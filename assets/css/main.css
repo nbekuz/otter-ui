@@ -1,0 +1,280 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    @apply bg-sber-gray-light font-sans;
+    height: 100%;
+    overscroll-behavior: none;
+  }
+
+  #app {
+    height: 100%;
+  }
+}
+
+@layer components {
+  /* Mobile phone frame wrapper */
+  .phone-frame {
+    @apply relative mx-auto bg-white overflow-hidden;
+    max-width: 430px;
+    min-height: 100dvh;
+  }
+
+  /* Page container with bottom nav padding */
+  .page-container {
+    @apply pb-20 pt-0;
+    min-height: 100dvh;
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply w-full bg-sber-green text-white font-semibold py-4 rounded-2xl
+           active:bg-sber-green-dark transition-colors text-base;
+  }
+
+  .btn-primary:disabled {
+    @apply cursor-not-allowed bg-sber-gray-mid text-white active:bg-sber-gray-mid;
+  }
+
+  .btn-secondary {
+    @apply w-full bg-sber-gray-light text-sber-black font-semibold py-4 rounded-2xl
+           active:bg-sber-gray-mid transition-colors text-base;
+  }
+
+  .btn-outline {
+    @apply w-full border-2 border-sber-green text-sber-green font-semibold py-4 rounded-2xl
+           active:bg-sber-green-light transition-colors text-base;
+  }
+
+  /* Input field */
+  .input-field {
+    @apply w-full bg-sber-gray-light border border-sber-gray-mid rounded-2xl px-4 py-4
+           text-sber-black text-base outline-none focus:border-sber-green focus:bg-white
+           transition-colors;
+  }
+
+  /* Card */
+  .card {
+    @apply bg-white rounded-2xl shadow-card;
+  }
+
+  /* Task group header */
+  .task-group-header {
+    @apply flex items-center justify-between px-4 py-3 bg-white rounded-2xl
+           cursor-pointer active:bg-sber-gray-light transition-colors select-none;
+  }
+
+  /* Priority indicator */
+  .priority-high { @apply bg-red-100 text-red-500 border-red-200; }
+  .priority-medium { @apply bg-orange-100 text-orange-500 border-orange-200; }
+  .priority-low { @apply bg-green-100 text-green-500 border-green-200; }
+  .priority-none { @apply bg-gray-100 text-gray-400 border-gray-200; }
+
+  /* Web modal */
+  .app-modal {
+    @apply fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2
+           rounded-3xl bg-white shadow-modal;
+    max-width: 32rem;
+  }
+
+  /* Overlay */
+  .overlay {
+    @apply fixed inset-0 bg-black/40 z-40;
+  }
+
+  /* Swipe hint */
+  .swipe-complete {
+    @apply absolute inset-y-0 left-0 flex items-center justify-start pl-4
+           bg-sber-green rounded-2xl text-white font-medium text-sm;
+  }
+  .swipe-delete {
+    @apply absolute inset-y-0 right-0 flex items-center justify-end pr-4
+           bg-red-500 rounded-2xl text-white font-medium text-sm;
+  }
+}
+
+@media (min-width: 1024px) {
+  .phone-frame {
+    max-width: none;
+    min-height: calc(100dvh - 3rem);
+    border-radius: 2rem;
+  }
+
+  .page-container {
+    min-height: calc(100dvh - 3rem);
+    padding-bottom: 2rem;
+  }
+
+  .app-modal {
+    max-width: 42rem;
+  }
+}
+
+@layer utilities {
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+  /* Custom scrollbar */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Smooth animations */
+  .slide-down-enter-active,
+  .slide-down-leave-active {
+    transition: all 0.25s ease;
+    overflow: hidden;
+  }
+  .slide-down-enter-from,
+  .slide-down-leave-to {
+    max-height: 0;
+    opacity: 0;
+  }
+  .slide-down-enter-to,
+  .slide-down-leave-from {
+    max-height: 1000px;
+    opacity: 1;
+  }
+}
+
+/* Custom animations */
+@keyframes ring-progress {
+  from { stroke-dashoffset: 283; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* Transition for modals */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+  transform: translate(-50%, calc(-50% + 16px)) scale(0.98);
+}
+.modal-enter-to,
+.modal-leave-from {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Fade overlay */
+.overlay-enter-active,
+.overlay-leave-active {
+  transition: opacity 0.3s;
+}
+.overlay-enter-from,
+.overlay-leave-to {
+  opacity: 0;
+}
+
+/* Page transitions */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.2s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+.dark body,
+.dark html {
+  background: #0f1115;
+}
+
+.dark .page-container,
+.dark .phone-frame,
+.dark .safe-bottom,
+.dark nav {
+  background-color: #0f1115 !important;
+}
+
+.dark .bg-white,
+.dark .card,
+.dark .task-group-header,
+.dark .app-modal,
+.dark .bottom-sheet {
+  background-color: #171a21 !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .text-white\/60 {
+  color: #9aa3af !important;
+}
+
+.dark .text-white\/40 {
+  color: #6b7280 !important;
+}
+
+.dark .bg-sber-gray-light {
+  background-color: #11151b !important;
+}
+
+.dark .text-sber-black {
+  color: #f3f4f6 !important;
+}
+
+.dark .text-sber-gray {
+  color: #9aa3af !important;
+}
+
+.dark .border-sber-gray-light,
+.dark .border-sber-gray-mid,
+.dark .border-t {
+  border-color: #2a303a !important;
+}
+
+.dark .input-field {
+  background-color: #11151b !important;
+  border-color: #2a303a !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .input-field::placeholder {
+  color: #7c8591;
+}
+
+.dark .btn-secondary,
+.dark .task-group-header,
+.dark .active\:bg-sber-gray-light:active {
+  background-color: #20242d !important;
+}
+
+.dark .hover\:bg-sber-gray-light:hover {
+  background-color: #20242d !important;
+}
+
+.dark .hover\:text-sber-black:hover {
+  color: #f3f4f6 !important;
+}
+
+.dark .shadow-sm,
+.dark .shadow-card,
+.dark .shadow-modal {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
