@@ -8,7 +8,7 @@
           </NuxtLink>
           <h1 class="mt-6 text-4xl font-bold leading-tight">Возвращайтесь к задачам на любом экране.</h1>
           <p class="mt-4 max-w-md text-sm leading-7 text-white/85">
-            Десктопный режим теперь удобнее для обзора задач, календаря и быстрого добавления новых дел.
+            Следите за задачами, сроками и приоритетами в одном удобном рабочем окне.
           </p>
         </div>
 
@@ -17,7 +17,7 @@
           <ul class="mt-4 space-y-3 text-sm text-white/90">
             <li>Умные списки по срокам и приоритетам</li>
             <li>Календарь, матрица и помодоро в одном интерфейсе</li>
-            <li>Быстрое создание задач с валидацией полей</li>
+            <li>Быстрое создание задач и удобные формы</li>
           </ul>
         </div>
       </div>
@@ -90,7 +90,7 @@
           <div class="mt-4 flex items-start gap-2 rounded-2xl bg-sber-blue-light px-4 py-3">
             <Info class="mt-0.5 h-4 w-4 flex-shrink-0 text-sber-blue" />
             <p class="text-xs text-sber-blue">
-              Для демо-режима введите любой email и пароль
+              Тестовый вход: введите любой email и пароль
             </p>
           </div>
 

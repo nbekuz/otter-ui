@@ -32,15 +32,22 @@ import { CheckSquare, Calendar, Grid2x2, Timer, Settings } from 'lucide-vue-next
 import dayjs from 'dayjs'
 
 const route = useRoute()
+const settingsStore = useSettingsStore()
 const todayDate = dayjs().format('D')
 
-const navItems = [
+const allNavItems = [
   { id: 'tasks', to: '/app', icon: CheckSquare, label: 'Задачи' },
   { id: 'calendar', to: '/app/calendar', icon: Calendar, label: 'Календарь' },
   { id: 'matrix', to: '/app/matrix', icon: Grid2x2, label: 'Матрица' },
   { id: 'pomodoro', to: '/app/pomodoro', icon: Timer, label: 'Помодоро' },
   { id: 'settings', to: '/app/settings', icon: Settings, label: 'Настройки' },
 ]
+
+const navItems = computed(() => {
+  const order = settingsStore.appSettings.bottomNavItems || []
+  const byId = new Map(allNavItems.map(item => [item.id, item]))
+  return order.map(id => byId.get(id)).filter(Boolean) as typeof allNavItems
+})
 
 function isActive(to: string) {
   if (to === '/app') return route.path === '/app'

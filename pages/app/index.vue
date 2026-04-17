@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container bg-sber-gray-light">
+  <div class="page-container bg-sber-gray-light" @click="handlePageClick">
     <!-- Header -->
     <div class="sticky top-0 z-20 bg-sber-gray-light px-4 pt-14 pb-3 lg:px-6">
       <div class="flex items-center justify-between mb-3">
@@ -8,8 +8,10 @@
           <h1 class="text-xl font-bold text-sber-black">Мои задачи</h1>
         </div>
         <div class="flex items-center gap-2">
-          <button class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center"
-                  @click="showSearch = !showSearch">
+          <button
+            class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center"
+            @click.stop="toggleSearch"
+          >
             <Search class="w-5 h-5 text-sber-gray" />
           </button>
           <NuxtLink to="/app/profile" class="w-10 h-10 overflow-hidden rounded-full bg-sber-green
@@ -24,7 +26,7 @@
 
       <!-- Search bar -->
       <Transition name="slide-down">
-        <div v-if="showSearch" class="relative mb-1">
+        <div v-if="showSearch" class="relative mb-1" @click.stop>
           <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-sber-gray" />
           <input
             ref="searchInput"
@@ -107,13 +109,14 @@ const settingsStore = useSettingsStore()
 const showSearch = ref(false)
 const searchQuery = ref('')
 const selectedTaskId = ref<string | null>(null)
+const searchInput = ref<HTMLInputElement | null>(null)
 
 const hour = dayjs().hour()
 const greeting = computed(() => {
-  if (hour < 6) return 'Доброй ночи 🌙'
+  if (hour < 16) return 'Доброй ночи 🌙'
   if (hour < 12) return 'Доброе утро ☀️'
   if (hour < 18) return 'Добрый день 🌤'
-  return 'Добрый вечер 🌆'
+  return 'Добрый вечер 🌙'
 })
 
 const stats = computed(() => [
@@ -175,5 +178,20 @@ const searchResults = computed(() => tasksStore.searchTasks(searchQuery.value))
 
 function openTask(id: string) {
   selectedTaskId.value = id
+}
+
+async function toggleSearch() {
+  showSearch.value = !showSearch.value
+
+  if (showSearch.value) {
+    await nextTick()
+    searchInput.value?.focus()
+  }
+}
+
+function handlePageClick() {
+  if (showSearch.value) {
+    showSearch.value = false
+  }
 }
 </script>

@@ -5,7 +5,7 @@
         <button
           class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light"
           type="button"
-          @click="navigateTo('/app')"
+          @click="goBackToSource"
         >
           <ChevronLeft class="h-5 w-5 text-sber-black" />
         </button>
@@ -21,14 +21,56 @@
         <div class="px-5 pt-5 pb-4">
           <label class="mb-2 block text-sm font-semibold text-sber-black">Название задачи</label>
           <input
+            ref="titleInputRef"
             v-model="form.title"
             placeholder="Например: подготовить отчёт или созвониться с клиентом"
             class="input-field py-3 text-base font-medium"
             :class="{ 'border-red-400 bg-red-50 placeholder:text-red-300': errors.title }"
-            autofocus
+            @keydown.enter.prevent="focusDueDateField"
             @input="errors.title = ''"
           />
           <p v-if="errors.title" class="mt-2 text-xs font-medium text-red-500">{{ errors.title }}</p>
+
+          <div class="mt-3">
+            <input
+              ref="attachmentInputRef"
+              type="file"
+              class="hidden"
+              @change="handleAttachmentChange"
+            >
+            <button
+              type="button"
+              class="inline-flex items-center gap-2 rounded-xl border border-sber-green/40 bg-sber-green-light px-3 py-2 text-sm font-semibold text-sber-green transition-colors hover:bg-sber-green/20"
+              @click="attachmentInputRef?.click()"
+            >
+              <Paperclip class="h-4 w-4" />
+              Добавить изображение или файл
+            </button>
+          </div>
+
+          <div v-if="attachmentName" class="mt-3 rounded-2xl border border-sber-gray-light bg-sber-gray-light/60 p-3">
+            <div class="flex items-start gap-3">
+              <img
+                v-if="attachmentPreviewUrl"
+                :src="attachmentPreviewUrl"
+                alt="Предпросмотр вложения"
+                class="h-16 w-16 rounded-xl object-cover"
+              >
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-medium text-sber-black">{{ attachmentName }}</p>
+                <p class="mt-1 text-xs text-sber-gray">
+                  {{ attachmentPreviewUrl ? 'Изображение прикреплено' : 'Файл прикреплен' }}
+                </p>
+              </div>
+              <button
+                type="button"
+                class="rounded-lg p-1 text-sber-gray transition-colors hover:bg-white hover:text-red-500"
+                @click="clearAttachment"
+              >
+                <X class="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="mb-4 flex border-b border-sber-gray-light px-4 gap-1 overflow-x-auto no-scrollbar">
@@ -55,25 +97,57 @@
                     :class="form.dueDate === quick.value
                       ? 'bg-sber-green text-white border-sber-green'
                       : 'bg-white text-sber-black border-sber-gray-mid'"
-                    @click="form.dueDate = quick.value">
+                    @click="selectQuickDate(quick.value)">
               {{ quick.label }}
             </button>
           </div>
 
-          <input v-model="form.dueDate" type="date" class="input-field mb-3" />
+          <div class="relative mb-3">
+            <input
+              ref="dueDateInputRef"
+              v-model="form.dueDate"
+              type="date"
+              class="input-field border-2 border-sber-green/50 pr-12 focus:border-sber-green focus:ring-2 focus:ring-sber-green/20"
+              @keydown.enter.prevent="focusDueTimeField"
+            />
+            <Calendar class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-sber-green" />
+          </div>
 
           <p class="text-xs font-semibold text-sber-gray mb-2 uppercase tracking-wide">Время срока</p>
-          <input v-model="form.dueTime" type="time" class="input-field mb-3" />
+          <div class="relative mb-3">
+            <input
+              ref="dueTimeInputRef"
+              v-model="form.dueTime"
+              type="time"
+              class="input-field border-2 border-sber-green/50 pr-12 focus:border-sber-green focus:ring-2 focus:ring-sber-green/20"
+              @keydown.enter.prevent="focusDurationStartField"
+            />
+            <Clock class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-sber-green" />
+          </div>
 
           <p class="text-xs font-semibold text-sber-gray mb-2 uppercase tracking-wide">Длительность</p>
           <div class="flex gap-2">
             <div class="flex-1">
               <label class="text-xs text-sber-gray mb-1 block">Начало</label>
-              <input v-model="form.durationStart" type="time" class="input-field" @input="errors.duration = ''" />
+              <input
+                ref="durationStartInputRef"
+                v-model="form.durationStart"
+                type="time"
+                class="input-field"
+                @keydown.enter.prevent="focusDurationEndField"
+                @input="errors.duration = ''"
+              />
             </div>
             <div class="flex-1">
               <label class="text-xs text-sber-gray mb-1 block">Конец</label>
-              <input v-model="form.durationEnd" type="time" class="input-field" @input="errors.duration = ''" />
+              <input
+                ref="durationEndInputRef"
+                v-model="form.durationEnd"
+                type="time"
+                class="input-field"
+                @keydown.enter.prevent="focusSubmitButton"
+                @input="errors.duration = ''"
+              />
             </div>
           </div>
           <p v-if="errors.duration" class="mt-2 text-xs font-medium text-red-500">{{ errors.duration }}</p>
@@ -123,11 +197,73 @@
                     :class="form.repeat === r.value
                       ? 'border-sber-green bg-sber-green-light'
                       : 'border-sber-gray-light bg-white'"
-                    @click="form.repeat = r.value">
+                    @click="selectRepeatOption(r.value)">
               <RefreshCw class="w-4 h-4" :class="form.repeat === r.value ? 'text-sber-green' : 'text-sber-gray'" />
               <span class="text-sm text-sber-black">{{ r.label }}</span>
               <Check v-if="form.repeat === r.value" class="w-4 h-4 ml-auto text-sber-green" />
             </button>
+          </div>
+
+          <div v-if="form.repeat === 'custom'" class="mt-3 rounded-2xl border border-sber-green/30 bg-sber-green-light/30 p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-sber-gray">Настроить повторение</p>
+
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <span class="text-sm text-sber-gray">Каждые</span>
+              <input
+                v-model.number="customRepeat.interval"
+                type="number"
+                min="1"
+                max="31"
+                class="w-20 rounded-xl border border-sber-gray-mid bg-white px-3 py-2 text-sm font-semibold text-sber-black"
+              />
+              <button
+                type="button"
+                class="rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
+                :class="customRepeat.unit === 'week' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white text-sber-black'"
+                @click="customRepeat.unit = 'week'"
+              >
+                Недели
+              </button>
+              <button
+                type="button"
+                class="rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
+                :class="customRepeat.unit === 'month' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white text-sber-black'"
+                @click="customRepeat.unit = 'month'"
+              >
+                Месяца
+              </button>
+            </div>
+
+            <div v-if="customRepeat.unit === 'week'" class="mt-3">
+              <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-sber-gray">Дни недели</p>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="day in weekDays"
+                  :key="day.value"
+                  type="button"
+                  class="rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors"
+                  :class="customRepeat.weekdays.includes(day.value)
+                    ? 'border-sber-green bg-sber-green text-white'
+                    : 'border-sber-gray-mid bg-white text-sber-gray'"
+                  @click="toggleCustomWeekday(day.value)"
+                >
+                  {{ day.label }}
+                </button>
+              </div>
+            </div>
+
+            <div v-else class="mt-3">
+              <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-sber-gray">День месяца</p>
+              <input
+                v-model.number="customRepeat.monthDay"
+                type="number"
+                min="1"
+                max="31"
+                class="w-28 rounded-xl border border-sber-gray-mid bg-white px-3 py-2 text-sm font-semibold text-sber-black"
+              />
+            </div>
+
+            <p v-if="errors.repeat" class="mt-2 text-xs font-medium text-red-500">{{ errors.repeat }}</p>
           </div>
         </div>
 
@@ -149,10 +285,10 @@
         </div>
 
         <div class="px-4 pb-6 pt-2">
-          <button class="btn-secondary mb-3" type="button" @click="navigateTo('/app')">
+          <button class="btn-secondary mb-3" type="button" @click="goBackToSource">
             Отмена
           </button>
-          <button class="btn-primary" type="submit">
+          <button ref="submitButtonRef" class="btn-primary" type="submit">
             Добавить задачу
           </button>
         </div>
@@ -162,13 +298,21 @@
 </template>
 
 <script setup lang="ts">
-import { Check, Bell, RefreshCw, Calendar, Flag, Grid2x2, ChevronLeft } from 'lucide-vue-next'
+import { Check, Bell, RefreshCw, Calendar, Flag, Grid2x2, ChevronLeft, Clock, Paperclip, X } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import type { Priority, RepeatType } from '~/data/mockData'
 
 definePageMeta({ layout: 'app' })
 
+const route = useRoute()
 const tasksStore = useTasksStore()
+const titleInputRef = ref<HTMLInputElement | null>(null)
+const dueDateInputRef = ref<HTMLInputElement | null>(null)
+const dueTimeInputRef = ref<HTMLInputElement | null>(null)
+const durationStartInputRef = ref<HTMLInputElement | null>(null)
+const durationEndInputRef = ref<HTMLInputElement | null>(null)
+const submitButtonRef = ref<HTMLButtonElement | null>(null)
+const attachmentInputRef = ref<HTMLInputElement | null>(null)
 
 const today = dayjs().format('YYYY-MM-DD')
 const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD')
@@ -185,9 +329,14 @@ const form = reactive({
   matrixBlock: 'not-urgent-not-important',
 })
 
+const attachmentName = ref('')
+const attachmentMimeType = ref('')
+const attachmentDataUrl = ref('')
+
 const errors = reactive({
   title: '',
   duration: '',
+  repeat: '',
 })
 
 const activeTab = ref('date')
@@ -229,7 +378,25 @@ const repeatOptions = [
   { label: 'Каждую неделю', value: 'weekly' },
   { label: 'Каждый месяц', value: 'monthly' },
   { label: 'Каждый год', value: 'yearly' },
+  { label: 'Настроить повторение', value: 'custom' },
 ]
+
+const weekDays = [
+  { label: 'Пн', value: 1 },
+  { label: 'Вт', value: 2 },
+  { label: 'Ср', value: 3 },
+  { label: 'Чт', value: 4 },
+  { label: 'Пт', value: 5 },
+  { label: 'Сб', value: 6 },
+  { label: 'Вс', value: 7 },
+]
+
+const customRepeat = reactive({
+  interval: 1,
+  unit: 'week' as 'week' | 'month',
+  weekdays: [1] as number[],
+  monthDay: dayjs().date(),
+})
 
 const matrixBlocks = [
   { id: 'urgent-important', title: 'Срочно и важно', color: '#FF3B30' },
@@ -238,9 +405,53 @@ const matrixBlocks = [
   { id: 'not-urgent-not-important', title: 'Не срочно, не важно', color: '#8E8E93' },
 ]
 
+const attachmentPreviewUrl = computed(() =>
+  attachmentMimeType.value.startsWith('image/') ? attachmentDataUrl.value : ''
+)
+
+watch(() => form.dueTime, (newTime) => {
+  if (!newTime) return
+  if (!form.durationStart) {
+    form.durationStart = newTime
+  }
+})
+
+onMounted(async () => {
+  applyPrefillFromQuery()
+  await nextTick()
+  titleInputRef.value?.focus()
+})
+
+async function focusDueDateField() {
+  activeTab.value = 'date'
+  await nextTick()
+  dueDateInputRef.value?.focus()
+}
+
+async function focusDueTimeField() {
+  await nextTick()
+  dueTimeInputRef.value?.focus()
+}
+
+async function focusDurationStartField() {
+  await nextTick()
+  durationStartInputRef.value?.focus()
+}
+
+async function focusDurationEndField() {
+  await nextTick()
+  durationEndInputRef.value?.focus()
+}
+
+async function focusSubmitButton() {
+  await nextTick()
+  submitButtonRef.value?.focus()
+}
+
 function submit() {
   errors.title = ''
   errors.duration = ''
+  errors.repeat = ''
 
   if (!form.title.trim()) {
     errors.title = 'Введите название задачи'
@@ -250,7 +461,19 @@ function submit() {
     errors.duration = 'Укажите и начало, и конец длительности'
   }
 
-  if (errors.title || errors.duration) return
+  if (form.repeat === 'custom') {
+    if (customRepeat.interval < 1) {
+      errors.repeat = 'Интервал повторения должен быть не меньше 1'
+    }
+    if (customRepeat.unit === 'week' && customRepeat.weekdays.length === 0) {
+      errors.repeat = 'Выберите хотя бы один день недели'
+    }
+    if (customRepeat.unit === 'month' && (customRepeat.monthDay < 1 || customRepeat.monthDay > 31)) {
+      errors.repeat = 'День месяца должен быть от 1 до 31'
+    }
+  }
+
+  if (errors.title || errors.duration || errors.repeat) return
 
   tasksStore.addTask({
     title: form.title.trim(),
@@ -262,9 +485,102 @@ function submit() {
     priority: form.priority,
     notification: form.notification || undefined,
     repeat: form.repeat,
+    repeatDays: form.repeat === 'custom' && customRepeat.unit === 'week'
+      ? [...customRepeat.weekdays]
+      : undefined,
+    repeatCustom: form.repeat === 'custom'
+      ? {
+          interval: customRepeat.interval,
+          unit: customRepeat.unit,
+          weekdays: customRepeat.unit === 'week' ? [...customRepeat.weekdays] : undefined,
+          monthDay: customRepeat.unit === 'month' ? customRepeat.monthDay : undefined,
+        }
+      : undefined,
+    attachment: attachmentDataUrl.value
+      ? {
+          name: attachmentName.value,
+          mimeType: attachmentMimeType.value || 'application/octet-stream',
+          dataUrl: attachmentDataUrl.value,
+        }
+      : undefined,
     matrixBlock: form.matrixBlock as any,
   })
 
-  navigateTo('/app')
+  navigateTo(resolveReturnPath())
+}
+
+function selectQuickDate(value: string) {
+  form.dueDate = value
+
+  if (value === '') {
+    form.dueTime = ''
+    form.durationStart = ''
+    form.durationEnd = ''
+  }
+}
+
+function selectRepeatOption(value: RepeatType) {
+  form.repeat = value
+  errors.repeat = ''
+}
+
+function toggleCustomWeekday(day: number) {
+  if (customRepeat.weekdays.includes(day)) {
+    customRepeat.weekdays = customRepeat.weekdays.filter(v => v !== day)
+    return
+  }
+  customRepeat.weekdays = [...customRepeat.weekdays, day].sort((a, b) => a - b)
+}
+
+function clearAttachment() {
+  attachmentName.value = ''
+  attachmentMimeType.value = ''
+  attachmentDataUrl.value = ''
+  if (attachmentInputRef.value) {
+    attachmentInputRef.value.value = ''
+  }
+}
+
+function handleAttachmentChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  attachmentName.value = file.name
+  attachmentMimeType.value = file.type || 'application/octet-stream'
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    attachmentDataUrl.value = typeof reader.result === 'string' ? reader.result : ''
+  }
+  reader.readAsDataURL(file)
+}
+
+function resolveReturnPath() {
+  const raw = Array.isArray(route.query.returnTo) ? route.query.returnTo[0] : route.query.returnTo
+  if (typeof raw === 'string' && raw.startsWith('/app')) {
+    return raw
+  }
+  return '/app'
+}
+
+function goBackToSource() {
+  navigateTo(resolveReturnPath())
+}
+
+function applyPrefillFromQuery() {
+  const dueDateParam = Array.isArray(route.query.dueDate) ? route.query.dueDate[0] : route.query.dueDate
+  const dueTimeParam = Array.isArray(route.query.dueTime) ? route.query.dueTime[0] : route.query.dueTime
+
+  if (typeof dueDateParam === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dueDateParam)) {
+    form.dueDate = dueDateParam
+  }
+
+  if (typeof dueTimeParam === 'string' && /^\d{2}:\d{2}$/.test(dueTimeParam)) {
+    form.dueTime = dueTimeParam
+    if (!form.durationStart) {
+      form.durationStart = dueTimeParam
+    }
+  }
 }
 </script>

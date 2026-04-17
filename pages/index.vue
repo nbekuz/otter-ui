@@ -1,29 +1,29 @@
 <template>
-  <div class="min-h-dvh bg-white lg:flex lg:items-center lg:justify-center lg:bg-sber-gray-light lg:px-6 lg:py-10">
-    <div class="w-full lg:grid lg:max-w-6xl lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12 lg:rounded-[40px] lg:bg-white lg:p-10 lg:shadow-xl">
-      <div class="flex flex-1 flex-col items-center justify-center px-6 pt-16 pb-8 lg:items-start lg:px-2 lg:pt-2 lg:pb-2">
+  <div class="min-h-dvh bg-white lg:flex lg:items-center lg:justify-center lg:bg-white lg:px-0 lg:py-0">
+    <div class="w-full lg:grid lg:min-h-dvh lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-16 lg:px-12 xl:px-20">
+      <div class="flex flex-1 flex-col items-center justify-center px-6 pt-16 pb-8 lg:items-start lg:px-0 lg:pt-6 lg:pb-6">
         <!-- App Logo & Illustration -->
-        <div class="relative mb-8">
-          <BrandLogo size="lg" show-name-from="md" centered class="flex-col md:flex-row" />
+        <div class="relative mb-10">
+          <BrandLogo size="lg" show-name-from="md" centered class="flex-col md:flex-row lg:origin-left lg:scale-110" />
           <div class="absolute -top-2 -right-2 w-6 h-6 bg-sber-green/20 rounded-full"/>
           <div class="absolute -bottom-1 -left-3 w-4 h-4 bg-sber-blue/20 rounded-full"/>
         </div>
-        <p class="mb-2 max-w-xl px-4 text-center text-base leading-relaxed text-sber-gray lg:px-0 lg:text-left lg:text-lg">
-          Планировщик задач для тех,<br class="hidden lg:block">кто хочет держать дела под контролем
+        <p class="mb-2 max-w-2xl px-4 text-center text-lg leading-relaxed text-sber-gray lg:px-0 lg:text-left lg:text-2xl lg:leading-snug">
+          Планировщик задач для тех,<br class="hidden lg:block">кто держит дела под контролем
         </p>
 
-        <div class="mt-8 mb-4 grid w-full max-w-3xl grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
+        <div class="mt-10 mb-4 grid w-full max-w-3xl grid-cols-1 gap-4 lg:mr-auto lg:max-w-[700px] lg:grid-cols-2 lg:gap-5">
           <div
             v-for="feature in features"
             :key="feature.text"
-            class="flex items-start gap-3 rounded-[24px] bg-sber-gray-light px-4 py-4 text-left shadow-sm transition-transform lg:min-h-[120px] lg:hover:-translate-y-0.5"
+            class="flex items-start gap-3 rounded-[24px] bg-sber-gray-light px-5 py-5 text-left shadow-sm transition-transform lg:min-h-[136px] lg:hover:-translate-y-0.5"
           >
-            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-lg" :class="feature.bg">
+            <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-xl" :class="feature.bg">
               {{ feature.icon }}
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-semibold text-sber-black lg:text-base">{{ feature.title }}</p>
-              <p class="mt-1 text-xs leading-5 text-sber-gray lg:text-sm">{{ feature.text }}</p>
+              <p class="text-base font-semibold text-sber-black lg:text-lg">{{ feature.title }}</p>
+              <p class="mt-1 text-sm leading-6 text-sber-gray lg:text-base">{{ feature.text }}</p>
             </div>
           </div>
         </div>
@@ -37,7 +37,7 @@
             Ведите списки задач, планируйте время в календаре, расставляйте приоритеты и сохраняйте фокус в течение дня.
           </p>
 
-          <div class="mt-6 grid grid-cols-2 gap-3">
+          <div class="mt-6 grid max-w-[430px] grid-cols-2 gap-3">
             <div v-for="metric in metrics" :key="metric.label" class="rounded-2xl bg-white px-4 py-4 shadow-sm">
               <p class="text-xs font-semibold uppercase tracking-wide text-sber-gray">{{ metric.label }}</p>
               <p class="mt-2 text-lg font-bold text-sber-black">{{ metric.value }}</p>
@@ -45,7 +45,7 @@
             </div>
           </div>
 
-          <div class="mt-6 flex flex-col gap-3 lg:flex-row lg:flex-wrap">
+          <div class="mt-6 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:justify-center">
             <button class="btn-primary lg:w-auto lg:min-w-[190px] lg:px-7" type="button" @click="$router.push('/register')">
               Создать аккаунт
             </button>

@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container bg-sber-gray-light">
+  <div class="page-container bg-sber-gray-light lg:flex lg:h-full lg:flex-col lg:overflow-hidden lg:pb-0">
     <!-- Header -->
     <div class="sticky top-0 z-20 bg-white shadow-sm pt-14 pb-3 px-4">
       <div class="flex items-center justify-between mb-3">
@@ -61,8 +61,9 @@
       </div>
     </div>
 
-    <!-- DAY VIEW -->
-    <div v-if="calendarStore.viewType === 'day'" class="relative">
+    <div class="flex-1 min-h-0 overflow-y-auto">
+      <!-- DAY VIEW -->
+      <div v-if="calendarStore.viewType === 'day'" class="relative">
       <!-- Timeline -->
       <div class="flex">
         <div class="w-14 flex-shrink-0" />
@@ -92,11 +93,11 @@
             <div class="w-14 flex-shrink-0 text-xs text-sber-gray text-right pr-3 pt-1">
               {{ String(h).padStart(2, '0') }}:00
             </div>
-            <div class="flex-1 border-t border-sber-gray-light relative">
+            <div class="flex-1 cursor-pointer border-t border-sber-gray-light relative" @click="openNewTaskFromCalendar(h)">
               <div v-for="task in getHourTasks(h)" :key="task.id"
                    class="absolute left-1 right-1 rounded-lg px-2 py-1 text-xs font-medium cursor-pointer"
                    :style="{ backgroundColor: getPriorityColor(task.priority) + '30', color: getPriorityColor(task.priority), top: '2px' }"
-                   @click="selectedTaskId = task.id">
+                   @click.stop="selectedTaskId = task.id">
                 {{ task.title }}
               </div>
             </div>
@@ -105,19 +106,42 @@
       </Transition>
 
       <!-- Main hours (06:00–21:00) -->
-      <div v-for="h in mainHours" :key="h" class="flex min-h-[60px]">
-        <div class="w-14 flex-shrink-0 text-xs text-sber-gray text-right pr-3 pt-1">
-          {{ String(h).padStart(2, '0') }}:00
+      <div class="relative">
+        <div v-for="h in mainHours" :key="h" class="flex min-h-[60px]">
+          <div class="w-14 flex-shrink-0 text-xs text-sber-gray text-right pr-3 pt-1">
+            {{ String(h).padStart(2, '0') }}:00
+          </div>
+          <div class="flex-1 cursor-pointer border-t border-sber-gray-light" @click="openNewTaskFromCalendar(h)" />
         </div>
-        <div class="flex-1 border-t border-sber-gray-light relative px-1">
-          <div v-for="task in getHourTasks(h)" :key="task.id"
-               class="rounded-xl px-3 py-2 mb-1 cursor-pointer transition-opacity active:opacity-70"
-               :style="{ backgroundColor: getPriorityColor(task.priority) + '20', borderLeft: `3px solid ${getPriorityColor(task.priority)}` }"
-               @click="selectedTaskId = task.id">
+
+        <div class="pointer-events-none absolute top-0 right-0 bottom-0 left-14">
+          <div
+            v-for="task in dayTimelineTasks"
+            :key="task.id"
+            class="pointer-events-auto absolute left-1 right-1 cursor-grab overflow-hidden rounded-xl px-3 py-2 transition-opacity active:opacity-70"
+            :style="{
+              top: `${task.topPx}px`,
+              height: `${task.heightPx}px`,
+              backgroundColor: getPriorityColor(task.priority) + '20',
+              borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
+            }"
+            @pointerdown.stop.prevent="startTaskMove($event, task)"
+            @click.stop="handleTaskCardClick(task.id)"
+          >
+            <button
+              type="button"
+              class="absolute left-1/2 top-0 h-2 w-10 -translate-x-1/2 cursor-ns-resize rounded-full bg-sber-gray/40"
+              @pointerdown.stop.prevent="startTaskResize($event, task, 'start')"
+            />
             <p class="text-xs font-semibold" :style="{ color: getPriorityColor(task.priority) }">
-              {{ task.dueTime }} {{ task.duration ? `– ${task.duration.end}` : '' }}
+              {{ task.labelTime }}
             </p>
             <p class="text-xs text-sber-black font-medium truncate">{{ task.title }}</p>
+            <button
+              type="button"
+              class="absolute left-1/2 bottom-0 h-2 w-10 -translate-x-1/2 cursor-ns-resize rounded-full bg-sber-gray/40"
+              @pointerdown.stop.prevent="startTaskResize($event, task, 'end')"
+            />
           </div>
         </div>
       </div>
@@ -137,16 +161,26 @@
             <div class="w-14 flex-shrink-0 text-xs text-sber-gray text-right pr-3 pt-1">
               {{ String(h).padStart(2, '0') }}:00
             </div>
-            <div class="flex-1 border-t border-sber-gray-light relative" />
+            <div class="flex-1 cursor-pointer border-t border-sber-gray-light relative px-1" @click="openNewTaskFromCalendar(h)">
+              <div v-for="task in getHourTasks(h)" :key="task.id"
+                   class="rounded-xl px-3 py-2 mb-1 cursor-pointer transition-opacity active:opacity-70"
+                   :style="{ backgroundColor: getPriorityColor(task.priority) + '20', borderLeft: `3px solid ${getPriorityColor(task.priority)}` }"
+                   @click.stop="selectedTaskId = task.id">
+                <p class="text-xs font-semibold" :style="{ color: getPriorityColor(task.priority) }">
+                  {{ task.dueTime }} {{ task.duration ? `– ${task.duration.end}` : '' }}
+                </p>
+                <p class="text-xs text-sber-black font-medium truncate">{{ task.title }}</p>
+              </div>
+            </div>
           </div>
         </div>
       </Transition>
-    </div>
+      </div>
 
-    <!-- WEEK VIEW -->
-    <div v-else-if="calendarStore.viewType === 'week'" class="p-4">
+      <!-- WEEK VIEW -->
+      <div v-else-if="calendarStore.viewType === 'week'" class="p-4">
       <!-- Week header -->
-      <div class="flex gap-1 mb-3">
+      <div class="mb-3 flex gap-1">
         <div class="w-8" />
         <div v-for="day in weekViewDays" :key="day.date" class="flex-1 text-center">
           <p class="text-[10px] text-sber-gray">{{ day.dayName }}</p>
@@ -157,21 +191,36 @@
         </div>
       </div>
       <!-- Hours -->
-      <div v-for="h in [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]" :key="h" class="flex gap-1 min-h-[44px]">
-        <div class="w-8 text-[10px] text-sber-gray pt-1">{{ String(h).padStart(2, '0') }}</div>
-        <div v-for="day in weekViewDays" :key="day.date" class="flex-1 border-t border-sber-gray-light relative">
-          <div v-for="task in getDateHourTasks(day.date, h)" :key="task.id"
-               class="rounded px-1 py-0.5 mb-0.5 cursor-pointer truncate"
-               :style="{ backgroundColor: getPriorityColor(task.priority) + '25', color: getPriorityColor(task.priority) }"
-               @click="selectedTaskId = task.id">
-            <span class="text-[9px] font-medium">{{ task.title }}</span>
+      <div class="overflow-hidden rounded-2xl border border-[#d6dce6] bg-white/30">
+        <div v-for="h in [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]" :key="h" class="flex min-h-[48px] border-t border-[#d6dce6] first:border-t-0">
+          <div class="w-8 flex-shrink-0 pr-1 pt-1 text-right text-[10px] text-sber-gray">{{ String(h).padStart(2, '0') }}</div>
+          <div
+            v-for="day in weekViewDays"
+            :key="day.date"
+            class="relative flex-1 border-l border-[#d6dce6] px-0.5 py-0.5"
+            @dragover.prevent
+            @drop="handleWeekCellDrop($event, day.date, h)"
+          >
+            <div
+              v-for="task in getDateHourTasks(day.date, h)"
+              :key="task.id"
+              class="mb-0.5 max-h-[44px] cursor-move overflow-hidden rounded border border-[#d6dce6] px-1 py-0.5 text-sber-black"
+              :style="{ backgroundColor: getPriorityColor(task.priority) + '22' }"
+              draggable="true"
+              @dragstart="startWeekTaskDrag($event, task.id)"
+              @dragend="endWeekTaskDrag"
+              @click="selectedTaskId = task.id"
+            >
+              <p class="truncate text-[9px] font-semibold" :style="{ color: getPriorityColor(task.priority) }">{{ task.dueTime }}</p>
+              <p class="truncate text-[9px] font-medium text-sber-black">{{ task.title }}</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      </div>
 
-    <!-- MONTH VIEW -->
-    <div v-else-if="calendarStore.viewType === 'month'" class="p-4">
+      <!-- MONTH VIEW -->
+      <div v-else-if="calendarStore.viewType === 'month'" class="p-4">
       <!-- Weekday headers -->
       <div class="grid grid-cols-7 gap-1 mb-1">
         <div v-for="d in ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']" :key="d"
@@ -199,10 +248,10 @@
           </div>
         </div>
       </div>
-    </div>
+      </div>
 
-    <!-- YEAR VIEW -->
-    <div v-else-if="calendarStore.viewType === 'year'" class="p-4">
+      <!-- YEAR VIEW -->
+      <div v-else-if="calendarStore.viewType === 'year'" class="p-4">
       <div class="grid grid-cols-3 gap-3">
         <div v-for="month in yearMonths" :key="month.index"
              class="bg-white rounded-2xl p-3 cursor-pointer active:bg-sber-gray-light"
@@ -218,6 +267,7 @@
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
 
@@ -236,6 +286,7 @@ import {
   LayoutGrid, CalendarDays, Calendar, CalendarRange, Columns
 } from 'lucide-vue-next'
 import dayjs from 'dayjs'
+import type { Task } from '~/data/mockData'
 
 definePageMeta({ layout: 'app' })
 
@@ -266,6 +317,24 @@ const currentTimePx = computed(() => {
 const earlyHours = [0, 1, 2, 3, 4, 5]
 const mainHours = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 const lateHours = [21, 22, 23]
+const mainStartMinutes = mainHours[0] * 60
+const mainEndMinutes = (mainHours[mainHours.length - 1] + 1) * 60
+const minuteHeightPx = 1
+const minDurationMinutes = 10
+const draggingWeekTaskId = ref<string | null>(null)
+
+type DragMode = 'move' | 'resize-start' | 'resize-end'
+
+const dragState = ref<{
+  taskId: string
+  mode: DragMode
+  startY: number
+  initialStart: number
+  initialEnd: number
+  hadDuration: boolean
+} | null>(null)
+const dragPreview = ref<{ taskId: string; start: number; end: number } | null>(null)
+const didDrag = ref(false)
 
 // Week strip for day view
 const weekDays = computed(() => {
@@ -304,6 +373,33 @@ function getHourTasks(hour: number) {
   })
 }
 
+const dayTimelineTasks = computed(() => {
+  return tasksStore.getTasksForDate(calendarStore.currentDate)
+    .filter(t => !!t.dueTime)
+    .map((task) => {
+      const preview = dragPreview.value?.taskId === task.id ? dragPreview.value : null
+      const startMinutes = preview ? preview.start : parseTimeToMinutes(task.dueTime || '00:00')
+      const durationMinutes = preview ? (preview.end - preview.start) : getTaskDurationMinutes(task)
+      const endMinutes = Math.min(startMinutes + durationMinutes, mainEndMinutes)
+      const clippedStart = Math.max(startMinutes, mainStartMinutes)
+      const clippedDuration = Math.max(endMinutes - clippedStart, 15)
+
+      const labelTime = task.duration?.end
+        ? `${task.dueTime} – ${task.duration.end}`
+        : (task.dueTime || '')
+
+      return {
+        ...task,
+        rawStart: startMinutes,
+        rawEnd: startMinutes + durationMinutes,
+        labelTime,
+        topPx: (clippedStart - mainStartMinutes) * minuteHeightPx,
+        heightPx: clippedDuration * minuteHeightPx,
+      }
+    })
+    .filter(task => task.topPx < (mainEndMinutes - mainStartMinutes) * minuteHeightPx)
+})
+
 function getDateHourTasks(date: string, hour: number) {
   return tasksStore.getTasksForDate(date).filter(t => {
     if (!t.dueTime) return false
@@ -320,6 +416,127 @@ function getPriorityColor(priority: string) {
     none: '#8E8E93',
   }
   return colors[priority] || '#8E8E93'
+}
+
+function parseTimeToMinutes(time: string) {
+  const [h, m] = time.split(':').map(v => parseInt(v, 10))
+  const hours = Number.isFinite(h) ? h : 0
+  const minutes = Number.isFinite(m) ? m : 0
+  return hours * 60 + minutes
+}
+
+function formatMinutesToTime(totalMinutes: number) {
+  const clamped = Math.max(0, Math.min(23 * 60 + 59, totalMinutes))
+  const hours = Math.floor(clamped / 60)
+  const minutes = clamped % 60
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+}
+
+function getTaskDurationMinutes(task: { dueTime?: string; duration?: { start: string; end: string } }) {
+  if (task.duration?.start && task.duration?.end) {
+    const start = parseTimeToMinutes(task.duration.start)
+    const end = parseTimeToMinutes(task.duration.end)
+    if (end > start) return end - start
+  }
+  return 60
+}
+
+function snapMinutes(minutes: number) {
+  return Math.round(minutes / 5) * 5
+}
+
+function clampMoveStart(start: number, duration: number) {
+  const min = 0
+  const max = 24 * 60 - duration
+  return Math.max(min, Math.min(max, start))
+}
+
+function startTaskMove(event: PointerEvent, task: Task & { rawStart: number; rawEnd: number }) {
+  initDrag(event, task, 'move')
+}
+
+function startTaskResize(event: PointerEvent, task: Task & { rawStart: number; rawEnd: number }, edge: 'start' | 'end') {
+  initDrag(event, task, edge === 'start' ? 'resize-start' : 'resize-end')
+}
+
+function initDrag(event: PointerEvent, task: Task & { rawStart: number; rawEnd: number }, mode: DragMode) {
+  dragState.value = {
+    taskId: task.id,
+    mode,
+    startY: event.clientY,
+    initialStart: task.rawStart,
+    initialEnd: task.rawEnd,
+    hadDuration: !!task.duration,
+  }
+  didDrag.value = false
+
+  window.addEventListener('pointermove', handleDragMove)
+  window.addEventListener('pointerup', handleDragEnd)
+  window.addEventListener('pointercancel', handleDragEnd)
+}
+
+function handleDragMove(event: PointerEvent) {
+  if (!dragState.value) return
+
+  const deltaMinutes = snapMinutes((event.clientY - dragState.value.startY) / minuteHeightPx)
+  if (Math.abs(deltaMinutes) >= 5) {
+    didDrag.value = true
+  }
+
+  let nextStart = dragState.value.initialStart
+  let nextEnd = dragState.value.initialEnd
+
+  if (dragState.value.mode === 'move') {
+    const duration = dragState.value.initialEnd - dragState.value.initialStart
+    nextStart = clampMoveStart(dragState.value.initialStart + deltaMinutes, duration)
+    nextEnd = nextStart + duration
+  } else if (dragState.value.mode === 'resize-start') {
+    nextStart = Math.max(0, Math.min(dragState.value.initialEnd - minDurationMinutes, dragState.value.initialStart + deltaMinutes))
+  } else {
+    nextEnd = Math.min(24 * 60, Math.max(dragState.value.initialStart + minDurationMinutes, dragState.value.initialEnd + deltaMinutes))
+  }
+
+  dragPreview.value = {
+    taskId: dragState.value.taskId,
+    start: nextStart,
+    end: nextEnd,
+  }
+}
+
+function handleDragEnd() {
+  if (!dragState.value) return
+
+  if (dragPreview.value && dragPreview.value.taskId === dragState.value.taskId) {
+    const { start, end } = dragPreview.value
+    const duration = Math.max(minDurationMinutes, end - start)
+    const updates: Partial<Task> = {
+      dueTime: formatMinutesToTime(start),
+    }
+
+    const shouldSaveDuration = dragState.value.mode !== 'move' || dragState.value.hadDuration
+    if (shouldSaveDuration) {
+      updates.duration = {
+        start: formatMinutesToTime(start),
+        end: formatMinutesToTime(start + duration),
+      }
+    }
+
+    tasksStore.updateTask(dragState.value.taskId, updates)
+  }
+
+  dragState.value = null
+  dragPreview.value = null
+  window.removeEventListener('pointermove', handleDragMove)
+  window.removeEventListener('pointerup', handleDragEnd)
+  window.removeEventListener('pointercancel', handleDragEnd)
+}
+
+function handleTaskCardClick(taskId: string) {
+  if (didDrag.value) {
+    didDrag.value = false
+    return
+  }
+  selectedTaskId.value = taskId
 }
 
 // Month cells
@@ -373,5 +590,55 @@ function goToMonth(monthIndex: number) {
   const year = parseInt(calendarStore.currentDate.substring(0, 4))
   calendarStore.setDate(dayjs().year(year).month(monthIndex).date(1).format('YYYY-MM-DD'))
   calendarStore.setView('month')
+}
+
+function openNewTaskFromCalendar(hour: number) {
+  const dueTime = `${String(hour).padStart(2, '0')}:00`
+  navigateTo(
+    `/app/new-task?returnTo=${encodeURIComponent(`/app/calendar?view=${calendarStore.viewType}&date=${calendarStore.currentDate}`)}&dueDate=${calendarStore.currentDate}&dueTime=${dueTime}`
+  )
+}
+
+function startWeekTaskDrag(event: DragEvent, taskId: string) {
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', taskId)
+  }
+  draggingWeekTaskId.value = taskId
+}
+
+function endWeekTaskDrag() {
+  draggingWeekTaskId.value = null
+}
+
+function handleWeekCellDrop(event: DragEvent, date: string, hour: number) {
+  const draggedTaskId = draggingWeekTaskId.value || event.dataTransfer?.getData('text/plain') || null
+  if (!draggedTaskId) return
+
+  const task = tasksStore.tasks.find(t => t.id === draggedTaskId)
+  if (!task) {
+    draggingWeekTaskId.value = null
+    return
+  }
+
+  const currentMinutes = task.dueTime ? parseTimeToMinutes(task.dueTime) % 60 : 0
+  const nextStartMinutes = hour * 60 + currentMinutes
+  const durationMinutes = getTaskDurationMinutes(task)
+  const nextEndMinutes = Math.min(nextStartMinutes + durationMinutes, 24 * 60 - 1)
+
+  const updates: Partial<Task> = {
+    dueDate: date,
+    dueTime: formatMinutesToTime(nextStartMinutes),
+  }
+
+  if (task.duration) {
+    updates.duration = {
+      start: formatMinutesToTime(nextStartMinutes),
+      end: formatMinutesToTime(nextEndMinutes),
+    }
+  }
+
+  tasksStore.updateTask(task.id, updates)
+  draggingWeekTaskId.value = null
 }
 </script>

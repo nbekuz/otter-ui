@@ -16,6 +16,17 @@ export interface Task {
   notification?: string  // minutes before
   repeat: RepeatType
   repeatDays?: number[]  // days of week
+  repeatCustom?: {
+    interval: number
+    unit: 'week' | 'month'
+    weekdays?: number[]
+    monthDay?: number
+  }
+  attachment?: {
+    name: string
+    mimeType: string
+    dataUrl: string
+  }
   imageUrl?: string
   listId?: string
   matrixBlock?: 'urgent-important' | 'not-urgent-important' | 'urgent-not-important' | 'not-urgent-not-important'
@@ -28,6 +39,7 @@ export interface User {
   name: string
   avatar?: string
   isPremium: boolean
+  premiumExpiresAt?: string
 }
 
 export interface PomodoroSettings {

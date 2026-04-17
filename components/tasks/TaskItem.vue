@@ -42,14 +42,13 @@
         <!-- Meta info -->
         <div class="flex items-center gap-2 mt-1.5 flex-wrap">
           <!-- Date/time -->
-          <span v-if="task.dueDate" class="flex items-center gap-1 text-xs"
-                :class="isOverdue ? 'text-red-500' : 'text-sber-gray'">
+          <span v-if="task.dueDate" class="flex items-center gap-1 text-xs text-sber-gray">
             <Clock class="w-3 h-3" />
             {{ formatDateTime }}
           </span>
 
           <!-- Duration -->
-          <span v-if="task.duration" class="text-xs text-sber-blue font-medium">
+          <span v-if="task.duration" class="text-xs text-sber-gray font-medium">
             {{ task.duration.start }}–{{ task.duration.end }}
           </span>
 
@@ -83,11 +82,6 @@ const emit = defineEmits<{
   delete: [id: string]
   open: [id: string]
 }>()
-
-const today = dayjs().format('YYYY-MM-DD')
-const isOverdue = computed(() =>
-  !props.task.completed && props.task.dueDate && props.task.dueDate < today
-)
 
 const priorityCheckboxClass = computed(() => {
   switch (props.task.priority) {

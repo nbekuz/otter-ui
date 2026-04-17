@@ -36,6 +36,9 @@
                 </span>
               </div>
               <p class="mt-1 truncate text-sm text-sber-gray">{{ authStore.user?.email }}</p>
+              <p v-if="authStore.user?.isPremium && premiumExpiresLabel" class="mt-1 text-xs font-medium text-yellow-700">
+                Подписка активна до {{ premiumExpiresLabel }}
+              </p>
               <div class="mt-4 flex flex-wrap gap-3">
                 <button class="rounded-2xl bg-sber-green px-4 py-2.5 text-sm font-semibold text-white" type="button" @click="nameModal = true">
                   Изменить имя
@@ -280,9 +283,25 @@ const stats = computed(() => [
   {
     label: 'Статус',
     value: authStore.user?.isPremium ? 'PRO' : 'FREE',
-    caption: authStore.user?.isPremium ? 'Премиум активен' : 'Базовый тариф',
+    caption: authStore.user?.isPremium
+      ? (premiumExpiresLabel.value ? `До ${premiumExpiresLabel.value}` : 'Премиум активен')
+      : 'Базовый тариф',
   },
 ])
+
+const premiumExpiresLabel = computed(() => {
+  const expiresAt = authStore.user?.premiumExpiresAt
+  if (!expiresAt) return ''
+
+  const date = new Date(expiresAt)
+  if (Number.isNaN(date.getTime())) return ''
+
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date)
+})
 
 const avatarOptions = computed(() => {
   const letter = initials.value

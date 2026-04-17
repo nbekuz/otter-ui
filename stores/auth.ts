@@ -45,7 +45,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function activatePremium() {
-    if (user.value) user.value.isPremium = true
+    if (user.value) {
+      const premiumExpiresAt = new Date()
+      premiumExpiresAt.setMonth(premiumExpiresAt.getMonth() + 1)
+      user.value.isPremium = true
+      user.value.premiumExpiresAt = premiumExpiresAt.toISOString()
+    }
   }
 
   return {

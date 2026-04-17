@@ -25,23 +25,39 @@
         <div class="px-4 space-y-3 mb-6">
           <div v-if="task.dueDate" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
             <Calendar class="w-4 h-4 text-sber-gray" />
-            <span class="text-sm text-sber-black">{{ formatDate }}</span>
+            <span class="text-sm text-sber-gray">{{ formatDate }}</span>
           </div>
           <div v-if="task.dueTime" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
             <Clock class="w-4 h-4 text-sber-gray" />
-            <span class="text-sm text-sber-black">{{ task.dueTime }}</span>
+            <span class="text-sm text-sber-gray">{{ task.dueTime }}</span>
           </div>
           <div v-if="task.duration" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
             <Timer class="w-4 h-4 text-sber-gray" />
-            <span class="text-sm text-sber-black">{{ task.duration.start }} – {{ task.duration.end }}</span>
+            <span class="text-sm text-sber-gray">{{ task.duration.start }} – {{ task.duration.end }}</span>
           </div>
           <div v-if="task.repeat !== 'none'" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
             <RefreshCw class="w-4 h-4 text-sber-gray" />
-            <span class="text-sm text-sber-black">{{ repeatLabel }}</span>
+            <span class="text-sm text-sber-gray">{{ repeatLabel }}</span>
           </div>
           <div v-if="task.notification" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
             <Bell class="w-4 h-4 text-sber-gray" />
-            <span class="text-sm text-sber-black">За {{ notifyLabel }}</span>
+            <span class="text-sm text-sber-gray">{{ notifyLabel }}</span>
+          </div>
+          <div v-if="task.attachment" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
+            <Paperclip class="w-4 h-4 text-sber-gray" />
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm text-sber-gray">{{ task.attachment.name }}</p>
+            </div>
+            <button
+              type="button"
+              class="rounded-lg bg-sber-green-light px-3 py-1 text-xs font-semibold text-sber-green"
+              @click="openAttachment"
+            >
+              Открыть
+            </button>
+          </div>
+          <div v-if="task.attachment && isAttachmentImage" class="overflow-hidden rounded-2xl border border-sber-gray-light">
+            <img :src="task.attachment.dataUrl" alt="Вложение задачи" class="h-36 w-full object-cover" />
           </div>
         </div>
 
@@ -71,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import { Calendar, Clock, Timer, RefreshCw, Bell, CheckCircle, Trash2 } from 'lucide-vue-next'
+import { Calendar, Clock, Timer, RefreshCw, Bell, CheckCircle, Trash2, Paperclip } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 
 const props = defineProps<{ taskId: string }>()
@@ -110,19 +126,42 @@ const repeatLabel = computed(() => {
     monthly: 'Каждый месяц',
     yearly: 'Каждый год',
   }
+  if (task.value?.repeat === 'custom' && task.value.repeatCustom) {
+    const { interval, unit, weekdays, monthDay } = task.value.repeatCustom
+    if (unit === 'week') {
+      const dayNames: Record<number, string> = {
+        1: 'Пн',
+        2: 'Вт',
+        3: 'Ср',
+        4: 'Чт',
+        5: 'Пт',
+        6: 'Сб',
+        7: 'Вс',
+      }
+      const selectedDays = (weekdays || []).map(d => dayNames[d]).filter(Boolean).join(', ')
+      return selectedDays
+        ? `Каждые ${interval} нед. (${selectedDays})`
+        : `Каждые ${interval} нед.`
+    }
+    return `Каждые ${interval} мес. (день ${monthDay || 1})`
+  }
   return labels[task.value?.repeat || ''] || ''
 })
 
 const notifyLabel = computed(() => {
   const v = task.value?.notification
-  if (!v || v === '0') return 'в момент срока'
-  if (v === '5') return '5 минут'
-  if (v === '15') return '15 минут'
-  if (v === '30') return '30 минут'
-  if (v === '60') return '1 час'
-  if (v === '1440') return '1 день'
-  return `${v} минут`
+  if (!v || v === '0') return 'В момент срока'
+  if (v === '5') return 'За 5 минут'
+  if (v === '15') return 'За 15 минут'
+  if (v === '30') return 'За 30 минут'
+  if (v === '60') return 'За 1 час'
+  if (v === '1440') return 'За 1 день'
+  return `За ${v} минут`
 })
+
+const isAttachmentImage = computed(() =>
+  task.value?.attachment?.mimeType?.startsWith('image/') ?? false
+)
 
 function toggleComplete() {
   if (task.value) {
@@ -136,5 +175,11 @@ function deleteTask() {
     tasksStore.deleteTask(task.value.id)
     emit('close')
   }
+}
+
+function openAttachment() {
+  const dataUrl = task.value?.attachment?.dataUrl
+  if (!dataUrl) return
+  window.open(dataUrl, '_blank')
 }
 </script>

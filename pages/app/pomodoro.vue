@@ -10,8 +10,40 @@
     </div>
 
     <div class="flex-1 px-4 pb-6 lg:px-6">
-      <div class="mx-auto grid max-w-5xl gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-start">
-        <div class="rounded-[32px] bg-white px-6 py-6 shadow-card">
+      <div class="mx-auto max-w-5xl space-y-4">
+        <div class="grid gap-3 lg:grid-cols-2">
+          <button
+            class="flex w-full items-center gap-3 rounded-[28px] border border-sber-gray-light bg-white px-4 py-4 shadow-sm transition-colors active:bg-sber-gray-light"
+            @click="taskPickerOpen = true"
+          >
+            <Target class="h-5 w-5 text-sber-green" />
+            <div class="flex-1 text-left">
+              <p class="text-xs text-sber-gray">Задача для фокуса</p>
+              <p class="truncate text-sm font-medium text-sber-black">
+                {{ selectedTask?.title || 'Выбрать задачу...' }}
+              </p>
+            </div>
+            <ChevronRight class="h-4 w-4 text-sber-gray" />
+          </button>
+
+          <div class="flex items-center gap-3 rounded-[28px] border border-sber-gray-light bg-white px-4 py-4 shadow-sm">
+            <Music class="h-5 w-5 text-sber-gray" />
+            <span class="flex-1 text-sm text-sber-gray">Звук фоновый</span>
+            <div class="flex flex-wrap justify-end gap-2">
+              <button
+                v-for="s in workSoundOptions.slice(0, 4)"
+                :key="s.id"
+                class="rounded-lg px-2 py-1 text-sm transition-colors"
+                :class="activeWorkSound === s.id ? 'bg-sber-green text-white' : 'bg-sber-gray-light text-sber-gray'"
+                @click="activeWorkSound = s.id"
+              >
+                {{ s.icon }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mx-auto w-full max-w-3xl rounded-[32px] bg-white px-6 py-6 shadow-card">
           <!-- Session count -->
           <div class="mb-6 flex justify-center gap-2">
             <div v-for="i in pomodoroStore.settings.sessionsUntilLong" :key="i"
@@ -23,21 +55,12 @@
 
           <!-- Timer circle -->
           <div class="flex flex-col items-center justify-center">
-            <div class="relative mb-8 h-64 w-64 rounded-full bg-sber-gray-light">
-              <!-- SVG ring -->
-              <svg class="h-full w-full -rotate-90" viewBox="0 0 100 100">
-                <!-- Background ring -->
-                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(142,142,147,0.18)" stroke-width="6" />
-                <!-- Progress ring -->
-                <circle
-                  cx="50" cy="50" r="45" fill="none"
-                  :stroke="pomodoroStore.isBreak ? '#007AFF' : '#21A038'"
-                  stroke-width="6"
-                  stroke-linecap="round"
-                  :stroke-dasharray="`${283 * pomodoroStore.progress} 283`"
-                  :style="{ transition: 'stroke-dasharray 1s linear' }"
-                />
-              </svg>
+            <div class="relative mb-8 flex h-64 w-64 items-center justify-center rounded-full bg-sber-gray-light">
+              <div class="h-[232px] w-[232px] rounded-full p-2 transition-all" :style="dialStyle">
+                <div class="flex h-full w-full items-center justify-center rounded-full bg-white shadow-inner">
+                  <div class="h-[188px] w-[188px] rounded-full border border-sber-gray-light bg-sber-gray-light/60" />
+                </div>
+              </div>
 
               <!-- Time display -->
               <div class="absolute inset-0 flex flex-col items-center justify-center">
@@ -80,40 +103,6 @@
               </button>
             </div>
           </div>
-        </div>
-
-        <!-- Focus Task -->
-        <div class="space-y-3">
-      <button
-        class="flex w-full items-center gap-3 rounded-[28px] border border-sber-gray-light bg-white px-4 py-4 shadow-sm transition-colors active:bg-sber-gray-light"
-        @click="taskPickerOpen = true"
-      >
-        <Target class="w-5 h-5 text-sber-green" />
-        <div class="flex-1 text-left">
-          <p class="text-xs text-sber-gray">Задача для фокуса</p>
-          <p class="text-sm font-medium text-sber-black truncate">
-            {{ selectedTask?.title || 'Выбрать задачу...' }}
-          </p>
-        </div>
-        <ChevronRight class="w-4 h-4 text-sber-gray" />
-      </button>
-
-      <!-- Work sound -->
-      <div class="flex items-center gap-3 rounded-[28px] border border-sber-gray-light bg-white px-4 py-4 shadow-sm">
-        <Music class="w-5 h-5 text-sber-gray" />
-        <span class="text-sm text-sber-gray flex-1">Звук фоновый</span>
-        <div class="flex gap-2 flex-wrap justify-end">
-          <button
-            v-for="s in workSoundOptions.slice(0, 4)"
-            :key="s.id"
-            class="text-sm px-2 py-1 rounded-lg transition-colors"
-            :class="activeWorkSound === s.id ? 'bg-sber-green text-white' : 'bg-sber-gray-light text-sber-gray'"
-            @click="activeWorkSound = s.id"
-          >
-            {{ s.icon }}
-          </button>
-        </div>
-      </div>
         </div>
       </div>
     </div>
@@ -252,6 +241,14 @@ const settingsOpen = ref(false)
 const taskPickerOpen = ref(false)
 const taskSearch = ref('')
 const activeWorkSound = ref('rain')
+const progressPercent = computed(() => Math.round(Math.max(0, Math.min(1, pomodoroStore.progress)) * 100))
+
+const dialStyle = computed(() => {
+  const activeColor = pomodoroStore.isBreak ? '#007AFF' : '#21A038'
+  return {
+    background: `conic-gradient(${activeColor} ${progressPercent.value}%, rgba(142,142,147,0.2) ${progressPercent.value}% 100%)`,
+  }
+})
 
 const selectedTask = computed(() =>
   tasksStore.tasks.find(t => t.id === pomodoroStore.selectedTaskId)

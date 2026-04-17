@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
+  <div class="page-container lg:flex lg:h-full lg:flex-col lg:overflow-hidden lg:pb-0" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
     <!-- Header -->
     <div class="px-4 pt-14 pb-4" :class="isDarkTheme ? 'bg-[#171a21] border-b border-[#2a303a]' : 'bg-white shadow-sm'">
       <div class="flex items-center justify-between">
@@ -14,29 +14,46 @@
     </div>
 
     <!-- Matrix 2x2 grid -->
-    <div class="p-3 grid grid-cols-2 gap-3">
+    <div class="grid flex-1 min-h-0 grid-cols-2 auto-rows-fr gap-3 p-3">
       <div
         v-for="block in blocks"
         :key="block.id"
-        class="rounded-2xl overflow-hidden border"
+        class="flex min-h-0 flex-col overflow-hidden rounded-2xl border"
         :style="getBlockContainerStyle(block)"
       >
         <!-- Block header -->
-        <div class="px-3 pt-3 pb-2 border-b"
+        <div class="border-b px-3 pt-3 pb-2"
              :style="{ borderColor: block.color + '30' }">
-          <div class="flex items-center justify-between mb-1">
-            <div class="w-2.5 h-2.5 rounded-full" :style="{ backgroundColor: block.color }" />
+          <div class="mb-1 flex items-center justify-between gap-2">
+            <div class="flex min-w-0 items-center gap-2">
+              <div class="h-2.5 w-2.5 flex-shrink-0 rounded-full" :style="{ backgroundColor: block.color }" />
+              <p class="truncate text-xs font-bold leading-tight" :style="{ color: block.color }">{{ block.title }}</p>
+            </div>
             <span class="text-[10px] font-medium px-2 py-0.5 rounded-full text-white"
                   :style="{ backgroundColor: block.color }">
               {{ getBlockTasks(block.id).length }}
             </span>
           </div>
-          <p class="text-xs font-bold leading-tight" :style="{ color: block.color }">{{ block.title }}</p>
-          <p class="text-[10px] text-sber-gray">{{ block.description }}</p>
         </div>
 
         <!-- Tasks in block -->
-        <div class="px-2 py-2 min-h-[100px] max-h-[220px] overflow-y-auto no-scrollbar">
+        <div
+          class="min-h-0 flex-1 overflow-y-auto no-scrollbar px-2 py-2"
+          @dragover.prevent="dragTarget = block.id"
+          @dragleave="dragTarget = null"
+          @drop.prevent="onDrop(block.id)"
+        >
+          <!-- Drop zone -->
+          <div
+            class="sticky top-0 z-10 mt-0 mb-1 border-2 border-dashed rounded-xl py-2.5 flex items-center justify-center transition-colors"
+            :style="{ borderColor: block.color + '50', backgroundColor: isDarkTheme ? '#171a21' : block.bgColor }"
+            :class="dragTarget === block.id ? (isDarkTheme ? 'bg-[#20242d]' : 'bg-white/90') : ''"
+          >
+            <span class="text-[10px]" :style="{ color: block.color }">
+              {{ dragTarget === block.id ? 'Отпустите здесь' : '+ перетащите' }}
+            </span>
+          </div>
+
           <div
             v-for="task in getBlockTasks(block.id)"
             :key="task.id"
@@ -54,30 +71,17 @@
               >
                 <Check v-if="task.completed" class="w-2.5 h-2.5 text-white" />
               </button>
-              <p class="text-xs font-medium text-sber-black line-clamp-2 leading-snug"
-                 :class="task.completed ? 'line-through text-sber-gray' : ''">
-                {{ task.title }}
-              </p>
+              <div class="flex min-w-0 flex-1 items-start justify-between gap-2">
+                <p class="line-clamp-2 text-xs font-medium leading-snug text-sber-black"
+                   :class="task.completed ? 'line-through text-sber-gray' : ''">
+                  {{ task.title }}
+                </p>
+                <div v-if="task.dueDate || task.dueTime" class="flex flex-shrink-0 items-center gap-1 text-[10px] text-sber-gray">
+                  <Clock class="h-2.5 w-2.5 text-sber-gray" />
+                  <span class="whitespace-nowrap">{{ formatTaskMeta(task.dueDate, task.dueTime) }}</span>
+                </div>
+              </div>
             </div>
-            <div v-if="task.dueDate" class="flex items-center gap-1 mt-1 ml-6">
-              <Clock class="w-2.5 h-2.5 text-sber-gray" />
-              <span class="text-[10px] text-sber-gray">{{ formatDate(task.dueDate) }}</span>
-            </div>
-          </div>
-
-          <!-- Drop zone -->
-          <div
-            class="border-2 border-dashed rounded-xl py-4 flex items-center justify-center
-                   transition-colors mt-1"
-            :style="{ borderColor: block.color + '50' }"
-            :class="dragTarget === block.id ? (isDarkTheme ? 'bg-[#20242d]' : 'bg-white/80') : ''"
-            @dragover.prevent="dragTarget = block.id"
-            @dragleave="dragTarget = null"
-            @drop.prevent="onDrop(block.id)"
-          >
-            <span class="text-[10px]" :style="{ color: block.color }">
-              {{ dragTarget === block.id ? 'Отпустите здесь' : '+ перетащите' }}
-            </span>
           </div>
         </div>
       </div>
@@ -114,7 +118,7 @@
                   <button
                     v-for="df in dateFilters"
                     :key="df.value"
-                    class="px-3 py-1 rounded-xl text-xs font-medium border transition-colors"
+                    class="w-16 px-2 py-1 rounded-xl text-center text-xs font-medium border transition-colors"
                     :class="block.dateFilter?.includes(df.value)
                       ? 'text-white border-transparent'
                       : 'border-sber-gray-mid text-sber-gray bg-white'"
@@ -131,7 +135,7 @@
                   <button
                     v-for="pf in priorityFilters"
                     :key="pf.value"
-                    class="px-3 py-1 rounded-xl text-xs font-medium border transition-colors"
+                    class="w-16 px-2 py-1 rounded-xl text-center text-xs font-medium border transition-colors"
                     :class="block.priorityFilter?.includes(pf.value)
                       ? 'text-white border-transparent'
                       : 'border-sber-gray-mid text-sber-gray bg-white'"
@@ -200,11 +204,23 @@ function formatDate(date: string) {
   return dayjs(date).format('D MMM')
 }
 
+function formatTaskMeta(dueDate?: string, dueTime?: string) {
+  const parts: string[] = []
+  if (dueDate) parts.push(formatDate(dueDate))
+  if (dueTime) parts.push(dueTime)
+  return parts.join(', ')
+}
+
 function onDragStart(e: DragEvent, taskId: string) {
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', taskId)
+  }
   draggedTaskId = taskId
 }
 
 function onDrop(blockId: string) {
+  // Keep fallback for browsers where module-scoped state is faster than dataTransfer.
   if (draggedTaskId) {
     tasksStore.moveToMatrix(draggedTaskId, blockId)
     draggedTaskId = null

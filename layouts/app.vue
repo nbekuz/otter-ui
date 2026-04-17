@@ -1,11 +1,11 @@
 <template>
-  <div class="min-h-dvh lg:px-6 lg:py-6" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
-    <div class="mx-auto flex min-h-dvh max-w-[1440px] lg:min-h-[calc(100dvh-3rem)] lg:gap-6">
+  <div class="min-h-dvh lg:overflow-hidden lg:px-6 lg:py-6" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
+    <div class="mx-auto flex min-h-dvh max-w-[1440px] lg:h-[calc(100dvh-3rem)] lg:min-h-[calc(100dvh-3rem)] lg:gap-6 lg:overflow-hidden">
       <aside
-        class="hidden lg:flex lg:w-72 lg:flex-col lg:rounded-[32px] lg:p-6"
+        class="hidden lg:flex lg:h-full lg:w-72 lg:flex-shrink-0 lg:flex-col lg:rounded-[32px] lg:p-6"
         :class="isDarkTheme ? 'lg:bg-[#171a21] lg:text-white lg:border lg:border-[#2a303a]' : 'lg:bg-white lg:shadow-card'"
       >
-        <div class="mb-8">
+        <div v-if="!isTasksPage" class="mb-8">
           <BrandLogo size="md" show-name-from="md" :text-class="isDarkTheme ? 'text-white' : 'text-sber-black'" />
           <h2 class="mt-2 text-3xl font-bold text-sber-black">Рабочее пространство</h2>
           <p class="mt-2 text-sm leading-relaxed text-sber-gray">
@@ -25,7 +25,12 @@
               <img v-else :src="authStore.user.avatar" class="h-full w-full object-cover" />
             </div>
             <div class="min-w-0">
-              <p class="truncate text-sm font-semibold text-sber-black">{{ authStore.user?.name || 'Пользователь' }}</p>
+              <div class="flex items-center gap-2">
+                <p class="truncate text-sm font-semibold text-sber-black">{{ authStore.user?.name || 'Пользователь' }}</p>
+                <span v-if="authStore.user?.isPremium" class="rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-yellow-700">
+                  Pro
+                </span>
+              </div>
               <p class="truncate text-xs text-sber-gray">{{ authStore.user?.email || 'demo@otter.app' }}</p>
             </div>
           </div>
@@ -51,17 +56,17 @@
           </NuxtLink>
         </nav>
 
-        <button class="mt-6 flex items-center justify-center gap-2 rounded-2xl bg-sber-green px-4 py-4 text-base font-semibold text-white transition-colors hover:bg-sber-green-dark" @click="navigateTo('/app/new-task')">
+        <button class="mt-6 flex items-center justify-center gap-2 rounded-2xl bg-sber-green px-4 py-4 text-base font-semibold text-white transition-colors hover:bg-sber-green-dark" @click="openNewTask">
           <Plus class="h-5 w-5" />
           Новая задача
         </button>
       </aside>
 
       <div
-        class="phone-frame relative flex-1"
+        class="phone-frame relative flex-1 lg:h-[calc(100dvh-3rem)]"
         :class="isDarkTheme ? 'bg-[#0f1115] lg:border lg:border-[#2a303a]' : 'bg-sber-gray-light lg:shadow-card'"
       >
-        <div class="min-h-dvh lg:min-h-[calc(100dvh-3rem)] lg:overflow-y-auto">
+        <div class="min-h-dvh lg:h-full lg:overflow-y-auto">
           <slot />
         </div>
 
@@ -69,7 +74,7 @@
 
         <button
           class="fixed bottom-24 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-sber-green shadow-lg transition-transform active:scale-95 lg:hidden"
-          @click="navigateTo('/app/new-task')"
+          @click="openNewTask"
         >
           <Plus class="h-7 w-7 text-white" />
         </button>
@@ -85,6 +90,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
+const isTasksPage = computed(() => route.path === '/app')
 
 const navItems = [
   { id: 'tasks', to: '/app', icon: CheckSquare, label: 'Задачи' },
@@ -97,5 +103,9 @@ const navItems = [
 function isActive(to: string) {
   if (to === '/app') return route.path === '/app'
   return route.path.startsWith(to)
+}
+
+function openNewTask() {
+  navigateTo(`/app/new-task?returnTo=${encodeURIComponent(route.fullPath)}`)
 }
 </script>

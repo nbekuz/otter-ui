@@ -57,8 +57,11 @@
       <SettingsSettingsRow label="Имя" :value="authStore.user?.name" @click="nameModal = true">
         <template #icon><User class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
-      <SettingsSettingsRow label="Профиль" @click="navigateTo('/app/profile')">
+      <SettingsSettingsRow label="Аватар" @click="avatarModal = true">
         <template #icon><Camera class="w-5 h-5 text-sber-gray mr-3" /></template>
+      </SettingsSettingsRow>
+      <SettingsSettingsRow label="Профиль" @click="navigateTo('/app/profile')">
+        <template #icon><Info class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
       <SettingsSettingsRow label="Пароль" @click="passwordModal = true">
         <template #icon><Lock class="w-5 h-5 text-sber-gray mr-3" /></template>
@@ -69,6 +72,55 @@
       <SettingsSettingsRow label="Премиум" label-class="text-yellow-600" @click="premiumModal = true">
         <template #icon><Crown class="w-5 h-5 text-yellow-500 mr-3" /></template>
       </SettingsSettingsRow>
+    </div>
+
+    <!-- Premium highlight -->
+    <div class="mx-4 mt-4 rounded-2xl border p-4 shadow-sm" :class="isDarkTheme ? 'border-yellow-500/30 bg-[#171a21]' : 'border-yellow-300 bg-gradient-to-r from-yellow-50 to-amber-50'">
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase tracking-wide text-yellow-600">Premium</p>
+          <p class="mt-1 text-sm font-semibold text-sber-black">
+            {{ authStore.user?.isPremium ? 'Premium активен' : 'Расширьте возможности приложения' }}
+          </p>
+          <p class="mt-1 text-xs text-sber-gray">
+            {{ authStore.user?.isPremium ? 'Синхронизация, расширенная статистика и дополнительные инструменты уже доступны.' : 'Подключите Premium для расширенной статистики и синхронизации.' }}
+          </p>
+        </div>
+        <button
+          class="rounded-xl px-3 py-2 text-sm font-semibold text-white transition-colors"
+          :class="authStore.user?.isPremium ? 'bg-yellow-500/70' : 'bg-gradient-to-r from-yellow-400 to-yellow-600'"
+          @click="premiumModal = true"
+        >
+          {{ authStore.user?.isPremium ? 'Управлять' : 'Подключить Premium' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom menu customization -->
+    <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
+      <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Нижнее меню</p>
+      <p class="px-4 pb-2 text-xs text-sber-gray">Включайте вкладки и меняйте порядок перетаскиванием.</p>
+      <div
+        v-for="item in orderedBottomMenuItems"
+        :key="item.id"
+        class="flex items-center gap-3 px-4 py-3 border-b border-sber-gray-light last:border-0"
+        draggable="true"
+        @dragstart="onBottomMenuDragStart(item.id)"
+        @dragover.prevent
+        @drop="onBottomMenuDrop(item.id)"
+      >
+        <GripVertical class="w-4 h-4 text-sber-gray cursor-grab" />
+        <component :is="item.icon" class="w-5 h-5 text-sber-gray" />
+        <span class="text-sm font-medium text-sber-black flex-1">{{ item.label }}</span>
+        <button
+          class="w-12 h-6 rounded-full transition-colors relative"
+          :class="isBottomMenuEnabled(item.id) ? 'bg-sber-green' : 'bg-sber-gray-mid'"
+          @click="toggleBottomMenuItem(item.id)"
+        >
+          <div class="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform"
+               :class="isBottomMenuEnabled(item.id) ? 'translate-x-7' : 'translate-x-1'" />
+        </button>
+      </div>
     </div>
 
     <!-- App settings -->
@@ -131,16 +183,16 @@
         </div>
       </div>
 
-      <SettingsSettingsRow label="Оформление" @click="showComingSoon()">
+      <SettingsSettingsRow label="Вид" @click="showComingSoon()">
         <template #icon><EyeOff class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
-      <SettingsSettingsRow label="Формат даты и времени" @click="showComingSoon()">
+      <SettingsSettingsRow label="Дата и время" @click="showComingSoon()">
         <template #icon><Clock class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
-      <SettingsSettingsRow label="Импорт данных" @click="showComingSoon()">
+      <SettingsSettingsRow label="Интеграции и импорт" @click="showComingSoon()">
         <template #icon><Download class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
-      <SettingsSettingsRow label="Поделиться приложением" @click="shareApp">
+      <SettingsSettingsRow label="Рекомендовать друзьям" @click="shareApp">
         <template #icon><Share2 class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
     </div>
@@ -200,11 +252,14 @@
     <!-- General / About -->
     <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
       <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Общее</p>
-      <SettingsSettingsRow label="Язык" value="Русский">
+      <SettingsSettingsRow label="Язык" :value="selectedLanguageLabel" @click="languageModal = true">
         <template #icon><Globe class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
       <SettingsSettingsRow label="Центр помощи" @click="helpModal = true">
         <template #icon><HelpCircle class="w-5 h-5 text-sber-gray mr-3" /></template>
+      </SettingsSettingsRow>
+      <SettingsSettingsRow label="Написать нам" @click="contactModal = true">
+        <template #icon><MessageSquareText class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
       <SettingsSettingsRow label="О приложении" @click="aboutModal = true">
         <template #icon><Info class="w-5 h-5 text-sber-gray mr-3" /></template>
@@ -332,6 +387,27 @@
       </Transition>
     </Teleport>
 
+    <!-- Language modal -->
+    <Teleport to="body">
+      <Transition name="overlay"><div v-if="languageModal" class="overlay" @click="languageModal = false" /></Transition>
+      <Transition name="modal">
+        <div v-if="languageModal" class="app-modal px-5 py-5" @click.stop>
+          <h3 class="text-lg font-bold mb-4">Язык приложения</h3>
+          <button
+            v-for="lang in languages"
+            :key="lang.id"
+            class="mb-2 flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors"
+            :class="selectedLanguage === lang.id ? 'border-sber-green bg-sber-green-light' : 'border-sber-gray-light bg-white'"
+            @click="setLanguage(lang.id)"
+          >
+            <span class="flex-1 text-sm font-medium text-sber-black">{{ lang.label }}</span>
+            <Check v-if="selectedLanguage === lang.id" class="w-4 h-4 text-sber-green" />
+          </button>
+          <button class="btn-secondary mt-3" @click="languageModal = false">Закрыть</button>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Help modal -->
     <Teleport to="body">
       <Transition name="overlay"><div v-if="helpModal" class="overlay" @click="helpModal = false" /></Transition>
@@ -355,7 +431,33 @@
             </Transition>
             <div class="h-px bg-sber-gray-light" />
           </div>
-          <button class="btn-primary mt-4">Связаться с нами</button>
+          <button class="btn-primary mt-4" @click="openContactFromHelp">Связаться с нами</button>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Contact modal -->
+    <Teleport to="body">
+      <Transition name="overlay"><div v-if="contactModal" class="overlay" @click="contactModal = false" /></Transition>
+      <Transition name="modal">
+        <div v-if="contactModal" class="app-modal px-5 py-5" style="max-height: 85dvh; overflow-y: auto;" @click.stop>
+          <h3 class="text-lg font-bold mb-1">Написать нам</h3>
+          <p class="text-sm text-sber-gray mb-3">Опишите проблему или идею, можно добавить скриншот.</p>
+          <textarea
+            v-model="contactMessage"
+            class="input-field min-h-[120px] mb-3 resize-none"
+            placeholder="Ваше сообщение..."
+          />
+          <input ref="contactScreenshotInputRef" type="file" accept="image/*" class="hidden" @change="handleContactScreenshotChange">
+          <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl mb-3" @click="contactScreenshotInputRef?.click()">
+            <Image class="w-5 h-5 text-sber-gray" />
+            <span class="text-sm text-sber-black">Добавить скриншот</span>
+          </button>
+          <div v-if="contactScreenshotName" class="mb-3 rounded-xl bg-sber-gray-light px-3 py-2 text-xs text-sber-gray">
+            Прикреплено: {{ contactScreenshotName }}
+          </div>
+          <button class="btn-primary" @click="sendContactMessage">Отправить</button>
+          <button class="btn-secondary mt-3" @click="contactModal = false">Отмена</button>
         </div>
       </Transition>
     </Teleport>
@@ -374,13 +476,17 @@
             <p class="text-sm text-sber-gray">Версия 1.0.0</p>
           </div>
           <div class="space-y-2">
-            <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" @click="showComingSoon()">
+            <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" @click="openStoreRating('rustore')">
               <Star class="w-4 h-4 text-sber-gray" />
               <span class="text-sm">Оценить в RuStore</span>
             </button>
-            <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" @click="showComingSoon()">
+            <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" @click="openStoreRating('google')">
               <Star class="w-4 h-4 text-sber-gray" />
               <span class="text-sm">Оценить в Google Play</span>
+            </button>
+            <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" @click="showComingSoon()">
+              <Info class="w-4 h-4 text-sber-gray" />
+              <span class="text-sm">Лицензии и информация</span>
             </button>
           </div>
           <button class="btn-secondary mt-4" @click="aboutModal = false">Закрыть</button>
@@ -409,7 +515,7 @@
         <div v-if="comingSoonVisible"
              class="fixed top-20 left-1/2 -translate-x-1/2 bg-sber-black text-white
                     px-5 py-3 rounded-2xl text-sm font-medium z-50 shadow-lg text-center">
-          Скоро появится
+          Уже разрабатываем, скоро будет готово 😊
         </div>
       </Transition>
     </Teleport>
@@ -420,13 +526,14 @@
       <Transition name="modal">
         <div v-if="avatarModal" class="app-modal px-5 py-5" @click.stop>
           <h3 class="text-lg font-bold mb-4">Фото профиля</h3>
+          <input ref="avatarInputRef" type="file" accept="image/*" class="hidden" @change="handleAvatarFileChange">
           <button class="w-full flex items-center gap-3 px-4 py-4 bg-sber-gray-light rounded-2xl mb-2"
-                  @click="avatarModal = false">
-            <Camera class="w-5 h-5 text-sber-gray" /> Сделать фото
+                  @click="avatarInputRef?.click()">
+            <Image class="w-5 h-5 text-sber-gray" /> Выбрать изображение
           </button>
           <button class="w-full flex items-center gap-3 px-4 py-4 bg-sber-gray-light rounded-2xl mb-3"
-                  @click="avatarModal = false">
-            <Image class="w-5 h-5 text-sber-gray" /> Выбрать из галереи
+                  @click="clearAvatar">
+            <Camera class="w-5 h-5 text-sber-gray" /> Удалить аватар
           </button>
           <button class="btn-secondary" @click="avatarModal = false">Отмена</button>
         </div>
@@ -439,7 +546,8 @@
 import {
   Bell, Vibrate, Volume2, CheckCircle, Camera, Image, Globe,
   HelpCircle, Info, Star, Check, ChevronDown, ChevronRight, Search, User, Lock,
-  EyeOff, Clock, Download, Share2, Smartphone, Crown
+  EyeOff, Clock, Download, Share2, Smartphone, Crown, GripVertical, MessageSquareText,
+  CheckSquare, Calendar, Grid2x2, Timer, Settings
 } from 'lucide-vue-next'
 import { Moon, Sun } from 'lucide-vue-next'
 import { soundOptions, faqData } from '~/data/mockData'
@@ -453,12 +561,20 @@ const nameModal = ref(false)
 const passwordModal = ref(false)
 const premiumModal = ref(false)
 const soundModal = ref<string | null>(null)
+const languageModal = ref(false)
 const helpModal = ref(false)
+const contactModal = ref(false)
 const aboutModal = ref(false)
 const avatarModal = ref(false)
+const avatarInputRef = ref<HTMLInputElement | null>(null)
+const contactScreenshotInputRef = ref<HTMLInputElement | null>(null)
 const showLogout = ref(false)
 const comingSoonVisible = ref(false)
 const newName = ref(authStore.user?.name || '')
+const selectedLanguage = ref(settingsStore.appSettings.language || 'ru')
+const draggedBottomMenuId = ref<string | null>(null)
+const contactMessage = ref('')
+const contactScreenshotName = ref('')
 const nameError = ref('')
 const passwordForm = reactive({
   current: '',
@@ -471,6 +587,30 @@ const passwordErrors = reactive({
   confirm: '',
 })
 const faqSearch = ref('')
+
+const languages = [
+  { id: 'ru', label: 'Русский' },
+]
+
+const bottomMenuCatalog = [
+  { id: 'tasks', label: 'Задачи', icon: CheckSquare },
+  { id: 'calendar', label: 'Календарь', icon: Calendar },
+  { id: 'matrix', label: 'Матрица', icon: Grid2x2 },
+  { id: 'pomodoro', label: 'Помодоро', icon: Timer },
+  { id: 'settings', label: 'Настройки', icon: Settings },
+]
+
+const orderedBottomMenuItems = computed(() => {
+  const enabled = settingsStore.appSettings.bottomNavItems || []
+  const byId = new Map(bottomMenuCatalog.map(item => [item.id, item]))
+  const ordered = enabled.map(id => byId.get(id)).filter(Boolean)
+  const rest = bottomMenuCatalog.filter(item => !enabled.includes(item.id))
+  return [...ordered, ...rest] as typeof bottomMenuCatalog
+})
+
+const selectedLanguageLabel = computed(() =>
+  languages.find(l => l.id === selectedLanguage.value)?.label || 'Русский'
+)
 
 const faqItems = ref(faqData.map(f => ({ ...f, open: false })))
 
@@ -511,6 +651,14 @@ function shareApp() {
   } else {
     showComingSoon()
   }
+}
+
+function openStoreRating(store: 'rustore' | 'google') {
+  const urls = {
+    rustore: 'https://www.rustore.ru/',
+    google: 'https://play.google.com/store',
+  }
+  window.open(urls[store], '_blank')
 }
 
 function toggleTheme() {
@@ -591,6 +739,95 @@ function setSound(modal: string | null, soundId: string) {
     settingsStore.updateSettings({ completionSound: soundId })
   }
   soundModal.value = null
+}
+
+function setLanguage(languageId: string) {
+  selectedLanguage.value = languageId
+  settingsStore.updateSettings({ language: languageId })
+  languageModal.value = false
+}
+
+function isBottomMenuEnabled(itemId: string) {
+  return settingsStore.appSettings.bottomNavItems.includes(itemId)
+}
+
+function toggleBottomMenuItem(itemId: string) {
+  const current = [...settingsStore.appSettings.bottomNavItems]
+  if (current.includes(itemId)) {
+    if (current.length <= 2) {
+      showComingSoon()
+      return
+    }
+    settingsStore.reorderNavItems(current.filter(id => id !== itemId))
+    return
+  }
+  current.push(itemId)
+  settingsStore.reorderNavItems(current)
+}
+
+function onBottomMenuDragStart(itemId: string) {
+  draggedBottomMenuId.value = itemId
+}
+
+function onBottomMenuDrop(targetItemId: string) {
+  if (!draggedBottomMenuId.value || draggedBottomMenuId.value === targetItemId) return
+
+  const current = [...settingsStore.appSettings.bottomNavItems]
+  const fromIndex = current.indexOf(draggedBottomMenuId.value)
+  const toIndex = current.indexOf(targetItemId)
+  if (fromIndex === -1 || toIndex === -1) return
+
+  const [moved] = current.splice(fromIndex, 1)
+  current.splice(toIndex, 0, moved)
+  settingsStore.reorderNavItems(current)
+  draggedBottomMenuId.value = null
+}
+
+function openContactFromHelp() {
+  helpModal.value = false
+  contactModal.value = true
+}
+
+function sendContactMessage() {
+  if (!contactMessage.value.trim()) {
+    showComingSoon()
+    return
+  }
+  contactMessage.value = ''
+  contactScreenshotName.value = ''
+  if (contactScreenshotInputRef.value) {
+    contactScreenshotInputRef.value.value = ''
+  }
+  contactModal.value = false
+  showComingSoon()
+}
+
+function handleContactScreenshotChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  contactScreenshotName.value = file.name
+}
+
+function handleAvatarFileChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    const result = typeof reader.result === 'string' ? reader.result : ''
+    if (result) {
+      authStore.updateAvatar(result)
+    }
+    avatarModal.value = false
+  }
+  reader.readAsDataURL(file)
+}
+
+function clearAvatar() {
+  authStore.updateAvatar('')
+  avatarModal.value = false
 }
 </script>
 

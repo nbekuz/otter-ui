@@ -10,7 +10,7 @@
         </div>
 
         <div class="px-6 pt-6 pb-10 lg:px-8">
-          <form class="space-y-4" @submit.prevent="handleRegister">
+          <form class="space-y-4" novalidate @submit.prevent="handleRegister">
             <div>
               <label class="mb-2 block text-sm font-medium text-sber-gray">Email</label>
               <div class="relative">
@@ -39,7 +39,6 @@
                   placeholder="Минимум 6 символов"
                   autocomplete="new-password"
                   required
-                  minlength="6"
                   class="input-field pl-12 pr-12"
                   :class="{ 'border-red-400 bg-red-50': errors.password }"
                   @input="errors.password = ''"
@@ -96,7 +95,7 @@
               <p v-if="errors.terms" class="mt-2 ml-1 text-xs text-red-500">{{ errors.terms }}</p>
             </div>
 
-            <button class="btn-primary" type="submit">
+            <button class="btn-primary lg:mx-auto lg:max-w-[360px]" type="submit">
               Создать аккаунт
             </button>
           </form>
@@ -110,7 +109,7 @@
             </div>
           </Transition>
 
-          <div class="mt-6 text-center">
+          <div class="mt-6 text-center lg:mx-auto lg:max-w-[360px]">
             <span class="text-sm text-sber-gray">Уже есть аккаунт? </span>
             <NuxtLink to="/login" class="text-sm font-semibold text-sber-green">Войти</NuxtLink>
           </div>
@@ -120,21 +119,15 @@
       <div class="hidden lg:flex lg:flex-col lg:justify-between lg:bg-sber-gray-light lg:p-10">
         <div>
           <BrandLogo size="md" show-name-from="md" />
-          <h2 class="mt-4 text-4xl font-bold leading-tight text-sber-black">Начните управлять задачами не только с телефона, но и с десктопа.</h2>
-          <p class="mt-4 max-w-md text-sm leading-7 text-sber-gray">
-            Широкий экран теперь использует отдельную навигацию, больше воздуха между блоками и более удобные формы.
-          </p>
+          <h2 class="mt-4 text-4xl font-bold leading-tight text-sber-black">Управляйте задачами не только с телефона, но и с десктопа.</h2>
         </div>
 
-        <div class="space-y-3 rounded-[28px] bg-white p-6 shadow-card">
-          <div class="rounded-2xl bg-sber-green-light px-4 py-3">
-            <p class="text-xs uppercase tracking-wide text-sber-green">После регистрации</p>
-            <p class="mt-2 text-sm font-semibold text-sber-black">Сразу попадёте в рабочее пространство с задачами, календарём и матрицей.</p>
-          </div>
-          <div class="rounded-2xl bg-sber-blue-light px-4 py-3">
-            <p class="text-xs uppercase tracking-wide text-sber-blue">Что улучшено</p>
-            <p class="mt-2 text-sm font-semibold text-sber-black">Формы проверяют обязательные поля до отправки, а интерфейс аккуратно масштабируется на больших экранах.</p>
-          </div>
+        <div class="space-y-3 rounded-[28px] bg-white p-6 text-center shadow-card">
+          <p class="text-sm font-semibold uppercase tracking-wide text-sber-green">Планируйте</p>
+          <p class="text-sm font-semibold uppercase tracking-wide text-sber-blue">Координируйте</p>
+          <p class="text-sm font-semibold uppercase tracking-wide text-[#7C3AED]">Фокусируйтесь</p>
+          <p class="text-sm font-semibold uppercase tracking-wide text-[#EF4444]">Управляйте</p>
+          <p class="pt-2 text-sm font-medium text-sber-gray">План на ближайшие 10 дней всегда под рукой.</p>
         </div>
       </div>
     </div>
@@ -165,7 +158,7 @@ function validate() {
     valid = false
   }
   if (form.password.length < 6) {
-    errors.password = 'Пароль должен содержать минимум 6 символов'
+    errors.password = 'Пароль должен состоять минимум из 6 символов'
     valid = false
   }
   if (form.password !== form.confirmPassword) {
