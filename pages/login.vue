@@ -4,21 +4,33 @@
       <div class="hidden lg:flex lg:flex-col lg:justify-between lg:bg-gradient-to-br lg:from-sber-green lg:to-sber-blue lg:p-10 lg:text-white">
         <div>
           <NuxtLink to="/" class="inline-flex">
-            <BrandLogo size="md" show-name-from="md" text-class="text-white" />
+            <img :src="logoUrl" alt="Otter logo" class="h-11 w-11 rounded-2xl brightness-0 invert opacity-95" />
           </NuxtLink>
-          <h1 class="mt-6 text-4xl font-bold leading-tight">Возвращайтесь к задачам на любом экране.</h1>
+          <h1 class="mt-6 text-4xl font-bold leading-tight">Пару кликов, и задача готова. Ничего лишнего.</h1>
           <p class="mt-4 max-w-md text-sm leading-7 text-white/85">
-            Следите за задачами, сроками и приоритетами в одном удобном рабочем окне.
+            Теперь еще удобнее для обзора задач, календаря и планов на день.
           </p>
         </div>
 
         <div class="rounded-[28px] bg-white/10 p-5 backdrop-blur">
           <p class="text-xs uppercase tracking-[0.2em] text-white/70">Что внутри</p>
-          <ul class="mt-4 space-y-3 text-sm text-white/90">
-            <li>Умные списки по срокам и приоритетам</li>
-            <li>Календарь, матрица и помодоро в одном интерфейсе</li>
-            <li>Быстрое создание задач и удобные формы</li>
-          </ul>
+          <div class="relative mt-4 grid grid-cols-2 items-start gap-3">
+            <div class="pointer-events-none absolute left-1/2 top-3 h-[calc(100%-1.5rem)] w-3 -translate-x-1/2 rounded-full bg-sber-gray-light/95" />
+            <div class="pointer-events-none absolute left-3 top-1/2 h-3 w-[calc(100%-1.5rem)] -translate-y-1/2 rounded-full bg-sber-gray-light/95" />
+            <div
+              v-for="(metric, index) in metrics"
+              :key="metric"
+              class="flex min-h-[108px] items-center justify-center rounded-2xl bg-white/95 px-4 py-4 text-center text-sber-black shadow-sm"
+              :class="{ 'mt-7': index % 2 === 1 }"
+            >
+              <p class="text-sm font-bold uppercase tracking-wide">{{ metric }}</p>
+            </div>
+            <div class="pointer-events-none absolute left-1/2 top-1/2 z-10 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sber-gray-light">
+              <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm">
+                <img :src="logoUrl" alt="Otter logo" class="h-8 w-8 brightness-0" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -82,7 +94,7 @@
               </button>
             </div>
 
-            <button class="btn-primary" type="submit">
+            <button class="btn-primary mx-auto block w-full max-w-[320px]" type="submit">
               Войти
             </button>
           </form>
@@ -106,7 +118,7 @@
           </div>
 
           <button
-            class="flex w-full items-center justify-center gap-3 rounded-2xl border border-sber-gray-mid bg-white py-4 font-semibold text-sber-black transition-colors active:bg-sber-gray-light"
+            class="mx-auto flex w-full max-w-[320px] items-center justify-center gap-3 rounded-2xl border border-sber-gray-mid bg-white py-4 font-semibold text-sber-black transition-colors active:bg-sber-gray-light"
             type="button"
             @click="loginWithGoogle"
           >
@@ -158,8 +170,10 @@
 
 <script setup lang="ts">
 import { ChevronLeft, Mail, Lock, Eye, EyeOff, Info } from 'lucide-vue-next'
+import logoUrl from '~/assets/img/logo.svg'
 
 const authStore = useAuthStore()
+const metrics = ['планируйте', 'контролируйте', 'фокусируйтесь', 'управляйте']
 const form = reactive({ email: '', password: '' })
 const errors = reactive({ email: '', password: '' })
 const showPassword = ref(false)

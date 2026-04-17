@@ -1,5 +1,5 @@
 <template>
-  <div class="inline-flex items-center gap-3" :class="centered ? 'justify-center' : ''">
+  <div class="inline-flex items-center gap-2" :class="centered ? 'justify-center' : ''">
     <img :src="logoUrl" alt="Otter logo" :class="[logoClass, logoToneClass]" />
     <span :class="[nameClassMap[showNameFrom], textClass, textSizeClass, 'font-bold tracking-tight']">
       {{ name }}

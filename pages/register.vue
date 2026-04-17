@@ -94,10 +94,13 @@
               </div>
               <p v-if="errors.terms" class="mt-2 ml-1 text-xs text-red-500">{{ errors.terms }}</p>
             </div>
+            <div class="w-full flex lg:justify-center items-center">
 
-            <button class="btn-primary lg:mx-auto lg:max-w-[360px]" type="submit">
-              Создать аккаунт
-            </button>
+              <button class="btn-primary  lg:max-w-[360px] " type="submit">
+                Создать аккаунт
+              </button>
+            </div>
+
           </form>
 
           <Transition name="fade-notification">
@@ -116,18 +119,36 @@
         </div>
       </div>
 
-      <div class="hidden lg:flex lg:flex-col lg:justify-between lg:bg-sber-gray-light lg:p-10">
+      <div class="hidden lg:flex lg:flex-col lg:justify-between lg:bg-gradient-to-br lg:from-sber-green lg:to-sber-blue lg:p-10 lg:text-white">
         <div>
-          <BrandLogo size="md" show-name-from="md" />
-          <h2 class="mt-4 text-4xl font-bold leading-tight text-sber-black">Управляйте задачами не только с телефона, но и с десктопа.</h2>
+          <NuxtLink to="/" class="inline-flex">
+            <img :src="logoUrl" alt="Otter logo" class="h-11 w-11 rounded-2xl brightness-0 invert opacity-95" />
+          </NuxtLink>
+          <h2 class="mt-6 text-4xl font-bold leading-tight">Пару кликов, и задача готова. Ничего лишнего.</h2>
+          <p class="mt-4 max-w-md text-sm leading-7 text-white/85">
+            Теперь еще удобнее для обзора задач, календаря и планов на день.
+          </p>
         </div>
 
-        <div class="space-y-3 rounded-[28px] bg-white p-6 text-center shadow-card">
-          <p class="text-sm font-semibold uppercase tracking-wide text-sber-green">Планируйте</p>
-          <p class="text-sm font-semibold uppercase tracking-wide text-sber-blue">Координируйте</p>
-          <p class="text-sm font-semibold uppercase tracking-wide text-[#7C3AED]">Фокусируйтесь</p>
-          <p class="text-sm font-semibold uppercase tracking-wide text-[#EF4444]">Управляйте</p>
-          <p class="pt-2 text-sm font-medium text-sber-gray">План на ближайшие 10 дней всегда под рукой.</p>
+        <div class="rounded-[28px] bg-white/10 p-5 backdrop-blur">
+          <p class="text-xs uppercase tracking-[0.2em] text-white/70">Что внутри</p>
+          <div class="relative mt-4 grid grid-cols-2 items-start gap-3">
+            <div class="pointer-events-none absolute left-1/2 top-3 h-[calc(100%-1.5rem)] w-3 -translate-x-1/2 rounded-full bg-sber-gray-light/95" />
+            <div class="pointer-events-none absolute left-3 top-1/2 h-3 w-[calc(100%-1.5rem)] -translate-y-1/2 rounded-full bg-sber-gray-light/95" />
+            <div
+              v-for="(metric, index) in metrics"
+              :key="metric"
+              class="flex min-h-[108px] items-center justify-center rounded-2xl bg-white/95 px-4 py-4 text-center text-sber-black shadow-sm"
+              :class="{ 'mt-7': index % 2 === 1 }"
+            >
+              <p class="text-sm font-bold uppercase tracking-wide">{{ metric }}</p>
+            </div>
+            <div class="pointer-events-none absolute left-1/2 top-1/2 z-10 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sber-gray-light">
+              <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm">
+                <img :src="logoUrl" alt="Otter logo" class="h-8 w-8 brightness-0" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -136,8 +157,10 @@
 
 <script setup lang="ts">
 import { ChevronLeft, Mail, Lock, Eye, EyeOff, Check, CheckCircle } from 'lucide-vue-next'
+import logoUrl from '~/assets/img/logo.svg'
 
 const authStore = useAuthStore()
+const metrics = ['планируйте', 'контролируйте', 'фокусируйтесь', 'управляйте']
 
 const form = reactive({ email: '', password: '', confirmPassword: '' })
 const errors = reactive({ email: '', password: '', confirmPassword: '', terms: '' })

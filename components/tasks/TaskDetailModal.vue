@@ -4,10 +4,10 @@
       <div class="overlay" @click="$emit('close')" />
     </Transition>
     <Transition name="modal">
-      <div v-if="task" class="app-modal" style="max-height: 80dvh; overflow-y: auto;" @click.stop>
+      <div v-if="task" class="app-modal pt-4" style="max-height: 80dvh; overflow-y: auto;" @click.stop>
 
         <!-- Priority banner -->
-        <div class="mx-4 rounded-2xl px-4 py-2 mb-4 flex items-center gap-2"
+        <div class="mx-4 mb-5 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5"
              :style="{ backgroundColor: priorityColor + '20' }">
           <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: priorityColor }" />
           <span class="text-xs font-medium" :style="{ color: priorityColor }">

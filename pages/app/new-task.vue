@@ -409,11 +409,18 @@ const attachmentPreviewUrl = computed(() =>
   attachmentMimeType.value.startsWith('image/') ? attachmentDataUrl.value : ''
 )
 
-watch(() => form.dueTime, (newTime) => {
+watch(() => form.dueTime, (newTime, oldTime) => {
   if (!newTime) return
-  if (!form.durationStart) {
+  if (!form.durationStart || form.durationStart === oldTime) {
     form.durationStart = newTime
   }
+})
+
+watch(() => form.dueDate, (newDate) => {
+  if (newDate !== '') return
+  form.dueTime = ''
+  form.durationStart = ''
+  form.durationEnd = ''
 })
 
 onMounted(async () => {

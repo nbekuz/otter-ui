@@ -36,9 +36,14 @@
                 </span>
               </div>
               <p class="mt-1 truncate text-sm text-sber-gray">{{ authStore.user?.email }}</p>
-              <p v-if="authStore.user?.isPremium && premiumExpiresLabel" class="mt-1 text-xs font-medium text-yellow-700">
-                Подписка активна до {{ premiumExpiresLabel }}
-              </p>
+              <div v-if="authStore.user?.isPremium && premiumExpiresLabel" class="mt-2 flex flex-wrap items-center gap-2">
+                <span class="rounded-full bg-yellow-100 px-2.5 py-1 text-[11px] font-bold text-yellow-700">
+                  ⭐ ПРЕМИУМ
+                </span>
+                <span class="text-xs font-medium text-yellow-700">
+                  Срок до {{ premiumExpiresLabel }}
+                </span>
+              </div>
               <div class="mt-4 flex flex-wrap gap-3">
                 <button class="rounded-2xl bg-sber-green px-4 py-2.5 text-sm font-semibold text-white" type="button" @click="nameModal = true">
                   Изменить имя
@@ -51,26 +56,8 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 lg:grid-cols-3">
-          <div v-for="stat in stats" :key="stat.label" class="rounded-2xl bg-white px-4 py-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-sber-gray">{{ stat.label }}</p>
-            <p class="mt-2 text-2xl font-bold text-sber-black">{{ stat.value }}</p>
-            <p class="mt-1 text-xs leading-5 text-sber-gray">{{ stat.caption }}</p>
-          </div>
-        </div>
+      
 
-        <div class="overflow-hidden rounded-2xl bg-white shadow-sm">
-          <p class="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-sber-gray">Личные данные</p>
-          <SettingsSettingsRow label="Имя" :value="authStore.user?.name" @click="nameModal = true">
-            <template #icon><User class="mr-3 h-5 w-5 text-sber-gray" /></template>
-          </SettingsSettingsRow>
-          <SettingsSettingsRow label="Email" :value="authStore.user?.email">
-            <template #icon><Mail class="mr-3 h-5 w-5 text-sber-gray" /></template>
-          </SettingsSettingsRow>
-          <SettingsSettingsRow label="Пароль" value="Изменить" @click="passwordModal = true">
-            <template #icon><Lock class="mr-3 h-5 w-5 text-sber-gray" /></template>
-          </SettingsSettingsRow>
-        </div>
       </div>
 
       <div class="mt-4 space-y-4 lg:mt-0">

@@ -1,7 +1,7 @@
 <template>
   <div class="page-container bg-sber-gray-light lg:flex lg:h-full lg:flex-col lg:overflow-hidden lg:pb-0">
     <!-- Header -->
-    <div class="sticky top-0 z-20 bg-white shadow-sm pt-14 pb-3 px-4">
+    <div class="sticky top-0 z-40 bg-white shadow-sm pt-14 pb-3 px-4">
       <div class="flex items-center justify-between mb-3">
         <h1 class="text-xl font-bold text-sber-black">{{ calendarStore.displayLabel }}</h1>
         <div class="flex items-center gap-2">
@@ -18,7 +18,7 @@
       <!-- View selector dropdown -->
       <Transition name="slide-down">
         <div v-if="viewMenuOpen"
-             class="absolute top-full left-4 right-4 bg-white rounded-2xl shadow-modal z-30 p-2">
+             class="absolute top-full left-4 right-4 bg-white rounded-2xl shadow-modal z-50 p-2">
           <button v-for="v in viewTypes" :key="v.value"
                   class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors"
                   :class="calendarStore.viewType === v.value ? 'bg-sber-green-light text-sber-green' : 'text-sber-black'"
@@ -64,20 +64,6 @@
     <div class="flex-1 min-h-0 overflow-y-auto">
       <!-- DAY VIEW -->
       <div v-if="calendarStore.viewType === 'day'" class="relative">
-      <!-- Timeline -->
-      <div class="flex">
-        <div class="w-14 flex-shrink-0" />
-        <div class="flex-1 relative">
-          <!-- Current time indicator -->
-          <div v-if="calendarStore.currentDate === todayStr"
-               class="absolute left-0 right-0 flex items-center z-10"
-               :style="{ top: `${currentTimePx}px` }">
-            <div class="w-2 h-2 rounded-full bg-red-500 -ml-1" />
-            <div class="flex-1 h-0.5 bg-red-500" />
-          </div>
-        </div>
-      </div>
-
       <!-- Early hours toggle -->
       <div class="flex items-center cursor-pointer px-3 py-2 bg-sber-gray-light"
            @click="calendarStore.toggleEarlyHours()">
@@ -106,12 +92,26 @@
       </Transition>
 
       <!-- Main hours (06:00–21:00) -->
-      <div class="relative">
+      <div ref="mainTimelineRef" class="relative" @click="openNewTaskFromMainTimeline">
+        <div
+          v-if="calendarStore.currentDate === todayStr && isCurrentTimeInMainRange"
+          class="pointer-events-none absolute top-0 left-0 right-0 z-20 flex items-center"
+          :style="{ transform: `translateY(${currentMainTimePx}px)` }"
+        >
+          <div class="w-14 flex-shrink-0" />
+          <div class="relative flex-1">
+            <div class="absolute left-0 right-0 flex items-center">
+              <div class="w-2 h-2 rounded-full bg-red-500 -ml-1" />
+              <div class="flex-1 h-0.5 bg-red-500" />
+            </div>
+          </div>
+        </div>
+
         <div v-for="h in mainHours" :key="h" class="flex min-h-[60px]">
           <div class="w-14 flex-shrink-0 text-xs text-sber-gray text-right pr-3 pt-1">
             {{ String(h).padStart(2, '0') }}:00
           </div>
-          <div class="flex-1 cursor-pointer border-t border-sber-gray-light" @click="openNewTaskFromCalendar(h)" />
+          <div class="flex-1 cursor-pointer border-t border-sber-gray-light" />
         </div>
 
         <div class="pointer-events-none absolute top-0 right-0 bottom-0 left-14">
@@ -133,10 +133,10 @@
               class="absolute left-1/2 top-0 h-2 w-10 -translate-x-1/2 cursor-ns-resize rounded-full bg-sber-gray/40"
               @pointerdown.stop.prevent="startTaskResize($event, task, 'start')"
             />
-            <p class="text-xs font-semibold" :style="{ color: getPriorityColor(task.priority) }">
+            <p class="relative z-30 text-xs font-semibold" :style="{ color: getPriorityColor(task.priority) }">
               {{ task.labelTime }}
             </p>
-            <p class="text-xs text-sber-black font-medium truncate">{{ task.title }}</p>
+            <p class="relative z-30 text-xs text-sber-black font-medium truncate">{{ task.title }}</p>
             <button
               type="button"
               class="absolute left-1/2 bottom-0 h-2 w-10 -translate-x-1/2 cursor-ns-resize rounded-full bg-sber-gray/40"
@@ -191,27 +191,28 @@
         </div>
       </div>
       <!-- Hours -->
-      <div class="overflow-hidden rounded-2xl border border-[#d6dce6] bg-white/30">
-        <div v-for="h in [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]" :key="h" class="flex min-h-[48px] border-t border-[#d6dce6] first:border-t-0">
+      <div class="overflow-hidden rounded-2xl border border-[#c8cfdb] bg-white/45">
+        <div v-for="h in [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]" :key="h" class="flex min-h-[48px] border-t border-[#c8cfdb] first:border-t-0">
           <div class="w-8 flex-shrink-0 pr-1 pt-1 text-right text-[10px] text-sber-gray">{{ String(h).padStart(2, '0') }}</div>
           <div
             v-for="day in weekViewDays"
             :key="day.date"
-            class="relative flex-1 border-l border-[#d6dce6] px-0.5 py-0.5"
+            class="relative flex-1 overflow-hidden border-l border-[#c8cfdb] px-0.5 py-0.5"
+            @dragenter.prevent
             @dragover.prevent
-            @drop="handleWeekCellDrop($event, day.date, h)"
+            @drop.prevent.stop="handleWeekCellDrop($event, day.date, h)"
           >
             <div
               v-for="task in getDateHourTasks(day.date, h)"
               :key="task.id"
-              class="mb-0.5 max-h-[44px] cursor-move overflow-hidden rounded border border-[#d6dce6] px-1 py-0.5 text-sber-black"
+              class="mb-0.5 w-full max-h-[44px] cursor-move overflow-hidden rounded border border-[#c8cfdb] px-1 py-0.5"
               :style="{ backgroundColor: getPriorityColor(task.priority) + '22' }"
               draggable="true"
-              @dragstart="startWeekTaskDrag($event, task.id)"
+              @dragstart.stop="startWeekTaskDrag($event, task.id)"
               @dragend="endWeekTaskDrag"
               @click="selectedTaskId = task.id"
             >
-              <p class="truncate text-[9px] font-semibold" :style="{ color: getPriorityColor(task.priority) }">{{ task.dueTime }}</p>
+              <p class="truncate text-[9px] font-semibold text-sber-black">{{ task.dueTime }}</p>
               <p class="truncate text-[9px] font-medium text-sber-black">{{ task.title }}</p>
             </div>
           </div>
@@ -221,33 +222,54 @@
 
       <!-- MONTH VIEW -->
       <div v-else-if="calendarStore.viewType === 'month'" class="p-4">
-      <!-- Weekday headers -->
-      <div class="grid grid-cols-7 gap-1 mb-1">
-        <div v-for="d in ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']" :key="d"
-             class="text-center text-[10px] font-semibold text-sber-gray py-1">
-          {{ d }}
-        </div>
-      </div>
-      <!-- Calendar grid -->
-      <div class="grid grid-cols-7 gap-1">
-        <div v-for="cell in monthCells" :key="cell.date || cell.empty"
-             class="aspect-square rounded-xl flex flex-col items-center justify-start pt-1 cursor-pointer
-                    transition-colors relative"
-             :class="[
-               !cell.isCurrentMonth ? 'opacity-30' : '',
-               cell.date === calendarStore.currentDate ? 'bg-sber-green text-white' :
-               cell.isToday ? 'bg-sber-green-light text-sber-green' : 'hover:bg-sber-gray-light',
-             ]"
-             @click="cell.date && calendarStore.setDate(cell.date) && calendarStore.setView('day')">
-          <span class="text-xs font-bold">{{ cell.day }}</span>
-          <!-- Task dots -->
-          <div class="flex gap-0.5 mt-0.5 flex-wrap justify-center">
-            <div v-for="dot in getDateDots(cell.date)" :key="dot"
-                 class="w-1.5 h-1.5 rounded-full"
-                 :style="{ backgroundColor: dot }" />
+        <!-- Weekday headers -->
+        <div class="mb-1 grid grid-cols-7 gap-1">
+          <div v-for="d in ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']" :key="d"
+               class="py-1 text-center text-[10px] font-semibold text-sber-gray">
+            {{ d }}
           </div>
         </div>
-      </div>
+        <!-- Calendar grid -->
+        <div class="grid grid-cols-7 gap-1">
+          <div
+            v-for="cell in monthCells"
+            :key="cell.date || cell.empty"
+            class="relative aspect-square overflow-hidden rounded-xl border border-[#c8cfdb] p-1 transition-colors"
+            :class="[
+              !cell.isCurrentMonth ? 'opacity-35' : '',
+              cell.date === calendarStore.currentDate ? 'bg-sber-green-light/70' :
+              cell.isToday ? 'bg-sber-green-light/40' : 'bg-white/40 hover:bg-sber-gray-light',
+            ]"
+            @dragenter.prevent
+            @dragover.prevent
+            @drop.prevent.stop="cell.date && handleMonthCellDrop($event, cell.date)"
+            @click="cell.date && calendarStore.setDate(cell.date) && calendarStore.setView('day')"
+          >
+            <div class="flex items-center justify-between">
+              <span
+                class="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold"
+                :class="cell.isToday ? 'bg-sber-green text-white' : 'text-sber-black'"
+              >
+                {{ cell.day }}
+              </span>
+            </div>
+
+            <div class="mt-1 space-y-0.5">
+              <div
+                v-for="task in getMonthCellTasks(cell.date)"
+                :key="task.id"
+                class="truncate rounded border border-[#c8cfdb] px-1 py-0.5 text-[9px] font-medium text-sber-black"
+                :style="{ backgroundColor: getPriorityColor(task.priority) + '20' }"
+                draggable="true"
+                @dragstart.stop="startWeekTaskDrag($event, task.id)"
+                @dragend="endWeekTaskDrag"
+                @click.stop="selectedTaskId = task.id"
+              >
+                {{ task.title }}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- YEAR VIEW -->
@@ -296,6 +318,7 @@ const tasksStore = useTasksStore()
 const todayStr = dayjs().format('YYYY-MM-DD')
 const viewMenuOpen = ref(false)
 const selectedTaskId = ref<string | null>(null)
+const mainTimelineRef = ref<HTMLElement | null>(null)
 
 const viewTypes = [
   { value: 'day', label: 'День', icon: CalendarDays },
@@ -312,6 +335,16 @@ function setView(v: string) {
 const currentTimePx = computed(() => {
   const now = dayjs()
   return (now.hour() * 60 + now.minute()) * (60 / 60) // 60px per hour
+})
+const isCurrentTimeInMainRange = computed(() => {
+  const now = dayjs()
+  const nowMinutes = now.hour() * 60 + now.minute()
+  return nowMinutes >= mainStartMinutes && nowMinutes <= mainEndMinutes
+})
+const currentMainTimePx = computed(() => {
+  const now = dayjs()
+  const nowMinutes = now.hour() * 60 + now.minute()
+  return Math.max(0, nowMinutes - mainStartMinutes) * minuteHeightPx
 })
 
 const earlyHours = [0, 1, 2, 3, 4, 5]
@@ -430,6 +463,10 @@ function formatMinutesToTime(totalMinutes: number) {
   const hours = Math.floor(clamped / 60)
   const minutes = clamped % 60
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+}
+
+function roundToStep(value: number, step: number) {
+  return Math.round(value / step) * step
 }
 
 function getTaskDurationMinutes(task: { dueTime?: string; duration?: { start: string; end: string } }) {
@@ -569,6 +606,11 @@ function getDateDots(date?: string) {
   return tasks.slice(0, 3).map(t => getPriorityColor(t.priority))
 }
 
+function getMonthCellTasks(date?: string) {
+  if (!date) return []
+  return tasksStore.getTasksForDate(date).slice(0, 3)
+}
+
 // Year months
 const yearMonths = computed(() => {
   const year = parseInt(calendarStore.currentDate.substring(0, 4))
@@ -599,6 +641,21 @@ function openNewTaskFromCalendar(hour: number) {
   )
 }
 
+function openNewTaskFromMainTimeline(event: MouseEvent) {
+  const container = mainTimelineRef.value
+  if (!container) return
+
+  const rect = container.getBoundingClientRect()
+  const offsetY = event.clientY - rect.top
+  const rawMinutes = mainStartMinutes + Math.floor(offsetY / minuteHeightPx)
+  const snappedMinutes = Math.max(mainStartMinutes, Math.min(mainEndMinutes - 1, roundToStep(rawMinutes, 5)))
+  const dueTime = formatMinutesToTime(snappedMinutes)
+
+  navigateTo(
+    `/app/new-task?returnTo=${encodeURIComponent(`/app/calendar?view=${calendarStore.viewType}&date=${calendarStore.currentDate}`)}&dueDate=${calendarStore.currentDate}&dueTime=${dueTime}`
+  )
+}
+
 function startWeekTaskDrag(event: DragEvent, taskId: string) {
   if (event.dataTransfer) {
     event.dataTransfer.effectAllowed = 'move'
@@ -624,7 +681,8 @@ function handleWeekCellDrop(event: DragEvent, date: string, hour: number) {
   const currentMinutes = task.dueTime ? parseTimeToMinutes(task.dueTime) % 60 : 0
   const nextStartMinutes = hour * 60 + currentMinutes
   const durationMinutes = getTaskDurationMinutes(task)
-  const nextEndMinutes = Math.min(nextStartMinutes + durationMinutes, 24 * 60 - 1)
+  const dayEndMinutes = 24 * 60 - 1
+  const nextEndMinutes = Math.min(nextStartMinutes + durationMinutes, dayEndMinutes)
 
   const updates: Partial<Task> = {
     dueDate: date,
@@ -639,6 +697,20 @@ function handleWeekCellDrop(event: DragEvent, date: string, hour: number) {
   }
 
   tasksStore.updateTask(task.id, updates)
+  draggingWeekTaskId.value = null
+}
+
+function handleMonthCellDrop(event: DragEvent, date: string) {
+  const draggedTaskId = draggingWeekTaskId.value || event.dataTransfer?.getData('text/plain') || null
+  if (!draggedTaskId) return
+
+  const task = tasksStore.tasks.find(t => t.id === draggedTaskId)
+  if (!task) {
+    draggingWeekTaskId.value = null
+    return
+  }
+
+  tasksStore.updateTask(task.id, { dueDate: date })
   draggingWeekTaskId.value = null
 }
 </script>

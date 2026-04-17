@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container lg:flex lg:h-full lg:flex-col lg:overflow-hidden lg:pb-0" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
+  <div class="page-container lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:pb-6" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
     <!-- Header -->
     <div class="px-4 pt-14 pb-4" :class="isDarkTheme ? 'bg-[#171a21] border-b border-[#2a303a]' : 'bg-white shadow-sm'">
       <div class="flex items-center justify-between">
@@ -10,24 +10,28 @@
           <Settings class="w-5 h-5 text-sber-gray" />
         </button>
       </div>
-      <p class="text-xs text-sber-gray mt-1">Приоритизируйте задачи по важности и срочности</p>
+      <p class="mt-1 text-xs text-sber-gray">Приоритизируйте задачи по важности и срочности</p>
     </div>
 
     <!-- Matrix 2x2 grid -->
-    <div class="grid flex-1 min-h-0 grid-cols-2 auto-rows-fr gap-3 p-3">
+    <div class="grid min-h-0 flex-1 grid-cols-2 grid-rows-2 gap-3 p-3">
       <div
         v-for="block in blocks"
         :key="block.id"
         class="flex min-h-0 flex-col overflow-hidden rounded-2xl border"
         :style="getBlockContainerStyle(block)"
+        @dragenter.prevent
+        @dragover.prevent="dragTarget = block.id"
+        @dragleave="dragTarget = null"
+        @drop.prevent="onDrop(block.id)"
       >
         <!-- Block header -->
         <div class="border-b px-3 pt-3 pb-2"
              :style="{ borderColor: block.color + '30' }">
           <div class="mb-1 flex items-center justify-between gap-2">
-            <div class="flex min-w-0 items-center gap-2">
+            <div class="flex min-w-0 items-center gap-3">
               <div class="h-2.5 w-2.5 flex-shrink-0 rounded-full" :style="{ backgroundColor: block.color }" />
-              <p class="truncate text-xs font-bold leading-tight" :style="{ color: block.color }">{{ block.title }}</p>
+              <p class="truncate pr-2 text-xs font-bold leading-tight" :style="{ color: block.color }">{{ block.title }}</p>
             </div>
             <span class="text-[10px] font-medium px-2 py-0.5 rounded-full text-white"
                   :style="{ backgroundColor: block.color }">
@@ -37,15 +41,10 @@
         </div>
 
         <!-- Tasks in block -->
-        <div
-          class="min-h-0 flex-1 overflow-y-auto no-scrollbar px-2 py-2"
-          @dragover.prevent="dragTarget = block.id"
-          @dragleave="dragTarget = null"
-          @drop.prevent="onDrop(block.id)"
-        >
+        <div class="min-h-0 flex-1 overflow-y-auto px-2 py-2">
           <!-- Drop zone -->
           <div
-            class="sticky top-0 z-10 mt-0 mb-1 border-2 border-dashed rounded-xl py-2.5 flex items-center justify-center transition-colors"
+            class="sticky top-0 z-20 mb-2 flex items-center justify-center rounded-xl border-2 border-dashed py-2.5 transition-colors"
             :style="{ borderColor: block.color + '50', backgroundColor: isDarkTheme ? '#171a21' : block.bgColor }"
             :class="dragTarget === block.id ? (isDarkTheme ? 'bg-[#20242d]' : 'bg-white/90') : ''"
           >
@@ -63,7 +62,7 @@
             @dragstart="onDragStart($event, task.id)"
             @click="selectedTaskId = task.id"
           >
-            <div class="flex items-start gap-2">
+            <div class="flex items-center gap-2">
               <button
                 class="w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 mt-0.5"
                 :style="{ borderColor: block.color, backgroundColor: task.completed ? block.color : 'transparent' }"
@@ -71,12 +70,12 @@
               >
                 <Check v-if="task.completed" class="w-2.5 h-2.5 text-white" />
               </button>
-              <div class="flex min-w-0 flex-1 items-start justify-between gap-2">
-                <p class="line-clamp-2 text-xs font-medium leading-snug text-sber-black"
+              <div class="flex min-w-0 flex-1 items-center gap-2">
+                <p class="truncate text-xs font-medium leading-snug text-sber-black"
                    :class="task.completed ? 'line-through text-sber-gray' : ''">
                   {{ task.title }}
                 </p>
-                <div v-if="task.dueDate || task.dueTime" class="flex flex-shrink-0 items-center gap-1 text-[10px] text-sber-gray">
+                <div v-if="task.dueDate || task.dueTime" class="ml-auto flex flex-shrink-0 items-center gap-1 text-[10px] text-sber-gray">
                   <Clock class="h-2.5 w-2.5 text-sber-gray" />
                   <span class="whitespace-nowrap">{{ formatTaskMeta(task.dueDate, task.dueTime) }}</span>
                 </div>
@@ -118,7 +117,7 @@
                   <button
                     v-for="df in dateFilters"
                     :key="df.value"
-                    class="w-16 px-2 py-1 rounded-xl text-center text-xs font-medium border transition-colors"
+                    class="w-20 whitespace-nowrap px-2 py-1 rounded-xl text-center text-xs font-medium border transition-colors"
                     :class="block.dateFilter?.includes(df.value)
                       ? 'text-white border-transparent'
                       : 'border-sber-gray-mid text-sber-gray bg-white'"
@@ -135,7 +134,7 @@
                   <button
                     v-for="pf in priorityFilters"
                     :key="pf.value"
-                    class="w-16 px-2 py-1 rounded-xl text-center text-xs font-medium border transition-colors"
+                    class="w-20 whitespace-nowrap px-2 py-1 rounded-xl text-center text-xs font-medium border transition-colors"
                     :class="block.priorityFilter?.includes(pf.value)
                       ? 'text-white border-transparent'
                       : 'border-sber-gray-mid text-sber-gray bg-white'"

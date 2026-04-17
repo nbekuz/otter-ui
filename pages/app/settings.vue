@@ -45,6 +45,9 @@
             </span>
           </div>
           <p class="text-sm text-sber-gray">{{ authStore.user?.email }}</p>
+          <p v-if="authStore.user?.isPremium && premiumExpiresLabel" class="mt-1 text-xs font-medium text-yellow-700">
+            Срок до {{ premiumExpiresLabel }}
+          </p>
         </div>
         <ChevronRight class="w-5 h-5 text-sber-gray-mid flex-shrink-0" />
       </div>
@@ -251,7 +254,7 @@
 
     <!-- General / About -->
     <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
-      <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Общее</p>
+      <!-- <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Общее</p> -->
       <SettingsSettingsRow label="Язык" :value="selectedLanguageLabel" @click="languageModal = true">
         <template #icon><Globe class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
@@ -622,6 +625,20 @@ const filteredFaq = computed(() => {
 })
 
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
+
+const premiumExpiresLabel = computed(() => {
+  const expiresAt = authStore.user?.premiumExpiresAt
+  if (!expiresAt) return ''
+
+  const date = new Date(expiresAt)
+  if (Number.isNaN(date.getTime())) return ''
+
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date)
+})
 
 const taskGroups = [
   { id: 'overdue', label: 'Просрочено', color: '#FF3B30' },

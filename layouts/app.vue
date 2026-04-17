@@ -1,16 +1,16 @@
 <template>
-  <div class="min-h-dvh lg:overflow-hidden lg:px-6 lg:py-6" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
-    <div class="mx-auto flex min-h-dvh max-w-[1440px] lg:h-[calc(100dvh-3rem)] lg:min-h-[calc(100dvh-3rem)] lg:gap-6 lg:overflow-hidden">
+  <div class="min-h-dvh lg:px-6 lg:py-6" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
+    <div class="mx-auto flex min-h-dvh max-w-[1440px] lg:h-[calc(100dvh-3rem)] lg:min-h-[calc(100dvh-3rem)] lg:gap-6 rounded">
       <aside
         class="hidden lg:flex lg:h-full lg:w-72 lg:flex-shrink-0 lg:flex-col lg:rounded-[32px] lg:p-6"
         :class="isDarkTheme ? 'lg:bg-[#171a21] lg:text-white lg:border lg:border-[#2a303a]' : 'lg:bg-white lg:shadow-card'"
       >
-        <div v-if="!isTasksPage" class="mb-8">
+        <div class="mb-2">
           <BrandLogo size="md" show-name-from="md" :text-class="isDarkTheme ? 'text-white' : 'text-sber-black'" />
-          <h2 class="mt-2 text-3xl font-bold text-sber-black">Рабочее пространство</h2>
+          <!-- <h2 class="mt-2 text-3xl font-bold text-sber-black">Рабочее пространство</h2>
           <p class="mt-2 text-sm leading-relaxed text-sber-gray">
             Все основные разделы всегда под рукой и удобно выглядят на широком экране.
-          </p>
+          </p> -->
         </div>
 
         <NuxtLink
@@ -63,10 +63,10 @@
       </aside>
 
       <div
-        class="phone-frame relative flex-1 lg:h-[calc(100dvh-3rem)]"
-        :class="isDarkTheme ? 'bg-[#0f1115] lg:border lg:border-[#2a303a]' : 'bg-sber-gray-light lg:shadow-card'"
+        class="phone-frame relative flex-1 lg:h-[calc(100dvh-3rem)]  lg:rounded-3xl"
+        :class="isDarkTheme ? 'bg-[#0f1115] lg:border lg:border-[#2a303a]' : 'bg-white lg:border lg:border-[#e9ebf1] lg:shadow-[0_20px_48px_rgba(15,23,42,0.10)]'"
       >
-        <div class="min-h-dvh lg:h-full lg:overflow-y-auto">
+        <div class="min-h-dvh lg:h-full lg:min-h-0 lg:overflow-y-auto ">
           <slot />
         </div>
 
