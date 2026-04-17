@@ -10,7 +10,7 @@
     </div>
 
     <div class="flex-1 px-4 pb-6 lg:px-6">
-      <div class="mx-auto max-w-5xl space-y-4">
+      <div class="mx-auto max-w-3xl space-y-4">
         <div class="grid gap-3 lg:grid-cols-2">
           <button
             class="flex w-full items-center gap-3 rounded-[28px] border border-sber-gray-light bg-white px-4 py-4 shadow-sm transition-colors active:bg-sber-gray-light"
@@ -43,7 +43,7 @@
           </div>
         </div>
 
-        <div class="mx-auto w-full max-w-3xl rounded-[32px] bg-white px-6 py-6 shadow-card">
+        <div class="mx-auto w-full rounded-[32px] bg-white px-6 py-6 shadow-card">
           <!-- Session count -->
           <div class="mb-6 flex justify-center gap-2">
             <div v-for="i in pomodoroStore.settings.sessionsUntilLong" :key="i"
@@ -55,15 +55,16 @@
 
           <!-- Timer circle -->
           <div class="flex flex-col items-center justify-center">
-            <div class="relative mb-8 flex h-64 w-64 items-center justify-center rounded-full bg-sber-gray-light">
-              <div class="h-[232px] w-[232px] rounded-full p-2 transition-all" :style="dialStyle">
-                <div class="flex h-full w-full items-center justify-center rounded-full bg-white shadow-inner">
-                  <div class="h-[188px] w-[188px] rounded-full border border-sber-gray-light bg-sber-gray-light/60" />
+            <div class="relative mb-8 flex h-64 w-64 items-center justify-center rounded-full border border-sber-gray-light bg-sber-gray-light/60 p-3 shadow-inner">
+              <div class="relative h-[224px] w-[224px] overflow-hidden rounded-full bg-white">
+                <div class="absolute inset-x-0 bottom-0 transition-all duration-500" :style="waterFillStyle">
+                  <div class="water-wave water-wave-1" />
+                  <div class="water-wave water-wave-2" />
                 </div>
               </div>
 
               <!-- Time display -->
-              <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <div class="absolute inset-0 z-20 flex flex-col items-center justify-center">
                 <p class="text-5xl font-bold tracking-tight text-sber-black">{{ pomodoroStore.displayTime }}</p>
                 <p v-if="pomodoroStore.state === 'paused'" class="mt-1 text-sm text-sber-gray">На паузе</p>
                 <p v-else-if="pomodoroStore.isBreak" class="mt-1 text-sm text-sber-blue">Перерыв</p>
@@ -243,10 +244,11 @@ const taskSearch = ref('')
 const activeWorkSound = ref('rain')
 const progressPercent = computed(() => Math.round(Math.max(0, Math.min(1, pomodoroStore.progress)) * 100))
 
-const dialStyle = computed(() => {
+const waterFillStyle = computed(() => {
   const activeColor = pomodoroStore.isBreak ? '#007AFF' : '#21A038'
   return {
-    background: `conic-gradient(${activeColor} ${progressPercent.value}%, rgba(142,142,147,0.2) ${progressPercent.value}% 100%)`,
+    height: `${progressPercent.value}%`,
+    background: `linear-gradient(180deg, ${activeColor}CC 0%, ${activeColor}99 100%)`,
   }
 })
 
@@ -283,3 +285,36 @@ function getPriorityColor(priority: string) {
   return colors[priority] || '#8E8E93'
 }
 </script>
+
+<style scoped>
+.water-wave {
+  position: absolute;
+  left: -25%;
+  width: 150%;
+  border-radius: 40%;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.water-wave-1 {
+  top: -12px;
+  height: 26px;
+  animation: waveDrift 7s linear infinite;
+}
+
+.water-wave-2 {
+  top: -18px;
+  height: 34px;
+  opacity: 0.55;
+  animation: waveDriftReverse 10s linear infinite;
+}
+
+@keyframes waveDrift {
+  from { transform: translateX(-6%) rotate(0deg); }
+  to { transform: translateX(6%) rotate(360deg); }
+}
+
+@keyframes waveDriftReverse {
+  from { transform: translateX(6%) rotate(360deg); }
+  to { transform: translateX(-6%) rotate(0deg); }
+}
+</style>
