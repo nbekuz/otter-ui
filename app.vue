@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-dvh" :class="isDark ? 'dark bg-[#0f1115]' : 'bg-white'">
+  <div class="min-h-dvh " :class="isDark ? 'dark bg-[#0f1115]' : 'bg-white'">
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>

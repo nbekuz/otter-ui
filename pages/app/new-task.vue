@@ -355,7 +355,7 @@ const quickDates = [
   { label: 'Без срока', value: '' },
 ]
 
-const priorities = [
+const priorities: Array<{ value: Priority; label: string; color: string }> = [
   { value: 'high', label: 'Высокий', color: '#FF3B30' },
   { value: 'medium', label: 'Средний', color: '#FF9500' },
   { value: 'low', label: 'Низкий', color: '#34C759' },
@@ -372,7 +372,7 @@ const notifyOptions = [
   { label: 'Без уведомления', value: '' },
 ]
 
-const repeatOptions = [
+const repeatOptions: Array<{ label: string; value: RepeatType }> = [
   { label: 'Не повторять', value: 'none' },
   { label: 'Каждый день', value: 'daily' },
   { label: 'Каждую неделю', value: 'weekly' },
