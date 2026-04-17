@@ -15,17 +15,17 @@
         <div class="rounded-[28px] bg-white/10 p-5 backdrop-blur">
           <p class="text-xs uppercase tracking-[0.2em] text-white/70">Что внутри</p>
           <div class="relative mt-4 grid grid-cols-2 items-start gap-3">
-            <div class="pointer-events-none absolute left-1/2 top-3 h-[calc(100%-1.5rem)] w-3 -translate-x-1/2 rounded-full bg-sber-gray-light/95" />
-            <div class="pointer-events-none absolute left-3 top-1/2 h-3 w-[calc(100%-1.5rem)] -translate-y-1/2 rounded-full bg-sber-gray-light/95" />
+            <div class="pointer-events-none absolute left-1/2 top-3 z-0 h-[calc(100%-1.5rem)] w-3 -translate-x-1/2 rounded-full bg-sber-gray-light/90" />
+            <div class="pointer-events-none absolute left-3 top-1/2 z-0 h-3 w-[calc(100%-1.5rem)] -translate-y-1/2 rounded-full bg-sber-gray-light/90" />
             <div
               v-for="(metric, index) in metrics"
               :key="metric"
-              class="flex min-h-[108px] items-center justify-center rounded-2xl bg-white/95 px-4 py-4 text-center text-sber-black shadow-sm"
+              class="relative z-10 flex min-h-[108px] items-center justify-center rounded-2xl bg-white/95 px-4 py-4 text-center text-sber-black shadow-sm"
               :class="{ 'mt-7': index % 2 === 1 }"
             >
               <p class="text-sm font-bold uppercase tracking-wide">{{ metric }}</p>
             </div>
-            <div class="pointer-events-none absolute left-1/2 top-1/2 z-10 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sber-gray-light">
+            <div class="pointer-events-none absolute left-1/2 top-1/2 z-20 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sber-gray-light">
               <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm">
                 <img :src="logoUrl" alt="Otter logo" class="h-8 w-8 brightness-0" />
               </div>
