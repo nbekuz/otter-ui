@@ -1,7 +1,9 @@
 <template>
-  <div class="page-container bg-sber-gray-light lg:flex lg:h-full lg:flex-col lg:overflow-hidden lg:pb-0">
-    <!-- Header -->
-    <div class="sticky top-0 z-40 bg-white shadow-sm pt-14 pb-3 px-4">
+  <div
+    class="page-container flex min-h-0 flex-col overflow-hidden bg-sber-gray-light max-lg:h-dvh max-lg:max-h-dvh lg:h-full lg:min-h-0 lg:pb-0"
+  >
+    <!-- Header: вне прокрутки — на мобильных шапка не «уезжает» (раньше ломалось из‑за скролла родителя layout). -->
+    <div class="relative z-40 shrink-0 bg-white shadow-sm pt-14 pb-3 px-4">
       <div class="flex items-center justify-between mb-3">
         <h1 class="text-xl font-bold text-sber-black">{{ calendarStore.displayLabel }}</h1>
         <div class="flex items-center gap-2">
@@ -429,8 +431,101 @@ function getHourTasks(hour: number) {
   })
 }
 
+/** Полуинтервалы [start, end) в минутах — пересечение по времени показа. */
+function intervalsOverlapHalfOpen(aStart: number, aEnd: number, bStart: number, bEnd: number) {
+  return aStart < bEnd && bStart < aEnd
+}
+
+/**
+ * Раскладка «как в календаре»: пересекающиеся по времени задачи — в одной связной группе,
+ * ширина делится на число одновременных слотов; внутри группы — колонки без наложения.
+ */
+function assignDayTimelineOverlapLayout(
+  segments: Array<{ id: string; rawStart: number; rawEnd: number }>,
+): Map<string, { col: number; cols: number }> {
+  const layout = new Map<string, { col: number; cols: number }>()
+  const n = segments.length
+  if (n === 0) return layout
+
+  const visited = new Array(n).fill(false)
+
+  for (let startIdx = 0; startIdx < n; startIdx++) {
+    if (visited[startIdx]) continue
+
+    const stack: number[] = [startIdx]
+    visited[startIdx] = true
+    const comp: number[] = []
+
+    while (stack.length) {
+      const u = stack.pop()!
+      comp.push(u)
+      for (let v = 0; v < n; v++) {
+        if (visited[v]) continue
+        const su = segments[u]
+        const sv = segments[v]
+        if (intervalsOverlapHalfOpen(su.rawStart, su.rawEnd, sv.rawStart, sv.rawEnd)) {
+          visited[v] = true
+          stack.push(v)
+        }
+      }
+    }
+
+    const endpoints: Array<{ t: number; d: number }> = []
+    for (const idx of comp) {
+      const s = segments[idx]
+      endpoints.push({ t: s.rawStart, d: 1 })
+      endpoints.push({ t: s.rawEnd, d: -1 })
+    }
+    endpoints.sort((a, b) => (a.t !== b.t ? a.t - b.t : a.d - b.d))
+    let sweep = 0
+    let maxConc = 0
+    for (const e of endpoints) {
+      sweep += e.d
+      maxConc = Math.max(maxConc, sweep)
+    }
+    const cols = Math.max(1, maxConc)
+
+    const sortedIdx = [...comp].sort((ai, bi) => {
+      const a = segments[ai]
+      const b = segments[bi]
+      if (a.rawStart !== b.rawStart) return a.rawStart - b.rawStart
+      return b.rawEnd - a.rawEnd
+    })
+
+    const columnEnds: number[] = []
+    for (const idx of sortedIdx) {
+      const t = segments[idx]
+      let col = columnEnds.findIndex(end => end <= t.rawStart)
+      if (col === -1) {
+        col = columnEnds.length
+        columnEnds.push(t.rawEnd)
+      } else {
+        columnEnds[col] = t.rawEnd
+      }
+      layout.set(t.id, { col, cols })
+    }
+  }
+
+  return layout
+}
+
+function dayTimelineTaskHorizontalStyle(layoutCols: number, layoutCol: number): Record<string, string> {
+  const pad = 4
+  const gap = 3
+  if (layoutCols <= 1) {
+    return { left: `${pad}px`, right: `${pad}px` }
+  }
+  const gapsTotal = gap * (layoutCols - 1)
+  const innerPx = 2 * pad + gapsTotal
+  return {
+    left: `calc(${pad}px + (100% - ${innerPx}px) * ${layoutCol} / ${layoutCols} + ${gap * layoutCol}px)`,
+    width: `calc((100% - ${innerPx}px) / ${layoutCols})`,
+    right: 'auto',
+  }
+}
+
 const dayTimelineTasks = computed(() => {
-  return tasksStore.getTasksForDate(calendarStore.currentDate)
+  const base = tasksStore.getTasksForDate(calendarStore.currentDate)
     .filter(t => !!t.dueTime)
     .map((task) => {
       const preview = dragPreview.value?.taskId === task.id ? dragPreview.value : null
@@ -456,6 +551,19 @@ const dayTimelineTasks = computed(() => {
       }
     })
     .filter(task => task.topPx < (mainEndMinutes - mainStartMinutes) * minuteHeightPx)
+
+  const layout = assignDayTimelineOverlapLayout(
+    base.map(t => ({ id: t.id, rawStart: t.rawStart, rawEnd: t.rawEnd })),
+  )
+
+  return base.map((task) => {
+    const slot = layout.get(task.id) ?? { col: 0, cols: 1 }
+    return {
+      ...task,
+      layoutCol: slot.col,
+      layoutCols: slot.cols,
+    }
+  })
 })
 
 function getDateHourTasks(date: string, hour: number) {

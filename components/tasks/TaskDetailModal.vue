@@ -64,17 +64,6 @@
         <!-- Actions -->
         <div class="flex flex-col gap-2 px-4 pb-6">
           <button
-            class="flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold transition-colors"
-            :class="task.completed
-              ? 'bg-sber-gray-light text-sber-gray'
-              : 'bg-sber-green-light text-sber-green'"
-            type="button"
-            @click="toggleComplete"
-          >
-            <CheckCircle class="h-5 w-5" />
-            {{ task.completed ? 'В работе' : 'Выполнено' }}
-          </button>
-          <button
             class="flex items-center justify-center gap-2 rounded-2xl bg-red-50 py-3.5 text-sm font-semibold text-red-500 transition-colors"
             type="button"
             @click="deleteTask"
@@ -97,7 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import { Calendar, Clock, Timer, RefreshCw, Bell, CheckCircle, Trash2, Paperclip, Save } from 'lucide-vue-next'
+import { Calendar, Clock, Timer, RefreshCw, Bell, Trash2, Paperclip, Save } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 
 const props = defineProps<{ taskId: string }>()
@@ -172,13 +161,6 @@ const notifyLabel = computed(() => {
 const isAttachmentImage = computed(() =>
   task.value?.attachment?.mimeType?.startsWith('image/') ?? false
 )
-
-function toggleComplete() {
-  if (task.value) {
-    tasksStore.completeTask(task.value.id)
-    emit('close')
-  }
-}
 
 function deleteTask() {
   if (task.value) {

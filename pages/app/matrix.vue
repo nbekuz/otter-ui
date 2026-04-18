@@ -50,7 +50,7 @@
         <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-2 py-2">
           <!-- Drop zone -->
           <div
-            class="sticky top-0 z-20 mb-2 flex items-center justify-center rounded-xl border-2 border-dashed py-2.5 transition-colors"
+            class="sticky top-0 z-20 mb-2 flex items-center justify-center rounded-xl border-2 border-dashed py-[5px] transition-colors"
             :style="{ borderColor: block.color + '50', backgroundColor: isDarkTheme ? '#171a21' : block.bgColor }"
             :class="dragTarget === block.id ? (isDarkTheme ? 'bg-[#20242d]' : 'bg-white/90') : ''"
           >
@@ -68,22 +68,27 @@
             @dragstart="onDragStart($event, task.id)"
             @click="selectedTaskId = task.id"
           >
-            <div class="flex items-center gap-2">
+            <div class="flex items-start gap-2">
               <button
-                class="w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 mt-0.5"
+                class="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border"
                 :style="{ borderColor: block.color, backgroundColor: task.completed ? block.color : 'transparent' }"
                 @click.stop="tasksStore.completeTask(task.id)"
               >
                 <Check v-if="task.completed" class="w-2.5 h-2.5 text-white" />
               </button>
-              <div class="flex min-w-0 flex-1 items-center gap-2">
-                <p class="truncate text-xs font-medium leading-snug text-sber-black"
-                   :class="task.completed ? 'line-through text-sber-gray' : ''">
+              <div class="min-w-0 flex-1">
+                <p
+                  class="break-words text-xs font-medium leading-snug text-sber-black"
+                  :class="task.completed ? 'line-through text-sber-gray' : ''"
+                >
                   {{ task.title }}
                 </p>
-                <div v-if="task.dueDate || task.dueTime" class="ml-auto flex flex-shrink-0 items-center gap-1 text-[10px] text-sber-gray">
-                  <Clock class="h-2.5 w-2.5 text-sber-gray" />
-                  <span class="whitespace-nowrap">{{ formatTaskMeta(task.dueDate, task.dueTime) }}</span>
+                <div
+                  v-if="task.dueDate || task.dueTime"
+                  class="mt-1 flex items-center gap-1 text-[10px] text-sber-gray"
+                >
+                  <Clock class="h-2.5 w-2.5 shrink-0 text-sber-gray" />
+                  <span>{{ formatTaskMeta(task.dueDate, task.dueTime) }}</span>
                 </div>
               </div>
             </div>
