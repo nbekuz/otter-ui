@@ -128,63 +128,65 @@
         <div v-if="activeTab === 'date'" class="pb-1 pt-1.5 lg:pb-4 lg:pt-3">
           <p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-3 lg:text-xs">Дата выполнения</p>
           <div class="mb-1.5 flex flex-wrap gap-1 lg:mb-4 lg:gap-2">
-            <button v-for="quick in quickDates" :key="quick.value"
+            <button v-for="quick in quickDates" :key="quick.id"
                     type="button"
                     class="rounded-md border px-2 py-0.5 text-[11px] font-medium transition-colors lg:rounded-xl lg:px-3 lg:py-1.5 lg:text-sm"
-                    :class="form.dueDate === quick.value
+                    :class="isQuickDateActive(quick)
                       ? 'bg-sber-green text-white border-sber-green'
                       : 'bg-white text-sber-black border-sber-gray-mid'"
-                    @click="selectQuickDate(quick.value)">
+                    @click="toggleQuickDate(quick)">
               {{ quick.label }}
             </button>
           </div>
 
-          <div class="grid max-lg:grid-cols-2 max-lg:gap-x-2 max-lg:gap-y-1 lg:grid-cols-1 lg:gap-y-3">
-            <div class="min-w-0">
-              <p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-2 lg:text-xs">Дата</p>
-              <DateFieldRu
-                ref="dueDateFieldRef"
-                v-model="form.dueDate"
-                field-class="border-2 border-sber-green/50 py-2 text-xs max-lg:!px-2 lg:py-2.5 lg:pr-12 lg:text-base"
-                @keydown="onDueDateKeydown"
-              />
+          <template v-if="!explicitNoDeadline">
+            <div class="grid max-lg:grid-cols-2 max-lg:gap-x-2 max-lg:gap-y-1 lg:grid-cols-1 lg:gap-y-3">
+              <div class="min-w-0">
+                <p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-2 lg:text-xs">Дата</p>
+                <DateFieldRu
+                  ref="dueDateFieldRef"
+                  v-model="form.dueDate"
+                  field-class="border-2 border-sber-green/50 py-2 text-xs max-lg:!px-2 lg:py-2.5 lg:pr-12 lg:text-base"
+                  @keydown="onDueDateKeydown"
+                />
+              </div>
+              <div class="min-w-0">
+                <p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:hidden">Время</p>
+                <p class="mb-2 hidden text-xs font-semibold uppercase tracking-wide text-sber-gray lg:block">Время срока</p>
+                <TimeFieldRu
+                  ref="dueTimeFieldRef"
+                  v-model="form.dueTime"
+                  field-class="border-2 border-sber-green/50 py-2 text-xs max-lg:!px-2 lg:py-2.5 lg:pr-12 lg:text-base"
+                  @keydown="onDueTimeKeydown"
+                />
+              </div>
             </div>
-            <div class="min-w-0">
-              <p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:hidden">Время</p>
-              <p class="mb-2 hidden text-xs font-semibold uppercase tracking-wide text-sber-gray lg:block">Время срока</p>
-              <TimeFieldRu
-                ref="dueTimeFieldRef"
-                v-model="form.dueTime"
-                field-class="border-2 border-sber-green/50 py-2 text-xs max-lg:!px-2 lg:py-2.5 lg:pr-12 lg:text-base"
-                @keydown="onDueTimeKeydown"
-              />
-            </div>
-          </div>
 
-          <p class="mb-0.5 mt-1.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-2 lg:mt-3 lg:text-xs">Длительность</p>
-          <div class="flex gap-1.5 lg:gap-2">
-            <div class="min-w-0 flex-1">
-              <label class="mb-0.5 block text-[10px] text-sber-gray lg:mb-1 lg:text-xs">Начало</label>
-              <TimeFieldRu
-                ref="durationStartFieldRef"
-                v-model="form.durationStart"
-                field-class="border-2 border-sber-green/50 py-2 text-xs !px-2 max-lg:py-1.5 lg:py-4 lg:!px-4 lg:text-base"
-                @keydown="onDurationStartKeydown"
-                @update:model-value="errors.duration = ''"
-              />
+            <p class="mb-0.5 mt-1.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-2 lg:mt-3 lg:text-xs">Длительность</p>
+            <div class="flex gap-1.5 lg:gap-2">
+              <div class="min-w-0 flex-1">
+                <label class="mb-0.5 block text-[10px] text-sber-gray lg:mb-1 lg:text-xs">Начало</label>
+                <TimeFieldRu
+                  ref="durationStartFieldRef"
+                  v-model="form.durationStart"
+                  field-class="border-2 border-sber-green/50 py-2 text-xs !px-2 max-lg:py-1.5 lg:py-4 lg:!px-4 lg:text-base"
+                  @keydown="onDurationStartKeydown"
+                  @update:model-value="errors.duration = ''"
+                />
+              </div>
+              <div class="min-w-0 flex-1">
+                <label class="mb-0.5 block text-[10px] text-sber-gray lg:mb-1 lg:text-xs">Конец</label>
+                <TimeFieldRu
+                  ref="durationEndFieldRef"
+                  v-model="form.durationEnd"
+                  field-class="border-2 border-sber-green/50 py-2 text-xs !px-2 max-lg:py-1.5 lg:py-4 lg:!px-4 lg:text-base"
+                  @keydown="onDurationEndKeydown"
+                  @update:model-value="errors.duration = ''"
+                />
+              </div>
             </div>
-            <div class="min-w-0 flex-1">
-              <label class="mb-0.5 block text-[10px] text-sber-gray lg:mb-1 lg:text-xs">Конец</label>
-              <TimeFieldRu
-                ref="durationEndFieldRef"
-                v-model="form.durationEnd"
-                field-class="border-2 border-sber-green/50 py-2 text-xs !px-2 max-lg:py-1.5 lg:py-4 lg:!px-4 lg:text-base"
-                @keydown="onDurationEndKeydown"
-                @update:model-value="errors.duration = ''"
-              />
-            </div>
-          </div>
-          <p v-if="errors.duration" class="mt-1 text-xs font-medium text-red-500 lg:mt-2">{{ errors.duration }}</p>
+            <p v-if="errors.duration" class="mt-1 text-xs font-medium text-red-500 lg:mt-2">{{ errors.duration }}</p>
+          </template>
         </div>
 
         <div v-if="activeTab === 'priority'" class="pb-3 pt-2 lg:px-0 lg:pb-4 lg:pt-3">
@@ -460,6 +462,8 @@ const form = reactive({
 })
 
 const attachmentRemoved = ref(false)
+/** «Без срока» как осознанный выбор: скрывает поля даты. Пустая дата без флага — ничего не выбрано, можно ввести любую дату. */
+const explicitNoDeadline = ref(false)
 /** Создание задачи: описание по умолчанию свёрнуто на телефоне, чтобы влезала вкладка «Дата». */
 const mobileDescOpen = ref(false)
 
@@ -492,10 +496,12 @@ const tabs: Array<{
   { id: 'matrix', label: 'Матрица', icon: Grid2x2, iconOnly: true },
 ]
 
-const quickDates = [
-  { label: 'Сегодня', value: today },
-  { label: 'Завтра', value: tomorrow },
-  { label: 'Без срока', value: '' },
+type QuickDatePreset = { id: 'today' | 'tomorrow' | 'none'; label: string; value: string }
+
+const quickDates: QuickDatePreset[] = [
+  { id: 'today', label: 'Сегодня', value: today },
+  { id: 'tomorrow', label: 'Завтра', value: tomorrow },
+  { id: 'none', label: 'Без срока', value: '' },
 ]
 
 const priorities: Array<{ value: Priority; label: string; color: string }> = [
@@ -560,7 +566,10 @@ watch(() => form.dueTime, (newTime, oldTime) => {
 })
 
 watch(() => form.dueDate, (newDate) => {
-  if (newDate !== '') return
+  if (newDate !== '') {
+    explicitNoDeadline.value = false
+    return
+  }
   form.dueTime = ''
   form.durationStart = ''
   form.durationEnd = ''
@@ -739,14 +748,34 @@ function submit() {
   navigateTo(resolveReturnPath())
 }
 
-function selectQuickDate(value: string) {
-  form.dueDate = value
+function isQuickDateActive(quick: QuickDatePreset) {
+  if (quick.id === 'none') return explicitNoDeadline.value
+  if (explicitNoDeadline.value) return false
+  return form.dueDate === quick.value
+}
 
-  if (value === '') {
+function toggleQuickDate(quick: QuickDatePreset) {
+  if (quick.id === 'none') {
+    if (explicitNoDeadline.value) {
+      explicitNoDeadline.value = false
+    } else {
+      explicitNoDeadline.value = true
+      form.dueDate = ''
+      form.dueTime = ''
+      form.durationStart = ''
+      form.durationEnd = ''
+    }
+    return
+  }
+  if (!explicitNoDeadline.value && form.dueDate === quick.value) {
+    form.dueDate = ''
     form.dueTime = ''
     form.durationStart = ''
     form.durationEnd = ''
+    return
   }
+  explicitNoDeadline.value = false
+  form.dueDate = quick.value
 }
 
 function selectRepeatOption(value: RepeatType) {
@@ -849,6 +878,8 @@ function hydrateFromTask(task: Task) {
   } else {
     resetAttachmentFields()
   }
+
+  explicitNoDeadline.value = !task.dueDate
 }
 
 function loadEditTaskFromRoute() {
