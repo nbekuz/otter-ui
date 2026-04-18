@@ -1,7 +1,10 @@
 <template>
-  <div class="page-container lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:pb-6" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
+  <div
+    class="page-container flex min-h-0 flex-col overflow-hidden max-lg:!min-h-0 max-lg:h-dvh max-lg:max-h-dvh lg:h-full lg:min-h-0 lg:pb-6"
+    :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'"
+  >
     <!-- Header -->
-    <div class="px-4 pt-14 pb-4" :class="isDarkTheme ? 'bg-[#171a21] border-b border-[#2a303a]' : 'bg-white shadow-sm'">
+    <div class="shrink-0 px-4 pt-14 pb-4" :class="isDarkTheme ? 'bg-[#171a21] border-b border-[#2a303a]' : 'bg-white shadow-sm'">
       <div class="flex items-center justify-between">
         <h1 class="text-xl font-bold text-sber-black">Матрица Эйзенхауэра</h1>
         <button class="w-9 h-9 rounded-xl flex items-center justify-center"
@@ -13,12 +16,15 @@
       <p class="mt-1 text-xs text-sber-gray">Приоритизируйте задачи по важности и срочности</p>
     </div>
 
-    <!-- Matrix 2x2 grid -->
-    <div class="grid min-h-0 flex-1 grid-cols-2 grid-rows-2 gap-3 p-3">
+    <!-- Matrix 2x2: равные квадранты; список задач только внутри блока (overflow). -->
+    <div
+      class="grid min-h-0 flex-1 grid-cols-2 grid-rows-2 gap-3 p-3"
+      style="grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);"
+    >
       <div
         v-for="block in blocks"
         :key="block.id"
-        class="flex min-h-0 flex-col overflow-hidden rounded-2xl border"
+        class="flex h-full max-h-full min-h-0 flex-col overflow-hidden rounded-2xl border"
         :style="getBlockContainerStyle(block)"
         @dragenter.prevent
         @dragover.prevent="dragTarget = block.id"
@@ -41,7 +47,7 @@
         </div>
 
         <!-- Tasks in block -->
-        <div class="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+        <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-2 py-2">
           <!-- Drop zone -->
           <div
             class="sticky top-0 z-20 mb-2 flex items-center justify-center rounded-xl border-2 border-dashed py-2.5 transition-colors"
@@ -159,6 +165,7 @@
       v-if="selectedTaskId"
       :task-id="selectedTaskId"
       @close="selectedTaskId = null"
+      @edit="openTaskFromDetailModal"
     />
   </div>
 </template>
@@ -169,6 +176,7 @@ import dayjs from 'dayjs'
 
 definePageMeta({ layout: 'app' })
 
+const route = useRoute()
 const tasksStore = useTasksStore()
 const settingsStore = useSettingsStore()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
@@ -264,5 +272,10 @@ function togglePriorityFilter(blockId: string, filter: string) {
   if (idx === -1) filters.push(filter)
   else filters.splice(idx, 1)
   settingsStore.updateMatrixBlock(blockId, { priorityFilter: filters })
+}
+
+function openTaskFromDetailModal(taskId: string) {
+  selectedTaskId.value = null
+  navigateTo({ path: '/app/new-task', query: { id: taskId, returnTo: route.path } })
 }
 </script>

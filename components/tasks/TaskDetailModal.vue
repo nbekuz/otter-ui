@@ -62,23 +62,33 @@
         </div>
 
         <!-- Actions -->
-        <div class="px-4 pb-6 flex flex-col gap-2">
+        <div class="flex flex-col gap-2 px-4 pb-6">
           <button
-            class="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold text-sm transition-colors"
+            class="flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold transition-colors"
             :class="task.completed
               ? 'bg-sber-gray-light text-sber-gray'
               : 'bg-sber-green-light text-sber-green'"
+            type="button"
             @click="toggleComplete"
           >
-            <CheckCircle class="w-5 h-5" />
-            {{ task.completed ? 'Снять отметку' : 'Отметить выполненной' }}
+            <CheckCircle class="h-5 w-5" />
+            {{ task.completed ? 'В работе' : 'Выполнено' }}
           </button>
           <button
-            class="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-red-50 text-red-500 font-semibold text-sm"
+            class="flex items-center justify-center gap-2 rounded-2xl bg-red-50 py-3.5 text-sm font-semibold text-red-500 transition-colors"
+            type="button"
             @click="deleteTask"
           >
-            <Trash2 class="w-5 h-5" />
-            Удалить задачу
+            <Trash2 class="h-5 w-5" />
+            Удалить
+          </button>
+          <button
+            class="btn-primary flex items-center justify-center gap-2 py-3.5 text-sm font-semibold"
+            type="button"
+            @click="openEditor"
+          >
+            <Save class="h-5 w-5" />
+            Сохранить
           </button>
         </div>
       </div>
@@ -87,11 +97,11 @@
 </template>
 
 <script setup lang="ts">
-import { Calendar, Clock, Timer, RefreshCw, Bell, CheckCircle, Trash2, Paperclip } from 'lucide-vue-next'
+import { Calendar, Clock, Timer, RefreshCw, Bell, CheckCircle, Trash2, Paperclip, Save } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 
 const props = defineProps<{ taskId: string }>()
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: []; edit: [taskId: string] }>()
 const tasksStore = useTasksStore()
 
 const task = computed(() => tasksStore.tasks.find(t => t.id === props.taskId))
@@ -175,6 +185,10 @@ function deleteTask() {
     tasksStore.deleteTask(task.value.id)
     emit('close')
   }
+}
+
+function openEditor() {
+  emit('edit', props.taskId)
 }
 
 function openAttachment() {

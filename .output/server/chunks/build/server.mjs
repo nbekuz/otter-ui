@@ -416,12 +416,12 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Z0WHXMLB.mjs')
+    component: () => import('./index-CTQBjl6p.mjs')
   },
   {
     name: "login",
     path: "/login",
-    component: () => import('./login-fDZWtBvO.mjs')
+    component: () => import('./login-DEXH1aGv.mjs')
   },
   {
     name: "matrix",
@@ -441,7 +441,7 @@ const _routes = [
   {
     name: "register",
     path: "/register",
-    component: () => import('./register-_Cdn0OxB.mjs')
+    component: () => import('./register-Zb6Xq5Vz.mjs')
   },
   {
     name: "settings",
@@ -452,43 +452,43 @@ const _routes = [
     name: "app",
     path: "/app",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import('./index-C08pjAvz.mjs')
+    component: () => import('./index-C5238tcS.mjs')
   },
   {
     name: "app-matrix",
     path: "/app/matrix",
     meta: __nuxt_page_meta$5 || {},
-    component: () => import('./matrix-DZdtYh22.mjs')
+    component: () => import('./matrix-CCEVqvUR.mjs')
   },
   {
     name: "app-profile",
     path: "/app/profile",
     meta: __nuxt_page_meta$4 || {},
-    component: () => import('./profile-CU7WiI37.mjs')
+    component: () => import('./profile-0x1I9ZYR.mjs')
   },
   {
     name: "app-calendar",
     path: "/app/calendar",
     meta: __nuxt_page_meta$3 || {},
-    component: () => import('./calendar-BL-KggMO.mjs')
+    component: () => import('./calendar-BBKjOx3N.mjs')
   },
   {
     name: "app-new-task",
     path: "/app/new-task",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./new-task-DBTyfJrt.mjs')
+    component: () => import('./new-task-MQGDtwDy.mjs')
   },
   {
     name: "app-pomodoro",
     path: "/app/pomodoro",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./pomodoro-CKHKf7xe.mjs')
+    component: () => import('./pomodoro-D8mUP6LD.mjs')
   },
   {
     name: "app-settings",
     path: "/app/settings",
     meta: __nuxt_page_meta || {},
-    component: () => import('./settings-DG_Tfk-r.mjs')
+    component: () => import('./settings-BOm6-52g.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1602,7 +1602,7 @@ const globalMiddleware = [
   manifest_45route_45rule
 ];
 const namedMiddleware = {
-  auth: () => import('./auth-DDrC_rUQ.mjs')
+  auth: () => import('./auth-D9jighE-.mjs')
 };
 const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:router",
@@ -1888,7 +1888,7 @@ const plugins = [
   components_plugin_z4hgvsiddfKkfXTP6M8M4zG5Cb7sGnDhcryKVM45Di4
 ];
 const layouts = {
-  app: defineAsyncComponent(() => import('./app-COT4GNIZ.mjs').then((m) => m.default || m)),
+  app: defineAsyncComponent(() => import('./app-Cf4fBQ3B.mjs').then((m) => m.default || m)),
   default: defineAsyncComponent(() => import('./default-m3NOsT_2.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
@@ -2174,7 +2174,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
       const _component_NuxtLayout = __nuxt_component_0;
       const _component_NuxtPage = __nuxt_component_1;
       _push(`<div${ssrRenderAttrs(mergeProps({
-        class: ["min-h-dvh", unref(isDark) ? "dark bg-[#0f1115]" : "bg-sber-gray-light"]
+        class: ["min-h-dvh", unref(isDark) ? "dark bg-[#0f1115]" : "bg-white"]
       }, _attrs))}>`);
       _push(ssrRenderComponent(_component_NuxtLayout, null, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
@@ -2297,5 +2297,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { defaultPomodoroSettings as a, useLocalStorage as b, defineNuxtRouteMiddleware as c, defineStore as d, entry_default as default, useRoute as e, faqData as f, useRouter as g, encodeRoutePath as h, useNuxtApp as i, useRuntimeConfig as j, nuxtLinkDefaults as k, mockUser as l, mockTasks as m, navigateTo as n, resolveRouteObject as r, soundOptions as s, useSettingsStore as u, workSoundOptions as w };
+export { useRoute as a, defaultPomodoroSettings as b, useLocalStorage as c, defineStore as d, entry_default as default, defineNuxtRouteMiddleware as e, faqData as f, useRouter as g, encodeRoutePath as h, useNuxtApp as i, useRuntimeConfig as j, nuxtLinkDefaults as k, mockUser as l, mockTasks as m, navigateTo as n, resolveRouteObject as r, soundOptions as s, useSettingsStore as u, workSoundOptions as w };
 //# sourceMappingURL=server.mjs.map

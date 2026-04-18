@@ -178,22 +178,22 @@
 
               <div>
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Дата</label>
-                <input v-model="editorForm.dueDate" class="input-field py-3" type="date">
+                <DateFieldRu v-model="editorForm.dueDate" field-class="py-3" />
               </div>
 
               <div>
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Время</label>
-                <input v-model="editorForm.dueTime" class="input-field py-3" type="time">
+                <TimeFieldRu v-model="editorForm.dueTime" field-class="py-3" />
               </div>
 
               <div>
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Начало</label>
-                <input v-model="editorForm.durationStart" class="input-field py-3" type="time">
+                <TimeFieldRu v-model="editorForm.durationStart" field-class="py-3" />
               </div>
 
               <div>
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Конец</label>
-                <input v-model="editorForm.durationEnd" class="input-field py-3" type="time">
+                <TimeFieldRu v-model="editorForm.durationEnd" field-class="py-3" />
               </div>
 
               <div>
@@ -317,12 +317,6 @@
       </div>
     </div>
 
-    <!-- Task detail modal -->
-    <TasksTaskDetailModal
-      v-if="mobileSelectedTaskId"
-      :task-id="mobileSelectedTaskId"
-      @close="mobileSelectedTaskId = null"
-    />
   </div>
 </template>
 
@@ -339,7 +333,6 @@ const settingsStore = useSettingsStore()
 
 const showSearch = ref(false)
 const searchQuery = ref('')
-const mobileSelectedTaskId = ref<string | null>(null)
 const desktopSelectedTaskId = ref<string | null>(null)
 const searchInput = ref<HTMLInputElement | null>(null)
 const isDesktop = ref(false)
@@ -464,7 +457,7 @@ function openTask(id: string) {
     desktopSelectedTaskId.value = id
     return
   }
-  mobileSelectedTaskId.value = id
+  navigateTo({ path: '/app/new-task', query: { id, returnTo: '/app' } })
 }
 
 async function toggleSearch() {

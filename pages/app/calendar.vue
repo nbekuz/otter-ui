@@ -118,7 +118,7 @@
           <div
             v-for="task in dayTimelineTasks"
             :key="task.id"
-            class="pointer-events-auto absolute left-1 right-1 cursor-grab overflow-hidden rounded-xl px-3 py-2 transition-opacity active:opacity-70"
+            class="pointer-events-auto absolute left-1 right-1 cursor-grab touch-none select-none overflow-hidden rounded-xl px-3 py-2 transition-opacity active:opacity-70"
             :style="{
               top: `${task.topPx}px`,
               height: `${task.heightPx}px`,
@@ -126,22 +126,33 @@
               borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
             }"
             @pointerdown.stop.prevent="startTaskMove($event, task)"
-            @click.stop="handleTaskCardClick(task.id)"
+            @click.stop.prevent="handleTaskCardClick(task.id)"
           >
             <button
               type="button"
-              class="absolute left-1/2 top-0 h-2 w-10 -translate-x-1/2 cursor-ns-resize rounded-full bg-sber-gray/40"
+              class="absolute left-1/2 top-0 z-40 flex h-8 w-full max-w-[5.5rem] -translate-x-1/2 cursor-ns-resize items-start justify-center pt-1"
+              aria-label="Изменить начало"
               @pointerdown.stop.prevent="startTaskResize($event, task, 'start')"
-            />
-            <p class="relative z-30 text-xs font-semibold" :style="{ color: getPriorityColor(task.priority) }">
+            >
+              <span class="pointer-events-none h-2 w-10 shrink-0 rounded-full bg-sber-gray/50" />
+            </button>
+            <p
+              class="pointer-events-none relative z-10 text-xs font-semibold"
+              :style="{ color: getPriorityColor(task.priority) }"
+            >
               {{ task.labelTime }}
             </p>
-            <p class="relative z-30 text-xs text-sber-black font-medium truncate">{{ task.title }}</p>
+            <p class="pointer-events-none relative z-10 truncate text-xs font-medium text-sber-black">
+              {{ task.title }}
+            </p>
             <button
               type="button"
-              class="absolute left-1/2 bottom-0 h-2 w-10 -translate-x-1/2 cursor-ns-resize rounded-full bg-sber-gray/40"
+              class="absolute bottom-0 left-1/2 z-40 flex h-8 w-full max-w-[5.5rem] -translate-x-1/2 cursor-ns-resize items-end justify-center pb-1"
+              aria-label="Изменить конец"
               @pointerdown.stop.prevent="startTaskResize($event, task, 'end')"
-            />
+            >
+              <span class="pointer-events-none h-2 w-10 shrink-0 rounded-full bg-sber-gray/50" />
+            </button>
           </div>
         </div>
       </div>
@@ -298,6 +309,7 @@
       v-if="selectedTaskId"
       :task-id="selectedTaskId"
       @close="selectedTaskId = null"
+      @edit="openTaskFromDetailModal"
     />
   </div>
 </template>
@@ -312,6 +324,7 @@ import type { Task } from '~/data/mockData'
 
 definePageMeta({ layout: 'app' })
 
+const route = useRoute()
 const calendarStore = useCalendarStore()
 const tasksStore = useTasksStore()
 
@@ -365,9 +378,17 @@ const dragState = ref<{
   initialStart: number
   initialEnd: number
   hadDuration: boolean
+  captureEl: HTMLElement | null
+  pointerId: number | null
 } | null>(null)
 const dragPreview = ref<{ taskId: string; start: number; end: number } | null>(null)
 const didDrag = ref(false)
+/**
+ * После реального перетаскивания часто приходит лишний click (ghost click на touch).
+ * Один такой клик по карточке игнорируем; таймер сбрасывает флаг, если click не пришёл.
+ */
+const ignoreNextTaskCardClick = ref(false)
+let postDragClickIgnoreTimer: ReturnType<typeof setTimeout> | null = null
 
 // Week strip for day view
 const weekDays = computed(() => {
@@ -417,9 +438,11 @@ const dayTimelineTasks = computed(() => {
       const clippedStart = Math.max(startMinutes, mainStartMinutes)
       const clippedDuration = Math.max(endMinutes - clippedStart, 15)
 
-      const labelTime = task.duration?.end
-        ? `${task.dueTime} – ${task.duration.end}`
-        : (task.dueTime || '')
+      const labelTime = preview
+        ? `${formatMinutesToTime(preview.start)} – ${formatMinutesToTime(preview.end)}`
+        : task.duration?.end
+          ? `${task.dueTime} – ${task.duration.end}`
+          : (task.dueTime || '')
 
       return {
         ...task,
@@ -497,6 +520,16 @@ function startTaskResize(event: PointerEvent, task: Task & { rawStart: number; r
 }
 
 function initDrag(event: PointerEvent, task: Task & { rawStart: number; rawEnd: number }, mode: DragMode) {
+  const captureEl = (event.currentTarget as HTMLElement | null) ?? null
+  const pointerId = event.pointerId
+  if (captureEl?.setPointerCapture) {
+    try {
+      captureEl.setPointerCapture(pointerId)
+    } catch {
+      /* ignore */
+    }
+  }
+
   dragState.value = {
     taskId: task.id,
     mode,
@@ -504,19 +537,23 @@ function initDrag(event: PointerEvent, task: Task & { rawStart: number; rawEnd: 
     initialStart: task.rawStart,
     initialEnd: task.rawEnd,
     hadDuration: !!task.duration,
+    captureEl,
+    pointerId,
   }
   didDrag.value = false
+  dragPreview.value = { taskId: task.id, start: task.rawStart, end: task.rawEnd }
 
-  window.addEventListener('pointermove', handleDragMove)
+  window.addEventListener('pointermove', handleDragMove, { passive: false })
   window.addEventListener('pointerup', handleDragEnd)
   window.addEventListener('pointercancel', handleDragEnd)
 }
 
 function handleDragMove(event: PointerEvent) {
   if (!dragState.value) return
+  event.preventDefault()
 
-  const deltaMinutes = snapMinutes((event.clientY - dragState.value.startY) / minuteHeightPx)
-  if (Math.abs(deltaMinutes) >= 5) {
+  const rawDeltaMinutes = (event.clientY - dragState.value.startY) / minuteHeightPx
+  if (Math.abs(rawDeltaMinutes) >= 1.5) {
     didDrag.value = true
   }
 
@@ -525,12 +562,15 @@ function handleDragMove(event: PointerEvent) {
 
   if (dragState.value.mode === 'move') {
     const duration = dragState.value.initialEnd - dragState.value.initialStart
-    nextStart = clampMoveStart(dragState.value.initialStart + deltaMinutes, duration)
+    nextStart = clampMoveStart(dragState.value.initialStart + rawDeltaMinutes, duration)
+    nextStart = snapMinutes(nextStart)
     nextEnd = nextStart + duration
   } else if (dragState.value.mode === 'resize-start') {
-    nextStart = Math.max(0, Math.min(dragState.value.initialEnd - minDurationMinutes, dragState.value.initialStart + deltaMinutes))
+    nextStart = Math.max(0, Math.min(dragState.value.initialEnd - minDurationMinutes, dragState.value.initialStart + rawDeltaMinutes))
+    nextStart = snapMinutes(nextStart)
   } else {
-    nextEnd = Math.min(24 * 60, Math.max(dragState.value.initialStart + minDurationMinutes, dragState.value.initialEnd + deltaMinutes))
+    nextEnd = Math.min(24 * 60, Math.max(dragState.value.initialStart + minDurationMinutes, dragState.value.initialEnd + rawDeltaMinutes))
+    nextEnd = snapMinutes(nextEnd)
   }
 
   dragPreview.value = {
@@ -543,23 +583,49 @@ function handleDragMove(event: PointerEvent) {
 function handleDragEnd() {
   if (!dragState.value) return
 
-  if (dragPreview.value && dragPreview.value.taskId === dragState.value.taskId) {
-    const { start, end } = dragPreview.value
-    const duration = Math.max(minDurationMinutes, end - start)
-    const updates: Partial<Task> = {
-      dueTime: formatMinutesToTime(start),
-    }
-
-    const shouldSaveDuration = dragState.value.mode !== 'move' || dragState.value.hadDuration
-    if (shouldSaveDuration) {
-      updates.duration = {
-        start: formatMinutesToTime(start),
-        end: formatMinutesToTime(start + duration),
+  const state = dragState.value
+  if (state.captureEl && state.pointerId != null) {
+    try {
+      if (state.captureEl.hasPointerCapture(state.pointerId)) {
+        state.captureEl.releasePointerCapture(state.pointerId)
       }
+    } catch {
+      /* ignore */
     }
-
-    tasksStore.updateTask(dragState.value.taskId, updates)
   }
+
+  if (dragPreview.value && dragPreview.value.taskId === state.taskId) {
+    const { start, end } = dragPreview.value
+    const unchanged = start === state.initialStart && end === state.initialEnd
+    if (unchanged) {
+      /* noop */
+    } else {
+      const duration = Math.max(minDurationMinutes, end - start)
+      const updates: Partial<Task> = {
+        dueTime: formatMinutesToTime(start),
+      }
+
+      const shouldSaveDuration = state.mode !== 'move' || state.hadDuration
+      if (shouldSaveDuration) {
+        updates.duration = {
+          start: formatMinutesToTime(start),
+          end: formatMinutesToTime(start + duration),
+        }
+      }
+
+      tasksStore.updateTask(state.taskId, updates)
+    }
+  }
+
+  if (didDrag.value) {
+    ignoreNextTaskCardClick.value = true
+    if (postDragClickIgnoreTimer) clearTimeout(postDragClickIgnoreTimer)
+    postDragClickIgnoreTimer = setTimeout(() => {
+      ignoreNextTaskCardClick.value = false
+      postDragClickIgnoreTimer = null
+    }, 450)
+  }
+  didDrag.value = false
 
   dragState.value = null
   dragPreview.value = null
@@ -569,11 +635,17 @@ function handleDragEnd() {
 }
 
 function handleTaskCardClick(taskId: string) {
-  if (didDrag.value) {
-    didDrag.value = false
+  if (dragState.value) return
+  if (ignoreNextTaskCardClick.value) {
+    ignoreNextTaskCardClick.value = false
     return
   }
   selectedTaskId.value = taskId
+}
+
+function openTaskFromDetailModal(taskId: string) {
+  selectedTaskId.value = null
+  navigateTo({ path: '/app/new-task', query: { id: taskId, returnTo: route.path } })
 }
 
 // Month cells

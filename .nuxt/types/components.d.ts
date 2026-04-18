@@ -15,6 +15,8 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 
 interface _GlobalComponents {
   BrandLogo: typeof import("../../components/BrandLogo.vue")['default']
+  DateFieldRu: typeof import("../../components/DateFieldRu.vue")['default']
+  TimeFieldRu: typeof import("../../components/TimeFieldRu.vue")['default']
   LayoutBottomNav: typeof import("../../components/layout/BottomNav.vue")['default']
   SettingsRow: typeof import("../../components/settings/Row.vue")['default']
   TasksTaskDetailModal: typeof import("../../components/tasks/TaskDetailModal.vue")['default']
@@ -44,6 +46,8 @@ interface _GlobalComponents {
   Body: typeof import("../../node_modules/nuxt/dist/head/runtime/components")['Body']
   NuxtIsland: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-island")['default']
   LazyBrandLogo: LazyComponent<typeof import("../../components/BrandLogo.vue")['default']>
+  LazyDateFieldRu: LazyComponent<typeof import("../../components/DateFieldRu.vue")['default']>
+  LazyTimeFieldRu: LazyComponent<typeof import("../../components/TimeFieldRu.vue")['default']>
   LazyLayoutBottomNav: LazyComponent<typeof import("../../components/layout/BottomNav.vue")['default']>
   LazySettingsRow: LazyComponent<typeof import("../../components/settings/Row.vue")['default']>
   LazyTasksTaskDetailModal: LazyComponent<typeof import("../../components/tasks/TaskDetailModal.vue")['default']>

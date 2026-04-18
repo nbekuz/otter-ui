@@ -3,10 +3,10 @@
     <div class="w-full lg:grid lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch lg:gap-16 lg:px-12 xl:px-20">
       <div class="flex flex-1  flex-col items-center justify-start px-6 pt-6 pb-8 lg:items-start lg:px-0 lg:pt-2 lg:pb-6">
         <!-- App Logo & Illustration -->
-        <div class="relative mb-8">
-          <img :src="logoUrl" alt="Otter logo" class="h-16 w-16 rounded-[22px] brightness-0 lg:origin-left lg:scale-110" />
-          <div class="absolute -top-2 -right-2 w-6 h-6 bg-sber-green/20 rounded-full"/>
-          <div class="absolute -bottom-1 -left-3 w-4 h-4 bg-sber-blue/20 rounded-full"/>
+        <div class="relative mb-8 w-fit lg:origin-left lg:scale-110">
+          <BrandLogo size="lg" show-name-from="always" text-class="text-sber-black" />
+          <div class="pointer-events-none absolute -top-2 left-[calc(4rem-0.5rem)] h-6 w-6 rounded-full bg-sber-green/20" />
+          <div class="pointer-events-none absolute -bottom-1 -left-3 h-4 w-4 rounded-full bg-sber-blue/20" />
         </div>
         <p class="mb-2 max-w-2xl px-4 text-center text-lg leading-relaxed text-sber-gray lg:px-0 lg:text-left lg:text-2xl lg:leading-snug">
           Планировщик задач для тех, кто ценит время
@@ -27,6 +27,24 @@
             </div>
           </div>
         </div>
+
+        <div class="mt-2 w-full max-w-3xl rounded-[24px] border border-sber-gray-mid/25 bg-white px-5 py-4 shadow-sm lg:mr-auto lg:max-w-[700px]">
+          <p class="text-xs font-semibold uppercase tracking-wide text-sber-gray">
+            В одном приложении
+          </p>
+          <ul class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <li
+              v-for="item in checklistItems"
+              :key="item"
+              class="flex items-center gap-3 text-sm font-medium text-sber-black lg:text-base"
+            >
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 border-sber-green bg-sber-green/10">
+                <Check class="h-3.5 w-3.5 text-sber-green" stroke-width="3" />
+              </span>
+              {{ item }}
+            </li>
+          </ul>
+        </div>
       </div>
 
       <div class="px-6 pb-10 lg:p-0">
@@ -37,14 +55,18 @@
             Ведите списки задач, планируйте время в календаре, расставляйте приоритеты и сохраняйте фокус в течение дня.
           </p>
 
-          <div class="relative mt-6 grid max-w-[430px] grid-cols-2 items-start gap-3">
+          <div class="relative mt-6 grid max-w-[430px] grid-cols-2 items-start gap-2 sm:gap-3">
             <div
               v-for="(metric, index) in metrics"
               :key="metric"
-              class="flex min-h-[112px] items-center justify-center rounded-2xl bg-white px-4 py-4 text-center shadow-sm"
+              class="flex min-h-[112px] min-w-0 items-center justify-center rounded-2xl bg-white px-2 py-4 text-center shadow-sm sm:px-4"
               :class="{ 'sm:mt-8': index % 2 === 1 }"
             >
-              <p class="text-base font-bold uppercase tracking-wide text-sber-black">{{ metric }}</p>
+              <p
+                class="w-full min-w-0 max-w-full text-balance break-anywhere text-center text-[11px] font-bold uppercase leading-tight tracking-tight text-sber-black sm:text-sm sm:leading-snug sm:tracking-wide md:text-base"
+              >
+                {{ metric }}
+              </p>
             </div>
             <div class="pointer-events-none absolute left-1/2 top-1/2 z-10 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sber-gray-light">
               <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm">
@@ -81,6 +103,7 @@
 </template>
 
 <script setup lang="ts">
+import { Check } from 'lucide-vue-next'
 import logoUrl from '~/assets/img/logo.svg'
 
 const authStore = useAuthStore()
@@ -118,6 +141,13 @@ const features = [
 ]
 
 const metrics = ['планируйте', 'контролируйте', 'фокусируйтесь', 'управляйте']
+
+const checklistItems = [
+  'Списки задач',
+  'Календарь',
+  'Матрица Эйзенхауэра',
+  'Таймер Помодоро',
+]
 
 function loginWithGoogle() {
   authStore.loginWithGoogle()
