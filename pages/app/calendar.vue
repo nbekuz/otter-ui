@@ -118,10 +118,12 @@
           <div
             v-for="task in dayTimelineTasks"
             :key="task.id"
-            class="pointer-events-auto absolute left-1 right-1 cursor-grab touch-none select-none overflow-hidden rounded-xl px-3 py-2 transition-opacity active:opacity-70"
+            class="pointer-events-auto absolute cursor-grab touch-none select-none overflow-hidden rounded-xl px-3 py-2 transition-opacity active:opacity-70"
             :style="{
+              ...dayTimelineTaskHorizontalStyle(task.layoutCols, task.layoutCol),
               top: `${task.topPx}px`,
               height: `${task.heightPx}px`,
+              zIndex: dragPreview?.taskId === task.id ? 35 : 1,
               backgroundColor: getPriorityColor(task.priority) + '20',
               borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
             }"
