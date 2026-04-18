@@ -320,37 +320,95 @@
         </div>
 
         <div class="shrink-0 border-t border-sber-gray-light bg-white px-3 pb-2 pt-2 lg:px-4 lg:pb-4 lg:pt-3">
-          <button class="btn-secondary mb-2 max-lg:!py-2.5 max-lg:!text-sm lg:mb-3" type="button" @click="goBackToSource">
-            Отмена
-          </button>
-
           <template v-if="isEditMode && editingTask">
-            <div class="mb-2 space-y-1.5 lg:mb-3 lg:space-y-2">
+            <!-- Мобильная панель: меньше по высоте, дата/время остаются в зоне прокрутки -->
+            <div class="max-lg:space-y-2 lg:hidden">
               <button
-                class="flex w-full items-center justify-center gap-2 rounded-2xl py-2.5 text-xs font-semibold transition-colors max-lg:py-2.5 lg:py-3.5 lg:text-sm"
+                class="flex w-full items-center justify-center gap-2 rounded-2xl py-2 text-xs font-semibold transition-colors"
                 :class="editingTask.completed ? 'bg-sber-gray-light text-sber-gray' : 'bg-sber-green-light text-sber-green'"
                 type="button"
                 @click="toggleEditComplete"
               >
-                <Check class="h-4 w-4 lg:h-5 lg:w-5" />
+                <Check class="h-4 w-4" />
                 {{ editingTask.completed ? 'В работе' : 'Выполнено' }}
               </button>
-              <button
-                class="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-50 py-2.5 text-xs font-semibold text-red-500 transition-colors max-lg:py-2.5 lg:py-3.5 lg:text-sm"
-                type="button"
-                @click="deleteEditingTask"
-              >
-                <Trash2 class="h-4 w-4 lg:h-5 lg:w-5" />
-                Удалить
+              <div class="flex gap-1.5">
+                <button
+                  class="btn-secondary min-w-0 flex-1 !w-auto !py-2.5 !text-xs"
+                  type="button"
+                  @click="goBackToSource"
+                >
+                  Отмена
+                </button>
+                <button
+                  class="flex min-w-0 flex-[0.9] items-center justify-center gap-1 rounded-2xl bg-red-50 py-2.5 text-[11px] font-semibold text-red-500 transition-colors"
+                  type="button"
+                  @click="deleteEditingTask"
+                >
+                  <Trash2 class="h-3.5 w-3.5 shrink-0" />
+                  <span class="truncate">Удалить</span>
+                </button>
+                <button
+                  ref="mobileSubmitRef"
+                  class="btn-primary min-w-0 flex-[1.15] !w-auto !py-2.5 !text-xs"
+                  type="submit"
+                >
+                  Сохранить
+                </button>
+              </div>
+            </div>
+
+            <div class="hidden lg:block">
+              <button class="btn-secondary mb-3" type="button" @click="goBackToSource">
+                Отмена
+              </button>
+              <div class="mb-3 space-y-2">
+                <button
+                  class="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold transition-colors"
+                  :class="editingTask.completed ? 'bg-sber-gray-light text-sber-gray' : 'bg-sber-green-light text-sber-green'"
+                  type="button"
+                  @click="toggleEditComplete"
+                >
+                  <Check class="h-5 w-5" />
+                  {{ editingTask.completed ? 'В работе' : 'Выполнено' }}
+                </button>
+                <button
+                  class="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-50 py-3.5 text-sm font-semibold text-red-500 transition-colors"
+                  type="button"
+                  @click="deleteEditingTask"
+                >
+                  <Trash2 class="h-5 w-5" />
+                  Удалить
+                </button>
+              </div>
+              <button ref="desktopSubmitRef" class="btn-primary" type="submit">
+                Сохранить
               </button>
             </div>
-            <button ref="submitButtonRef" class="btn-primary max-lg:!py-2.5 max-lg:!text-sm" type="submit">
-              Сохранить
-            </button>
           </template>
-          <button v-else ref="submitButtonRef" class="btn-primary max-lg:!py-2.5 max-lg:!text-sm" type="submit">
-            Добавить задачу
-          </button>
+
+          <template v-else>
+            <div class="flex gap-1.5 lg:hidden">
+              <button
+                class="btn-secondary min-w-0 flex-1 !w-auto !py-2.5 !text-sm"
+                type="button"
+                @click="goBackToSource"
+              >
+                Отмена
+              </button>
+              <button ref="mobileSubmitRef" class="btn-primary min-w-0 flex-[1.35] !w-auto !py-2.5 !text-sm" type="submit">
+                Добавить задачу
+              </button>
+            </div>
+            <div class="hidden lg:block">
+              <button class="btn-secondary mb-3" type="button" @click="goBackToSource">
+                Отмена
+              </button>
+              <button ref="desktopSubmitRef" class="btn-primary" type="submit">
+                Добавить задачу
+              </button>
+            </div>
+          </template>
         </div>
       </form>
     </div>
@@ -381,7 +439,8 @@ const dueDateFieldRef = ref<{ focus: () => void } | null>(null)
 const dueTimeFieldRef = ref<{ focus: () => void } | null>(null)
 const durationStartFieldRef = ref<{ focus: () => void } | null>(null)
 const durationEndFieldRef = ref<{ focus: () => void } | null>(null)
-const submitButtonRef = ref<HTMLButtonElement | null>(null)
+const mobileSubmitRef = ref<HTMLButtonElement | null>(null)
+const desktopSubmitRef = ref<HTMLButtonElement | null>(null)
 const attachmentInputRef = ref<HTMLInputElement | null>(null)
 
 const today = dayjs().format('YYYY-MM-DD')
@@ -565,7 +624,13 @@ function onDurationEndKeydown(e: KeyboardEvent) {
 
 async function focusSubmitButton() {
   await nextTick()
-  submitButtonRef.value?.focus()
+  const mobile = mobileSubmitRef.value
+  const desktop = desktopSubmitRef.value
+  if (mobile && mobile.offsetParent !== null) {
+    mobile.focus()
+    return
+  }
+  desktop?.focus()
 }
 
 function submit() {
