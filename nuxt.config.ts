@@ -56,8 +56,6 @@ export default defineNuxtConfig({
         messagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '911773858551',
         appId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || '1:911773858551:web:dd939daa464da5af74f1f2',
         measurementId: process.env.NUXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-D48K735BKD',
-        /** `true` bo‘lsa — har yerda Google popup; aks holda faqat localhost/127.0.0.1 da popup, boshqa joyda redirect */
-        firebaseGoogleUsePopup: process.env.NUXT_PUBLIC_FIREBASE_GOOGLE_POPUP === 'true',
       },
     },
   },

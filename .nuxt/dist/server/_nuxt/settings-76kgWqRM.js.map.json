@@ -1,0 +1,1 @@
+{"file":"settings-76kgWqRM.js","mappings":";;;;;;;;;;;;;;;;;;;AACA,KAAA,QAAA,SAAA,IAAAA,iBAAA,MAAM,WAAW,iBAAiB,EAAE,cAAc,KAAK,CAAA;;;;;;;;;;;","names":["_withAsyncContext"],"sources":["../../../../pages/settings.vue"],"sourcesContent":["<script setup lang=\"ts\">\nawait navigateTo('/app/settings', { redirectCode: 301 })\n</script>\n"],"version":3}

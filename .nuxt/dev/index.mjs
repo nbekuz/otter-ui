@@ -647,8 +647,7 @@ const _inlineRuntimeConfig = {
       "storageBucket": "otter-6bdac.firebasestorage.app",
       "messagingSenderId": "911773858551",
       "appId": "1:911773858551:web:dd939daa464da5af74f1f2",
-      "measurementId": "G-D48K735BKD",
-      "firebaseGoogleUsePopup": false
+      "measurementId": "G-D48K735BKD"
     }
   }
 };
@@ -2120,7 +2119,22 @@ const plugins = [
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"19ee0-L2ToYBXRP/92xJ0wT3unkByJ+o4\"",
+    "mtime": "2026-05-09T00:30:03.714Z",
+    "size": 106208,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"6a1cb-hNTCoeT4CrOGoSkSowjyMpVc88k\"",
+    "mtime": "2026-05-09T00:30:03.714Z",
+    "size": 434635,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));

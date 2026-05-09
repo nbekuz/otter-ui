@@ -417,12 +417,12 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-8nqhE3VG.mjs')
+    component: () => import('./index-RHQTv434.mjs')
   },
   {
     name: "login",
     path: "/login",
-    component: () => import('./login-ueHpPN-a.mjs')
+    component: () => import('./login-DKIeENk1.mjs')
   },
   {
     name: "matrix",
@@ -442,7 +442,7 @@ const _routes = [
   {
     name: "register",
     path: "/register",
-    component: () => import('./register-Bb-TfiRB.mjs')
+    component: () => import('./register-5NBEDc2n.mjs')
   },
   {
     name: "settings",
@@ -453,7 +453,7 @@ const _routes = [
     name: "app",
     path: "/app",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import('./index-CoQ2b__i.mjs')
+    component: () => import('./index-BOb6Bqar.mjs')
   },
   {
     name: "app-matrix",
@@ -465,7 +465,7 @@ const _routes = [
     name: "app-profile",
     path: "/app/profile",
     meta: __nuxt_page_meta$4 || {},
-    component: () => import('./profile-CAkKkE3O.mjs')
+    component: () => import('./profile-CjpW4i9X.mjs')
   },
   {
     name: "app-calendar",
@@ -489,12 +489,12 @@ const _routes = [
     name: "app-settings",
     path: "/app/settings",
     meta: __nuxt_page_meta || {},
-    component: () => import('./settings-D7wnEskJ.mjs')
+    component: () => import('./settings-OchUcK1X.mjs')
   },
   {
     name: "profile-fill",
     path: "/profile-fill",
-    component: () => import('./profile-fill-DYGi2YcQ.mjs')
+    component: () => import('./profile-fill-KJ-9WMh8.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1621,7 +1621,7 @@ const plugins = [
   components_plugin_z4hgvsiddfKkfXTP6M8M4zG5Cb7sGnDhcryKVM45Di4
 ];
 const layouts = {
-  app: defineAsyncComponent(() => import('./app-Bu26pqqh.mjs').then((m) => m.default || m)),
+  app: defineAsyncComponent(() => import('./app-CWVlB0fU.mjs').then((m) => m.default || m)),
   default: defineAsyncComponent(() => import('./default-m3NOsT_2.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;

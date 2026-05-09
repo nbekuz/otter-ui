@@ -3,7 +3,6 @@ export {}
 declare global {
   const ACCESS_TOKEN_KEY: typeof import('../../utils/auth-session').ACCESS_TOKEN_KEY
   const FIREBASE_ID_TOKEN_STORAGE_KEY: typeof import('../../utils/auth-session').FIREBASE_ID_TOKEN_STORAGE_KEY
-  const GOOGLE_REDIRECT_PENDING_KEY: typeof import('../../composables/useFirebaseAuth.client').GOOGLE_REDIRECT_PENDING_KEY
   const PASSWORD_MAX_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MAX_LENGTH
   const PASSWORD_MIN_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MIN_LENGTH
   const REFRESH_TOKEN_KEY: typeof import('../../utils/auth-session').REFRESH_TOKEN_KEY
@@ -439,7 +438,6 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     readonly ACCESS_TOKEN_KEY: UnwrapRef<typeof import('../../utils/auth-session')['ACCESS_TOKEN_KEY']>
     readonly FIREBASE_ID_TOKEN_STORAGE_KEY: UnwrapRef<typeof import('../../utils/auth-session')['FIREBASE_ID_TOKEN_STORAGE_KEY']>
-    readonly GOOGLE_REDIRECT_PENDING_KEY: UnwrapRef<typeof import('../../composables/useFirebaseAuth.client')['GOOGLE_REDIRECT_PENDING_KEY']>
     readonly PASSWORD_MAX_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MAX_LENGTH']>
     readonly PASSWORD_MIN_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MIN_LENGTH']>
     readonly REFRESH_TOKEN_KEY: UnwrapRef<typeof import('../../utils/auth-session')['REFRESH_TOKEN_KEY']>
