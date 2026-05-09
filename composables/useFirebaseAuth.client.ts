@@ -6,14 +6,18 @@ import {
   getAuth,
   getRedirectResult,
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
 } from 'firebase/auth'
 import { FIREBASE_ID_TOKEN_STORAGE_KEY } from '~/utils/auth-session'
 
-/** Redirect boshlanganda yoziladi — qaytishdan keyin fallback va tozalash uchun */
+/** Redirect boshlanganda — `currentUser` fallback uchun */
 export const GOOGLE_REDIRECT_PENDING_KEY = 'otter:googleRedirectStartedAt'
 
 const REDIRECT_FALLBACK_MAX_MS = 6 * 60 * 1000
+
+/** `getRedirectResult` faqat 1× bir mount sikli uchun */
+let finishRedirectInFlight: Promise<string | null> | null = null
 
 let analyticsInitialized = false
 
@@ -51,6 +55,77 @@ async function ensureAnalytics(app: FirebaseApp) {
   }
 }
 
+/**
+ * Redirect qaytishi: `getRedirectResult` birinchi (Firebase tavsiyasi), keyin `authStateReady`.
+ * Marker bor bo‘lsa — qisqa kechikish (router / storage sinxroni uchun).
+ */
+async function finishRedirectFlowOnce(auth: Auth): Promise<string | null> {
+  const expectingRedirectFallback = readRedirectPendingFresh()
+
+  console.log('[otter:google] finishRedirectFlow', {
+    origin: typeof window !== 'undefined' ? window.location.origin : null,
+    href: typeof window !== 'undefined' ? window.location.href.slice(0, 120) : null,
+    appName: auth?.app?.name,
+    configAuthDomain: auth?.config?.authDomain,
+    pendingMarker: expectingRedirectFallback,
+    currentUserUid: auth.currentUser?.uid ?? null,
+  })
+
+  if (expectingRedirectFallback) {
+    await new Promise<void>(resolve => setTimeout(resolve, 120))
+  }
+
+  let result: Awaited<ReturnType<typeof getRedirectResult>> | null = null
+  try {
+    result = await getRedirectResult(auth)
+    console.log('[otter:google] getRedirectResult:', result ? { uid: result.user?.uid } : 'NO_REDIRECT_RESULT (null)')
+  }
+  catch (err) {
+    if (expectingRedirectFallback)
+      clearRedirectPending()
+    console.error('[otter:google] getRedirectResult error:', err)
+    return null
+  }
+
+  try {
+    await auth.authStateReady()
+    console.log('[otter:google] authStateReady OK')
+  }
+  catch (e) {
+    console.warn('[otter:google] authStateReady:', e)
+  }
+
+  let user = result?.user ?? null
+
+  if (!user && expectingRedirectFallback && auth.currentUser && authHasGoogleProvider(auth)) {
+    console.warn('[otter:google] fallback: currentUser', { uid: auth.currentUser.uid })
+    user = auth.currentUser
+  }
+
+  if (expectingRedirectFallback) {
+    clearRedirectPending()
+  }
+
+  if (!user) {
+    if (expectingRedirectFallback) {
+      console.warn(
+        '[otter:google] redirect marker bor edi, lekin token yo‘q. Tekshiring: bir xil host (localhost vs 127.0.0.1), '
+        + 'Firebase Authorized domains (Vercel domeni), Google OAuth redirect URI.',
+      )
+    }
+    return null
+  }
+
+  const token = await user.getIdToken()
+  console.log('[otter:google] ID token OK', {
+    uid: user.uid,
+    email: user.email,
+    tokenLength: token?.length ?? 0,
+  })
+  localStorage.setItem(FIREBASE_ID_TOKEN_STORAGE_KEY, token)
+  return token
+}
+
 export function useFirebaseAuth() {
   const nuxtApp = useNuxtApp()
   const runtime = useRuntimeConfig()
@@ -81,93 +156,66 @@ export function useFirebaseAuth() {
     return getAuth(getFirebaseApp())
   }
 
-  /**
-   * To‘liq sahifa redirect — COOP / popup muammolaridan qochadi.
-   * Qaytganidan keyin `tryFinishGoogleRedirect()` chaqiriladi (plugin yoki sahifa).
-   */
-  async function startGoogleRedirect(): Promise<void> {
+  async function loginWithGoogleRedirect(): Promise<void> {
     if (import.meta.server) {
       throw new Error('Google sign-in is only available in the browser')
     }
 
-    console.log('[otter:google] startGoogleRedirect → signInWithRedirect', {
+    finishRedirectInFlight = null
+
+    console.log('[otter:google] loginWithGoogleRedirect → signInWithRedirect', {
       origin: typeof window !== 'undefined' ? window.location.origin : null,
       projectId: (runtime.public.firebase as FirebaseOptions)?.projectId,
+      authFromPlugin: !!nuxtApp.$firebaseAuth,
     })
 
-    const auth = getFirebaseAuth()
+    const auth = nuxtApp.$firebaseAuth ?? getFirebaseAuth()
     const provider = new GoogleAuthProvider()
     provider.setCustomParameters({ prompt: 'select_account' })
     sessionStorage.setItem(GOOGLE_REDIRECT_PENDING_KEY, String(Date.now()))
-    await signInWithRedirect(auth, provider)
+    try {
+      await signInWithRedirect(auth, provider)
+    }
+    catch (e) {
+      clearRedirectPending()
+      throw e
+    }
   }
 
-  /**
-   * Google OAuth redirect tugagach — bir marta ID token qaytaradi yoki `null`.
-   */
+  async function loginWithGooglePopup(): Promise<string> {
+    if (import.meta.server) {
+      throw new Error('Google sign-in is only available in the browser')
+    }
+    const auth = nuxtApp.$firebaseAuth ?? getFirebaseAuth()
+    const provider = new GoogleAuthProvider()
+    provider.setCustomParameters({ prompt: 'select_account' })
+    const credential = await signInWithPopup(auth, provider)
+    const token = await credential.user.getIdToken()
+    localStorage.setItem(FIREBASE_ID_TOKEN_STORAGE_KEY, token)
+    console.log('[otter:google] popup: ID token OK', { tokenLength: token.length })
+    return token
+  }
+
   async function tryFinishGoogleRedirect(): Promise<string | null> {
     if (import.meta.server) return null
 
-    const auth = getFirebaseAuth()
-    const expectingRedirectFallback = readRedirectPendingFresh()
+    const auth = nuxtApp.$firebaseAuth ?? getFirebaseAuth()
 
-    console.log('[otter:google] tryFinishGoogleRedirect: authStateReady + getRedirectResult…')
-
-    try {
-      await auth.authStateReady()
-    }
-    catch (e) {
-      console.warn('[otter:google] authStateReady:', e)
-    }
-
-    try {
-      const result = await getRedirectResult(auth)
-      let user = result?.user ?? null
-
-      if (!user && expectingRedirectFallback && auth.currentUser && authHasGoogleProvider(auth)) {
-        console.warn(
-          '[otter:google] getRedirectResult bo‘sh, lekin Yangi sahifa/auth tugagach currentUser qoldi — token shundan olinadi. (HMR yoki race baribir bo‘lishi mumkin.)',
-          { uid: auth.currentUser.uid }
-        )
-        user = auth.currentUser
-      }
-
-      if (expectingRedirectFallback) {
-        clearRedirectPending()
-      }
-
-      if (!user) {
-        console.log('[otter:google] getRedirectResult: foydalanuvchi yo‘q', {
-          expectingRedirectFallback,
-          hadCurrentUser: !!auth.currentUser,
-          googleLinked: authHasGoogleProvider(auth),
-        })
-        return null
-      }
-
-      const token = await user.getIdToken()
-      console.log('[otter:google] Firebase user + ID token OK', {
-        uid: user.uid,
-        email: user.email,
-        tokenLength: token?.length ?? 0,
-        storageKey: FIREBASE_ID_TOKEN_STORAGE_KEY,
+    if (!finishRedirectInFlight) {
+      finishRedirectInFlight = finishRedirectFlowOnce(auth).finally(() => {
+        finishRedirectInFlight = null
       })
-      localStorage.setItem(FIREBASE_ID_TOKEN_STORAGE_KEY, token)
-      return token
     }
-    catch (err) {
-      if (expectingRedirectFallback) {
-        clearRedirectPending()
-      }
-      console.error('[otter:google] getRedirectResult xato:', err)
-      return null
-    }
+
+    return finishRedirectInFlight
   }
 
   return {
     getFirebaseApp,
     getFirebaseAuth,
-    startGoogleRedirect,
+    startGoogleRedirect: loginWithGoogleRedirect,
+    loginWithGoogleRedirect,
+    loginWithGooglePopup,
     tryFinishGoogleRedirect,
   }
 }

@@ -174,16 +174,37 @@ const checklistItems = [
   'Таймер Помодоро',
 ]
 
+function preferGooglePopup(): boolean {
+  const runtime = useRuntimeConfig()
+  if (runtime.public.firebaseGoogleUsePopup === true)
+    return true
+  if (import.meta.client && /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname))
+    return true
+  return false
+}
+
 async function handleGoogleLogin() {
   googleError.value = ''
   if (googleLoading.value) return
   googleLoading.value = true
   try {
-    const { startGoogleRedirect } = useFirebaseAuth()
-    await startGoogleRedirect()
+    const { loginWithGooglePopup, loginWithGoogleRedirect } = useFirebaseAuth()
+
+    if (preferGooglePopup()) {
+      if (import.meta.client && typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem(GOOGLE_REDIRECT_PENDING_KEY)
+      }
+      const firebase_token = await loginWithGooglePopup()
+      await authStore.loginWithGoogle({ firebase_token })
+    }
+    else {
+      await loginWithGoogleRedirect()
+    }
   }
   catch (err: any) {
     googleError.value = err?.response?.data?.detail || err?.message || 'Вход через Google не удался'
+  }
+  finally {
     googleLoading.value = false
   }
 }

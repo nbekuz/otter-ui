@@ -32,6 +32,8 @@ import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
       appId: string,
 
       measurementId: string,
+
+      firebaseGoogleUsePopup: boolean,
    },
   }
 declare module '@nuxt/schema' {
