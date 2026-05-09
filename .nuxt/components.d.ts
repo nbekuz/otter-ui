@@ -14,6 +14,7 @@ type HydrationStrategies = {
 type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {}, {}, { hydrated: () => void }> & T
 
 
+export const AppGlobalToast: typeof import("../components/AppGlobalToast.vue")['default']
 export const BrandLogo: typeof import("../components/BrandLogo.vue")['default']
 export const DateFieldRu: typeof import("../components/DateFieldRu.vue")['default']
 export const GoogleLoginButton: typeof import("../components/GoogleLoginButton.client.vue")['default']
@@ -46,6 +47,7 @@ export const Head: typeof import("../node_modules/nuxt/dist/head/runtime/compone
 export const Html: typeof import("../node_modules/nuxt/dist/head/runtime/components")['Html']
 export const Body: typeof import("../node_modules/nuxt/dist/head/runtime/components")['Body']
 export const NuxtIsland: typeof import("../node_modules/nuxt/dist/app/components/nuxt-island")['default']
+export const LazyAppGlobalToast: LazyComponent<typeof import("../components/AppGlobalToast.vue")['default']>
 export const LazyBrandLogo: LazyComponent<typeof import("../components/BrandLogo.vue")['default']>
 export const LazyDateFieldRu: LazyComponent<typeof import("../components/DateFieldRu.vue")['default']>
 export const LazyGoogleLoginButton: LazyComponent<typeof import("../components/GoogleLoginButton.client.vue")['default']>

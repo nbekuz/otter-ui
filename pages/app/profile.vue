@@ -144,16 +144,6 @@
           <h3 class="mb-2 text-lg font-bold text-sber-black">Сменить пароль</h3>
           <p class="mb-4 text-xs text-sber-gray">Новый: 8–20 символов, Aa + цифра + спецсимвол (!, @ …).</p>
           <input
-            v-model="passwordForm.current"
-            class="input-field mb-2"
-            :class="{ 'border-red-400 bg-red-50': passwordErrors.current }"
-            type="password"
-            placeholder="Текущий пароль"
-            required
-            @input="passwordErrors.current = ''"
-          />
-          <p v-if="passwordErrors.current" class="mb-3 ml-1 text-xs text-red-500">{{ passwordErrors.current }}</p>
-          <input
             v-model="passwordForm.next"
             class="input-field mb-2"
             :class="{ 'border-red-400 bg-red-50': passwordErrors.next }"
@@ -275,13 +265,11 @@ const nameSaving = ref(false)
 const passwordSaving = ref(false)
 
 const passwordForm = reactive({
-  current: '',
   next: '',
   confirm: '',
 })
 
 const passwordErrors = reactive({
-  current: '',
   next: '',
   confirm: '',
 })
@@ -367,23 +355,17 @@ async function saveProfileNames() {
 }
 
 function closePasswordModal() {
-  passwordForm.current = ''
   passwordForm.next = ''
   passwordForm.confirm = ''
-  passwordErrors.current = ''
   passwordErrors.next = ''
   passwordErrors.confirm = ''
   passwordModal.value = false
 }
 
 async function savePassword() {
-  passwordErrors.current = ''
   passwordErrors.next = ''
   passwordErrors.confirm = ''
 
-  if (!passwordForm.current.trim()) {
-    passwordErrors.current = 'Введите текущий пароль'
-  }
   const nextRule = validateNewPassword(passwordForm.next)
   if (nextRule) {
     passwordErrors.next = nextRule
@@ -392,24 +374,21 @@ async function savePassword() {
     passwordErrors.confirm = 'Пароли не совпадают'
   }
 
-  if (passwordErrors.current || passwordErrors.next || passwordErrors.confirm) return
+  if (passwordErrors.next || passwordErrors.confirm) return
 
   passwordSaving.value = true
   try {
-    await authStore.changePassword(passwordForm.current.trim(), passwordForm.next)
+    const result = await authStore.changePassword(passwordForm.next.trim())
     closePasswordModal()
+    const { showToast } = useAppToast()
+    const msg = typeof result?.detail === 'string' ? result.detail : 'Пароль обновлён'
+    showToast(msg, 'success')
   }
   catch (err: any) {
     const payload = err?.response?.data
     const detail = typeof payload?.detail === 'string' ? payload.detail : ''
-    const oldPw = Array.isArray(payload?.old_password) ? payload.old_password.join(' ')
-      : Array.isArray(payload?.current_password) ? payload.current_password.join(' ')
-      : ''
     const np = Array.isArray(payload?.new_password) ? payload.new_password.join(' ') : ''
-    if (oldPw || detail?.toLowerCase().includes('password')) {
-      passwordErrors.current = oldPw || detail || 'Неверный текущий пароль'
-    }
-    else if (np) {
+    if (np) {
       passwordErrors.next = np
     }
     else if (detail) {
@@ -419,7 +398,7 @@ async function savePassword() {
       passwordErrors.next = JSON.stringify(payload)
     }
     else {
-      passwordErrors.next = 'Не удалось сменить пароль. Проверьте эндпоинт auth/change-password/ на сервере.'
+      passwordErrors.next = 'Не удалось сменить пароль. Проверьте API (profile/change-password/).'
     }
   }
   finally {

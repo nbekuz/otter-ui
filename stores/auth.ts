@@ -164,13 +164,9 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
-  /**
-   * Parolni backendda almashtirish. MOBILE API boshqa path/body bo‘lsa, shu yerni moslang
-   * (masalan `current_password` / `password` maydonlari).
-   */
-  async function changePassword(currentPassword: string, newPassword: string) {
-    return apiPost<{ detail?: string }>('auth/change-password/', {
-      old_password: currentPassword,
+  /** POST `profile/change-password/` — Bearer access; body: faqat `new_password` (Swagger). */
+  async function changePassword(newPassword: string) {
+    return apiPost<{ detail?: string }>('profile/change-password/', {
       new_password: newPassword,
     })
   }
