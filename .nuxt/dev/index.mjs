@@ -642,12 +642,13 @@ const _inlineRuntimeConfig = {
     "apiBaseUrl": "http://159.194.221.54:8005/api/v1/",
     "firebase": {
       "apiKey": "AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4",
-      "authDomain": "otter-6bdac.firebaseapp.com",
+      "authDomain": "otter-ui-seven.vercel.app",
       "projectId": "otter-6bdac",
       "storageBucket": "otter-6bdac.firebasestorage.app",
       "messagingSenderId": "911773858551",
       "appId": "1:911773858551:web:dd939daa464da5af74f1f2",
-      "measurementId": "G-D48K735BKD"
+      "measurementId": "G-D48K735BKD",
+      "firebaseGoogleUsePopup": false
     }
   }
 };
@@ -2119,22 +2120,7 @@ const plugins = [
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"6a25d-wY5Czj+8WjRqz359WvUeqx3GFNU\"",
-    "mtime": "2026-05-09T00:20:25.141Z",
-    "size": 434781,
-    "path": "index.mjs.map"
-  },
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"19f07-5hH1PRO3K9tLR/5oHUoutQRjFl4\"",
-    "mtime": "2026-05-09T00:20:25.140Z",
-    "size": 106247,
-    "path": "index.mjs"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2301,9 +2287,9 @@ function publicAssetsURL(...path) {
 const APP_ROOT_OPEN_TAG = `<${appRootTag}${propsToString(appRootAttrs)}>`;
 const APP_ROOT_CLOSE_TAG = `</${appRootTag}>`;
 // @ts-expect-error file will be produced after app build
-const getServerEntry = () => import('file:///Users/nodirbek/Desktop/otter-app/.nuxt/dist/server/server.mjs').then((r) => r.default || r);
+const getServerEntry = () => import('file:///Users/nodirbek/Desktop/otter-app/.nuxt//dist/server/server.mjs').then((r) => r.default || r);
 // @ts-expect-error file will be produced after app build
-const getClientManifest = () => import('file:///Users/nodirbek/Desktop/otter-app/.nuxt/dist/server/client.manifest.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
+const getClientManifest = () => import('file:///Users/nodirbek/Desktop/otter-app/.nuxt//dist/server/client.manifest.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
 // -- SSR Renderer --
 const getSSRRenderer = lazyCachedFunction(async () => {
 	// Load server bundle
