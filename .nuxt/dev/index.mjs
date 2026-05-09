@@ -635,6 +635,11 @@ const _inlineRuntimeConfig = {
     "routeRules": {
       "/__nuxt_error": {
         "cache": false
+      },
+      "/**": {
+        "headers": {
+          "Cross-Origin-Opener-Policy": "same-origin-allow-popups"
+        }
       }
     }
   },

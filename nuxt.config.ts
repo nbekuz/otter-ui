@@ -1,6 +1,19 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-04-13',
   devtools: { enabled: false },
+  /**
+   * `signInWithPopup` opener ↔ popup o‘rtasida `window.closed` / `window.close` ishlatadi.
+   * `same-origin` COOP bunday chaqiruqlarni bloklaydi → konsoldagi COOP xatolari.
+   * `same-origin-allow-popups` — OAuth/popup uchun rasmiy tuzatish yo‘nalishi.
+   * @see https://developer.chrome.com/blog/new-in-chrome-97/#coop-fix
+   */
+  routeRules: {
+    '/**': {
+      headers: {
+        'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+      },
+    },
+  },
   experimental: {
     appManifest: false,
   },

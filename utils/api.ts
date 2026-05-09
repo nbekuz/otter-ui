@@ -1,7 +1,7 @@
 import axios, { type AxiosRequestConfig } from 'axios'
 import { clearAuthSession, getAccessToken } from '~/utils/auth-session'
 
-const DEFAULT_API_BASE_URL = 'http://159.194.221.54:8005/api/v1/'
+const DEFAULT_API_BASE_URL = 'https://admin.skkamni.ru/api/v1/'
 const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL
 
 export const api = axios.create({

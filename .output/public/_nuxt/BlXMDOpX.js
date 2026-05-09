@@ -1,1 +1,0 @@
-import{d as t,w as n,n as s}from"./T6U8p3d4.js";const _=t({__name:"calendar",async setup(o){let a,e;return[a,e]=n(()=>s("/app/calendar",{})),await a,e(),()=>{}}});export{_ as default};
