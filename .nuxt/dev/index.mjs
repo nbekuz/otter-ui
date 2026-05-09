@@ -638,7 +638,18 @@ const _inlineRuntimeConfig = {
       }
     }
   },
-  "public": {}
+  "public": {
+    "apiBaseUrl": "http://159.194.221.54:8005/api/v1/",
+    "firebase": {
+      "apiKey": "AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4",
+      "authDomain": "otter-6bdac.firebaseapp.com",
+      "projectId": "otter-6bdac",
+      "storageBucket": "otter-6bdac.firebasestorage.app",
+      "messagingSenderId": "911773858551",
+      "appId": "1:911773858551:web:dd939daa464da5af74f1f2",
+      "measurementId": "G-D48K735BKD"
+    }
+  }
 };
 const envOptions = {
   prefix: "NITRO_",

@@ -9,6 +9,22 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@vueuse/nuxt',
   ],
+  vite: {
+    resolve: {
+      dedupe: ['vue'],
+    },
+    server: {
+      watch: {
+        ignored: [
+          '**/.git/**',
+          '**/node_modules/**',
+          '**/.nuxt/**',
+          '**/.output/**',
+          '**/.venv-ocr/**',
+        ],
+      },
+    },
+  },
   css: ['~/assets/css/main.css'],
   app: {
     head: {
@@ -26,5 +42,20 @@ export default defineNuxtConfig({
   },
   pinia: {
     storesDirs: ['./stores/**'],
+  },
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://159.194.221.54:8005/api/v1/',
+      firebase: {
+        apiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4',
+        authDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'otter-6bdac.firebaseapp.com',
+        projectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || 'otter-6bdac',
+        // Konsolda `*.appspot.com` ko‘rsatsa: NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET orqali yozing
+        storageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'otter-6bdac.firebasestorage.app',
+        messagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '911773858551',
+        appId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || '1:911773858551:web:dd939daa464da5af74f1f2',
+        measurementId: process.env.NUXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-D48K735BKD',
+      },
+    },
   },
 })

@@ -31,7 +31,7 @@
                   Pro
                 </span>
               </div>
-              <p class="truncate text-xs text-sber-gray">{{ authStore.user?.email || 'demo@otter.app' }}</p>
+              <p v-if="authStore.user?.email" class="truncate text-xs text-sber-gray">{{ authStore.user.email }}</p>
             </div>
           </div>
         </NuxtLink>

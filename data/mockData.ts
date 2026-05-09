@@ -66,7 +66,7 @@ export interface AppSettings {
 // ─── Mock User ───────────────────────────────────────────────────────────────
 export const mockUser: User = {
   id: 'user-1',
-  email: 'demo@otter.app',
+  email: 'user@example.com',
   name: 'Александр',
   isPremium: false,
 }

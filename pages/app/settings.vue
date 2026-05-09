@@ -57,10 +57,10 @@
     <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
       <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Аккаунт</p>
 
-      <SettingsSettingsRow label="Имя" :value="authStore.user?.name" @click="nameModal = true">
+      <SettingsSettingsRow label="Имя" :value="profileFullNameDisplay" @click="openNameModal">
         <template #icon><User class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
-      <SettingsSettingsRow label="Аватар" @click="avatarModal = true">
+      <SettingsSettingsRow label="Аватар" @click="openAvatarModal">
         <template #icon><Camera class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
       <SettingsSettingsRow label="Профиль" @click="navigateTo('/app/profile')">
@@ -275,31 +275,43 @@
 
     <!-- Name modal -->
     <Teleport to="body">
-      <Transition name="overlay"><div v-if="nameModal" class="overlay" @click="nameModal = false" /></Transition>
+      <Transition name="overlay"><div v-if="nameModal" class="overlay" @click="closeNameModal" /></Transition>
       <Transition name="modal">
         <div v-if="nameModal" class="app-modal px-5 py-5" @click.stop>
-          <h3 class="text-lg font-bold mb-4">Имя</h3>
+          <h3 class="text-lg font-bold mb-4">Имя и фамилия</h3>
+          <label class="mb-2 block text-sm font-medium text-sber-gray">Имя</label>
           <input
-            v-model="newName"
+            v-model="editFirstName"
             class="input-field mb-2"
-            :class="{ 'border-red-400 bg-red-50': nameError }"
-            placeholder="Введите имя"
-            required
-            @input="nameError = ''"
+            :class="{ 'border-red-400 bg-red-50': nameErrors.first }"
+            placeholder="Имя"
+            @input="nameErrors.first = ''"
           />
-          <p v-if="nameError" class="mb-3 ml-1 text-xs text-red-500">{{ nameError }}</p>
-          <button class="btn-primary mb-3" @click="saveName">Сохранить</button>
-          <button class="btn-secondary" @click="closeNameModal">Отмена</button>
+          <p v-if="nameErrors.first" class="mb-3 ml-1 text-xs text-red-500">{{ nameErrors.first }}</p>
+          <label class="mb-2 block text-sm font-medium text-sber-gray">Фамилия</label>
+          <input
+            v-model="editLastName"
+            class="input-field mb-2"
+            :class="{ 'border-red-400 bg-red-50': nameErrors.last }"
+            placeholder="Фамилия"
+            @input="nameErrors.last = ''"
+          />
+          <p v-if="nameErrors.last" class="mb-3 ml-1 text-xs text-red-500">{{ nameErrors.last }}</p>
+          <button class="btn-primary mb-3 w-full" :disabled="nameSaving" @click="saveName">
+            {{ nameSaving ? 'Сохранение…' : 'Сохранить' }}
+          </button>
+          <button class="btn-secondary w-full" :disabled="nameSaving" @click="closeNameModal">Отмена</button>
         </div>
       </Transition>
     </Teleport>
 
     <!-- Password modal -->
     <Teleport to="body">
-      <Transition name="overlay"><div v-if="passwordModal" class="overlay" @click="passwordModal = false" /></Transition>
+      <Transition name="overlay"><div v-if="passwordModal" class="overlay" @click="closePasswordModal" /></Transition>
       <Transition name="modal">
         <div v-if="passwordModal" class="app-modal px-5 py-5" @click.stop>
-          <h3 class="text-lg font-bold mb-4">Пароль</h3>
+          <h3 class="text-lg font-bold mb-2">Пароль</h3>
+          <p class="mb-4 text-xs text-sber-gray">Новый: 8–20 символов, Aa + цифра + спецсимвол (!, @ …).</p>
           <input
             v-model="passwordForm.current"
             class="input-field mb-2"
@@ -330,8 +342,10 @@
             @input="passwordErrors.confirm = ''"
           />
           <p v-if="passwordErrors.confirm" class="mb-3 ml-1 text-xs text-red-500">{{ passwordErrors.confirm }}</p>
-          <button class="btn-primary mb-3" @click="savePassword">Сохранить</button>
-          <button class="btn-secondary" @click="closePasswordModal">Отмена</button>
+          <button class="btn-primary mb-3 w-full" :disabled="passwordSaving" @click="savePassword">
+            {{ passwordSaving ? 'Сохранение…' : 'Сохранить' }}
+          </button>
+          <button class="btn-secondary w-full" :disabled="passwordSaving" @click="closePasswordModal">Отмена</button>
         </div>
       </Transition>
     </Teleport>
@@ -525,20 +539,22 @@
 
     <!-- Avatar modal -->
     <Teleport to="body">
-      <Transition name="overlay"><div v-if="avatarModal" class="overlay" @click="avatarModal = false" /></Transition>
+      <Transition name="overlay"><div v-if="avatarModal" class="overlay" @click="closeAvatarModal" /></Transition>
       <Transition name="modal">
         <div v-if="avatarModal" class="app-modal px-5 py-5" @click.stop>
           <h3 class="text-lg font-bold mb-4">Фото профиля</h3>
+          <p v-if="avatarSettingsError" class="mb-3 text-xs text-red-500">{{ avatarSettingsError }}</p>
           <input ref="avatarInputRef" type="file" accept="image/*" class="hidden" @change="handleAvatarFileChange">
           <button class="w-full flex items-center gap-3 px-4 py-4 bg-sber-gray-light rounded-2xl mb-2"
                   @click="avatarInputRef?.click()">
             <Image class="w-5 h-5 text-sber-gray" /> Выбрать изображение
           </button>
-          <button class="w-full flex items-center gap-3 px-4 py-4 bg-sber-gray-light rounded-2xl mb-3"
-                  @click="clearAvatar">
-            <Camera class="w-5 h-5 text-sber-gray" /> Удалить аватар
+          <button class="mb-3 w-full rounded-2xl bg-sber-gray-light px-4 py-4" type="button" @click="onClearAvatarTap">
+            <span class="flex items-center gap-3 text-sber-black">
+              <Camera class="h-5 w-5 text-sber-gray" /> Удалить аватар
+            </span>
           </button>
-          <button class="btn-secondary" @click="avatarModal = false">Отмена</button>
+          <button class="btn-secondary" @click="closeAvatarModal">Отмена</button>
         </div>
       </Transition>
     </Teleport>
@@ -554,6 +570,7 @@ import {
 } from 'lucide-vue-next'
 import { Moon, Sun } from 'lucide-vue-next'
 import { soundOptions, faqData } from '~/data/mockData'
+import { validateNewPassword } from '~/utils/password-policy'
 
 definePageMeta({ layout: 'app' })
 
@@ -569,16 +586,20 @@ const helpModal = ref(false)
 const contactModal = ref(false)
 const aboutModal = ref(false)
 const avatarModal = ref(false)
+const avatarSettingsError = ref('')
 const avatarInputRef = ref<HTMLInputElement | null>(null)
 const contactScreenshotInputRef = ref<HTMLInputElement | null>(null)
 const showLogout = ref(false)
 const comingSoonVisible = ref(false)
-const newName = ref(authStore.user?.name || '')
+const editFirstName = ref('')
+const editLastName = ref('')
+const nameErrors = reactive({ first: '', last: '' })
+const nameSaving = ref(false)
+const passwordSaving = ref(false)
 const selectedLanguage = ref(settingsStore.appSettings.language || 'ru')
 const draggedBottomMenuId = ref<string | null>(null)
 const contactMessage = ref('')
 const contactScreenshotName = ref('')
-const nameError = ref('')
 const passwordForm = reactive({
   current: '',
   next: '',
@@ -626,6 +647,11 @@ const filteredFaq = computed(() => {
 
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
+const profileFullNameDisplay = computed(() => {
+  const raw = `${authStore.profileFirstName || ''} ${authStore.profileLastName || ''}`.trim()
+  return raw || authStore.user?.name || '—'
+})
+
 const premiumExpiresLabel = computed(() => {
   const expiresAt = authStore.user?.premiumExpiresAt
   if (!expiresAt) return ''
@@ -662,6 +688,16 @@ function showComingSoon() {
   setTimeout(() => { comingSoonVisible.value = false }, 2500)
 }
 
+function openAvatarModal() {
+  avatarSettingsError.value = ''
+  avatarModal.value = true
+}
+
+function closeAvatarModal() {
+  avatarSettingsError.value = ''
+  avatarModal.value = false
+}
+
 function shareApp() {
   if (navigator.share) {
     navigator.share({ title: 'Otter - Планировщик', url: window.location.origin })
@@ -688,22 +724,64 @@ function setTheme(theme: 'light' | 'dark') {
   settingsStore.updateSettings({ theme })
 }
 
-function saveName() {
-  if (!newName.value.trim()) {
-    nameError.value = 'Имя обязательно'
-    return
+function openNameModal() {
+  nameErrors.first = ''
+  nameErrors.last = ''
+  editFirstName.value = authStore.profileFirstName.trim()
+  editLastName.value = authStore.profileLastName.trim()
+  if ((!editFirstName.value || !editLastName.value) && authStore.user?.name?.trim()) {
+    const parts = authStore.user.name.trim().split(/\s+/).filter(Boolean)
+    if (!editFirstName.value) editFirstName.value = parts[0] || ''
+    if (!editLastName.value) editLastName.value = parts.slice(1).join(' ')
   }
+  nameModal.value = true
+}
 
-  authStore.updateName(newName.value.trim())
-  closeNameModal()
+async function saveName() {
+  nameErrors.first = ''
+  nameErrors.last = ''
+  const first = editFirstName.value.trim()
+  const last = editLastName.value.trim()
+  let ok = true
+  if (!first) {
+    nameErrors.first = 'Введите имя'
+    ok = false
+  }
+  if (!last) {
+    nameErrors.last = 'Введите фамилию'
+    ok = false
+  }
+  if (!ok || nameSaving.value) return
+
+  nameSaving.value = true
+  try {
+    await authStore.updateProfile(first, last)
+    closeNameModal()
+  }
+  catch (err: any) {
+    const payload = err?.response?.data
+    const f = Array.isArray(payload?.first_name) ? payload.first_name.join(' ') : ''
+    const l = Array.isArray(payload?.last_name) ? payload.last_name.join(' ') : ''
+    const detail = typeof payload?.detail === 'string' ? payload.detail : ''
+    if (f) nameErrors.first = f
+    if (l) nameErrors.last = l
+    if (!f && !l && detail)
+      nameErrors.first = detail
+    if (!f && !l && !detail)
+      nameErrors.first = 'Не удалось сохранить'
+  }
+  finally {
+    nameSaving.value = false
+  }
 }
 
 function closeNameModal() {
-  nameError.value = ''
+  nameErrors.first = ''
+  nameErrors.last = ''
   nameModal.value = false
 }
 
-function savePassword() {
+async function savePassword() {
   passwordErrors.current = ''
   passwordErrors.next = ''
   passwordErrors.confirm = ''
@@ -712,8 +790,9 @@ function savePassword() {
     passwordErrors.current = 'Введите текущий пароль'
   }
 
-  if (passwordForm.next.length < 6) {
-    passwordErrors.next = 'Новый пароль должен быть не короче 6 символов'
+  const nextRule = validateNewPassword(passwordForm.next)
+  if (nextRule) {
+    passwordErrors.next = nextRule
   }
 
   if (passwordForm.next !== passwordForm.confirm) {
@@ -722,7 +801,34 @@ function savePassword() {
 
   if (passwordErrors.current || passwordErrors.next || passwordErrors.confirm) return
 
-  closePasswordModal()
+  passwordSaving.value = true
+  try {
+    await authStore.changePassword(passwordForm.current.trim(), passwordForm.next)
+    closePasswordModal()
+  }
+  catch (err: any) {
+    const payload = err?.response?.data
+    const detail = typeof payload?.detail === 'string' ? payload.detail : ''
+    const oldPw = Array.isArray(payload?.old_password) ? payload.old_password.join(' ')
+      : Array.isArray(payload?.current_password) ? payload.current_password.join(' ')
+      : ''
+    const np = Array.isArray(payload?.new_password) ? payload.new_password.join(' ') : ''
+    if (oldPw || detail?.toLowerCase().includes('password')) {
+      passwordErrors.current = oldPw || detail || 'Неверный текущий пароль'
+    }
+    else if (np) {
+      passwordErrors.next = np
+    }
+    else if (detail) {
+      passwordErrors.next = detail
+    }
+    else {
+      passwordErrors.next = 'Не удалось сменить пароль. Проверьте endpoint на сервере (auth/change-password/).'
+    }
+  }
+  finally {
+    passwordSaving.value = false
+  }
 }
 
 function closePasswordModal() {
@@ -826,25 +932,42 @@ function handleContactScreenshotChange(event: Event) {
   contactScreenshotName.value = file.name
 }
 
-function handleAvatarFileChange(event: Event) {
+async function handleAvatarFileChange(event: Event) {
+  avatarSettingsError.value = ''
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
-  if (!file) return
+  if (input) input.value = ''
+  if (!file || !file.type.startsWith('image/')) return
 
-  const reader = new FileReader()
-  reader.onload = () => {
-    const result = typeof reader.result === 'string' ? reader.result : ''
-    if (result) {
-      authStore.updateAvatar(result)
-    }
-    avatarModal.value = false
+  let first = authStore.profileFirstName.trim()
+  let last = authStore.profileLastName.trim()
+  if ((!first || !last) && authStore.user?.name?.trim()) {
+    const parts = authStore.user.name.trim().split(/\s+/).filter(Boolean)
+    if (!first) first = parts[0] || ''
+    if (!last) last = parts.slice(1).join(' ')
   }
-  reader.readAsDataURL(file)
+  if (!first.trim()) {
+    avatarSettingsError.value = 'Сначала укажите имя и фамилию в разделе «Имя».'
+    return
+  }
+  if (!last.trim())
+    last = first
+
+  try {
+    await authStore.updateProfile(first.trim(), last.trim(), file)
+    closeAvatarModal()
+  }
+  catch (err: any) {
+    const payload = err?.response?.data
+    const av = Array.isArray(payload?.avatar) ? payload.avatar.join(' ') : ''
+    const detail = typeof payload?.detail === 'string' ? payload.detail : ''
+    avatarSettingsError.value = av || detail || 'Не удалось загрузить фото'
+  }
 }
 
-function clearAvatar() {
-  authStore.updateAvatar('')
-  avatarModal.value = false
+function onClearAvatarTap() {
+  closeAvatarModal()
+  showComingSoon()
 }
 </script>
 

@@ -36,7 +36,7 @@
                 <input
                   v-model="form.password"
                   :type="showPassword ? 'text' : 'password'"
-                  placeholder="Минимум 6 символов"
+                  placeholder="8–20: Aa, 0–9 и спецсимвол (!@…)"
                   autocomplete="new-password"
                   required
                   class="input-field pl-12 pr-12"
@@ -96,18 +96,18 @@
             </div>
             <div class="w-full flex lg:justify-center items-center">
 
-              <button class="btn-primary  lg:max-w-[360px] " type="submit">
-                Создать аккаунт
+              <button class="btn-primary  lg:max-w-[360px] disabled:opacity-60 disabled:cursor-not-allowed" type="submit" :disabled="isSubmitting">
+                {{ isSubmitting ? 'Отправка...' : 'Создать аккаунт' }}
               </button>
             </div>
 
           </form>
 
           <Transition name="fade-notification">
-            <div v-if="showSuccess" class="mt-4 flex items-center gap-3 rounded-2xl border border-sber-green bg-sber-green-light px-4 py-3">
-              <CheckCircle class="h-5 w-5 flex-shrink-0 text-sber-green" />
-              <p class="text-sm font-medium text-sber-green">
-                Аккаунт создан! Проверьте почту для подтверждения.
+            <div v-if="toast.visible" class="mt-4 flex items-center gap-3 rounded-2xl px-4 py-3" :class="toast.type === 'success' ? 'border border-sber-green bg-sber-green-light' : 'border border-red-300 bg-red-50'">
+              <CheckCircle class="h-5 w-5 flex-shrink-0" :class="toast.type === 'success' ? 'text-sber-green' : 'text-red-500'" />
+              <p class="text-sm font-medium" :class="toast.type === 'success' ? 'text-sber-green' : 'text-red-600'">
+                {{ toast.message }}
               </p>
             </div>
           </Transition>
@@ -158,6 +158,7 @@
 <script setup lang="ts">
 import { ChevronLeft, Mail, Lock, Eye, EyeOff, Check, CheckCircle } from 'lucide-vue-next'
 import logoUrl from '~/assets/img/logo.svg'
+import { validateNewPassword } from '~/utils/password-policy'
 
 const authStore = useAuthStore()
 const metrics = ['планируйте', 'контролируйте', 'фокусируйтесь', 'управляйте']
@@ -167,7 +168,12 @@ const errors = reactive({ email: '', password: '', confirmPassword: '', terms: '
 const showPassword = ref(false)
 const showConfirm = ref(false)
 const agreeTerms = ref(false)
-const showSuccess = ref(false)
+const isSubmitting = ref(false)
+const toast = reactive({
+  visible: false,
+  type: 'success' as 'success' | 'error',
+  message: '',
+})
 
 function validate() {
   errors.email = ''
@@ -180,8 +186,9 @@ function validate() {
     errors.email = 'Введите корректный email'
     valid = false
   }
-  if (form.password.length < 6) {
-    errors.password = 'Пароль должен состоять минимум из 6 символов'
+  const pwRule = validateNewPassword(form.password)
+  if (pwRule) {
+    errors.password = pwRule
     valid = false
   }
   if (form.password !== form.confirmPassword) {
@@ -195,12 +202,50 @@ function validate() {
   return valid
 }
 
-function handleRegister() {
+function showToast(type: 'success' | 'error', message: string) {
+  toast.visible = true
+  toast.type = type
+  toast.message = message
+}
+
+async function handleRegister() {
   if (!validate()) return
-  showSuccess.value = true
-  setTimeout(() => {
-    authStore.register(form.email.trim(), form.password)
-  }, 1500)
+  if (isSubmitting.value) return
+
+  toast.visible = false
+  isSubmitting.value = true
+
+  try {
+    await authStore.register(form.email.trim(), form.password, '', '', { navigateOnSuccess: false })
+    showToast('success', 'Аккаунт создан! Проверьте почту для подтверждения.')
+    setTimeout(() => {
+      navigateTo('/profile-fill')
+    }, 1200)
+  }
+  catch (err: any) {
+    const payload = err?.response?.data
+    const passwordErrors = Array.isArray(payload?.password) ? payload.password : []
+    const emailErrors = Array.isArray(payload?.email) ? payload.email : []
+    const detailError = typeof payload?.detail === 'string' ? payload.detail : ''
+
+    if (passwordErrors.length > 0) {
+      errors.password = passwordErrors.join(' ')
+    }
+    if (emailErrors.length > 0) {
+      errors.email = emailErrors.join(' ')
+    }
+
+    const apiMessage = [
+      ...passwordErrors,
+      ...emailErrors,
+      detailError,
+    ].filter(Boolean).join(' ')
+
+    showToast('error', apiMessage || err?.message || 'Не удалось зарегистрироваться. Попробуйте снова.')
+  }
+  finally {
+    isSubmitting.value = false
+  }
 }
 
 function toggleTerms() {

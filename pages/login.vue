@@ -89,7 +89,7 @@
             </div>
 
             <div class="flex justify-end">
-              <button class="text-sm font-medium text-sber-green" type="button" @click="showForgot = true">
+              <button class="text-sm font-medium text-sber-green" type="button" @click="openForgotModal">
                 Забыли пароль?
               </button>
             </div>
@@ -98,13 +98,6 @@
               Войти
             </button>
           </form>
-
-          <div class="mt-4 flex items-start gap-2 rounded-2xl bg-sber-blue-light px-4 py-3">
-            <Info class="mt-0.5 h-4 w-4 flex-shrink-0 text-sber-blue" />
-            <p class="text-xs text-sber-blue">
-              Тестовый вход: введите любой email и пароль
-            </p>
-          </div>
 
           <div class="my-6 text-center">
             <span class="text-sm text-sber-gray">Нет аккаунта? </span>
@@ -117,10 +110,12 @@
             <div class="h-px flex-1 bg-sber-gray-mid" />
           </div>
 
+          <p v-if="googleError" class="mx-auto mb-2 max-w-[320px] text-center text-xs text-red-500">{{ googleError }}</p>
           <button
-            class="mx-auto flex w-full max-w-[320px] items-center justify-center gap-3 rounded-2xl border border-sber-gray-mid bg-white py-4 font-semibold text-sber-black transition-colors active:bg-sber-gray-light"
+            class="mx-auto flex w-full max-w-[320px] items-center justify-center gap-3 rounded-2xl border border-sber-gray-mid bg-white py-4 font-semibold text-sber-black transition-colors active:bg-sber-gray-light disabled:cursor-not-allowed disabled:opacity-60"
             type="button"
-            @click="loginWithGoogle"
+            :disabled="googleLoading"
+            @click="handleGoogleLogin"
           >
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -128,40 +123,127 @@
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            Войти через Google
+            {{ googleLoading ? 'Вход…' : 'Войти через Google' }}
           </button>
         </div>
       </div>
     </div>
 
     <Teleport to="body">
+      <Transition name="fade-notification">
+        <div
+          v-if="pageToast.visible"
+          class="fixed bottom-6 left-1/2 z-[200] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 px-0"
+          role="status"
+        >
+          <div class="flex items-center gap-3 rounded-2xl border border-sber-green bg-sber-green-light px-4 py-3 shadow-lg">
+            <CheckCircle class="h-5 w-5 flex-shrink-0 text-sber-green" />
+            <p class="text-sm font-medium text-sber-green">
+              {{ pageToast.message }}
+            </p>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <Teleport to="body">
       <Transition name="overlay">
         <div v-if="showForgot" class="overlay" @click="closeForgotModal" />
       </Transition>
       <Transition name="modal">
-        <form v-if="showForgot" class="app-modal px-6 py-6" @click.stop @submit.prevent="sendReset">
+        <form v-if="showForgot" class="app-modal px-6 py-6" @click.stop @submit.prevent="onForgotSubmit">
           <h3 class="mb-2 text-lg font-bold text-sber-black">Восстановление пароля</h3>
-          <p class="mb-4 text-sm text-sber-gray">
-            Введите ваш email, и мы отправим ссылку для сброса пароля
-          </p>
-          <div class="relative mb-2">
-            <Mail class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-sber-gray" />
-            <input
-              v-model="forgotEmail"
-              type="email"
-              placeholder="Email"
-              autocomplete="email"
-              class="input-field pl-12"
-              :class="{ 'border-red-400 bg-red-50': forgotError }"
-              @input="forgotError = ''"
-            />
-          </div>
+
+          <template v-if="forgotStep === 'email'">
+            <p class="mb-4 text-sm text-sber-gray">
+              Введите email — мы отправим письмо с кодом (например: «ВАШ КОД 310696»).
+            </p>
+            <div class="relative mb-2">
+              <Mail class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-sber-gray" />
+              <input
+                v-model="forgotEmail"
+                type="email"
+                placeholder="Email"
+                autocomplete="email"
+                class="input-field pl-12"
+                :class="{ 'border-red-400 bg-red-50': forgotError }"
+                @input="forgotError = ''"
+              />
+            </div>
+          </template>
+
+          <template v-else-if="forgotStep === 'code'">
+            <p class="mb-2 text-sm text-sber-gray">
+              Код отправлен на <span class="font-medium text-sber-black">{{ forgotEmail }}</span>
+            </p>
+            <p class="mb-3 text-xs text-sber-gray">Введите 6 цифр из письма (только код).</p>
+            <div class="relative mb-2">
+              <Lock class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-sber-gray" />
+              <input
+                v-model="forgotCode"
+                type="text"
+                inputmode="numeric"
+                maxlength="6"
+                placeholder="000000"
+                autocomplete="one-time-code"
+                class="input-field pl-12 tracking-widest"
+                :class="{ 'border-red-400 bg-red-50': forgotError }"
+                @input="onForgotCodeInput"
+              />
+            </div>
+            <button class="btn-secondary mb-3 w-full" type="button" @click="goBackForgotEmail">
+              Изменить email
+            </button>
+          </template>
+
+          <template v-else>
+            <p class="mb-2 text-sm text-sber-gray">
+              Новый пароль для <span class="font-medium text-sber-black">{{ forgotEmail }}</span>
+            </p>
+            <p class="mb-3 text-xs text-sber-gray">8–20 символов: заглавная и строчная латинские буквы, цифра и один специальный символ.</p>
+            <div class="relative mb-2">
+              <Lock class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-sber-gray" />
+              <input
+                v-model="forgotNewPassword"
+                :type="showForgotNewPw ? 'text' : 'password'"
+                placeholder="Новый пароль"
+                autocomplete="new-password"
+                class="input-field pl-12 pr-12"
+                :class="{ 'border-red-400 bg-red-50': forgotPwError }"
+                @input="forgotPwError = ''"
+              />
+              <button class="absolute right-4 top-1/2 -translate-y-1/2" type="button" @click="showForgotNewPw = !showForgotNewPw">
+                <Eye v-if="!showForgotNewPw" class="h-5 w-5 text-sber-gray" />
+                <EyeOff v-else class="h-5 w-5 text-sber-gray" />
+              </button>
+            </div>
+            <div class="relative mb-2">
+              <Lock class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-sber-gray" />
+              <input
+                v-model="forgotConfirmPassword"
+                :type="showForgotConfirmPw ? 'text' : 'password'"
+                placeholder="Повторите пароль"
+                autocomplete="new-password"
+                class="input-field pl-12 pr-12"
+                :class="{ 'border-red-400 bg-red-50': forgotPwError }"
+                @input="forgotPwError = ''"
+              />
+              <button class="absolute right-4 top-1/2 -translate-y-1/2" type="button" @click="showForgotConfirmPw = !showForgotConfirmPw">
+                <Eye v-if="!showForgotConfirmPw" class="h-5 w-5 text-sber-gray" />
+                <EyeOff v-else class="h-5 w-5 text-sber-gray" />
+              </button>
+            </div>
+            <p v-if="forgotPwError" class="mb-2 ml-1 text-xs text-red-500">{{ forgotPwError }}</p>
+          </template>
+
           <p v-if="forgotError" class="mb-3 ml-1 text-xs text-red-500">{{ forgotError }}</p>
-          <button class="btn-primary" type="submit">Отправить</button>
-          <button class="btn-secondary mt-3" type="button" @click="closeForgotModal">Отмена</button>
-          <div v-if="resetSent" class="mt-3 text-center text-sm font-medium text-sber-green">
-            ✓ Письмо отправлено на {{ forgotEmail }}
-          </div>
+
+          <button class="btn-primary w-full" type="submit" :disabled="forgotLoading">
+            {{ forgotSubmitLabel }}
+          </button>
+          <button class="btn-secondary mt-3 w-full" type="button" :disabled="forgotLoading" @click="closeForgotModal">
+            Отмена
+          </button>
         </form>
       </Transition>
     </Teleport>
@@ -169,18 +251,80 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronLeft, Mail, Lock, Eye, EyeOff, Info } from 'lucide-vue-next'
+import { ChevronLeft, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-vue-next'
 import logoUrl from '~/assets/img/logo.svg'
+import { validateNewPassword } from '~/utils/password-policy'
 
 const authStore = useAuthStore()
 const metrics = ['планируйте', 'контролируйте', 'фокусируйтесь', 'управляйте']
 const form = reactive({ email: '', password: '' })
 const errors = reactive({ email: '', password: '' })
 const showPassword = ref(false)
+const googleLoading = ref(false)
+const googleError = ref('')
+
+/** Parol tiklangach toast — `navigateTo` sahifani qayta ochsa ham saqlanadi */
+const pendingPasswordResetToast = useState<string | null>('loginPasswordResetToast', () => null)
+
+const pageToast = reactive({
+  visible: false,
+  message: '',
+})
+let pageToastTimer: ReturnType<typeof setTimeout> | null = null
+
+function showPageToast(message: string) {
+  if (pageToastTimer) {
+    clearTimeout(pageToastTimer)
+    pageToastTimer = null
+  }
+  pageToast.message = message
+  pageToast.visible = true
+  pageToastTimer = setTimeout(() => {
+    pageToast.visible = false
+    pageToastTimer = null
+  }, 5000)
+}
+
+function flushPendingPasswordToast() {
+  const msg = pendingPasswordResetToast.value
+  if (!msg) return
+  pendingPasswordResetToast.value = null
+  showPageToast(msg)
+}
+
+onMounted(() => {
+  flushPendingPasswordToast()
+
+  const pending = useState<string | null>('googleBackendError', () => null)
+  if (pending.value) {
+    googleError.value = pending.value
+    pending.value = null
+  }
+})
+
+onUnmounted(() => {
+  if (pageToastTimer) clearTimeout(pageToastTimer)
+})
+
 const showForgot = ref(false)
+const forgotStep = ref<'email' | 'code' | 'new-password'>('email')
 const forgotEmail = ref('')
+const forgotCode = ref('')
+const forgotResetToken = ref('')
+const forgotNewPassword = ref('')
+const forgotConfirmPassword = ref('')
 const forgotError = ref('')
-const resetSent = ref(false)
+const forgotPwError = ref('')
+const forgotLoading = ref(false)
+const showForgotNewPw = ref(false)
+const showForgotConfirmPw = ref(false)
+
+const forgotSubmitLabel = computed(() => {
+  if (forgotLoading.value) return 'Подождите...'
+  if (forgotStep.value === 'email') return 'Отправить код'
+  if (forgotStep.value === 'code') return 'Подтвердить код'
+  return 'Сохранить пароль'
+})
 
 function clearError(field: 'email' | 'password') {
   errors[field] = ''
@@ -201,32 +345,158 @@ function validate() {
   return !errors.email && !errors.password
 }
 
-function handleLogin() {
+async function handleLogin() {
   if (!validate()) return
-  authStore.login(form.email.trim(), form.password)
+  try {
+    await authStore.login(form.email.trim(), form.password)
+  }
+  catch (err: any) {
+    errors.password = err?.response?.data?.detail || "Login xatoligi. Qayta urinib ko'ring."
+  }
 }
 
-function loginWithGoogle() {
-  authStore.loginWithGoogle()
+async function handleGoogleLogin() {
+  googleError.value = ''
+  if (googleLoading.value) return
+  googleLoading.value = true
+  try {
+    const { startGoogleRedirect } = useFirebaseAuth()
+    await startGoogleRedirect()
+  }
+  catch (err: any) {
+    googleError.value = err?.response?.data?.detail || err?.message || 'Вход через Google не удался'
+    googleLoading.value = false
+  }
 }
 
-function sendReset() {
+function onForgotCodeInput() {
   forgotError.value = ''
+  forgotCode.value = forgotCode.value.replace(/\D/g, '').slice(0, 6)
+}
 
-  if (!forgotEmail.value.trim() || !forgotEmail.value.includes('@')) {
-    forgotError.value = 'Введите корректный email'
+function goBackForgotEmail() {
+  forgotStep.value = 'email'
+  forgotCode.value = ''
+  forgotResetToken.value = ''
+  forgotError.value = ''
+}
+
+async function onForgotSubmit() {
+  forgotError.value = ''
+  forgotPwError.value = ''
+
+  if (forgotStep.value === 'email') {
+    if (!forgotEmail.value.trim() || !forgotEmail.value.includes('@')) {
+      forgotError.value = 'Введите корректный email'
+      return
+    }
+    forgotLoading.value = true
+    try {
+      await authStore.forgotPassword(forgotEmail.value.trim())
+      forgotStep.value = 'code'
+    }
+    catch (err: any) {
+      forgotError.value = err?.response?.data?.detail || 'Не удалось отправить код'
+    }
+    finally {
+      forgotLoading.value = false
+    }
     return
   }
 
-  resetSent.value = true
-  setTimeout(() => {
+  if (forgotStep.value === 'code') {
+    const code = forgotCode.value.trim()
+    if (code.length !== 6) {
+      forgotError.value = 'Введите 6 цифр кода из письма'
+      return
+    }
+    forgotLoading.value = true
+    try {
+      const { reset_token } = await authStore.forgotPasswordVerify(forgotEmail.value.trim(), code)
+      forgotResetToken.value = reset_token
+      forgotStep.value = 'new-password'
+    }
+    catch (err: any) {
+      forgotError.value = err?.response?.data?.detail || 'Неверный код или срок истёк'
+    }
+    finally {
+      forgotLoading.value = false
+    }
+    return
+  }
+
+  const pwMsg = validateNewPassword(forgotNewPassword.value)
+  if (pwMsg) {
+    forgotPwError.value = pwMsg
+    return
+  }
+  if (forgotNewPassword.value !== forgotConfirmPassword.value) {
+    forgotPwError.value = 'Пароли не совпадают'
+    return
+  }
+  if (!forgotResetToken.value) {
+    forgotError.value = 'Сессия сброса устарела. Начните заново.'
+    return
+  }
+
+  forgotLoading.value = true
+  try {
+    const res = await authStore.forgotPasswordConfirm(forgotResetToken.value, forgotNewPassword.value)
+    const detail = res?.detail
+    const message = typeof detail === 'string'
+      ? detail
+      : Array.isArray(detail)
+        ? detail.map(String).join(' ')
+        : 'Пароль обновлён'
+    pendingPasswordResetToast.value = message
     closeForgotModal()
-  }, 2000)
+    await navigateTo({ path: '/login', replace: true })
+    await nextTick()
+    flushPendingPasswordToast()
+  }
+  catch (err: any) {
+    const payload = err?.response?.data
+    const pwErrors = Array.isArray(payload?.new_password) ? payload.new_password : []
+    forgotPwError.value = pwErrors.join(' ') || payload?.detail || 'Не удалось сохранить пароль'
+  }
+  finally {
+    forgotLoading.value = false
+  }
+}
+
+function resetForgotForm() {
+  forgotStep.value = 'email'
+  forgotEmail.value = ''
+  forgotCode.value = ''
+  forgotResetToken.value = ''
+  forgotNewPassword.value = ''
+  forgotConfirmPassword.value = ''
+  forgotError.value = ''
+  forgotPwError.value = ''
+  forgotLoading.value = false
+  showForgotNewPw.value = false
+  showForgotConfirmPw.value = false
+}
+
+function openForgotModal() {
+  resetForgotForm()
+  showForgot.value = true
 }
 
 function closeForgotModal() {
+  resetForgotForm()
   showForgot.value = false
-  resetSent.value = false
-  forgotError.value = ''
 }
 </script>
+
+<style scoped>
+.fade-notification-enter-active,
+.fade-notification-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-notification-enter-from,
+.fade-notification-leave-to {
+  opacity: 0;
+  transform: translate(-50%, 10px);
+}
+</style>

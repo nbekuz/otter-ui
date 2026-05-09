@@ -1,38 +1,188 @@
 import { defineStore } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
-import { mockUser, type User } from '~/data/mockData'
+import type { User } from '~/data/mockData'
+import { apiGet, apiPost, apiPut } from '~/utils/api'
+import { clearAuthSession, setAuthTokens } from '~/utils/auth-session'
+
+interface BackendUser {
+  id: number
+  email: string
+  first_name: string
+  last_name: string
+  avatar: string | null
+}
+
+interface LoginResponse {
+  tokens: {
+    access: string
+    refresh: string
+  }
+}
+
+interface RegisterResponse extends LoginResponse {
+  user: BackendUser
+}
+
+interface GoogleLoginPayload {
+  firebase_token: string
+}
+
+interface GoogleLoginResponse extends RegisterResponse {}
+interface RegisterOptions {
+  navigateOnSuccess?: boolean
+}
 
 export const useAuthStore = defineStore('auth', () => {
   const user = useLocalStorage<User | null>('otter.auth.user', null)
-  const demoToken = useLocalStorage<string | null>('otter.auth.demo-token', null)
-  const isLoggedIn = computed(() => !!user.value && !!demoToken.value)
+  const accessToken = useLocalStorage<string | null>('access_token', null)
+  const refreshToken = useLocalStorage<string | null>('refresh_token', null)
+  const profileFirstName = useLocalStorage<string>('otter.auth.first-name', '')
+  const profileLastName = useLocalStorage<string>('otter.auth.last-name', '')
+  const profileLoaded = ref(false)
+  const isLoggedIn = computed(() => !!accessToken.value)
+  const requiresProfileFill = computed(() =>
+    isLoggedIn.value && (!profileFirstName.value.trim() || !profileLastName.value.trim())
+  )
 
-  function setSession(nextUser: User) {
-    user.value = nextUser
-    demoToken.value = `demo_${Date.now()}`
+  function mapBackendUser(nextUser: BackendUser): User {
+    const fullName = `${nextUser.first_name || ''} ${nextUser.last_name || ''}`.trim()
+    return {
+      id: String(nextUser.id),
+      email: nextUser.email,
+      name: fullName || nextUser.email.split('@')[0] || 'User',
+      avatar: nextUser.avatar || undefined,
+      isPremium: user.value?.isPremium || false,
+      premiumExpiresAt: user.value?.premiumExpiresAt,
+    }
   }
 
-  // Mock login (always succeeds)
-  function login(email: string, _password: string) {
-    setSession({ ...mockUser, email })
+  function setSession(nextUser: BackendUser, tokens: LoginResponse['tokens']) {
+    setAuthTokens(tokens)
+    profileFirstName.value = nextUser.first_name || ''
+    profileLastName.value = nextUser.last_name || ''
+    profileLoaded.value = true
+    user.value = mapBackendUser(nextUser)
+    accessToken.value = tokens.access
+    refreshToken.value = tokens.refresh
+  }
+
+  async function fetchMyProfile() {
+    const profile = await apiGet<BackendUser>('profile/')
+    profileFirstName.value = profile.first_name || ''
+    profileLastName.value = profile.last_name || ''
+    profileLoaded.value = true
+    user.value = mapBackendUser(profile)
+    return profile
+  }
+
+  async function updateProfile(first_name: string, last_name: string, avatar?: File) {
+    const formData = new FormData()
+    formData.append('first_name', first_name)
+    formData.append('last_name', last_name)
+    if (avatar) {
+      formData.append('avatar', avatar)
+    }
+
+    const profile = await apiPut<BackendUser>('profile/', formData)
+
+    profileFirstName.value = profile.first_name || ''
+    profileLastName.value = profile.last_name || ''
+    profileLoaded.value = true
+    user.value = mapBackendUser(profile)
+    return profile
+  }
+
+  async function login(email: string, password: string) {
+    const response = await apiPost<LoginResponse>('auth/login/', {
+      email,
+      password,
+    })
+    accessToken.value = response.tokens.access
+    refreshToken.value = response.tokens.refresh
+    setAuthTokens(response.tokens)
+    await fetchMyProfile()
     navigateTo('/app')
   }
 
-  // Mock register
-  function register(email: string, _password: string) {
-    setSession({ ...mockUser, email, name: email.split('@')[0] })
+  async function register(
+    email: string,
+    password: string,
+    first_name = '',
+    last_name = '',
+    options: RegisterOptions = {}
+  ) {
+    const { navigateOnSuccess = true } = options
+    const response = await apiPost<RegisterResponse>('auth/register/', {
+      email,
+      password,
+      first_name,
+      last_name,
+    })
+    setSession(response.user, response.tokens)
+    if (navigateOnSuccess) {
+      navigateTo('/app')
+    }
+    return response
+  }
+
+  async function loginWithGoogle(payload?: GoogleLoginPayload) {
+    if (!payload?.firebase_token) {
+      console.warn('[otter:google] loginWithGoogle: firebase_token yo‘q, chiqildi')
+      return
+    }
+
+    console.log('[otter:google] loginWithGoogle: auth/google/ so‘rov yuborilmoqda…')
+    const response = await apiPost<GoogleLoginResponse>('auth/google/', payload)
+    console.log('[otter:google] loginWithGoogle: javob keldi', {
+      userId: response?.user?.id,
+      email: response?.user?.email,
+      hasAccess: !!response?.tokens?.access,
+      hasRefresh: !!response?.tokens?.refresh,
+    })
+
+    setSession(response.user, response.tokens)
+    await fetchMyProfile()
+    console.log('[otter:google] navigateTo(/app)')
     navigateTo('/app')
   }
 
-  // Mock Google login
-  function loginWithGoogle() {
-    setSession({ ...mockUser })
-    navigateTo('/app')
+  async function forgotPassword(email: string) {
+    return apiPost<{ detail: string }>('auth/forgot-password/', { email })
+  }
+
+  async function forgotPasswordVerify(email: string, code: string) {
+    return apiPost<{ reset_token: string }>('auth/forgot-password/verify/', {
+      email,
+      code,
+    })
+  }
+
+  async function forgotPasswordConfirm(reset_token: string, new_password: string) {
+    return apiPost<{ detail: string }>('auth/forgot-password/confirm/', {
+      reset_token,
+      new_password,
+    })
+  }
+
+  /**
+   * Parolni backendda almashtirish. MOBILE API boshqa path/body bo‘lsa, shu yerni moslang
+   * (masalan `current_password` / `password` maydonlari).
+   */
+  async function changePassword(currentPassword: string, newPassword: string) {
+    return apiPost<{ detail?: string }>('auth/change-password/', {
+      old_password: currentPassword,
+      new_password: newPassword,
+    })
   }
 
   function logout() {
+    clearAuthSession()
     user.value = null
-    demoToken.value = null
+    accessToken.value = null
+    refreshToken.value = null
+    profileFirstName.value = ''
+    profileLastName.value = ''
+    profileLoaded.value = false
     navigateTo('/')
   }
 
@@ -55,11 +205,22 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     user,
-    demoToken,
+    accessToken,
+    refreshToken,
+    profileFirstName,
+    profileLastName,
+    profileLoaded,
     isLoggedIn,
+    requiresProfileFill,
+    fetchMyProfile,
+    updateProfile,
     login,
     register,
     loginWithGoogle,
+    forgotPassword,
+    forgotPasswordVerify,
+    forgotPasswordConfirm,
+    changePassword,
     logout,
     updateAvatar,
     updateName,
