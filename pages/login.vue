@@ -345,13 +345,26 @@ function validate() {
   return !errors.email && !errors.password
 }
 
+function normalizeErrorDetail(detail: unknown, fallback: string): string {
+  if (typeof detail === 'string')
+    return detail
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map(item => (typeof item === 'string' ? item : ''))
+      .filter(Boolean)
+    if (parts.length)
+      return parts.join(' ')
+  }
+  return fallback
+}
+
 async function handleLogin() {
   if (!validate()) return
   try {
     await authStore.login(form.email.trim(), form.password)
   }
   catch (err: any) {
-    errors.password = err?.response?.data?.detail || "Login xatoligi. Qayta urinib ko'ring."
+    errors.password = normalizeErrorDetail(err?.response?.data?.detail, "Login xatoligi. Qayta urinib ko'ring.")
   }
 }
 
@@ -365,7 +378,10 @@ async function handleGoogleLogin() {
     await authStore.loginWithGoogle({ firebase_token })
   }
   catch (err: any) {
-    googleError.value = err?.response?.data?.detail || err?.message || 'Вход через Google не удался'
+    googleError.value = normalizeErrorDetail(
+      err?.response?.data?.detail,
+      err?.message || 'Вход через Google не удался',
+    )
   }
   finally {
     googleLoading.value = false
@@ -399,7 +415,7 @@ async function onForgotSubmit() {
       forgotStep.value = 'code'
     }
     catch (err: any) {
-      forgotError.value = err?.response?.data?.detail || 'Не удалось отправить код'
+      forgotError.value = normalizeErrorDetail(err?.response?.data?.detail, 'Не удалось отправить код')
     }
     finally {
       forgotLoading.value = false
@@ -420,7 +436,7 @@ async function onForgotSubmit() {
       forgotStep.value = 'new-password'
     }
     catch (err: any) {
-      forgotError.value = err?.response?.data?.detail || 'Неверный код или срок истёк'
+      forgotError.value = normalizeErrorDetail(err?.response?.data?.detail, 'Неверный код или срок истёк')
     }
     finally {
       forgotLoading.value = false

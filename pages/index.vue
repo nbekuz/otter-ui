@@ -174,6 +174,19 @@ const checklistItems = [
   'Таймер Помодоро',
 ]
 
+function normalizeErrorDetail(detail: unknown, fallback: string): string {
+  if (typeof detail === 'string')
+    return detail
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map(item => (typeof item === 'string' ? item : ''))
+      .filter(Boolean)
+    if (parts.length)
+      return parts.join(' ')
+  }
+  return fallback
+}
+
 async function handleGoogleLogin() {
   googleError.value = ''
   if (googleLoading.value) return
@@ -184,7 +197,10 @@ async function handleGoogleLogin() {
     await authStore.loginWithGoogle({ firebase_token })
   }
   catch (err: any) {
-    googleError.value = err?.response?.data?.detail || err?.message || 'Вход через Google не удался'
+    googleError.value = normalizeErrorDetail(
+      err?.response?.data?.detail,
+      err?.message || 'Вход через Google не удался',
+    )
   }
   finally {
     googleLoading.value = false
