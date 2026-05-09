@@ -48,8 +48,11 @@ export default defineNuxtConfig({
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://159.194.221.54:8005/api/v1/',
       firebase: {
         apiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4',
-        /** Vercel domeni — Firebase Console → Authentication → Authorized domains ga qo‘shilgan bo‘lsin. Local uchun: `NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN=otter-6bdac.firebaseapp.com` */
-        authDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'otter-ui-seven.vercel.app',
+        /**
+         * `*.firebaseapp.com` — Firebase `__/auth/iframe` shu hostda xizmat qiladi (Vercelda yo‘q).
+         * Ilova URL hali ham `*.vercel.app` bo‘lishi mumkin; Console → Authorized domains ga ikkalasini qo‘shing.
+         */
+        authDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'otter-6bdac.firebaseapp.com',
         projectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || 'otter-6bdac',
         // Konsolda `*.appspot.com` ko‘rsatsa: NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET orqali yozing
         storageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'otter-6bdac.firebasestorage.app',

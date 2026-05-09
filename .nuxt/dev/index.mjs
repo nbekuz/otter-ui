@@ -642,7 +642,7 @@ const _inlineRuntimeConfig = {
     "apiBaseUrl": "http://159.194.221.54:8005/api/v1/",
     "firebase": {
       "apiKey": "AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4",
-      "authDomain": "otter-ui-seven.vercel.app",
+      "authDomain": "otter-6bdac.firebaseapp.com",
       "projectId": "otter-6bdac",
       "storageBucket": "otter-6bdac.firebasestorage.app",
       "messagingSenderId": "911773858551",
@@ -2119,22 +2119,7 @@ const plugins = [
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"19ee0-L2ToYBXRP/92xJ0wT3unkByJ+o4\"",
-    "mtime": "2026-05-09T00:30:03.714Z",
-    "size": 106208,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"6a1cb-hNTCoeT4CrOGoSkSowjyMpVc88k\"",
-    "mtime": "2026-05-09T00:30:03.714Z",
-    "size": 434635,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
