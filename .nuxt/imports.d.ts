@@ -34,7 +34,7 @@ export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
 export { useAppToast, AppToastType } from '../composables/useAppToast';
 export { useFirebaseAuth } from '../composables/useFirebaseAuth.client';
 export { api, apiGet, apiPost, apiPut, apiPatch, apiDelete } from '../utils/api';
-export { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, FIREBASE_ID_TOKEN_STORAGE_KEY, migrateLegacyTokens, getAccessToken, getRefreshToken, setAuthTokens, clearAuthSession, AuthTokens } from '../utils/auth-session';
+export { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, FIREBASE_ID_TOKEN_STORAGE_KEY, migrateLegacyTokens, getAccessToken, getRefreshToken, setAuthTokens, clearAuthSession, readRememberedLogin, writeRememberedLogin, clearRememberedLogin, AuthTokens } from '../utils/auth-session';
 export { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH, validateNewPassword } from '../utils/password-policy';
 export { useAuthStore } from '../stores/auth';
 export { useCalendarStore, CalendarViewType } from '../stores/calendar';

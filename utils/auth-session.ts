@@ -4,6 +4,11 @@ export const REFRESH_TOKEN_KEY = 'refresh_token'
 /** Debug: Google redirectdan keyin Firebase ID token (faqat ko‘rish / tekshirish). */
 export const FIREBASE_ID_TOKEN_STORAGE_KEY = 'otter.firebase.id_token'
 
+/** «Запомнить» — email va parol (faqat client, mahalliy qurilma). */
+const REMEMBER_LOGIN_FLAG = 'otter.auth.remember-login'
+const REMEMBER_LOGIN_EMAIL = 'otter.auth.saved-login-email'
+const REMEMBER_LOGIN_PASSWORD = 'otter.auth.saved-login-password'
+
 const LEGACY_ACCESS_KEY = 'otter.auth.access-token'
 const LEGACY_REFRESH_KEY = 'otter.auth.refresh-token'
 
@@ -61,4 +66,27 @@ export function clearAuthSession() {
 
 if (import.meta.client) {
   migrateLegacyTokens()
+}
+
+export function readRememberedLogin(): { email: string, password: string } | null {
+  if (!import.meta.client) return null
+  if (localStorage.getItem(REMEMBER_LOGIN_FLAG) !== '1') return null
+  const email = localStorage.getItem(REMEMBER_LOGIN_EMAIL) || ''
+  const password = localStorage.getItem(REMEMBER_LOGIN_PASSWORD) || ''
+  if (!email) return null
+  return { email, password }
+}
+
+export function writeRememberedLogin(email: string, password: string) {
+  if (!import.meta.client) return
+  localStorage.setItem(REMEMBER_LOGIN_FLAG, '1')
+  localStorage.setItem(REMEMBER_LOGIN_EMAIL, email)
+  localStorage.setItem(REMEMBER_LOGIN_PASSWORD, password)
+}
+
+export function clearRememberedLogin() {
+  if (!import.meta.client) return
+  localStorage.removeItem(REMEMBER_LOGIN_FLAG)
+  localStorage.removeItem(REMEMBER_LOGIN_EMAIL)
+  localStorage.removeItem(REMEMBER_LOGIN_PASSWORD)
 }

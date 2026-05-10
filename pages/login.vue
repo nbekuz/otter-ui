@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-dvh bg-white lg:flex lg:items-center lg:justify-center lg:bg-sber-gray-light lg:px-6 lg:py-10">
-    <div class="w-full overflow-hidden lg:grid lg:max-w-5xl lg:grid-cols-[1.05fr_0.95fr] lg:rounded-[32px] lg:bg-white lg:shadow-xl">
+  <div class="min-h-dvh bg-white md:px-2 lg:flex lg:items-center lg:justify-center lg:bg-sber-gray-light lg:px-6 lg:py-10">
+    <div class="w-full max-w-full overflow-hidden lg:grid lg:max-w-5xl lg:grid-cols-[1.05fr_0.95fr] lg:rounded-[32px] lg:bg-white lg:shadow-xl">
       <div class="hidden lg:flex lg:flex-col lg:justify-between lg:border-r lg:border-sber-gray-light lg:bg-white lg:p-10 lg:text-sber-black">
         <div>
           <NuxtLink to="/" class="inline-flex">
@@ -35,14 +35,14 @@
       </div>
 
       <div class="min-h-dvh bg-white lg:min-h-0">
-        <div class="flex items-center px-4 pt-14 pb-4 lg:px-8 lg:pt-8">
+        <div class="flex items-center px-4 pt-14 pb-4 sm:px-6 lg:px-8 lg:pt-8">
           <button class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light" type="button" @click="$router.back()">
             <ChevronLeft class="h-5 w-5 text-sber-black" />
           </button>
           <h1 class="ml-3 text-xl font-bold text-sber-black">Войти</h1>
         </div>
 
-        <div class="flex-1 px-6 pt-6 pb-10 lg:px-8">
+        <div class="flex-1 px-4 pt-6 pb-10 sm:px-6 lg:px-8">
           <p class="mb-8 text-sm leading-relaxed text-sber-gray">
             Введите данные вашей учётной записи для входа в Otter
           </p>
@@ -88,13 +88,21 @@
               <p v-if="errors.password" class="mt-1 ml-1 text-xs text-red-500">{{ errors.password }}</p>
             </div>
 
-            <div class="flex justify-end">
-              <button class="text-sm font-medium text-sber-green" type="button" @click="openForgotModal">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <OtterCheckbox
+                v-model="rememberMe"
+                align="center"
+                class="min-w-0 flex-1"
+                @update:model-value="onRememberToggle"
+              >
+                <span class="cursor-default select-none text-sm text-sber-black">Запомнить</span>
+              </OtterCheckbox>
+              <button class="shrink-0 text-sm font-medium text-sber-green" type="button" @click="openForgotModal">
                 Забыли пароль?
               </button>
             </div>
 
-            <button class="btn-primary mx-auto block w-full max-w-[320px]" type="submit">
+            <button class="btn-primary mx-auto block w-full sm:max-w-[320px]" type="submit">
               Войти
             </button>
           </form>
@@ -110,9 +118,9 @@
             <div class="h-px flex-1 bg-sber-gray-mid" />
           </div>
 
-          <p v-if="googleError" class="mx-auto mb-2 max-w-[320px] text-center text-xs text-red-500">{{ googleError }}</p>
+          <p v-if="googleError" class="mx-auto mb-2 max-w-full text-center text-xs text-red-500 sm:max-w-[320px]">{{ googleError }}</p>
           <button
-            class="mx-auto flex w-full max-w-[320px] items-center justify-center gap-3 rounded-2xl border border-sber-gray-mid bg-white py-4 font-semibold text-sber-black transition-colors active:bg-sber-gray-light disabled:cursor-not-allowed disabled:opacity-60"
+            class="mx-auto flex w-full max-w-full items-center justify-center gap-3 rounded-2xl border border-sber-gray-mid bg-white py-4 font-semibold text-sber-black transition-colors active:bg-sber-gray-light disabled:cursor-not-allowed disabled:opacity-60 sm:max-w-[320px]"
             type="button"
             :disabled="googleLoading"
             @click="handleGoogleLogin"
@@ -254,12 +262,14 @@
 import { ChevronLeft, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-vue-next'
 import logoUrl from '~/assets/img/logo.svg'
 import { validateNewPassword } from '~/utils/password-policy'
+import { clearRememberedLogin, readRememberedLogin, writeRememberedLogin } from '~/utils/auth-session'
 
 const authStore = useAuthStore()
 const metrics = ['планируйте', 'контролируйте', 'фокусируйтесь', 'управляйте']
 const form = reactive({ email: '', password: '' })
 const errors = reactive({ email: '', password: '' })
 const showPassword = ref(false)
+const rememberMe = ref(false)
 const googleLoading = ref(false)
 const googleError = ref('')
 
@@ -292,8 +302,20 @@ function flushPendingPasswordToast() {
   showPageToast(msg)
 }
 
+function onRememberToggle() {
+  if (!rememberMe.value)
+    clearRememberedLogin()
+}
+
 onMounted(() => {
   flushPendingPasswordToast()
+
+  const saved = readRememberedLogin()
+  if (saved) {
+    form.email = saved.email
+    form.password = saved.password
+    rememberMe.value = true
+  }
 
   const pending = useState<string | null>('googleBackendError', () => null)
   if (pending.value) {
@@ -362,6 +384,10 @@ async function handleLogin() {
   if (!validate()) return
   try {
     await authStore.login(form.email.trim(), form.password)
+    if (rememberMe.value)
+      writeRememberedLogin(form.email.trim(), form.password)
+    else
+      clearRememberedLogin()
   }
   catch (err: any) {
     errors.password = normalizeErrorDetail(err?.response?.data?.detail, "Login xatoligi. Qayta urinib ko'ring.")

@@ -20,10 +20,9 @@
 }
 
 @layer components {
-  /* Mobile phone frame wrapper */
+  /* Mobile: tor telefon simulyatsiyasi. Tablet+ (md) — to‘liq kenglik. */
   .phone-frame {
-    @apply relative mx-auto bg-white overflow-hidden;
-    max-width: 430px;
+    @apply relative mx-auto w-full max-w-[430px] bg-white overflow-hidden;
     min-height: 100dvh;
   }
 
@@ -100,9 +99,15 @@
   }
 }
 
+/* Tablet va kattaroq: telefon ramkasidagi 430px cheklov yo‘q */
+@media (min-width: 768px) {
+  .phone-frame {
+    @apply max-w-none;
+  }
+}
+
 @media (min-width: 1024px) {
   .phone-frame {
-    max-width: none;
     min-height: calc(100dvh - 3rem);
     border-radius: 2rem;
   }

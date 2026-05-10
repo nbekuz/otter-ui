@@ -1,15 +1,15 @@
 <template>
-  <div class="min-h-dvh bg-white lg:flex lg:items-center lg:justify-center lg:bg-sber-gray-light lg:px-6 lg:py-10">
-    <div class="w-full overflow-hidden lg:grid lg:max-w-5xl lg:grid-cols-[0.95fr_1.05fr] lg:rounded-[32px] lg:bg-white lg:shadow-xl">
+  <div class="min-h-dvh bg-white md:px-2 lg:flex lg:items-center lg:justify-center lg:bg-sber-gray-light lg:px-6 lg:py-10">
+    <div class="w-full max-w-full overflow-hidden lg:grid lg:max-w-5xl lg:grid-cols-[0.95fr_1.05fr] lg:rounded-[32px] lg:bg-white lg:shadow-xl">
       <div class="min-h-dvh bg-white lg:order-2 lg:min-h-0">
-        <div class="flex items-center px-4 pt-14 pb-4 lg:px-8 lg:pt-8">
+        <div class="flex items-center px-4 pt-14 pb-4 sm:px-6 lg:px-8 lg:pt-8">
           <button class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light" type="button" @click="$router.back()">
             <ChevronLeft class="h-5 w-5 text-sber-black" />
           </button>
           <h1 class="ml-3 text-xl font-bold text-sber-black">Создать аккаунт</h1>
         </div>
 
-        <div class="px-6 pt-6 pb-10 lg:px-8">
+        <div class="px-4 pt-6 pb-10 sm:px-6 lg:px-8">
           <form class="space-y-4" novalidate @submit.prevent="handleRegister">
             <div>
               <label class="mb-2 block text-sm font-medium text-sber-gray">Email</label>
@@ -36,7 +36,7 @@
                 <input
                   v-model="form.password"
                   :type="showPassword ? 'text' : 'password'"
-                  placeholder="8–20: Aa, 0–9 и спецсимвол (!@…)"
+                  placeholder="Введите пароль"
                   autocomplete="new-password"
                   required
                   class="input-field pl-12 pr-12"
@@ -75,28 +75,24 @@
               </p>
             </div>
 
+            <OtterCheckbox v-model="rememberMe" @update:model-value="onRememberToggle">
+              <span class="text-sm leading-relaxed text-sber-gray">Запомнить email и пароль на этом устройстве</span>
+            </OtterCheckbox>
+
             <div>
-              <div class="flex items-start gap-3">
-                <button
-                  class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg border-2"
-                  :class="agreeTerms ? 'border-sber-green bg-sber-green' : 'border-sber-gray-mid'"
-                  type="button"
-                  @click="toggleTerms"
-                >
-                  <Check v-if="agreeTerms" class="h-4 w-4 text-white" />
-                </button>
+              <OtterCheckbox v-model="agreeTerms" @update:model-value="onTermsToggle">
                 <p class="text-sm leading-relaxed text-sber-gray">
                   Я соглашаюсь с
                   <span class="font-medium text-sber-green">Пользовательским соглашением</span>
                   и
                   <span class="font-medium text-sber-green">Политикой конфиденциальности</span>
                 </p>
-              </div>
+              </OtterCheckbox>
               <p v-if="errors.terms" class="mt-2 ml-1 text-xs text-red-500">{{ errors.terms }}</p>
             </div>
-            <div class="w-full flex lg:justify-center items-center">
+            <div class="flex w-full items-center lg:justify-center">
 
-              <button class="btn-primary  lg:max-w-[360px] disabled:opacity-60 disabled:cursor-not-allowed" type="submit" :disabled="isSubmitting">
+              <button class="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60 lg:max-w-[360px]" type="submit" :disabled="isSubmitting">
                 {{ isSubmitting ? 'Отправка...' : 'Создать аккаунт' }}
               </button>
             </div>
@@ -156,9 +152,10 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronLeft, Mail, Lock, Eye, EyeOff, Check, CheckCircle } from 'lucide-vue-next'
+import { ChevronLeft, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-vue-next'
 import logoUrl from '~/assets/img/logo.svg'
 import { validateNewPassword } from '~/utils/password-policy'
+import { clearRememberedLogin, readRememberedLogin, writeRememberedLogin } from '~/utils/auth-session'
 
 const authStore = useAuthStore()
 const metrics = ['планируйте', 'контролируйте', 'фокусируйтесь', 'управляйте']
@@ -168,6 +165,7 @@ const errors = reactive({ email: '', password: '', confirmPassword: '', terms: '
 const showPassword = ref(false)
 const showConfirm = ref(false)
 const agreeTerms = ref(false)
+const rememberMe = ref(false)
 const isSubmitting = ref(false)
 const toast = reactive({
   visible: false,
@@ -208,6 +206,26 @@ function showToast(type: 'success' | 'error', message: string) {
   toast.message = message
 }
 
+function onRememberToggle() {
+  if (!rememberMe.value)
+    clearRememberedLogin()
+}
+
+function onTermsToggle(accepted: boolean) {
+  if (accepted)
+    errors.terms = ''
+}
+
+onMounted(() => {
+  const saved = readRememberedLogin()
+  if (saved) {
+    form.email = saved.email
+    form.password = saved.password
+    form.confirmPassword = saved.password
+    rememberMe.value = true
+  }
+})
+
 async function handleRegister() {
   if (!validate()) return
   if (isSubmitting.value) return
@@ -217,6 +235,10 @@ async function handleRegister() {
 
   try {
     await authStore.register(form.email.trim(), form.password, '', '', { navigateOnSuccess: false })
+    if (rememberMe.value)
+      writeRememberedLogin(form.email.trim(), form.password)
+    else
+      clearRememberedLogin()
     showToast('success', 'Аккаунт создан! Проверьте почту для подтверждения.')
     setTimeout(() => {
       navigateTo('/profile-fill')
@@ -248,12 +270,6 @@ async function handleRegister() {
   }
 }
 
-function toggleTerms() {
-  agreeTerms.value = !agreeTerms.value
-  if (agreeTerms.value) {
-    errors.terms = ''
-  }
-}
 </script>
 
 <style scoped>

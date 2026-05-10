@@ -1,22 +1,28 @@
 <template>
-  <div class="min-h-dvh bg-white lg:flex lg:items-center lg:justify-center lg:bg-white lg:px-0 lg:py-0">
-    <div class="w-full lg:grid lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch lg:gap-16 lg:px-12 xl:px-20">
-      <div class="flex flex-1  flex-col items-center justify-start px-6 pt-6 pb-8 lg:items-start lg:px-0 lg:pt-2 lg:pb-6">
+  <div class="min-h-dvh w-full overflow-x-hidden bg-white lg:flex lg:items-center lg:justify-center">
+    <div
+      class="w-full px-4 pt-6 pb-8 md:px-8 md:pt-8 md:pb-10 lg:grid lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch lg:gap-12 lg:px-10 lg:py-10 xl:gap-16 xl:px-14 2xl:px-20"
+    >
+      <div class="flex w-full flex-1 flex-col items-center justify-start md:items-stretch lg:items-start lg:pt-0 lg:pb-2">
         <!-- App Logo & Illustration -->
         <div class="relative mb-8 w-fit lg:origin-left lg:scale-110">
           <BrandLogo size="lg" show-name-from="always" text-class="text-sber-black" />
           <div class="pointer-events-none absolute -top-2 left-[calc(4rem-0.5rem)] h-6 w-6 rounded-full bg-sber-green/20" />
           <div class="pointer-events-none absolute -bottom-1 -left-3 h-4 w-4 rounded-full bg-sber-blue/20" />
         </div>
-        <p class="mb-2 max-w-2xl px-4 text-center text-lg leading-relaxed text-sber-gray lg:px-0 lg:text-left lg:text-2xl lg:leading-snug">
+        <p
+          class="mb-2 w-full text-center text-lg leading-relaxed text-sber-gray md:text-left md:text-xl md:leading-relaxed lg:max-w-2xl lg:text-2xl lg:leading-snug"
+        >
           Планировщик задач для тех, кто ценит время
         </p>
 
-        <div class="mt-10 mb-4 grid w-full max-w-3xl grid-cols-1 gap-4 lg:mr-auto lg:max-w-[700px] lg:grid-cols-2 lg:gap-5">
+        <div
+          class="mt-10 mb-4 grid w-full grid-cols-1 gap-4 md:grid-cols-2 md:gap-4 lg:gap-5"
+        >
           <div
             v-for="feature in features"
             :key="feature.text"
-            class="flex items-start gap-3 rounded-[24px] bg-sber-gray-light px-5 py-5 text-left shadow-sm transition-transform lg:min-h-[136px] lg:hover:-translate-y-0.5"
+            class="flex items-start gap-3 rounded-[24px] bg-sber-gray-light px-5 py-5 text-left shadow-sm transition-transform md:min-h-[120px] lg:min-h-[136px] lg:hover:-translate-y-0.5"
           >
             <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-xl" :class="feature.bg">
               {{ feature.icon }}
@@ -28,11 +34,13 @@
           </div>
         </div>
 
-        <div class="mt-2 w-full max-w-3xl rounded-[24px] border border-sber-gray-mid/25 bg-white px-5 py-4 shadow-sm lg:mr-auto lg:max-w-[700px]">
+        <div
+          class="mt-2 w-full rounded-[24px] border border-sber-gray-mid/25 bg-white px-5 py-4 shadow-sm md:px-6 md:py-5"
+        >
           <p class="text-xs font-semibold uppercase tracking-wide text-sber-gray">
             В одном приложении
           </p>
-          <ul class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          <ul class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 md:gap-4">
             <li
               v-for="item in checklistItems"
               :key="item"
@@ -47,15 +55,19 @@
         </div>
       </div>
 
-      <div class="px-6 pb-10 lg:p-0">
-        <div class="rounded-[32px] bg-sber-gray-light p-6 lg:p-8">
+      <div class="w-full max-w-none pb-10 pt-2 md:pb-12 lg:max-w-none lg:pb-0 lg:pt-0">
+        <div class="w-full rounded-[32px] bg-sber-gray-light p-6 md:p-8 lg:p-8">
           <p class="text-sm font-semibold text-sber-green">Планирование, фокус и порядок</p>
-          <h2 class="mt-3 max-w-md text-2xl font-bold text-sber-black">Все основные инструменты для работы с задачами в одном месте.</h2>
-          <p class="mt-3 max-w-lg text-sm leading-7 text-sber-gray">
+          <h2 class="mt-3 w-full text-2xl font-bold text-sber-black lg:max-w-xl xl:max-w-2xl">
+            Все основные инструменты для работы с задачами в одном месте.
+          </h2>
+          <p class="mt-3 w-full text-sm leading-7 text-sber-gray md:text-base lg:max-w-xl">
             Ведите списки задач, планируйте время в календаре, расставляйте приоритеты и сохраняйте фокус в течение дня.
           </p>
 
-          <div class="relative mt-6 grid max-w-[430px] grid-cols-2 items-start gap-2 sm:gap-3">
+          <div
+            class="relative mt-6 w-full grid grid-cols-2 items-start gap-2 sm:gap-3 md:mt-8 md:gap-4"
+          >
             <div
               v-for="(metric, index) in metrics"
               :key="metric"
@@ -75,17 +87,27 @@
             </div>
           </div>
 
-          <div class="mt-6 flex w-full flex-col items-center gap-3 lg:flex-row lg:flex-wrap lg:justify-center">
-            <button class="btn-primary  w-full max-w-[260px] lg:w-auto lg:min-w-[190px] lg:px-7" type="button" @click="$router.push('/register')">
-              Создать аккаунт
-            </button>
-            <button class="btn-outline w-full max-w-[260px] lg:w-auto lg:min-w-[160px] lg:px-7" type="button" @click="$router.push('/login')">
-              Войти
-            </button>
-            <div class="flex w-full max-w-[260px] flex-col items-center gap-2 lg:w-auto lg:min-w-[220px]">
+          <div class="mt-6 flex w-full flex-col items-center gap-2 md:mt-8 md:gap-3">
+            <div class="flex w-full flex-wrap justify-center gap-2 md:gap-3">
+              <button
+                class="btn-primary !w-auto min-w-0 shrink px-4 sm:px-6 md:px-8"
+                type="button"
+                @click="$router.push('/register')"
+              >
+                Создать аккаунт
+              </button>
+              <button
+                class="btn-outline !w-auto min-w-0 shrink px-4 sm:px-6 md:px-8"
+                type="button"
+                @click="$router.push('/login')"
+              >
+                Войти
+              </button>
+            </div>
+            <div class="flex w-full flex-col items-center gap-2">
               <p v-if="googleError" class="w-full text-center text-xs text-red-500">{{ googleError }}</p>
               <button
-                class="flex w-full items-center justify-center gap-3 rounded-2xl border border-sber-gray-mid bg-white py-4 font-semibold text-sber-black transition-colors active:bg-sber-gray-light disabled:cursor-not-allowed disabled:opacity-60"
+                class="flex !w-auto max-w-full items-center justify-center gap-3 rounded-2xl border border-sber-gray-mid bg-white px-5 py-4 text-sm font-semibold text-sber-black transition-colors active:bg-sber-gray-light disabled:cursor-not-allowed disabled:opacity-60 sm:px-6 sm:text-base"
                 type="button"
                 :disabled="googleLoading"
                 @click="handleGoogleLogin"

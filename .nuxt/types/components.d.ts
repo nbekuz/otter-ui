@@ -18,6 +18,7 @@ interface _GlobalComponents {
   BrandLogo: typeof import("../../components/BrandLogo.vue")['default']
   DateFieldRu: typeof import("../../components/DateFieldRu.vue")['default']
   GoogleLoginButton: typeof import("../../components/GoogleLoginButton.client.vue")['default']
+  OtterCheckbox: typeof import("../../components/OtterCheckbox.vue")['default']
   TimeFieldRu: typeof import("../../components/TimeFieldRu.vue")['default']
   LayoutBottomNav: typeof import("../../components/layout/BottomNav.vue")['default']
   SettingsRow: typeof import("../../components/settings/Row.vue")['default']
@@ -51,6 +52,7 @@ interface _GlobalComponents {
   LazyBrandLogo: LazyComponent<typeof import("../../components/BrandLogo.vue")['default']>
   LazyDateFieldRu: LazyComponent<typeof import("../../components/DateFieldRu.vue")['default']>
   LazyGoogleLoginButton: LazyComponent<typeof import("../../components/GoogleLoginButton.client.vue")['default']>
+  LazyOtterCheckbox: LazyComponent<typeof import("../../components/OtterCheckbox.vue")['default']>
   LazyTimeFieldRu: LazyComponent<typeof import("../../components/TimeFieldRu.vue")['default']>
   LazyLayoutBottomNav: LazyComponent<typeof import("../../components/layout/BottomNav.vue")['default']>
   LazySettingsRow: LazyComponent<typeof import("../../components/settings/Row.vue")['default']>

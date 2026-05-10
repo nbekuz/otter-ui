@@ -1,9 +1,10 @@
-import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, inject, shallowRef, ref, getCurrentInstance, reactive, effectScope, isRef, isReactive, toRaw, unref, onMounted, nextTick, getCurrentScope, onScopeDispose, watch, toRefs, markRaw, computed, readonly, defineComponent, createElementBlock, provide, cloneVNode, h, defineAsyncComponent, shallowReactive, Suspense, Fragment, useSSRContext, createApp, mergeProps, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, toRef, isReadonly, isShallow } from 'vue';
+import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, inject, toRef, isRef, shallowRef, ref, getCurrentInstance, reactive, effectScope, isReactive, toRaw, unref, onMounted, nextTick, getCurrentScope, onScopeDispose, watch, toRefs, markRaw, computed, readonly, defineComponent, createElementBlock, provide, cloneVNode, h, useSSRContext, defineAsyncComponent, shallowReactive, Suspense, Fragment, createApp, mergeProps, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, isReadonly, isShallow } from 'vue';
 import { p as parseURL, i as encodePath, k as decodePath, l as hasProtocol, m as isScriptProtocol, f as joinURL, w as withQuery, s as sanitizeStatusCode, n as getContext, $ as $fetch, o as defu, q as createHooks, c as createError$1, r as executeAsync } from '../nitro/nitro.mjs';
 import { b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import axios from 'axios';
-import { ssrRenderAttrs, ssrRenderComponent, ssrInterpolate, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
+import { ssrRenderTeleport, ssrRenderClass, ssrRenderComponent, ssrInterpolate, ssrRenderAttrs, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
+import { CheckCircle } from 'lucide-vue-next';
 import dayjs from 'dayjs';
 import 'node:http';
 import 'node:https';
@@ -425,43 +426,43 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-RHQTv434.mjs')
+    component: () => import('./index-CTJwdjjd.mjs')
   },
   {
     name: "login",
     path: "/login",
-    component: () => import('./login-DKIeENk1.mjs')
+    component: () => import('./login-DfmpXRT_.mjs')
   },
   {
     name: "matrix",
     path: "/matrix",
-    component: () => import('./matrix-b0_NjkTx.mjs')
+    component: () => import('./matrix-BsStc0Y2.mjs')
   },
   {
     name: "calendar",
     path: "/calendar",
-    component: () => import('./calendar-Bj5hU2EQ.mjs')
+    component: () => import('./calendar-W8Qnn6mw.mjs')
   },
   {
     name: "pomodoro",
     path: "/pomodoro",
-    component: () => import('./pomodoro-Co9IL3BM.mjs')
+    component: () => import('./pomodoro-CA43JtVV.mjs')
   },
   {
     name: "register",
     path: "/register",
-    component: () => import('./register-5NBEDc2n.mjs')
+    component: () => import('./register-QIjNh_AP.mjs')
   },
   {
     name: "settings",
     path: "/settings",
-    component: () => import('./settings-76kgWqRM.mjs')
+    component: () => import('./settings-C0QpxNgQ.mjs')
   },
   {
     name: "app",
     path: "/app",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import('./index-BOb6Bqar.mjs')
+    component: () => import('./index-C9cSpw4S.mjs')
   },
   {
     name: "app-matrix",
@@ -473,7 +474,7 @@ const _routes = [
     name: "app-profile",
     path: "/app/profile",
     meta: __nuxt_page_meta$4 || {},
-    component: () => import('./profile-CjpW4i9X.mjs')
+    component: () => import('./profile-Cg8HN4Zr.mjs')
   },
   {
     name: "app-calendar",
@@ -491,18 +492,18 @@ const _routes = [
     name: "app-pomodoro",
     path: "/app/pomodoro",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./pomodoro-BFCoM9CG.mjs')
+    component: () => import('./pomodoro-DD3w6ZfG.mjs')
   },
   {
     name: "app-settings",
     path: "/app/settings",
     meta: __nuxt_page_meta || {},
-    component: () => import('./settings-OchUcK1X.mjs')
+    component: () => import('./settings-BzU_UdbB.mjs')
   },
   {
     name: "profile-fill",
     path: "/profile-fill",
-    component: () => import('./profile-fill-KJ-9WMh8.mjs')
+    component: () => import('./profile-fill-DB4WL3wQ.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1296,7 +1297,7 @@ function useLocalStorage(key, initialValue, options = {}) {
 function setAuthTokens(tokens) {
   return;
 }
-const DEFAULT_API_BASE_URL = "http://159.194.221.54:8005/api/v1/";
+const DEFAULT_API_BASE_URL = "https://admin.skkamni.ru/api/v1/";
 const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL;
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -1343,7 +1344,7 @@ const globalMiddleware = [
   manifest_45route_45rule
 ];
 const namedMiddleware = {
-  auth: () => import('./auth-C0E7N-Cg.mjs')
+  auth: () => import('./auth-BExbDmfg.mjs')
 };
 const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:router",
@@ -1602,6 +1603,32 @@ defineComponent({
     };
   }
 });
+const useStateKeyPrefix = "$s";
+function useState(...args) {
+  const autoKey = typeof args[args.length - 1] === "string" ? args.pop() : void 0;
+  if (typeof args[0] !== "string") {
+    args.unshift(autoKey);
+  }
+  const [_key, init] = args;
+  if (!_key || typeof _key !== "string") {
+    throw new TypeError("[nuxt] [useState] key must be a string: " + _key);
+  }
+  if (init !== void 0 && typeof init !== "function") {
+    throw new Error("[nuxt] [useState] init must be a function: " + init);
+  }
+  const key = useStateKeyPrefix + _key;
+  const nuxtApp = useNuxtApp();
+  const state = toRef(nuxtApp.payload.state, key);
+  if (state.value === void 0 && init) {
+    const initialValue = init();
+    if (isRef(initialValue)) {
+      nuxtApp.payload.state[key] = initialValue;
+      return initialValue;
+    }
+    state.value = initialValue;
+  }
+  return state;
+}
 const plugin = /* @__PURE__ */ defineNuxtPlugin({
   name: "pinia",
   setup(nuxtApp) {
@@ -1628,9 +1655,59 @@ const plugins = [
   plugin,
   components_plugin_z4hgvsiddfKkfXTP6M8M4zG5Cb7sGnDhcryKVM45Di4
 ];
+const DEFAULT_MS = 4500;
+function useAppToast() {
+  const toast = useState("app-global-toast", () => ({
+    visible: false,
+    message: "",
+    type: "success"
+  }));
+  function hideToast() {
+    toast.value.visible = false;
+  }
+  function showToast(message, type = "success", durationMs = DEFAULT_MS) {
+    return;
+  }
+  return { toast, showToast, hideToast };
+}
+const _sfc_main$3 = /* @__PURE__ */ defineComponent({
+  __name: "AppGlobalToast",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const { toast } = useAppToast();
+    return (_ctx, _push, _parent, _attrs) => {
+      ssrRenderTeleport(_push, (_push2) => {
+        if (unref(toast).visible) {
+          _push2(`<div class="${ssrRenderClass([unref(toast).type === "success" ? "border-sber-green bg-sber-green-light" : "border-red-300 bg-red-50", "fixed left-1/2 top-[max(5rem,env(safe-area-inset-top,0px)+1rem)] z-[100] flex max-w-[min(100vw-2rem,420px)] -translate-x-1/2 items-center gap-3 rounded-2xl border px-4 py-3 shadow-lg"])}" role="status" data-v-ee22b97d>`);
+          _push2(ssrRenderComponent(unref(CheckCircle), {
+            class: ["h-5 w-5 flex-shrink-0", unref(toast).type === "success" ? "text-sber-green" : "text-red-500"],
+            "aria-hidden": "true"
+          }, null, _parent));
+          _push2(`<p class="${ssrRenderClass([unref(toast).type === "success" ? "text-sber-green" : "text-red-600", "text-sm font-medium"])}" data-v-ee22b97d>${ssrInterpolate(unref(toast).message)}</p></div>`);
+        } else {
+          _push2(`<!---->`);
+        }
+      }, "body", false, _parent);
+    };
+  }
+});
+const _export_sfc = (sfc, props) => {
+  const target = sfc.__vccOpts || sfc;
+  for (const [key, val] of props) {
+    target[key] = val;
+  }
+  return target;
+};
+const _sfc_setup$3 = _sfc_main$3.setup;
+_sfc_main$3.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/AppGlobalToast.vue");
+  return _sfc_setup$3 ? _sfc_setup$3(props, ctx) : void 0;
+};
+const __nuxt_component_0 = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-ee22b97d"]]);
 const layouts = {
-  app: defineAsyncComponent(() => import('./app-CWVlB0fU.mjs').then((m) => m.default || m)),
-  default: defineAsyncComponent(() => import('./default-m3NOsT_2.mjs').then((m) => m.default || m))
+  app: defineAsyncComponent(() => import('./app-D-taFagg.mjs').then((m) => m.default || m)),
+  default: defineAsyncComponent(() => import('./default-BCm8t7aB.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
@@ -1654,7 +1731,7 @@ const nuxtLayoutProps = {
     default: null
   }
 };
-const __nuxt_component_0 = defineComponent({
+const __nuxt_component_1 = defineComponent({
   name: "NuxtLayout",
   inheritAttrs: false,
   props: nuxtLayoutProps,
@@ -1816,7 +1893,7 @@ const defineRouteProvider = (name = "RouteProvider") => defineComponent({
   }
 });
 const RouteProvider = defineRouteProvider();
-const __nuxt_component_1 = defineComponent({
+const __nuxt_component_2 = defineComponent({
   name: "NuxtPage",
   inheritAttrs: false,
   props: {
@@ -2215,11 +2292,13 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
     const settingsStore = useSettingsStore();
     const isDark = computed(() => settingsStore.appSettings.theme === "dark");
     return (_ctx, _push, _parent, _attrs) => {
-      const _component_NuxtLayout = __nuxt_component_0;
-      const _component_NuxtPage = __nuxt_component_1;
+      const _component_AppGlobalToast = __nuxt_component_0;
+      const _component_NuxtLayout = __nuxt_component_1;
+      const _component_NuxtPage = __nuxt_component_2;
       _push(`<div${ssrRenderAttrs(mergeProps({
         class: ["min-h-dvh", unref(isDark) ? "dark bg-[#0f1115]" : "bg-white"]
       }, _attrs))}>`);
+      _push(ssrRenderComponent(_component_AppGlobalToast, null, null, _parent));
       _push(ssrRenderComponent(_component_NuxtLayout, null, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
@@ -2341,5 +2420,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { useSettingsStore as a, useRoute as b, defaultPomodoroSettings as c, defineStore as d, entry_default as default, useLocalStorage as e, faqData as f, defineNuxtRouteMiddleware as g, useRouter as h, encodeRoutePath as i, useRuntimeConfig as j, nuxtLinkDefaults as k, apiGet as l, mockTasks as m, navigateTo as n, apiPut as o, apiPost as p, setAuthTokens as q, resolveRouteObject as r, soundOptions as s, useNuxtApp as u, workSoundOptions as w };
+export { _export_sfc as _, useSettingsStore as a, useRoute as b, defaultPomodoroSettings as c, defineStore as d, entry_default as default, useLocalStorage as e, faqData as f, defineNuxtRouteMiddleware as g, useRouter as h, encodeRoutePath as i, useNuxtApp as j, useRuntimeConfig as k, nuxtLinkDefaults as l, mockTasks as m, navigateTo as n, apiGet as o, apiPut as p, apiPost as q, resolveRouteObject as r, soundOptions as s, setAuthTokens as t, useState as u, workSoundOptions as w };
 //# sourceMappingURL=server.mjs.map

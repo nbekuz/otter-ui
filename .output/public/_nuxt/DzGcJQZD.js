@@ -1,1 +1,0 @@
-import{_ as o}from"./DlAUqK2U.js";import{a as t,c as r,ak as s}from"./ClMB4Kbo.js";const a={},c={class:"phone-frame"};function n(e,_){return t(),r("div",c,[s(e.$slots,"default")])}const d=o(a,[["render",n]]);export{d as default};
