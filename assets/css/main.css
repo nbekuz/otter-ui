@@ -100,7 +100,7 @@
 }
 
 /* Tablet va kattaroq: telefon ramkasidagi 430px cheklov yo‘q */
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .phone-frame {
     @apply max-w-none;
   }
