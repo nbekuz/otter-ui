@@ -1,11 +1,11 @@
-import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, inject, toRef, isRef, shallowRef, ref, getCurrentInstance, reactive, effectScope, isReactive, toRaw, unref, onMounted, nextTick, getCurrentScope, onScopeDispose, watch, toRefs, markRaw, computed, readonly, defineComponent, createElementBlock, provide, cloneVNode, h, useSSRContext, defineAsyncComponent, shallowReactive, Suspense, Fragment, createApp, mergeProps, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, isReadonly, isShallow } from 'vue';
-import { p as parseURL, i as encodePath, k as decodePath, l as hasProtocol, m as isScriptProtocol, f as joinURL, w as withQuery, s as sanitizeStatusCode, n as getContext, $ as $fetch, o as defu, q as createHooks, c as createError$1, r as executeAsync } from '../nitro/nitro.mjs';
+import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { toRef, isRef, hasInjectionContext, inject, getCurrentInstance, ref, reactive, effectScope, isReactive, toRaw, getCurrentScope, onScopeDispose, watch, nextTick, toRefs, markRaw, computed, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, useSSRContext, defineAsyncComponent, unref, shallowReactive, Suspense, Fragment, createApp, mergeProps, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, onMounted, readonly, isReadonly, isShallow } from 'vue';
+import { i as hasProtocol, k as isScriptProtocol, f as joinURL, p as parseURL, l as encodePath, m as decodePath, w as withQuery, s as sanitizeStatusCode, n as getContext, $ as $fetch, o as defu, q as createHooks, c as createError$1, r as executeAsync } from '../nitro/nitro.mjs';
 import { b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import axios from 'axios';
+import dayjs from 'dayjs';
 import { ssrRenderTeleport, ssrRenderClass, ssrRenderComponent, ssrInterpolate, ssrRenderAttrs, ssrRenderSuspense, ssrRenderVNode } from 'vue/server-renderer';
 import { CheckCircle } from 'lucide-vue-next';
-import dayjs from 'dayjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -426,84 +426,84 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-CTJwdjjd.mjs')
+    component: () => import('./index-BXBnGYEj.mjs')
   },
   {
     name: "login",
     path: "/login",
-    component: () => import('./login-DfmpXRT_.mjs')
+    component: () => import('./login-Dio_M1us.mjs')
   },
   {
     name: "matrix",
     path: "/matrix",
-    component: () => import('./matrix-BsStc0Y2.mjs')
+    component: () => import('./matrix-BlkikQGg.mjs')
   },
   {
     name: "calendar",
     path: "/calendar",
-    component: () => import('./calendar-W8Qnn6mw.mjs')
+    component: () => import('./calendar-8rIVYj5j.mjs')
   },
   {
     name: "pomodoro",
     path: "/pomodoro",
-    component: () => import('./pomodoro-CA43JtVV.mjs')
+    component: () => import('./pomodoro-BFzOuHH3.mjs')
   },
   {
     name: "register",
     path: "/register",
-    component: () => import('./register-QIjNh_AP.mjs')
+    component: () => import('./register-DuQ1ouoV.mjs')
   },
   {
     name: "settings",
     path: "/settings",
-    component: () => import('./settings-C0QpxNgQ.mjs')
+    component: () => import('./settings-BAyOInp9.mjs')
   },
   {
     name: "app",
     path: "/app",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import('./index-C9cSpw4S.mjs')
+    component: () => import('./index-Sa6G1K7c.mjs')
   },
   {
     name: "app-matrix",
     path: "/app/matrix",
     meta: __nuxt_page_meta$5 || {},
-    component: () => import('./matrix-fMNBaHkF.mjs')
+    component: () => import('./matrix-C9GylDiv.mjs')
   },
   {
     name: "app-profile",
     path: "/app/profile",
     meta: __nuxt_page_meta$4 || {},
-    component: () => import('./profile-Cg8HN4Zr.mjs')
+    component: () => import('./profile-C9Fda4N_.mjs')
   },
   {
     name: "app-calendar",
     path: "/app/calendar",
     meta: __nuxt_page_meta$3 || {},
-    component: () => import('./calendar-DeIX_2jf.mjs')
+    component: () => import('./calendar-Ck4V4lIK.mjs')
   },
   {
     name: "app-new-task",
     path: "/app/new-task",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./new-task-C1eXLbm0.mjs')
+    component: () => import('./new-task-DMIMkq5F.mjs')
   },
   {
     name: "app-pomodoro",
     path: "/app/pomodoro",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./pomodoro-DD3w6ZfG.mjs')
+    component: () => import('./pomodoro-CQnYyHbb.mjs')
   },
   {
     name: "app-settings",
     path: "/app/settings",
     meta: __nuxt_page_meta || {},
-    component: () => import('./settings-BzU_UdbB.mjs')
+    component: () => import('./settings-B-dtX1jh.mjs')
   },
   {
     name: "profile-fill",
     path: "/profile-fill",
-    component: () => import('./profile-fill-DB4WL3wQ.mjs')
+    component: () => import('./profile-fill-DAwwwi-v.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1297,27 +1297,64 @@ function useLocalStorage(key, initialValue, options = {}) {
 function setAuthTokens(tokens) {
   return;
 }
-const DEFAULT_API_BASE_URL = "https://admin.skkamni.ru/api/v1/";
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL;
+const DEFAULT_API_BASE_URL = "http://159.194.221.54:8005/api/v1/";
+function resolveApiBaseUrl() {
+  const fromEnv = process.env.NUXT_PUBLIC_API_BASE_URL;
+  if (fromEnv) return fromEnv.endsWith("/") ? fromEnv : `${fromEnv}/`;
+  return DEFAULT_API_BASE_URL;
+}
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: resolveApiBaseUrl(),
   headers: {
     "Content-Type": "application/json"
   }
 });
 api.interceptors.request.use((config) => {
+  config.baseURL = resolveApiBaseUrl();
   if (config.data instanceof FormData) {
     delete config.headers["Content-Type"];
   }
   return config;
 });
+let refreshPromise = null;
+async function refreshAccessToken() {
+  return null;
+}
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error?.response?.status === 401) ;
+    const originalRequest = error?.config;
+    const status = error?.response?.status;
+    if (status === 401 && originalRequest && !originalRequest._retry && !String(originalRequest.url || "").includes("auth/token/refresh/") && !String(originalRequest.url || "").includes("auth/login/") && !String(originalRequest.url || "").includes("auth/register/")) {
+      originalRequest._retry = true;
+      try {
+        if (!refreshPromise) {
+          refreshPromise = refreshAccessToken().finally(() => {
+            refreshPromise = null;
+          });
+        }
+        const access = await refreshPromise;
+        if (access) {
+          originalRequest.headers.Authorization = `Bearer ${access}`;
+          return api(originalRequest);
+        }
+      } catch {
+      }
+    }
     return Promise.reject(error);
   }
 );
+function getApiErrorMessage(error, fallback = "Ошибка запроса") {
+  const err = error;
+  const data = err?.response?.data;
+  if (!data) return err?.message || fallback;
+  if (typeof data.detail === "string") return data.detail;
+  const firstKey = Object.keys(data)[0];
+  const firstVal = firstKey ? data[firstKey] : null;
+  if (Array.isArray(firstVal) && typeof firstVal[0] === "string") return firstVal[0];
+  if (typeof firstVal === "string") return firstVal;
+  return fallback;
+}
 async function apiGet(url, config) {
   const response = await api.get(url, config);
   return response.data;
@@ -1330,6 +1367,1029 @@ async function apiPut(url, data, config) {
   const response = await api.put(url, data, config);
   return response.data;
 }
+async function apiPatch(url, data, config) {
+  const response = await api.patch(url, data, config);
+  return response.data;
+}
+async function apiDelete(url, config) {
+  const response = await api.delete(url, config);
+  return response.data;
+}
+const MATRIX_TO_UI = {
+  urgent_important: "urgent-important",
+  not_urgent_important: "not-urgent-important",
+  urgent_not_important: "urgent-not-important",
+  not_urgent_not_important: "not-urgent-not-important"
+};
+const MATRIX_TO_API = {
+  "urgent-important": "urgent_important",
+  "not-urgent-important": "not_urgent_important",
+  "urgent-not-important": "urgent_not_important",
+  "not-urgent-not-important": "not_urgent_not_important"
+};
+const REPEAT_TO_UI = {
+  none: "none",
+  day: "daily",
+  week: "weekly",
+  month: "monthly",
+  year: "yearly"
+};
+const REPEAT_TO_API = {
+  none: "none",
+  daily: "day",
+  weekly: "week",
+  monthly: "month",
+  yearly: "year",
+  custom: "week"
+};
+function apiPriorityToUi(priority) {
+  if (priority === "critical") return "high";
+  if (priority === "low" || priority === "medium" || priority === "high") return priority;
+  return "medium";
+}
+function uiPriorityToApi(priority) {
+  if (priority === "none") return "medium";
+  if (priority === "high") return "high";
+  if (priority === "low") return "low";
+  return "medium";
+}
+function reminderMinutes(dueAt, reminderAt) {
+  if (!dueAt || !reminderAt) return void 0;
+  const diff = dayjs(dueAt).diff(dayjs(reminderAt), "minute");
+  if (diff < 0) return void 0;
+  return String(diff);
+}
+function buildDueAt(dueDate, dueTime) {
+  if (!dueDate) return null;
+  const time = dueTime || "00:00";
+  return dayjs(`${dueDate}T${time}`).format();
+}
+function buildReminderAt(dueAt, notification) {
+  if (!dueAt || !notification) return null;
+  const minutes = Number(notification);
+  if (!Number.isFinite(minutes) || minutes < 0) return null;
+  return dayjs(dueAt).subtract(minutes, "minute").format();
+}
+function buildStartEnd(dueDate, duration) {
+  if (!dueDate || !duration?.start || !duration?.end) {
+    return { start_at: null, end_at: null };
+  }
+  return {
+    start_at: dayjs(`${dueDate}T${duration.start}`).format(),
+    end_at: dayjs(`${dueDate}T${duration.end}`).format()
+  };
+}
+function apiTaskToUi(task) {
+  const due = task.due_at ? dayjs(task.due_at) : null;
+  const start = task.start_at ? dayjs(task.start_at) : null;
+  const end = task.end_at ? dayjs(task.end_at) : null;
+  return {
+    id: String(task.id),
+    title: task.title,
+    description: task.description || void 0,
+    dueDate: due?.isValid() ? due.format("YYYY-MM-DD") : void 0,
+    dueTime: due?.isValid() && !(due.hour() === 0 && due.minute() === 0) ? due.format("HH:mm") : void 0,
+    duration: start?.isValid() && end?.isValid() ? { start: start.format("HH:mm"), end: end.format("HH:mm") } : void 0,
+    priority: apiPriorityToUi(task.priority),
+    completed: task.is_completed,
+    completedAt: task.completed_at ? dayjs(task.completed_at).format("YYYY-MM-DD") : void 0,
+    notification: reminderMinutes(task.due_at, task.reminder_at),
+    repeat: REPEAT_TO_UI[task.repeat_unit] || "none",
+    repeatCustom: task.repeat_unit !== "none" && task.repeat_interval > 1 ? { interval: task.repeat_interval, unit: "week" } : void 0,
+    imageUrl: task.image || void 0,
+    matrixBlock: MATRIX_TO_UI[task.matrix_block],
+    createdAt: task.created_at
+  };
+}
+function uiTaskToApiPayload(task) {
+  const due_at = buildDueAt(task.dueDate, task.dueTime);
+  const { start_at, end_at } = buildStartEnd(task.dueDate, task.duration);
+  const payload = {
+    title: task.title,
+    description: task.description ?? null,
+    due_at,
+    start_at,
+    end_at,
+    reminder_at: buildReminderAt(due_at, task.notification),
+    repeat_unit: REPEAT_TO_API[task.repeat || "none"],
+    repeat_interval: task.repeatCustom?.interval ?? 1,
+    priority: uiPriorityToApi(task.priority || "none"),
+    matrix_block: MATRIX_TO_API[task.matrixBlock || "not-urgent-not-important"]
+  };
+  if (task.completed !== void 0) {
+    payload.is_completed = task.completed;
+  }
+  return payload;
+}
+function groupKeyToUi(key) {
+  if (key === "no_deadline") return "nodate";
+  return key;
+}
+function apiMatrixBlockToUi(block) {
+  return MATRIX_TO_UI[block];
+}
+const GROUP_ORDER = ["overdue", "today", "tomorrow", "later", "nodate", "completed"];
+function flattenGroups(groups) {
+  const seen = /* @__PURE__ */ new Set();
+  const result = [];
+  for (const group of groups) {
+    for (const task of group.tasks) {
+      if (seen.has(task.id)) continue;
+      seen.add(task.id);
+      result.push(apiTaskToUi(task));
+    }
+  }
+  return result;
+}
+function groupTasksByKey(allTasks) {
+  const today2 = dayjs().format("YYYY-MM-DD");
+  const tomorrow2 = dayjs().add(1, "day").format("YYYY-MM-DD");
+  return {
+    overdue: allTasks.filter(
+      (t) => !t.completed && t.dueDate && dayjs(t.dueDate).isBefore(today2, "day")
+    ),
+    today: allTasks.filter(
+      (t) => !t.completed && t.dueDate === today2
+    ),
+    tomorrow: allTasks.filter(
+      (t) => !t.completed && t.dueDate === tomorrow2
+    ),
+    later: allTasks.filter(
+      (t) => !t.completed && t.dueDate && dayjs(t.dueDate).isAfter(tomorrow2, "day")
+    ),
+    nodate: allTasks.filter((t) => !t.completed && !t.dueDate),
+    completed: allTasks.filter((t) => t.completed)
+  };
+}
+const useTasksStore = /* @__PURE__ */ defineStore("tasks", () => {
+  const tasks = ref([]);
+  const groupedFromApi = ref({
+    overdue: [],
+    today: [],
+    tomorrow: [],
+    later: [],
+    nodate: [],
+    completed: []
+  });
+  const matrixTasksByBlock = ref({});
+  const calendarTasks = ref([]);
+  const calendarCacheKey = ref("");
+  const loading = ref(false);
+  const error = ref("");
+  const initialized = ref(false);
+  const today2 = computed(() => dayjs().format("YYYY-MM-DD"));
+  const tomorrow2 = computed(() => dayjs().add(1, "day").format("YYYY-MM-DD"));
+  const overdueTasks = computed(() => groupedFromApi.value.overdue);
+  const todayTasks = computed(() => groupedFromApi.value.today);
+  const tomorrowTasks = computed(() => groupedFromApi.value.tomorrow);
+  const laterTasks = computed(() => groupedFromApi.value.later);
+  const noDateTasks = computed(() => groupedFromApi.value.nodate);
+  const completedTasks = computed(() => groupedFromApi.value.completed);
+  function applyGrouped(groups) {
+    const next = {
+      overdue: [],
+      today: [],
+      tomorrow: [],
+      later: [],
+      nodate: [],
+      completed: []
+    };
+    for (const group of groups) {
+      const uiKey = groupKeyToUi(group.key);
+      if (uiKey in next) {
+        next[uiKey] = group.tasks.map(apiTaskToUi);
+      }
+    }
+    groupedFromApi.value = next;
+    tasks.value = flattenGroups(groups);
+  }
+  function upsertTaskInState(updated) {
+    const idx = tasks.value.findIndex((t) => t.id === updated.id);
+    if (idx === -1) {
+      tasks.value.unshift(updated);
+    } else {
+      tasks.value[idx] = updated;
+    }
+    groupedFromApi.value = groupTasksByKey(tasks.value);
+  }
+  function removeTaskFromState(id) {
+    tasks.value = tasks.value.filter((t) => t.id !== id);
+    groupedFromApi.value = groupTasksByKey(tasks.value);
+  }
+  async function fetchGrouped() {
+    loading.value = true;
+    error.value = "";
+    try {
+      const groups = await apiGet("tasks/grouped/");
+      applyGrouped(groups);
+      initialized.value = true;
+    } catch (err) {
+      error.value = getApiErrorMessage(err);
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  }
+  async function fetchMatrix() {
+    const blocks = await apiGet("matrix/");
+    const next = {};
+    for (const block of blocks) {
+      next[apiMatrixBlockToUi(block.block)] = block.tasks.map(apiTaskToUi);
+    }
+    matrixTasksByBlock.value = next;
+    return next;
+  }
+  async function fetchCalendar(view, date) {
+    const response = await apiGet("calendar/", { params: { view, date } });
+    calendarTasks.value = response.tasks.map(apiTaskToUi);
+    calendarCacheKey.value = `${view}:${date}`;
+    return calendarTasks.value;
+  }
+  function getTasksForDate(date) {
+    if (calendarTasks.value.length > 0) {
+      const fromCalendar = calendarTasks.value.filter((t) => t.dueDate === date);
+      if (fromCalendar.length > 0) return fromCalendar;
+    }
+    return tasks.value.filter((t) => t.dueDate === date);
+  }
+  function getTasksForWeek(startDate, endDate) {
+    const source = calendarTasks.value.length > 0 ? calendarTasks.value : tasks.value;
+    return source.filter(
+      (t) => t.dueDate && !dayjs(t.dueDate).isBefore(startDate, "day") && !dayjs(t.dueDate).isAfter(endDate, "day")
+    );
+  }
+  function getTasksForMatrix(blockId) {
+    if (matrixTasksByBlock.value[blockId]?.length) {
+      return matrixTasksByBlock.value[blockId];
+    }
+    return tasks.value.filter((t) => !t.completed && t.matrixBlock === blockId);
+  }
+  async function addTask(taskData) {
+    const payload = uiTaskToApiPayload(taskData);
+    const created = await apiPost("tasks/", payload);
+    const task = apiTaskToUi(created);
+    upsertTaskInState(task);
+    await fetchGrouped();
+    return task;
+  }
+  async function updateTask(id, updates) {
+    const existing = tasks.value.find((t) => t.id === id);
+    const merged = { ...existing, ...updates };
+    const payload = uiTaskToApiPayload(merged);
+    const updated = await apiPatch(`tasks/${id}/`, payload);
+    const task = apiTaskToUi(updated);
+    upsertTaskInState(task);
+    await fetchGrouped();
+    return task;
+  }
+  async function deleteTask(id) {
+    await apiDelete(`tasks/${id}/`);
+    removeTaskFromState(id);
+    await fetchGrouped();
+  }
+  async function completeTask(id) {
+    const existing = tasks.value.find((t) => t.id === id);
+    if (!existing) return;
+    const endpoint = existing.completed ? "uncomplete" : "complete";
+    const updated = await apiPost(`tasks/${id}/${endpoint}/`);
+    const task = apiTaskToUi(updated);
+    upsertTaskInState(task);
+    await fetchGrouped();
+    return task;
+  }
+  async function moveToMatrix(taskId, blockId) {
+    const matrix_block = blockId.replace(/-/g, "_");
+    const updated = await apiPatch(`tasks/${taskId}/`, { matrix_block });
+    const task = apiTaskToUi(updated);
+    upsertTaskInState(task);
+    await fetchMatrix();
+    await fetchGrouped();
+    return task;
+  }
+  async function fetchTask(id) {
+    const task = await apiGet(`tasks/${id}/`);
+    const ui = apiTaskToUi(task);
+    upsertTaskInState(ui);
+    return ui;
+  }
+  async function searchTasks(query) {
+    if (!query.trim()) return [];
+    const response = await apiGet("tasks/", {
+      params: { search: query.trim(), limit: 50 }
+    });
+    return (response.results || []).map(apiTaskToUi);
+  }
+  function reset() {
+    tasks.value = [];
+    groupedFromApi.value = GROUP_ORDER.reduce((acc, key) => {
+      acc[key] = [];
+      return acc;
+    }, {});
+    matrixTasksByBlock.value = {};
+    calendarTasks.value = [];
+    calendarCacheKey.value = "";
+    initialized.value = false;
+    error.value = "";
+  }
+  return {
+    tasks,
+    groupedFromApi,
+    matrixTasksByBlock,
+    calendarTasks,
+    calendarCacheKey,
+    loading,
+    error,
+    initialized,
+    today: today2,
+    tomorrow: tomorrow2,
+    overdueTasks,
+    todayTasks,
+    tomorrowTasks,
+    laterTasks,
+    noDateTasks,
+    completedTasks,
+    fetchGrouped,
+    fetchMatrix,
+    fetchCalendar,
+    getTasksForDate,
+    getTasksForWeek,
+    getTasksForMatrix,
+    addTask,
+    updateTask,
+    deleteTask,
+    completeTask,
+    moveToMatrix,
+    fetchTask,
+    searchTasks,
+    reset
+  };
+});
+const today = dayjs().format("YYYY-MM-DD");
+const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
+const twoDaysAgo = dayjs().subtract(3, "day").format("YYYY-MM-DD");
+const tomorrow = dayjs().add(1, "day").format("YYYY-MM-DD");
+const in3Days = dayjs().add(3, "day").format("YYYY-MM-DD");
+const in7Days = dayjs().add(7, "day").format("YYYY-MM-DD");
+[
+  // Overdue
+  {
+    id: "t1",
+    title: "Отправить отчёт за прошлый месяц",
+    description: "Нужно подготовить и отправить финансовый отчёт руководству",
+    dueDate: twoDaysAgo,
+    dueTime: "10:00",
+    priority: "high",
+    completed: false,
+    repeat: "none",
+    notification: "30",
+    createdAt: dayjs().subtract(7, "day").toISOString(),
+    matrixBlock: "urgent-important"
+  },
+  {
+    id: "t2",
+    title: "Позвонить в банк по вопросу карты",
+    dueDate: yesterday,
+    dueTime: "14:00",
+    priority: "medium",
+    completed: false,
+    repeat: "none",
+    createdAt: dayjs().subtract(5, "day").toISOString(),
+    matrixBlock: "urgent-not-important"
+  },
+  // Today
+  {
+    id: "t3",
+    title: "Встреча с командой разработки",
+    description: "Еженедельный стендап, обсудить спринт",
+    dueDate: today,
+    dueTime: "10:00",
+    duration: { start: "10:00", end: "11:00" },
+    priority: "high",
+    completed: false,
+    repeat: "weekly",
+    notification: "15",
+    createdAt: dayjs().subtract(2, "day").toISOString(),
+    matrixBlock: "urgent-important"
+  },
+  {
+    id: "t4",
+    title: "Сходить в спортзал",
+    dueDate: today,
+    dueTime: "19:00",
+    duration: { start: "19:00", end: "20:30" },
+    priority: "medium",
+    completed: false,
+    repeat: "daily",
+    createdAt: dayjs().subtract(1, "day").toISOString(),
+    matrixBlock: "not-urgent-important"
+  },
+  {
+    id: "t5",
+    title: "Купить продукты",
+    dueDate: today,
+    dueTime: "18:00",
+    priority: "low",
+    completed: false,
+    repeat: "none",
+    createdAt: dayjs().subtract(1, "day").toISOString(),
+    matrixBlock: "urgent-not-important"
+  },
+  {
+    id: "t6",
+    title: "Прочитать 30 страниц книги",
+    dueDate: today,
+    dueTime: "21:00",
+    priority: "medium",
+    completed: false,
+    repeat: "daily",
+    createdAt: dayjs().subtract(10, "day").toISOString(),
+    matrixBlock: "not-urgent-important"
+  },
+  // Tomorrow
+  {
+    id: "t7",
+    title: "Презентация нового проекта",
+    description: "Подготовить слайды и тезисы выступления",
+    dueDate: tomorrow,
+    dueTime: "09:30",
+    duration: { start: "09:30", end: "11:00" },
+    priority: "high",
+    completed: false,
+    repeat: "none",
+    notification: "60",
+    createdAt: dayjs().subtract(3, "day").toISOString(),
+    matrixBlock: "urgent-important"
+  },
+  {
+    id: "t8",
+    title: "Оплатить коммунальные услуги",
+    dueDate: tomorrow,
+    dueTime: "12:00",
+    priority: "medium",
+    completed: false,
+    repeat: "monthly",
+    createdAt: dayjs().toISOString(),
+    matrixBlock: "urgent-not-important"
+  },
+  // Later
+  {
+    id: "t9",
+    title: "Записаться на курс по Python",
+    dueDate: in3Days,
+    priority: "medium",
+    completed: false,
+    repeat: "none",
+    createdAt: dayjs().toISOString(),
+    matrixBlock: "not-urgent-important"
+  },
+  {
+    id: "t10",
+    title: "Сделать резервную копию файлов",
+    dueDate: in7Days,
+    priority: "low",
+    completed: false,
+    repeat: "none",
+    createdAt: dayjs().toISOString(),
+    matrixBlock: "not-urgent-not-important"
+  },
+  {
+    id: "t11",
+    title: "Обновить резюме",
+    dueDate: in7Days,
+    priority: "medium",
+    completed: false,
+    repeat: "none",
+    createdAt: dayjs().toISOString(),
+    matrixBlock: "not-urgent-important"
+  },
+  // No date
+  {
+    id: "t12",
+    title: "Посмотреть документальный фильм о природе",
+    priority: "none",
+    completed: false,
+    repeat: "none",
+    createdAt: dayjs().toISOString(),
+    matrixBlock: "not-urgent-not-important"
+  },
+  {
+    id: "t13",
+    title: "Выучить 10 новых слов на английском",
+    priority: "low",
+    completed: false,
+    repeat: "none",
+    createdAt: dayjs().toISOString(),
+    matrixBlock: "not-urgent-important"
+  },
+  {
+    id: "t14",
+    title: "Разобрать гардероб",
+    priority: "none",
+    completed: false,
+    repeat: "none",
+    createdAt: dayjs().subtract(5, "day").toISOString(),
+    matrixBlock: "not-urgent-not-important"
+  },
+  // Completed
+  {
+    id: "t15",
+    title: "Написать план на неделю",
+    dueDate: yesterday,
+    priority: "high",
+    completed: true,
+    completedAt: yesterday,
+    repeat: "weekly",
+    createdAt: dayjs().subtract(8, "day").toISOString()
+  },
+  {
+    id: "t16",
+    title: "Позвонить маме",
+    dueDate: yesterday,
+    priority: "medium",
+    completed: true,
+    completedAt: yesterday,
+    repeat: "none",
+    createdAt: dayjs().subtract(2, "day").toISOString()
+  },
+  {
+    id: "t17",
+    title: "Проверить email",
+    dueDate: today,
+    dueTime: "09:00",
+    priority: "low",
+    completed: true,
+    completedAt: today,
+    repeat: "daily",
+    createdAt: dayjs().subtract(15, "day").toISOString()
+  }
+];
+const defaultPomodoroSettings = {
+  duration: 25,
+  shortBreak: 5,
+  longBreak: 15,
+  sessionsUntilLong: 4,
+  sound: "bell",
+  workingSound: "rain",
+  showOnLockScreen: true
+};
+const defaultAppSettings = {
+  language: "ru",
+  theme: "light",
+  visibleGroups: ["overdue", "today", "tomorrow", "later", "nodate", "completed"],
+  notifications: true,
+  vibration: true,
+  notificationSound: "chime",
+  completionSound: "success",
+  bottomNavItems: ["tasks", "calendar", "matrix", "pomodoro", "settings"]
+};
+const matrixBlockDefaults = {
+  "urgent-important": {
+    id: "urgent-important",
+    title: "Срочно и важно",
+    color: "#FF3B30",
+    bgColor: "#FFF0EF",
+    description: "Сделать немедленно",
+    dateFilter: ["overdue", "today"],
+    priorityFilter: ["high"]
+  },
+  "not-urgent-important": {
+    id: "not-urgent-important",
+    title: "Не срочно, но важно",
+    color: "#007AFF",
+    bgColor: "#EFF5FF",
+    description: "Запланировать",
+    dateFilter: ["tomorrow", "later"],
+    priorityFilter: ["high", "medium"]
+  },
+  "urgent-not-important": {
+    id: "urgent-not-important",
+    title: "Срочно, не важно",
+    color: "#FF9500",
+    bgColor: "#FFF8EF",
+    description: "Делегировать",
+    dateFilter: ["overdue", "today", "tomorrow"],
+    priorityFilter: ["medium", "low"]
+  },
+  "not-urgent-not-important": {
+    id: "not-urgent-not-important",
+    title: "Не срочно, не важно",
+    color: "#8E8E93",
+    bgColor: "#F5F5F5",
+    description: "Устранить",
+    dateFilter: ["later", "nodate"],
+    priorityFilter: ["low", "none"]
+  }
+};
+const soundOptions = [
+  { id: "bell", name: "Колокольчик", icon: "🔔" },
+  { id: "chime", name: "Перезвон", icon: "🎵" },
+  { id: "success", name: "Успех", icon: "✅" },
+  { id: "ding", name: "Динь", icon: "🔊" },
+  { id: "soft", name: "Мягкий", icon: "🎶" },
+  { id: "none", name: "Без звука", icon: "🔇" }
+];
+const workSoundOptions = [
+  { id: "rain", name: "Дождь", icon: "🌧️" },
+  { id: "forest", name: "Лес", icon: "🌲" },
+  { id: "cafe", name: "Кафе", icon: "☕" },
+  { id: "white-noise", name: "Белый шум", icon: "💨" },
+  { id: "none", name: "Без звука", icon: "🔇" }
+];
+function apiToAppSettings(data) {
+  const visibleGroups = [];
+  if (data.show_overdue) visibleGroups.push("overdue");
+  if (data.show_today) visibleGroups.push("today");
+  if (data.show_tomorrow) visibleGroups.push("tomorrow");
+  if (data.show_later) visibleGroups.push("later");
+  if (data.show_no_deadline) visibleGroups.push("nodate");
+  if (data.show_completed) visibleGroups.push("completed");
+  return {
+    language: data.language,
+    theme: defaultAppSettings.theme,
+    visibleGroups,
+    notifications: true,
+    vibration: data.vibration_enabled,
+    notificationSound: data.notification_sound,
+    completionSound: data.completion_sound,
+    bottomNavItems: data.bottom_tabs?.length ? [...data.bottom_tabs] : [...defaultAppSettings.bottomNavItems]
+  };
+}
+function appSettingsToApiPatch(updates) {
+  const patch = {};
+  if (updates.language !== void 0) patch.language = updates.language;
+  if (updates.vibration !== void 0) patch.vibration_enabled = updates.vibration;
+  if (updates.notificationSound !== void 0) patch.notification_sound = updates.notificationSound;
+  if (updates.completionSound !== void 0) patch.completion_sound = updates.completionSound;
+  if (updates.bottomNavItems !== void 0) patch.bottom_tabs = [...updates.bottomNavItems];
+  if (updates.visibleGroups !== void 0) {
+    patch.show_overdue = updates.visibleGroups.includes("overdue");
+    patch.show_today = updates.visibleGroups.includes("today");
+    patch.show_tomorrow = updates.visibleGroups.includes("tomorrow");
+    patch.show_later = updates.visibleGroups.includes("later");
+    patch.show_no_deadline = updates.visibleGroups.includes("nodate");
+    patch.show_completed = updates.visibleGroups.includes("completed");
+  }
+  return patch;
+}
+function apiMatrixToBlocks(settings) {
+  const blocks = { ...matrixBlockDefaults };
+  for (const item of settings) {
+    const uiId = item.block.replace("urgent_important", "urgent-important").replace("not_urgent_important", "not-urgent-important").replace("urgent_not_important", "urgent-not-important").replace("not_urgent_not_important", "not-urgent-not-important");
+    if (!blocks[uiId]) continue;
+    blocks[uiId] = {
+      ...blocks[uiId],
+      title: item.title || blocks[uiId].title,
+      dateFilter: item.date_filter ? item.date_filter.split(",").filter(Boolean) : blocks[uiId].dateFilter,
+      priorityFilter: item.allowed_priorities?.length ? item.allowed_priorities.map((p) => p === "critical" ? "high" : p) : blocks[uiId].priorityFilter
+    };
+  }
+  return blocks;
+}
+function syncPremiumToAuth(settings) {
+  const authStore = useAuthStore();
+  if (authStore.user) {
+    authStore.user.isPremium = settings.is_premium;
+    authStore.user.premiumExpiresAt = settings.premium_activated_at || void 0;
+  }
+}
+const useSettingsStore = /* @__PURE__ */ defineStore("settings", () => {
+  const appSettings = useLocalStorage("otter.app.settings", { ...defaultAppSettings });
+  const matrixBlocks = useLocalStorage("otter.matrix.blocks", { ...matrixBlockDefaults });
+  const isPremium = ref(false);
+  const premiumActivatedAt = ref(null);
+  const loading = ref(false);
+  const error = ref("");
+  const helpFaq = ref([]);
+  const helpFaqLoading = ref(false);
+  const helpFaqError = ref("");
+  const premiumFeatures = ref([]);
+  const premiumFeaturesLoading = ref(false);
+  const legalDocuments = ref([]);
+  const legalDocumentsLoading = ref(false);
+  const legalDocumentsError = ref("");
+  async function fetchHelpFaq() {
+    helpFaqLoading.value = true;
+    helpFaqError.value = "";
+    try {
+      const items = await apiGet("help/");
+      helpFaq.value = items.map((item, index) => ({
+        id: `faq-${index}`,
+        question: item.question,
+        answer: item.answer,
+        open: false
+      }));
+    } catch (err) {
+      helpFaqError.value = getApiErrorMessage(err, "Не удалось загрузить FAQ");
+      throw err;
+    } finally {
+      helpFaqLoading.value = false;
+    }
+  }
+  async function sendHelpMessage(message, screenshot) {
+    if (screenshot) {
+      const formData = new FormData();
+      formData.append("message", message);
+      formData.append("screenshot", screenshot);
+      return apiPost("help/", formData);
+    }
+    return apiPost("help/", { message });
+  }
+  async function callStubAction() {
+    const response = await apiPost("settings/stub-action/");
+    return response.detail || "Уже разрабатываем, скоро будет готово :)";
+  }
+  async function fetchPremiumFeatures() {
+    premiumFeaturesLoading.value = true;
+    try {
+      premiumFeatures.value = await apiGet("premium/features/");
+    } finally {
+      premiumFeaturesLoading.value = false;
+    }
+  }
+  async function fetchLegalDocuments() {
+    legalDocumentsLoading.value = true;
+    legalDocumentsError.value = "";
+    try {
+      legalDocuments.value = await apiGet("legal/documents/");
+    } catch (err) {
+      legalDocumentsError.value = getApiErrorMessage(err, "Не удалось загрузить документы");
+      throw err;
+    } finally {
+      legalDocumentsLoading.value = false;
+    }
+  }
+  async function fetchFromApi() {
+    loading.value = true;
+    error.value = "";
+    try {
+      const [settings, matrixSettings] = await Promise.all([
+        apiGet("settings/"),
+        apiGet("matrix/settings/")
+      ]);
+      appSettings.value = {
+        ...appSettings.value,
+        ...apiToAppSettings(settings)
+      };
+      matrixBlocks.value = apiMatrixToBlocks(matrixSettings);
+      isPremium.value = settings.is_premium;
+      premiumActivatedAt.value = settings.premium_activated_at;
+      syncPremiumToAuth(settings);
+    } catch (err) {
+      error.value = getApiErrorMessage(err);
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  }
+  async function updateSettings(updates) {
+    const next = { ...appSettings.value, ...updates };
+    appSettings.value = next;
+    const patch = appSettingsToApiPatch(updates);
+    if (Object.keys(patch).length === 0) return;
+    const updated = await apiPatch("settings/", patch);
+    appSettings.value = {
+      ...next,
+      ...apiToAppSettings(updated)
+    };
+    isPremium.value = updated.is_premium;
+    premiumActivatedAt.value = updated.premium_activated_at;
+    syncPremiumToAuth(updated);
+  }
+  async function toggleGroup(groupId) {
+    const groups = [...appSettings.value.visibleGroups];
+    const idx = groups.indexOf(groupId);
+    if (idx === -1) groups.push(groupId);
+    else groups.splice(idx, 1);
+    await updateSettings({ visibleGroups: groups });
+  }
+  function isGroupVisible(groupId) {
+    return appSettings.value.visibleGroups.includes(groupId);
+  }
+  async function updateMatrixBlock(blockId, updates) {
+    const block = matrixBlocks.value[blockId];
+    if (!block) return;
+    Object.assign(block, updates);
+    const apiBlock = blockId.replace(/-/g, "_");
+    await apiPatch("matrix/settings/", {
+      block: apiBlock,
+      title: updates.title ?? block.title,
+      allowed_priorities: updates.priorityFilter || block.priorityFilter,
+      date_filter: Array.isArray(updates.dateFilter) ? updates.dateFilter.join(",") : updates.dateFilter ?? block.dateFilter?.join(",")
+    });
+  }
+  async function reorderNavItems(items) {
+    await updateSettings({ bottomNavItems: items });
+  }
+  async function premiumCheckout(tariff = "monthly") {
+    return apiPost("premium/checkout/", { tariff });
+  }
+  async function premiumActivate() {
+    const updated = await apiPost("premium/activate/");
+    appSettings.value = { ...appSettings.value, ...apiToAppSettings(updated) };
+    isPremium.value = updated.is_premium;
+    premiumActivatedAt.value = updated.premium_activated_at;
+    syncPremiumToAuth(updated);
+    return updated;
+  }
+  return {
+    appSettings,
+    matrixBlocks,
+    isPremium,
+    premiumActivatedAt,
+    loading,
+    error,
+    helpFaq,
+    helpFaqLoading,
+    helpFaqError,
+    premiumFeatures,
+    premiumFeaturesLoading,
+    legalDocuments,
+    legalDocumentsLoading,
+    legalDocumentsError,
+    fetchHelpFaq,
+    sendHelpMessage,
+    callStubAction,
+    fetchPremiumFeatures,
+    fetchLegalDocuments,
+    fetchFromApi,
+    updateSettings,
+    toggleGroup,
+    isGroupVisible,
+    updateMatrixBlock,
+    reorderNavItems,
+    premiumCheckout,
+    premiumActivate
+  };
+});
+const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
+  const user = useLocalStorage("otter.auth.user", null);
+  const accessToken = useLocalStorage("access_token", null);
+  const refreshToken = useLocalStorage("refresh_token", null);
+  const profileFirstName = useLocalStorage("otter.auth.first-name", "");
+  const profileLastName = useLocalStorage("otter.auth.last-name", "");
+  const profileLoaded = ref(false);
+  const isLoggedIn = computed(() => !!accessToken.value);
+  const requiresProfileFill = computed(
+    () => isLoggedIn.value && (!profileFirstName.value.trim() || !profileLastName.value.trim())
+  );
+  function mapBackendUser(nextUser) {
+    const fullName = `${nextUser.first_name || ""} ${nextUser.last_name || ""}`.trim();
+    return {
+      id: String(nextUser.id),
+      email: nextUser.email,
+      name: fullName || nextUser.email.split("@")[0] || "User",
+      avatar: nextUser.avatar || void 0,
+      isPremium: user.value?.isPremium || false,
+      premiumExpiresAt: user.value?.premiumExpiresAt
+    };
+  }
+  function setSession(nextUser, tokens) {
+    profileFirstName.value = nextUser.first_name || "";
+    profileLastName.value = nextUser.last_name || "";
+    profileLoaded.value = true;
+    user.value = mapBackendUser(nextUser);
+    accessToken.value = tokens.access;
+    refreshToken.value = tokens.refresh;
+  }
+  async function fetchMyProfile() {
+    const profile = await apiGet("profile/");
+    profileFirstName.value = profile.first_name || "";
+    profileLastName.value = profile.last_name || "";
+    profileLoaded.value = true;
+    user.value = mapBackendUser(profile);
+    return profile;
+  }
+  async function updateProfile(first_name, last_name, avatar) {
+    const formData = new FormData();
+    formData.append("first_name", first_name);
+    formData.append("last_name", last_name);
+    if (avatar) {
+      formData.append("avatar", avatar);
+    }
+    const profile = await apiPut("profile/", formData);
+    profileFirstName.value = profile.first_name || "";
+    profileLastName.value = profile.last_name || "";
+    profileLoaded.value = true;
+    user.value = mapBackendUser(profile);
+    return profile;
+  }
+  async function login(email, password) {
+    const response = await apiPost("auth/login/", {
+      email,
+      password
+    });
+    accessToken.value = response.tokens.access;
+    refreshToken.value = response.tokens.refresh;
+    setAuthTokens(response.tokens);
+    await fetchMyProfile();
+    navigateTo("/app");
+  }
+  async function register(email, password, first_name = "", last_name = "", options = {}) {
+    const { navigateOnSuccess = true } = options;
+    const response = await apiPost("auth/register/", {
+      email,
+      password,
+      first_name,
+      last_name
+    });
+    setSession(response.user, response.tokens);
+    if (navigateOnSuccess) {
+      navigateTo("/app");
+    }
+    return response;
+  }
+  async function loginWithGoogle(payload) {
+    if (!payload?.firebase_token) {
+      console.warn("[otter:google] loginWithGoogle: firebase_token yo‘q, chiqildi");
+      return;
+    }
+    console.log("[otter:google] loginWithGoogle: auth/google/ so‘rov yuborilmoqda…");
+    const response = await apiPost("auth/google/", payload);
+    console.log("[otter:google] loginWithGoogle: javob keldi", {
+      userId: response?.user?.id,
+      email: response?.user?.email,
+      hasAccess: !!response?.tokens?.access,
+      hasRefresh: !!response?.tokens?.refresh
+    });
+    setSession(response.user, response.tokens);
+    await fetchMyProfile();
+    console.log("[otter:google] navigateTo(/app)");
+    navigateTo("/app");
+  }
+  async function forgotPassword(email) {
+    return apiPost("auth/forgot-password/", { email });
+  }
+  async function forgotPasswordVerify(email, code) {
+    return apiPost("auth/forgot-password/verify/", {
+      email,
+      code
+    });
+  }
+  async function forgotPasswordConfirm(reset_token, new_password) {
+    return apiPost("auth/forgot-password/confirm/", {
+      reset_token,
+      new_password
+    });
+  }
+  async function changePassword(newPassword) {
+    return apiPost("profile/change-password/", {
+      new_password: newPassword
+    });
+  }
+  function logout() {
+    const tasksStore = useTasksStore();
+    tasksStore.reset();
+    user.value = null;
+    accessToken.value = null;
+    refreshToken.value = null;
+    profileFirstName.value = "";
+    profileLastName.value = "";
+    profileLoaded.value = false;
+    navigateTo("/");
+  }
+  function updateAvatar(url) {
+    if (user.value) user.value.avatar = url;
+  }
+  function updateName(name) {
+    if (user.value) user.value.name = name;
+  }
+  async function startPremiumCheckout(tariff = "monthly") {
+    const settingsStore = useSettingsStore();
+    return settingsStore.premiumCheckout(tariff);
+  }
+  async function activatePremium() {
+    const settingsStore = useSettingsStore();
+    await settingsStore.premiumActivate();
+    if (user.value) {
+      user.value.isPremium = settingsStore.isPremium;
+      user.value.premiumExpiresAt = settingsStore.premiumActivatedAt || void 0;
+    }
+  }
+  return {
+    user,
+    accessToken,
+    refreshToken,
+    profileFirstName,
+    profileLastName,
+    profileLoaded,
+    isLoggedIn,
+    requiresProfileFill,
+    fetchMyProfile,
+    updateProfile,
+    login,
+    register,
+    loginWithGoogle,
+    forgotPassword,
+    forgotPasswordVerify,
+    forgotPasswordConfirm,
+    changePassword,
+    logout,
+    updateAvatar,
+    updateName,
+    startPremiumCheckout,
+    activatePremium
+  };
+});
 const app_45auth_45global = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
   return;
 });
@@ -1344,7 +2404,7 @@ const globalMiddleware = [
   manifest_45route_45rule
 ];
 const namedMiddleware = {
-  auth: () => import('./auth-BExbDmfg.mjs')
+  auth: () => import('./auth-WEl_ZIMx.mjs')
 };
 const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:router",
@@ -1706,8 +2766,8 @@ _sfc_main$3.setup = (props, ctx) => {
 };
 const __nuxt_component_0 = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-ee22b97d"]]);
 const layouts = {
-  app: defineAsyncComponent(() => import('./app-D-taFagg.mjs').then((m) => m.default || m)),
-  default: defineAsyncComponent(() => import('./default-BCm8t7aB.mjs').then((m) => m.default || m))
+  app: defineAsyncComponent(() => import('./app-CUVJbdwo.mjs').then((m) => m.default || m)),
+  default: defineAsyncComponent(() => import('./default-BCEfED5V.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
@@ -1944,346 +3004,6 @@ function normalizeSlot(slot, data) {
   const slotContent = slot(data);
   return slotContent.length === 1 ? h(slotContent[0]) : h(Fragment, void 0, slotContent);
 }
-const today = dayjs().format("YYYY-MM-DD");
-const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
-const twoDaysAgo = dayjs().subtract(3, "day").format("YYYY-MM-DD");
-const tomorrow = dayjs().add(1, "day").format("YYYY-MM-DD");
-const in3Days = dayjs().add(3, "day").format("YYYY-MM-DD");
-const in7Days = dayjs().add(7, "day").format("YYYY-MM-DD");
-const mockTasks = [
-  // Overdue
-  {
-    id: "t1",
-    title: "Отправить отчёт за прошлый месяц",
-    description: "Нужно подготовить и отправить финансовый отчёт руководству",
-    dueDate: twoDaysAgo,
-    dueTime: "10:00",
-    priority: "high",
-    completed: false,
-    repeat: "none",
-    notification: "30",
-    createdAt: dayjs().subtract(7, "day").toISOString(),
-    matrixBlock: "urgent-important"
-  },
-  {
-    id: "t2",
-    title: "Позвонить в банк по вопросу карты",
-    dueDate: yesterday,
-    dueTime: "14:00",
-    priority: "medium",
-    completed: false,
-    repeat: "none",
-    createdAt: dayjs().subtract(5, "day").toISOString(),
-    matrixBlock: "urgent-not-important"
-  },
-  // Today
-  {
-    id: "t3",
-    title: "Встреча с командой разработки",
-    description: "Еженедельный стендап, обсудить спринт",
-    dueDate: today,
-    dueTime: "10:00",
-    duration: { start: "10:00", end: "11:00" },
-    priority: "high",
-    completed: false,
-    repeat: "weekly",
-    notification: "15",
-    createdAt: dayjs().subtract(2, "day").toISOString(),
-    matrixBlock: "urgent-important"
-  },
-  {
-    id: "t4",
-    title: "Сходить в спортзал",
-    dueDate: today,
-    dueTime: "19:00",
-    duration: { start: "19:00", end: "20:30" },
-    priority: "medium",
-    completed: false,
-    repeat: "daily",
-    createdAt: dayjs().subtract(1, "day").toISOString(),
-    matrixBlock: "not-urgent-important"
-  },
-  {
-    id: "t5",
-    title: "Купить продукты",
-    dueDate: today,
-    dueTime: "18:00",
-    priority: "low",
-    completed: false,
-    repeat: "none",
-    createdAt: dayjs().subtract(1, "day").toISOString(),
-    matrixBlock: "urgent-not-important"
-  },
-  {
-    id: "t6",
-    title: "Прочитать 30 страниц книги",
-    dueDate: today,
-    dueTime: "21:00",
-    priority: "medium",
-    completed: false,
-    repeat: "daily",
-    createdAt: dayjs().subtract(10, "day").toISOString(),
-    matrixBlock: "not-urgent-important"
-  },
-  // Tomorrow
-  {
-    id: "t7",
-    title: "Презентация нового проекта",
-    description: "Подготовить слайды и тезисы выступления",
-    dueDate: tomorrow,
-    dueTime: "09:30",
-    duration: { start: "09:30", end: "11:00" },
-    priority: "high",
-    completed: false,
-    repeat: "none",
-    notification: "60",
-    createdAt: dayjs().subtract(3, "day").toISOString(),
-    matrixBlock: "urgent-important"
-  },
-  {
-    id: "t8",
-    title: "Оплатить коммунальные услуги",
-    dueDate: tomorrow,
-    dueTime: "12:00",
-    priority: "medium",
-    completed: false,
-    repeat: "monthly",
-    createdAt: dayjs().toISOString(),
-    matrixBlock: "urgent-not-important"
-  },
-  // Later
-  {
-    id: "t9",
-    title: "Записаться на курс по Python",
-    dueDate: in3Days,
-    priority: "medium",
-    completed: false,
-    repeat: "none",
-    createdAt: dayjs().toISOString(),
-    matrixBlock: "not-urgent-important"
-  },
-  {
-    id: "t10",
-    title: "Сделать резервную копию файлов",
-    dueDate: in7Days,
-    priority: "low",
-    completed: false,
-    repeat: "none",
-    createdAt: dayjs().toISOString(),
-    matrixBlock: "not-urgent-not-important"
-  },
-  {
-    id: "t11",
-    title: "Обновить резюме",
-    dueDate: in7Days,
-    priority: "medium",
-    completed: false,
-    repeat: "none",
-    createdAt: dayjs().toISOString(),
-    matrixBlock: "not-urgent-important"
-  },
-  // No date
-  {
-    id: "t12",
-    title: "Посмотреть документальный фильм о природе",
-    priority: "none",
-    completed: false,
-    repeat: "none",
-    createdAt: dayjs().toISOString(),
-    matrixBlock: "not-urgent-not-important"
-  },
-  {
-    id: "t13",
-    title: "Выучить 10 новых слов на английском",
-    priority: "low",
-    completed: false,
-    repeat: "none",
-    createdAt: dayjs().toISOString(),
-    matrixBlock: "not-urgent-important"
-  },
-  {
-    id: "t14",
-    title: "Разобрать гардероб",
-    priority: "none",
-    completed: false,
-    repeat: "none",
-    createdAt: dayjs().subtract(5, "day").toISOString(),
-    matrixBlock: "not-urgent-not-important"
-  },
-  // Completed
-  {
-    id: "t15",
-    title: "Написать план на неделю",
-    dueDate: yesterday,
-    priority: "high",
-    completed: true,
-    completedAt: yesterday,
-    repeat: "weekly",
-    createdAt: dayjs().subtract(8, "day").toISOString()
-  },
-  {
-    id: "t16",
-    title: "Позвонить маме",
-    dueDate: yesterday,
-    priority: "medium",
-    completed: true,
-    completedAt: yesterday,
-    repeat: "none",
-    createdAt: dayjs().subtract(2, "day").toISOString()
-  },
-  {
-    id: "t17",
-    title: "Проверить email",
-    dueDate: today,
-    dueTime: "09:00",
-    priority: "low",
-    completed: true,
-    completedAt: today,
-    repeat: "daily",
-    createdAt: dayjs().subtract(15, "day").toISOString()
-  }
-];
-const defaultPomodoroSettings = {
-  duration: 25,
-  shortBreak: 5,
-  longBreak: 15,
-  sessionsUntilLong: 4,
-  sound: "bell",
-  workingSound: "rain",
-  showOnLockScreen: true
-};
-const defaultAppSettings = {
-  language: "ru",
-  theme: "light",
-  visibleGroups: ["overdue", "today", "tomorrow", "later", "nodate", "completed"],
-  notifications: true,
-  vibration: true,
-  notificationSound: "chime",
-  completionSound: "success",
-  bottomNavItems: ["tasks", "calendar", "matrix", "pomodoro", "settings"]
-};
-const matrixBlockDefaults = {
-  "urgent-important": {
-    id: "urgent-important",
-    title: "Срочно и важно",
-    color: "#FF3B30",
-    bgColor: "#FFF0EF",
-    description: "Сделать немедленно",
-    dateFilter: ["overdue", "today"],
-    priorityFilter: ["high"]
-  },
-  "not-urgent-important": {
-    id: "not-urgent-important",
-    title: "Не срочно, но важно",
-    color: "#007AFF",
-    bgColor: "#EFF5FF",
-    description: "Запланировать",
-    dateFilter: ["tomorrow", "later"],
-    priorityFilter: ["high", "medium"]
-  },
-  "urgent-not-important": {
-    id: "urgent-not-important",
-    title: "Срочно, не важно",
-    color: "#FF9500",
-    bgColor: "#FFF8EF",
-    description: "Делегировать",
-    dateFilter: ["overdue", "today", "tomorrow"],
-    priorityFilter: ["medium", "low"]
-  },
-  "not-urgent-not-important": {
-    id: "not-urgent-not-important",
-    title: "Не срочно, не важно",
-    color: "#8E8E93",
-    bgColor: "#F5F5F5",
-    description: "Устранить",
-    dateFilter: ["later", "nodate"],
-    priorityFilter: ["low", "none"]
-  }
-};
-const faqData = [
-  {
-    id: "f1",
-    question: "Как создать новую задачу?",
-    answer: "Нажмите кнопку «+» в нижней части экрана на странице списка задач или в представлении календаря."
-  },
-  {
-    id: "f2",
-    question: "Как установить приоритет задачи?",
-    answer: "При создании задачи нажмите на иконку флажка и выберите один из четырёх уровней приоритета: высокий, средний, низкий или без приоритета."
-  },
-  {
-    id: "f3",
-    question: "Что такое Матрица Эйзенхауэра?",
-    answer: "Это метод управления задачами, который делит задачи на 4 квадранта по степени срочности и важности. Помогает сфокусироваться на действительно важных делах."
-  },
-  {
-    id: "f4",
-    question: "Как работает таймер Помодоро?",
-    answer: "Технология Помодоро предполагает работу в течение 25 минут с полной концентрацией, затем 5-минутный перерыв. Такие циклы помогают оставаться продуктивным."
-  },
-  {
-    id: "f5",
-    question: "Как удалить задачу?",
-    answer: "Смахните задачу влево — появится красная кнопка удаления. Или откройте задачу и нажмите на кнопку удаления внутри."
-  },
-  {
-    id: "f6",
-    question: "Как отметить задачу как выполненную?",
-    answer: "Смахните задачу вправо или нажмите на квадрат-чекбокс слева от названия задачи."
-  }
-];
-const soundOptions = [
-  { id: "bell", name: "Колокольчик", icon: "🔔" },
-  { id: "chime", name: "Перезвон", icon: "🎵" },
-  { id: "success", name: "Успех", icon: "✅" },
-  { id: "ding", name: "Динь", icon: "🔊" },
-  { id: "soft", name: "Мягкий", icon: "🎶" },
-  { id: "none", name: "Без звука", icon: "🔇" }
-];
-const workSoundOptions = [
-  { id: "rain", name: "Дождь", icon: "🌧️" },
-  { id: "forest", name: "Лес", icon: "🌲" },
-  { id: "cafe", name: "Кафе", icon: "☕" },
-  { id: "white-noise", name: "Белый шум", icon: "💨" },
-  { id: "none", name: "Без звука", icon: "🔇" }
-];
-const useSettingsStore = /* @__PURE__ */ defineStore("settings", () => {
-  const appSettings = useLocalStorage("otter.app.settings", { ...defaultAppSettings });
-  const matrixBlocks = useLocalStorage("otter.matrix.blocks", { ...matrixBlockDefaults });
-  function updateSettings(updates) {
-    appSettings.value = { ...appSettings.value, ...updates };
-  }
-  function toggleGroup(groupId) {
-    const groups = appSettings.value.visibleGroups;
-    const idx = groups.indexOf(groupId);
-    if (idx === -1) {
-      groups.push(groupId);
-    } else {
-      groups.splice(idx, 1);
-    }
-  }
-  function isGroupVisible(groupId) {
-    return appSettings.value.visibleGroups.includes(groupId);
-  }
-  function updateMatrixBlock(blockId, updates) {
-    const block = matrixBlocks.value[blockId];
-    if (block) {
-      Object.assign(block, updates);
-    }
-  }
-  function reorderNavItems(items) {
-    appSettings.value.bottomNavItems = items;
-  }
-  return {
-    appSettings,
-    matrixBlocks,
-    updateSettings,
-    toggleGroup,
-    isGroupVisible,
-    updateMatrixBlock,
-    reorderNavItems
-  };
-});
 const _sfc_main$2 = /* @__PURE__ */ defineComponent({
   __name: "app",
   __ssrInlineRender: true,
@@ -2420,5 +3140,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { _export_sfc as _, useSettingsStore as a, useRoute as b, defaultPomodoroSettings as c, defineStore as d, entry_default as default, useLocalStorage as e, faqData as f, defineNuxtRouteMiddleware as g, useRouter as h, encodeRoutePath as i, useNuxtApp as j, useRuntimeConfig as k, nuxtLinkDefaults as l, mockTasks as m, navigateTo as n, apiGet as o, apiPut as p, apiPost as q, resolveRouteObject as r, soundOptions as s, setAuthTokens as t, useState as u, workSoundOptions as w };
+export { _export_sfc as _, useState as a, useTasksStore as b, useSettingsStore as c, useRoute as d, entry_default as default, useAppToast as e, defineStore as f, defaultPomodoroSettings as g, apiGet as h, apiPatch as i, apiPost as j, getApiErrorMessage as k, defineNuxtRouteMiddleware as l, useRouter as m, navigateTo as n, encodeRoutePath as o, useNuxtApp as p, useRuntimeConfig as q, resolveRouteObject as r, soundOptions as s, nuxtLinkDefaults as t, useAuthStore as u, workSoundOptions as w };
 //# sourceMappingURL=server.mjs.map

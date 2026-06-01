@@ -1,144 +1,272 @@
 import { defineStore } from 'pinia'
-import { useLocalStorage } from '@vueuse/core'
 import dayjs from 'dayjs'
-import { mockTasks, type Task, type Priority, type RepeatType } from '~/data/mockData'
+import type { Task } from '~/data/mockData'
+import type { ApiMatrixBlock, ApiTask, ApiTaskGroup } from '~/types/mobile-api'
+import { apiDelete, apiGet, apiPatch, apiPost, getApiErrorMessage } from '~/utils/api'
+import { apiMatrixBlockToUi, apiTaskToUi, groupKeyToUi, uiTaskToApiPayload } from '~/utils/task-mapper'
+
+type GroupKey = 'overdue' | 'today' | 'tomorrow' | 'later' | 'nodate' | 'completed'
+
+const GROUP_ORDER: GroupKey[] = ['overdue', 'today', 'tomorrow', 'later', 'nodate', 'completed']
+
+function flattenGroups(groups: ApiTaskGroup[]): Task[] {
+  const seen = new Set<number>()
+  const result: Task[] = []
+  for (const group of groups) {
+    for (const task of group.tasks) {
+      if (seen.has(task.id)) continue
+      seen.add(task.id)
+      result.push(apiTaskToUi(task))
+    }
+  }
+  return result
+}
+
+function groupTasksByKey(allTasks: Task[]) {
+  const today = dayjs().format('YYYY-MM-DD')
+  const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD')
+
+  return {
+    overdue: allTasks.filter(t =>
+      !t.completed && t.dueDate && dayjs(t.dueDate).isBefore(today, 'day'),
+    ),
+    today: allTasks.filter(t =>
+      !t.completed && t.dueDate === today,
+    ),
+    tomorrow: allTasks.filter(t =>
+      !t.completed && t.dueDate === tomorrow,
+    ),
+    later: allTasks.filter(t =>
+      !t.completed && t.dueDate && dayjs(t.dueDate).isAfter(tomorrow, 'day'),
+    ),
+    nodate: allTasks.filter(t => !t.completed && !t.dueDate),
+    completed: allTasks.filter(t => t.completed),
+  }
+}
 
 export const useTasksStore = defineStore('tasks', () => {
-  const tasks = useLocalStorage<Task[]>(
-    'otter.tasks',
-    mockTasks.map(task => ({
-      ...task,
-      duration: task.duration ? { ...task.duration } : undefined,
-    }))
-  )
+  const tasks = ref<Task[]>([])
+  const groupedFromApi = ref<Record<GroupKey, Task[]>>({
+    overdue: [],
+    today: [],
+    tomorrow: [],
+    later: [],
+    nodate: [],
+    completed: [],
+  })
+  const matrixTasksByBlock = ref<Record<string, Task[]>>({})
+  const calendarTasks = ref<Task[]>([])
+  const calendarCacheKey = ref('')
+  const loading = ref(false)
+  const error = ref('')
+  const initialized = ref(false)
 
   const today = computed(() => dayjs().format('YYYY-MM-DD'))
   const tomorrow = computed(() => dayjs().add(1, 'day').format('YYYY-MM-DD'))
 
-  // ─── Grouped tasks ───────────────────────────────────────────────────────
-  const overdueTasks = computed(() =>
-    tasks.value.filter(t =>
-      !t.completed && t.dueDate && dayjs(t.dueDate).isBefore(today.value, 'day')
-    )
-  )
+  const overdueTasks = computed(() => groupedFromApi.value.overdue)
+  const todayTasks = computed(() => groupedFromApi.value.today)
+  const tomorrowTasks = computed(() => groupedFromApi.value.tomorrow)
+  const laterTasks = computed(() => groupedFromApi.value.later)
+  const noDateTasks = computed(() => groupedFromApi.value.nodate)
+  const completedTasks = computed(() => groupedFromApi.value.completed)
 
-  const todayTasks = computed(() =>
-    tasks.value.filter(t =>
-      !t.completed && t.dueDate === today.value
-    )
-  )
+  function applyGrouped(groups: ApiTaskGroup[]) {
+    const next: Record<GroupKey, Task[]> = {
+      overdue: [],
+      today: [],
+      tomorrow: [],
+      later: [],
+      nodate: [],
+      completed: [],
+    }
+    for (const group of groups) {
+      const uiKey = groupKeyToUi(group.key) as GroupKey
+      if (uiKey in next) {
+        next[uiKey] = group.tasks.map(apiTaskToUi)
+      }
+    }
+    groupedFromApi.value = next
+    tasks.value = flattenGroups(groups)
+  }
 
-  const tomorrowTasks = computed(() =>
-    tasks.value.filter(t =>
-      !t.completed && t.dueDate === tomorrow.value
-    )
-  )
+  function upsertTaskInState(updated: Task) {
+    const idx = tasks.value.findIndex(t => t.id === updated.id)
+    if (idx === -1) {
+      tasks.value.unshift(updated)
+    }
+    else {
+      tasks.value[idx] = updated
+    }
+    groupedFromApi.value = groupTasksByKey(tasks.value)
+  }
 
-  const laterTasks = computed(() =>
-    tasks.value.filter(t =>
-      !t.completed && t.dueDate && dayjs(t.dueDate).isAfter(tomorrow.value, 'day')
-    )
-  )
+  function removeTaskFromState(id: string) {
+    tasks.value = tasks.value.filter(t => t.id !== id)
+    groupedFromApi.value = groupTasksByKey(tasks.value)
+  }
 
-  const noDateTasks = computed(() =>
-    tasks.value.filter(t => !t.completed && !t.dueDate)
-  )
+  async function fetchGrouped() {
+    loading.value = true
+    error.value = ''
+    try {
+      const groups = await apiGet<ApiTaskGroup[]>('tasks/grouped/')
+      applyGrouped(groups)
+      initialized.value = true
+    }
+    catch (err) {
+      error.value = getApiErrorMessage(err)
+      throw err
+    }
+    finally {
+      loading.value = false
+    }
+  }
 
-  const completedTasks = computed(() =>
-    tasks.value.filter(t => t.completed)
-  )
+  async function fetchMatrix() {
+    const blocks = await apiGet<Array<{
+      block: ApiMatrixBlock
+      tasks: ApiTask[]
+    }>>('matrix/')
 
-  // Tasks for specific date (calendar)
+    const next: Record<string, Task[]> = {}
+    for (const block of blocks) {
+      next[apiMatrixBlockToUi(block.block)] = block.tasks.map(apiTaskToUi)
+    }
+    matrixTasksByBlock.value = next
+    return next
+  }
+
+  async function fetchCalendar(view: 'day' | 'week' | 'month' | 'year', date: string) {
+    const response = await apiGet<{
+      tasks: ApiTask[]
+    }>('calendar/', { params: { view, date } })
+
+    calendarTasks.value = response.tasks.map(apiTaskToUi)
+    calendarCacheKey.value = `${view}:${date}`
+    return calendarTasks.value
+  }
+
   function getTasksForDate(date: string) {
+    if (calendarTasks.value.length > 0) {
+      const fromCalendar = calendarTasks.value.filter(t => t.dueDate === date)
+      if (fromCalendar.length > 0) return fromCalendar
+    }
     return tasks.value.filter(t => t.dueDate === date)
   }
 
-  // Tasks for date range (week)
   function getTasksForWeek(startDate: string, endDate: string) {
-    return tasks.value.filter(t =>
-      t.dueDate &&
-      !dayjs(t.dueDate).isBefore(startDate, 'day') &&
-      !dayjs(t.dueDate).isAfter(endDate, 'day')
+    const source = calendarTasks.value.length > 0 ? calendarTasks.value : tasks.value
+    return source.filter(t =>
+      t.dueDate
+      && !dayjs(t.dueDate).isBefore(startDate, 'day')
+      && !dayjs(t.dueDate).isAfter(endDate, 'day'),
     )
   }
 
-  // Tasks for matrix block
   function getTasksForMatrix(blockId: string) {
+    if (matrixTasksByBlock.value[blockId]?.length) {
+      return matrixTasksByBlock.value[blockId]
+    }
     return tasks.value.filter(t => !t.completed && t.matrixBlock === blockId)
   }
 
-  // ─── CRUD Operations ─────────────────────────────────────────────────────
-  function addTask(taskData: Partial<Task>) {
-    const newTask: Task = {
-      id: `t${Date.now()}`,
-      title: taskData.title || '',
-      description: taskData.description,
-      dueDate: taskData.dueDate,
-      dueTime: taskData.dueTime,
-      duration: taskData.duration,
-      priority: taskData.priority || 'none',
-      completed: false,
-      repeat: taskData.repeat || 'none',
-      repeatDays: taskData.repeatDays,
-      repeatCustom: taskData.repeatCustom,
-      attachment: taskData.attachment,
-      notification: taskData.notification,
-      imageUrl: taskData.imageUrl,
-      listId: taskData.listId,
-      matrixBlock: taskData.matrixBlock || 'not-urgent-not-important',
-      createdAt: new Date().toISOString(),
-    }
-    tasks.value.unshift(newTask)
-    return newTask
+  async function addTask(taskData: Partial<Task>) {
+    const payload = uiTaskToApiPayload(taskData)
+    const created = await apiPost<ApiTask>('tasks/', payload)
+    const task = apiTaskToUi(created)
+    upsertTaskInState(task)
+    await fetchGrouped()
+    return task
   }
 
-  function updateTask(id: string, updates: Partial<Task>) {
-    const idx = tasks.value.findIndex(t => t.id === id)
-    if (idx !== -1) {
-      tasks.value[idx] = { ...tasks.value[idx], ...updates }
-    }
+  async function updateTask(id: string, updates: Partial<Task>) {
+    const existing = tasks.value.find(t => t.id === id)
+    const merged = { ...existing, ...updates, id } as Partial<Task>
+    const payload = uiTaskToApiPayload(merged)
+    const updated = await apiPatch<ApiTask>(`tasks/${id}/`, payload)
+    const task = apiTaskToUi(updated)
+    upsertTaskInState(task)
+    await fetchGrouped()
+    return task
   }
 
-  function deleteTask(id: string) {
-    const idx = tasks.value.findIndex(t => t.id === id)
-    if (idx !== -1) {
-      tasks.value.splice(idx, 1)
-    }
+  async function deleteTask(id: string) {
+    await apiDelete(`tasks/${id}/`)
+    removeTaskFromState(id)
+    await fetchGrouped()
   }
 
-  function completeTask(id: string) {
-    const task = tasks.value.find(t => t.id === id)
-    if (task) {
-      task.completed = !task.completed
-      task.completedAt = task.completed ? dayjs().format('YYYY-MM-DD') : undefined
-    }
+  async function completeTask(id: string) {
+    const existing = tasks.value.find(t => t.id === id)
+    if (!existing) return
+
+    const endpoint = existing.completed ? 'uncomplete' : 'complete'
+    const updated = await apiPost<ApiTask>(`tasks/${id}/${endpoint}/`)
+    const task = apiTaskToUi(updated)
+    upsertTaskInState(task)
+    await fetchGrouped()
+    return task
   }
 
-  function moveToMatrix(taskId: string, blockId: string) {
-    const task = tasks.value.find(t => t.id === taskId)
-    if (task) {
-      task.matrixBlock = blockId as Task['matrixBlock']
-    }
+  async function moveToMatrix(taskId: string, blockId: string) {
+    const matrix_block = blockId.replace(/-/g, '_') as ApiMatrixBlock
+    const updated = await apiPatch<ApiTask>(`tasks/${taskId}/`, { matrix_block })
+    const task = apiTaskToUi(updated)
+    upsertTaskInState(task)
+    await fetchMatrix()
+    await fetchGrouped()
+    return task
   }
 
-  // Search tasks
-  function searchTasks(query: string) {
+  async function fetchTask(id: string) {
+    const task = await apiGet<ApiTask>(`tasks/${id}/`)
+    const ui = apiTaskToUi(task)
+    upsertTaskInState(ui)
+    return ui
+  }
+
+  async function searchTasks(query: string) {
     if (!query.trim()) return []
-    const q = query.toLowerCase()
-    return tasks.value.filter(t =>
-      t.title.toLowerCase().includes(q) ||
-      t.description?.toLowerCase().includes(q)
-    )
+    const response = await apiGet<{ results: ApiTask[] }>('tasks/', {
+      params: { search: query.trim(), limit: 50 },
+    })
+    return (response.results || []).map(apiTaskToUi)
+  }
+
+  function reset() {
+    tasks.value = []
+    groupedFromApi.value = GROUP_ORDER.reduce((acc, key) => {
+      acc[key] = []
+      return acc
+    }, {} as Record<GroupKey, Task[]>)
+    matrixTasksByBlock.value = {}
+    calendarTasks.value = []
+    calendarCacheKey.value = ''
+    initialized.value = false
+    error.value = ''
   }
 
   return {
     tasks,
+    groupedFromApi,
+    matrixTasksByBlock,
+    calendarTasks,
+    calendarCacheKey,
+    loading,
+    error,
+    initialized,
+    today,
+    tomorrow,
     overdueTasks,
     todayTasks,
     tomorrowTasks,
     laterTasks,
     noDateTasks,
     completedTasks,
+    fetchGrouped,
+    fetchMatrix,
+    fetchCalendar,
     getTasksForDate,
     getTasksForWeek,
     getTasksForMatrix,
@@ -147,6 +275,8 @@ export const useTasksStore = defineStore('tasks', () => {
     deleteTask,
     completeTask,
     moveToMatrix,
+    fetchTask,
     searchTasks,
+    reset,
   }
 })

@@ -895,4 +895,12 @@ function handleMonthCellDrop(event: DragEvent, date: string) {
   tasksStore.updateTask(task.id, { dueDate: date })
   draggingWeekTaskId.value = null
 }
+
+watch(
+  [() => calendarStore.currentDate, () => calendarStore.viewType],
+  ([date, view]) => {
+    void tasksStore.fetchCalendar(view, date)
+  },
+  { immediate: true },
+)
 </script>

@@ -209,15 +209,34 @@
       </Transition>
       <Transition name="modal">
         <div v-if="premiumModal" class="app-modal px-5 py-6" @click.stop>
-          <div class="text-center">
+          <div class="text-center mb-4">
             <div class="mb-3 text-4xl">⭐</div>
             <h3 class="text-xl font-bold text-sber-black">Otter Premium</h3>
-            <p class="mt-2 text-sm text-sber-gray">Синхронизация между устройствами, расширенная статистика и больше гибкости в планировании.</p>
           </div>
-          <button class="mt-6 w-full rounded-2xl bg-gradient-to-r from-yellow-400 to-yellow-600 py-4 font-bold text-white" type="button" @click="activatePremium">
-            Подключить Premium
+          <p v-if="settingsStore.premiumFeaturesLoading" class="mb-4 text-center text-sm text-sber-gray">Загрузка…</p>
+          <ul v-else class="mb-4 max-h-40 space-y-2 overflow-y-auto text-sm text-sber-black">
+            <li v-for="feat in settingsStore.premiumFeatures" :key="feat.key">• {{ feat.title }}</li>
+          </ul>
+          <button
+            v-if="!authStore.user?.isPremium"
+            class="w-full rounded-2xl bg-gradient-to-r from-yellow-400 to-yellow-600 py-4 font-bold text-white disabled:opacity-60"
+            type="button"
+            :disabled="premiumCheckoutLoading"
+            @click="purchasePremium"
+          >
+            {{ premiumCheckoutLoading ? 'Открываем оплату…' : 'Оплатить Premium' }}
           </button>
-          <button class="btn-secondary mt-3" type="button" @click="premiumModal = false">Позже</button>
+          <button
+            v-if="!authStore.user?.isPremium"
+            class="btn-secondary mt-2 w-full"
+            type="button"
+            :disabled="premiumActivateLoading"
+            @click="confirmPremiumPayment"
+          >
+            {{ premiumActivateLoading ? 'Активация…' : 'Я оплатил — активировать' }}
+          </button>
+          <p v-else class="text-center text-sm font-semibold text-sber-green">Premium активен</p>
+          <button class="btn-secondary mt-3 w-full" type="button" @click="premiumModal = false">Закрыть</button>
         </div>
       </Transition>
     </Teleport>
@@ -242,16 +261,21 @@
 
 <script setup lang="ts">
 import { ChevronLeft, Camera, Image, Settings, Crown, ChevronRight } from 'lucide-vue-next'
+import { getApiErrorMessage } from '~/utils/api'
 import { validateNewPassword } from '~/utils/password-policy'
 
 definePageMeta({ layout: 'app' })
 
 const authStore = useAuthStore()
+const settingsStore = useSettingsStore()
+const { showToast } = useAppToast()
 
 const nameModal = ref(false)
 const passwordModal = ref(false)
 const avatarModal = ref(false)
 const premiumModal = ref(false)
+const premiumCheckoutLoading = ref(false)
+const premiumActivateLoading = ref(false)
 const showLogout = ref(false)
 
 const avatarFileInputRef = ref<HTMLInputElement | null>(null)
@@ -464,8 +488,37 @@ async function handleDeviceAvatarChange(event: Event) {
   }
 }
 
-function activatePremium() {
-  authStore.activatePremium()
-  premiumModal.value = false
+watch(premiumModal, (open) => {
+  if (open) void settingsStore.fetchPremiumFeatures()
+})
+
+async function purchasePremium() {
+  premiumCheckoutLoading.value = true
+  try {
+    const { checkout_url } = await authStore.startPremiumCheckout()
+    window.open(checkout_url, '_blank', 'noopener,noreferrer')
+    showToast('После оплаты нажмите «Я оплатил — активировать».', 'success', 6000)
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err), 'error')
+  }
+  finally {
+    premiumCheckoutLoading.value = false
+  }
+}
+
+async function confirmPremiumPayment() {
+  premiumActivateLoading.value = true
+  try {
+    await authStore.activatePremium()
+    showToast('Premium активирован', 'success')
+    premiumModal.value = false
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err), 'error')
+  }
+  finally {
+    premiumActivateLoading.value = false
+  }
 }
 </script>

@@ -265,10 +265,18 @@ const filteredTasks = computed(() => {
 function toggleTimer() {
   if (pomodoroStore.state === 'running') {
     pomodoroStore.pause()
-  } else {
-    pomodoroStore.start()
+  }
+  else {
+    void pomodoroStore.start()
   }
 }
+
+onMounted(() => {
+  if (!tasksStore.initialized) {
+    void tasksStore.fetchGrouped()
+  }
+  void pomodoroStore.fetchSessions()
+})
 
 function selectTask(taskId: string | null) {
   pomodoroStore.selectTask(taskId)

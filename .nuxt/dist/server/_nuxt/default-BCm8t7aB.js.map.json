@@ -1,1 +1,0 @@
-{"file":"default-BCm8t7aB.js","mappings":";;;;;;;;;;;;;;;;;;AACO,QAAA,OAAAA,eAAAC,WAAA,EAAA,OAAM,iBAAa,MAAA,CAAA,CAAA,GAAA;;;;;;;;;;;","names":["_ssrRenderAttrs","_mergeProps"],"sources":["../../../../layouts/default.vue"],"sourcesContent":["<template>\n  <div class=\"phone-frame\">\n    <slot />\n  </div>\n</template>\n"],"version":3}

@@ -33,13 +33,14 @@ export { definePageMeta } from '../node_modules/nuxt/dist/pages/runtime/composab
 export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
 export { useAppToast, AppToastType } from '../composables/useAppToast';
 export { useFirebaseAuth } from '../composables/useFirebaseAuth.client';
-export { api, apiGet, apiPost, apiPut, apiPatch, apiDelete } from '../utils/api';
+export { api, getApiErrorMessage, apiGet, apiPost, apiPut, apiPatch, apiDelete } from '../utils/api';
 export { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, FIREBASE_ID_TOKEN_STORAGE_KEY, migrateLegacyTokens, getAccessToken, getRefreshToken, setAuthTokens, clearAuthSession, readRememberedLogin, writeRememberedLogin, clearRememberedLogin, AuthTokens } from '../utils/auth-session';
 export { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH, validateNewPassword } from '../utils/password-policy';
+export { apiTaskToUi, uiTaskToApiPayload, uiTaskToFormData, groupKeyToUi, apiMatrixBlockToUi } from '../utils/task-mapper';
 export { useAuthStore } from '../stores/auth';
 export { useCalendarStore, CalendarViewType } from '../stores/calendar';
 export { useMobileApiStore } from '../stores/mobile-api';
 export { usePomodoroStore } from '../stores/pomodoro';
-export { useSettingsStore } from '../stores/settings';
+export { useSettingsStore, HelpFaqItem } from '../stores/settings';
 export { useTasksStore } from '../stores/tasks';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';

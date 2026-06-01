@@ -87,6 +87,15 @@
     </div>
 
     <!-- Task groups -->
+    <div v-else-if="tasksStore.loading && !tasksStore.initialized" class="px-4 py-16 text-center text-sm text-sber-gray">
+      Загрузка задач...
+    </div>
+    <div v-else-if="tasksStore.error && !tasksStore.initialized" class="px-4 py-16 text-center">
+      <p class="text-sm text-red-500">{{ tasksStore.error }}</p>
+      <button class="mt-3 text-sm font-semibold text-sber-green" type="button" @click="tasksStore.fetchGrouped()">
+        Повторить
+      </button>
+    </div>
     <div v-else class="px-4 pb-8 lg:px-6 lg:pb-10">
       <div class="grid grid-cols-1 gap-3 lg:hidden">
         <TasksTaskGroup
@@ -421,7 +430,24 @@ const desktopSelectedTask = computed(() =>
   tasksStore.tasks.find(task => task.id === desktopSelectedTaskId.value) || null
 )
 
-const searchResults = computed(() => tasksStore.searchTasks(searchQuery.value))
+const searchResults = ref<Task[]>([])
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+watch(searchQuery, (query) => {
+  if (searchDebounceTimer) clearTimeout(searchDebounceTimer)
+  if (!query.trim()) {
+    searchResults.value = []
+    return
+  }
+  searchDebounceTimer = setTimeout(async () => {
+    try {
+      searchResults.value = await tasksStore.searchTasks(query)
+    }
+    catch {
+      searchResults.value = []
+    }
+  }, 300)
+})
 
 const editorForm = reactive({
   title: '',
@@ -661,6 +687,9 @@ watch(desktopGroups, (groups) => {
 onMounted(() => {
   updateDesktopFlag()
   window.addEventListener('resize', updateDesktopFlag)
+  if (!tasksStore.initialized) {
+    void tasksStore.fetchGrouped()
+  }
 })
 
 onBeforeUnmount(() => {

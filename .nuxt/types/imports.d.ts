@@ -12,9 +12,11 @@ declare global {
   const api: typeof import('../../utils/api').api
   const apiDelete: typeof import('../../utils/api').apiDelete
   const apiGet: typeof import('../../utils/api').apiGet
+  const apiMatrixBlockToUi: typeof import('../../utils/task-mapper').apiMatrixBlockToUi
   const apiPatch: typeof import('../../utils/api').apiPatch
   const apiPost: typeof import('../../utils/api').apiPost
   const apiPut: typeof import('../../utils/api').apiPut
+  const apiTaskToUi: typeof import('../../utils/task-mapper').apiTaskToUi
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
   const callOnce: typeof import('../../node_modules/nuxt/dist/app/composables/once').callOnce
@@ -61,11 +63,13 @@ declare global {
   const effectScope: typeof import('vue').effectScope
   const extendRef: typeof import('@vueuse/core').extendRef
   const getAccessToken: typeof import('../../utils/auth-session').getAccessToken
+  const getApiErrorMessage: typeof import('../../utils/api').getApiErrorMessage
   const getAppManifest: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getAppManifest
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getRefreshToken: typeof import('../../utils/auth-session').getRefreshToken
   const getRouteRules: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getRouteRules
+  const groupKeyToUi: typeof import('../../utils/task-mapper').groupKeyToUi
   const h: typeof import('vue').h
   const hasInjectionContext: typeof import('vue').hasInjectionContext
   const ignorableWatch: typeof import('@vueuse/core').ignorableWatch
@@ -166,6 +170,8 @@ declare global {
   const tryOnScopeDispose: typeof import('@vueuse/core').tryOnScopeDispose
   const tryOnUnmounted: typeof import('@vueuse/core').tryOnUnmounted
   const tryUseNuxtApp: typeof import('../../node_modules/nuxt/dist/app/nuxt').tryUseNuxtApp
+  const uiTaskToApiPayload: typeof import('../../utils/task-mapper').uiTaskToApiPayload
+  const uiTaskToFormData: typeof import('../../utils/task-mapper').uiTaskToFormData
   const unref: typeof import('vue').unref
   const unrefElement: typeof import('@vueuse/core').unrefElement
   const until: typeof import('@vueuse/core').until
@@ -438,6 +444,9 @@ declare global {
   // @ts-ignore
   export type { CalendarViewType } from '../../stores/calendar'
   import('../../stores/calendar')
+  // @ts-ignore
+  export type { HelpFaqItem } from '../../stores/settings'
+  import('../../stores/settings')
 }
 // for vue template auto import
 import { UnwrapRef } from 'vue'
@@ -454,9 +463,11 @@ declare module 'vue' {
     readonly api: UnwrapRef<typeof import('../../utils/api')['api']>
     readonly apiDelete: UnwrapRef<typeof import('../../utils/api')['apiDelete']>
     readonly apiGet: UnwrapRef<typeof import('../../utils/api')['apiGet']>
+    readonly apiMatrixBlockToUi: UnwrapRef<typeof import('../../utils/task-mapper')['apiMatrixBlockToUi']>
     readonly apiPatch: UnwrapRef<typeof import('../../utils/api')['apiPatch']>
     readonly apiPost: UnwrapRef<typeof import('../../utils/api')['apiPost']>
     readonly apiPut: UnwrapRef<typeof import('../../utils/api')['apiPut']>
+    readonly apiTaskToUi: UnwrapRef<typeof import('../../utils/task-mapper')['apiTaskToUi']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly callOnce: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/once')['callOnce']>
@@ -503,11 +514,13 @@ declare module 'vue' {
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
     readonly getAccessToken: UnwrapRef<typeof import('../../utils/auth-session')['getAccessToken']>
+    readonly getApiErrorMessage: UnwrapRef<typeof import('../../utils/api')['getApiErrorMessage']>
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getRefreshToken: UnwrapRef<typeof import('../../utils/auth-session')['getRefreshToken']>
     readonly getRouteRules: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getRouteRules']>
+    readonly groupKeyToUi: UnwrapRef<typeof import('../../utils/task-mapper')['groupKeyToUi']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly hasInjectionContext: UnwrapRef<typeof import('vue')['hasInjectionContext']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
@@ -608,6 +621,8 @@ declare module 'vue' {
     readonly tryOnScopeDispose: UnwrapRef<typeof import('@vueuse/core')['tryOnScopeDispose']>
     readonly tryOnUnmounted: UnwrapRef<typeof import('@vueuse/core')['tryOnUnmounted']>
     readonly tryUseNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/nuxt')['tryUseNuxtApp']>
+    readonly uiTaskToApiPayload: UnwrapRef<typeof import('../../utils/task-mapper')['uiTaskToApiPayload']>
+    readonly uiTaskToFormData: UnwrapRef<typeof import('../../utils/task-mapper')['uiTaskToFormData']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly unrefElement: UnwrapRef<typeof import('@vueuse/core')['unrefElement']>
     readonly until: UnwrapRef<typeof import('@vueuse/core')['until']>

@@ -642,10 +642,14 @@ async function focusSubmitButton() {
   desktop?.focus()
 }
 
-function submit() {
+const submitting = ref(false)
+const submitError = ref('')
+
+async function submit() {
   errors.title = ''
   errors.duration = ''
   errors.repeat = ''
+  submitError.value = ''
 
   if (!form.title.trim()) {
     errors.title = 'Введите название задачи'
@@ -669,6 +673,8 @@ function submit() {
 
   if (errors.title || errors.duration || errors.repeat) return
 
+  submitting.value = true
+  try {
   const description = form.description.trim() || undefined
   const duration = form.durationStart && form.durationEnd
     ? { start: form.durationStart, end: form.durationEnd }
@@ -710,12 +716,12 @@ function submit() {
       updates.attachment = undefined
     }
 
-    tasksStore.updateTask(editTaskId.value, updates)
+    await tasksStore.updateTask(editTaskId.value, updates)
     navigateTo(resolveReturnPath())
     return
   }
 
-  tasksStore.addTask({
+  await tasksStore.addTask({
     title: form.title.trim(),
     description,
     dueDate: form.dueDate || undefined,
@@ -746,6 +752,14 @@ function submit() {
   })
 
   navigateTo(resolveReturnPath())
+  }
+  catch (err: unknown) {
+    const e = err as { response?: { data?: { detail?: string } }; message?: string }
+    submitError.value = e?.response?.data?.detail || e?.message || 'Не удалось сохранить задачу'
+  }
+  finally {
+    submitting.value = false
+  }
 }
 
 function isQuickDateActive(quick: QuickDatePreset) {
@@ -882,24 +896,29 @@ function hydrateFromTask(task: Task) {
   explicitNoDeadline.value = !task.dueDate
 }
 
-function loadEditTaskFromRoute() {
+async function loadEditTaskFromRoute() {
   if (!editTaskId.value) return
-  const task = tasksStore.tasks.find(t => t.id === editTaskId.value)
+  let task = tasksStore.tasks.find(t => t.id === editTaskId.value)
   if (!task) {
-    navigateTo('/app', { replace: true })
-    return
+    try {
+      task = await tasksStore.fetchTask(editTaskId.value)
+    }
+    catch {
+      navigateTo('/app', { replace: true })
+      return
+    }
   }
   hydrateFromTask(task)
 }
 
-function toggleEditComplete() {
+async function toggleEditComplete() {
   if (!editTaskId.value) return
-  tasksStore.completeTask(editTaskId.value)
+  await tasksStore.completeTask(editTaskId.value)
 }
 
-function deleteEditingTask() {
+async function deleteEditingTask() {
   if (!editTaskId.value) return
-  tasksStore.deleteTask(editTaskId.value)
+  await tasksStore.deleteTask(editTaskId.value)
   navigateTo(resolveReturnPath())
 }
 </script>

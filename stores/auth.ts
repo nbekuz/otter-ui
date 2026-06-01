@@ -172,6 +172,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function logout() {
+    const tasksStore = useTasksStore()
+    tasksStore.reset()
     clearAuthSession()
     user.value = null
     accessToken.value = null
@@ -190,12 +192,17 @@ export const useAuthStore = defineStore('auth', () => {
     if (user.value) user.value.name = name
   }
 
-  function activatePremium() {
+  async function startPremiumCheckout(tariff = 'monthly') {
+    const settingsStore = useSettingsStore()
+    return settingsStore.premiumCheckout(tariff)
+  }
+
+  async function activatePremium() {
+    const settingsStore = useSettingsStore()
+    await settingsStore.premiumActivate()
     if (user.value) {
-      const premiumExpiresAt = new Date()
-      premiumExpiresAt.setMonth(premiumExpiresAt.getMonth() + 1)
-      user.value.isPremium = true
-      user.value.premiumExpiresAt = premiumExpiresAt.toISOString()
+      user.value.isPremium = settingsStore.isPremium
+      user.value.premiumExpiresAt = settingsStore.premiumActivatedAt || undefined
     }
   }
 
@@ -220,6 +227,7 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     updateAvatar,
     updateName,
+    startPremiumCheckout,
     activatePremium,
   }
 })

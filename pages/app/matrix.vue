@@ -193,6 +193,10 @@ let draggedTaskId: string | null = null
 
 const blocks = computed(() => Object.values(settingsStore.matrixBlocks))
 
+onMounted(() => {
+  void tasksStore.fetchMatrix()
+})
+
 function getBlockTasks(blockId: string) {
   return tasksStore.getTasksForMatrix(blockId)
 }

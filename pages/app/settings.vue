@@ -69,7 +69,7 @@
       <SettingsSettingsRow label="Пароль" @click="passwordModal = true">
         <template #icon><Lock class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
-      <SettingsSettingsRow label="Устройства" @click="showComingSoon()">
+      <SettingsSettingsRow label="Устройства" @click="runStubAction">
         <template #icon><Smartphone class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
       <SettingsSettingsRow label="Премиум" label-class="text-yellow-600" @click="premiumModal = true">
@@ -186,13 +186,13 @@
         </div>
       </div>
 
-      <SettingsSettingsRow label="Вид" @click="showComingSoon()">
+      <SettingsSettingsRow label="Вид" @click="runStubAction">
         <template #icon><EyeOff class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
-      <SettingsSettingsRow label="Дата и время" @click="showComingSoon()">
+      <SettingsSettingsRow label="Дата и время" @click="runStubAction">
         <template #icon><Clock class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
-      <SettingsSettingsRow label="Интеграции и импорт" @click="showComingSoon()">
+      <SettingsSettingsRow label="Интеграции и импорт" @click="runStubAction">
         <template #icon><Download class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsSettingsRow>
       <SettingsSettingsRow label="Рекомендовать друзьям" @click="shareApp">
@@ -350,22 +350,46 @@
             <h3 class="text-xl font-bold text-sber-black">Otter Premium</h3>
             <p class="text-sm text-sber-gray mt-1">Больше функций в приложении</p>
           </div>
-          <div class="space-y-3 mb-6">
-            <div v-for="feat in premiumFeatures" :key="feat" class="flex items-center gap-3">
+          <p v-if="settingsStore.premiumFeaturesLoading" class="mb-4 text-center text-sm text-sber-gray">
+            Загрузка возможностей…
+          </p>
+          <div v-else class="space-y-3 mb-6 max-h-48 overflow-y-auto">
+            <div
+              v-for="feat in settingsStore.premiumFeatures"
+              :key="feat.key"
+              class="flex items-center gap-3"
+            >
               <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center">
                 <Check class="w-3.5 h-3.5 text-yellow-600" />
               </div>
-              <span class="text-sm text-sber-black">{{ feat }}</span>
+              <span class="text-sm text-sber-black">{{ feat.title }}</span>
             </div>
           </div>
-          <button class="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-bold
-                         py-4 rounded-2xl active:opacity-90" @click="activatePremium">
-            Премиум за 299 ₽/месяц
+          <button
+            v-if="!authStore.user?.isPremium"
+            class="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-bold py-4 rounded-2xl active:opacity-90 disabled:opacity-60"
+            type="button"
+            :disabled="premiumCheckoutLoading"
+            @click="purchasePremium"
+          >
+            {{ premiumCheckoutLoading ? 'Открываем оплату…' : 'Оплатить 299 ₽/месяц' }}
           </button>
-          <p class="text-center text-xs text-sber-gray mt-3">
-            Оплата через Робокассу. Подписку можно отменить в любой момент.
+          <button
+            v-if="!authStore.user?.isPremium"
+            class="btn-secondary mt-2 w-full"
+            type="button"
+            :disabled="premiumActivateLoading"
+            @click="confirmPremiumPayment"
+          >
+            {{ premiumActivateLoading ? 'Активация…' : 'Я оплатил — активировать' }}
+          </button>
+          <p v-if="authStore.user?.isPremium" class="text-center text-sm font-semibold text-sber-green">
+            Premium уже активен
           </p>
-          <button class="btn-secondary mt-2" @click="premiumModal = false">Отмена</button>
+          <p class="text-center text-xs text-sber-gray mt-3">
+            Оплата через Робокассу. После оплаты нажмите «Я оплатил — активировать».
+          </p>
+          <button class="btn-secondary mt-2 w-full" type="button" @click="premiumModal = false">Закрыть</button>
         </div>
       </Transition>
     </Teleport>
@@ -425,6 +449,23 @@
             <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-sber-gray" />
             <input v-model="faqSearch" placeholder="Поиск по вопросам..." class="input-field pl-11 py-3 text-sm" />
           </div>
+          <p v-if="settingsStore.helpFaqLoading" class="py-6 text-center text-sm text-sber-gray">
+            Загрузка…
+          </p>
+          <p v-else-if="settingsStore.helpFaqError" class="py-4 text-center text-sm text-red-500">
+            {{ settingsStore.helpFaqError }}
+          </p>
+          <button
+            v-if="settingsStore.helpFaqError"
+            class="btn-secondary mb-4 w-full"
+            type="button"
+            @click="loadHelpFaq"
+          >
+            Повторить
+          </button>
+          <p v-else-if="filteredFaq.length === 0" class="py-6 text-center text-sm text-sber-gray">
+            Вопросы не найдены
+          </p>
           <div v-for="faq in filteredFaq" :key="faq.id" class="mb-3">
             <button class="w-full text-left" @click="faq.open = !faq.open">
               <div class="flex items-start justify-between gap-2 py-2">
@@ -463,7 +504,9 @@
           <div v-if="contactScreenshotName" class="mb-3 rounded-xl bg-sber-gray-light px-3 py-2 text-xs text-sber-gray">
             Прикреплено: {{ contactScreenshotName }}
           </div>
-          <button class="btn-primary" @click="sendContactMessage">Отправить</button>
+          <button class="btn-primary" type="button" :disabled="contactSending" @click="sendContactMessage">
+            {{ contactSending ? 'Отправка…' : 'Отправить' }}
+          </button>
           <button class="btn-secondary mt-3" @click="contactModal = false">Отмена</button>
         </div>
       </Transition>
@@ -491,12 +534,62 @@
               <Star class="w-4 h-4 text-sber-gray" />
               <span class="text-sm">Оценить в Google Play</span>
             </button>
-            <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" @click="showComingSoon()">
+            <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" type="button" @click="openLegalModal">
               <Info class="w-4 h-4 text-sber-gray" />
               <span class="text-sm">Лицензии и информация</span>
             </button>
           </div>
           <button class="btn-secondary mt-4" @click="aboutModal = false">Закрыть</button>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Legal documents -->
+    <Teleport to="body">
+      <Transition name="overlay"><div v-if="legalModal" class="overlay" @click="legalModal = false" /></Transition>
+      <Transition name="modal">
+        <div
+          v-if="legalModal"
+          class="app-modal px-5 py-5"
+          style="max-height: 85dvh; overflow-y: auto;"
+          @click.stop
+        >
+          <h3 class="text-lg font-bold mb-3">Юридические документы</h3>
+          <p v-if="settingsStore.legalDocumentsLoading" class="py-6 text-center text-sm text-sber-gray">
+            Загрузка…
+          </p>
+          <p v-else-if="settingsStore.legalDocumentsError" class="py-4 text-center text-sm text-red-500">
+            {{ settingsStore.legalDocumentsError }}
+          </p>
+          <button
+            v-if="settingsStore.legalDocumentsError"
+            class="btn-secondary mb-4 w-full"
+            type="button"
+            @click="loadLegalDocuments"
+          >
+            Повторить
+          </button>
+          <template v-else-if="selectedLegalDoc">
+            <button class="mb-3 text-sm font-semibold text-sber-green" type="button" @click="selectedLegalDoc = null">
+              ← Назад к списку
+            </button>
+            <h4 class="text-base font-bold text-sber-black mb-2">{{ selectedLegalDoc.title }}</h4>
+            <p class="whitespace-pre-wrap text-sm leading-relaxed text-sber-gray">{{ selectedLegalDoc.content }}</p>
+          </template>
+          <div v-else class="space-y-2">
+            <button
+              v-for="doc in settingsStore.legalDocuments"
+              :key="doc.doc_type"
+              class="flex w-full items-center gap-3 rounded-2xl bg-sber-gray-light px-4 py-3 text-left"
+              type="button"
+              @click="selectedLegalDoc = doc"
+            >
+              <Info class="h-4 w-4 text-sber-gray" />
+              <span class="text-sm text-sber-black">{{ doc.title }}</span>
+              <ChevronRight class="ml-auto h-4 w-4 text-sber-gray" />
+            </button>
+          </div>
+          <button class="btn-secondary mt-4 w-full" type="button" @click="legalModal = false">Закрыть</button>
         </div>
       </Transition>
     </Teleport>
@@ -559,13 +652,16 @@ import {
   CheckSquare, Calendar, Grid2x2, Timer, Settings
 } from 'lucide-vue-next'
 import { Moon, Sun } from 'lucide-vue-next'
-import { soundOptions, faqData } from '~/data/mockData'
+import { soundOptions } from '~/data/mockData'
+import type { ApiLegalDocument } from '~/types/mobile-api'
+import { getApiErrorMessage } from '~/utils/api'
 import { validateNewPassword } from '~/utils/password-policy'
 
 definePageMeta({ layout: 'app' })
 
 const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
+const { showToast } = useAppToast()
 
 const nameModal = ref(false)
 const passwordModal = ref(false)
@@ -575,6 +671,12 @@ const languageModal = ref(false)
 const helpModal = ref(false)
 const contactModal = ref(false)
 const aboutModal = ref(false)
+const legalModal = ref(false)
+const selectedLegalDoc = ref<ApiLegalDocument | null>(null)
+const premiumCheckoutLoading = ref(false)
+const premiumActivateLoading = ref(false)
+const contactSending = ref(false)
+const contactScreenshotFile = ref<File | null>(null)
 const avatarModal = ref(false)
 const avatarSettingsError = ref('')
 const avatarInputRef = ref<HTMLInputElement | null>(null)
@@ -624,13 +726,22 @@ const selectedLanguageLabel = computed(() =>
   languages.find(l => l.id === selectedLanguage.value)?.label || 'Русский'
 )
 
-const faqItems = ref(faqData.map(f => ({ ...f, open: false })))
-
 const filteredFaq = computed(() => {
-  if (!faqSearch.value) return faqItems.value
-  return faqItems.value.filter(f =>
-    f.question.toLowerCase().includes(faqSearch.value.toLowerCase())
+  const items = settingsStore.helpFaq
+  if (!faqSearch.value.trim()) return items
+  const q = faqSearch.value.trim().toLowerCase()
+  return items.filter(f =>
+    f.question.toLowerCase().includes(q)
+    || f.answer.toLowerCase().includes(q),
   )
+})
+
+async function loadHelpFaq() {
+  await settingsStore.fetchHelpFaq()
+}
+
+watch(helpModal, (open) => {
+  if (open) void loadHelpFaq()
 })
 
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
@@ -661,14 +772,6 @@ const taskGroups = [
   { id: 'later', label: 'Позже', color: '#AF52DE' },
   { id: 'nodate', label: 'Без срока', color: '#8E8E93' },
   { id: 'completed', label: 'Готово', color: '#21A038' },
-]
-
-const premiumFeatures = [
-  'Синхронизация между устройствами',
-  'Неограниченные задачи и списки',
-  'Расширенная статистика',
-  'Темная тема',
-  'Облачный бекап',
 ]
 
 function showComingSoon() {
@@ -819,9 +922,59 @@ function closePasswordModal() {
   passwordModal.value = false
 }
 
-function activatePremium() {
-  authStore.activatePremium()
-  premiumModal.value = false
+async function runStubAction() {
+  try {
+    const detail = await settingsStore.callStubAction()
+    showToast(detail, 'success')
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err), 'error')
+  }
+}
+
+async function loadLegalDocuments() {
+  await settingsStore.fetchLegalDocuments()
+}
+
+function openLegalModal() {
+  aboutModal.value = false
+  selectedLegalDoc.value = null
+  legalModal.value = true
+  void loadLegalDocuments()
+}
+
+watch(premiumModal, (open) => {
+  if (open) void settingsStore.fetchPremiumFeatures()
+})
+
+async function purchasePremium() {
+  premiumCheckoutLoading.value = true
+  try {
+    const { checkout_url } = await authStore.startPremiumCheckout()
+    window.open(checkout_url, '_blank', 'noopener,noreferrer')
+    showToast('Откройте вкладку оплаты. После оплаты нажмите «Я оплатил — активировать».', 'success', 6000)
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err), 'error')
+  }
+  finally {
+    premiumCheckoutLoading.value = false
+  }
+}
+
+async function confirmPremiumPayment() {
+  premiumActivateLoading.value = true
+  try {
+    await authStore.activatePremium()
+    showToast('Premium активирован', 'success')
+    premiumModal.value = false
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err), 'error')
+  }
+  finally {
+    premiumActivateLoading.value = false
+  }
 }
 
 function getSound(soundId: string) {
@@ -889,24 +1042,39 @@ function openContactFromHelp() {
   contactModal.value = true
 }
 
-function sendContactMessage() {
+async function sendContactMessage() {
   if (!contactMessage.value.trim()) {
-    showComingSoon()
+    showToast('Введите сообщение', 'error')
     return
   }
-  contactMessage.value = ''
-  contactScreenshotName.value = ''
-  if (contactScreenshotInputRef.value) {
-    contactScreenshotInputRef.value.value = ''
+  contactSending.value = true
+  try {
+    await settingsStore.sendHelpMessage(
+      contactMessage.value.trim(),
+      contactScreenshotFile.value || undefined,
+    )
+    showToast('Сообщение отправлено', 'success')
+    contactMessage.value = ''
+    contactScreenshotName.value = ''
+    contactScreenshotFile.value = null
+    if (contactScreenshotInputRef.value) {
+      contactScreenshotInputRef.value.value = ''
+    }
+    contactModal.value = false
   }
-  contactModal.value = false
-  showComingSoon()
+  catch (err) {
+    showToast(getApiErrorMessage(err, 'Не удалось отправить сообщение'), 'error')
+  }
+  finally {
+    contactSending.value = false
+  }
 }
 
 function handleContactScreenshotChange(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
+  contactScreenshotFile.value = file
   contactScreenshotName.value = file.name
 }
 
