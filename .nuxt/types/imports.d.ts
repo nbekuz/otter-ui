@@ -8,6 +8,7 @@ declare global {
   const REFRESH_TOKEN_KEY: typeof import('../../utils/auth-session').REFRESH_TOKEN_KEY
   const abortNavigation: typeof import('../../node_modules/nuxt/dist/app/composables/router').abortNavigation
   const acceptHMRUpdate: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').acceptHMRUpdate
+  const addMinutesToTime: typeof import('../../utils/time').addMinutesToTime
   const addRouteMiddleware: typeof import('../../node_modules/nuxt/dist/app/composables/router').addRouteMiddleware
   const api: typeof import('../../utils/api').api
   const apiDelete: typeof import('../../utils/api').apiDelete
@@ -62,6 +63,7 @@ declare global {
   const effect: typeof import('vue').effect
   const effectScope: typeof import('vue').effectScope
   const extendRef: typeof import('@vueuse/core').extendRef
+  const formatMinutesToTime: typeof import('../../utils/time').formatMinutesToTime
   const getAccessToken: typeof import('../../utils/auth-session').getAccessToken
   const getApiErrorMessage: typeof import('../../utils/api').getApiErrorMessage
   const getAppManifest: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getAppManifest
@@ -69,6 +71,7 @@ declare global {
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getRefreshToken: typeof import('../../utils/auth-session').getRefreshToken
   const getRouteRules: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getRouteRules
+  const getTaskScheduleStart: typeof import('../../utils/time').getTaskScheduleStart
   const groupKeyToUi: typeof import('../../utils/task-mapper').groupKeyToUi
   const h: typeof import('vue').h
   const hasInjectionContext: typeof import('vue').hasInjectionContext
@@ -93,6 +96,7 @@ declare global {
   const navigateTo: typeof import('../../node_modules/nuxt/dist/app/composables/router').navigateTo
   const nextTick: typeof import('vue').nextTick
   const onActivated: typeof import('vue').onActivated
+  const onAuthTokensChanged: typeof import('../../utils/auth-session').onAuthTokensChanged
   const onBeforeMount: typeof import('vue').onBeforeMount
   const onBeforeRouteLeave: typeof import('vue-router').onBeforeRouteLeave
   const onBeforeRouteUpdate: typeof import('vue-router').onBeforeRouteUpdate
@@ -114,6 +118,7 @@ declare global {
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
+  const parseTimeToMinutes: typeof import('../../utils/time').parseTimeToMinutes
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
   const prefetchComponents: typeof import('../../node_modules/nuxt/dist/app/composables/preload').prefetchComponents
   const preloadComponents: typeof import('../../node_modules/nuxt/dist/app/composables/preload').preloadComponents
@@ -459,6 +464,7 @@ declare module 'vue' {
     readonly REFRESH_TOKEN_KEY: UnwrapRef<typeof import('../../utils/auth-session')['REFRESH_TOKEN_KEY']>
     readonly abortNavigation: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['abortNavigation']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['acceptHMRUpdate']>
+    readonly addMinutesToTime: UnwrapRef<typeof import('../../utils/time')['addMinutesToTime']>
     readonly addRouteMiddleware: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['addRouteMiddleware']>
     readonly api: UnwrapRef<typeof import('../../utils/api')['api']>
     readonly apiDelete: UnwrapRef<typeof import('../../utils/api')['apiDelete']>
@@ -513,6 +519,7 @@ declare module 'vue' {
     readonly effect: UnwrapRef<typeof import('vue')['effect']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
+    readonly formatMinutesToTime: UnwrapRef<typeof import('../../utils/time')['formatMinutesToTime']>
     readonly getAccessToken: UnwrapRef<typeof import('../../utils/auth-session')['getAccessToken']>
     readonly getApiErrorMessage: UnwrapRef<typeof import('../../utils/api')['getApiErrorMessage']>
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
@@ -520,6 +527,7 @@ declare module 'vue' {
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getRefreshToken: UnwrapRef<typeof import('../../utils/auth-session')['getRefreshToken']>
     readonly getRouteRules: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getRouteRules']>
+    readonly getTaskScheduleStart: UnwrapRef<typeof import('../../utils/time')['getTaskScheduleStart']>
     readonly groupKeyToUi: UnwrapRef<typeof import('../../utils/task-mapper')['groupKeyToUi']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly hasInjectionContext: UnwrapRef<typeof import('vue')['hasInjectionContext']>
@@ -544,6 +552,7 @@ declare module 'vue' {
     readonly navigateTo: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['navigateTo']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
+    readonly onAuthTokensChanged: UnwrapRef<typeof import('../../utils/auth-session')['onAuthTokensChanged']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
     readonly onBeforeRouteLeave: UnwrapRef<typeof import('vue-router')['onBeforeRouteLeave']>
     readonly onBeforeRouteUpdate: UnwrapRef<typeof import('vue-router')['onBeforeRouteUpdate']>
@@ -565,6 +574,7 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
+    readonly parseTimeToMinutes: UnwrapRef<typeof import('../../utils/time')['parseTimeToMinutes']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
     readonly prefetchComponents: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preload')['prefetchComponents']>
     readonly preloadComponents: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preload')['preloadComponents']>

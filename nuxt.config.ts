@@ -58,7 +58,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://159.194.221.54:8005/api/v1/',
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://admin.skkamni.ru/api/v1/',
       firebase: {
         apiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4',
         /**

@@ -238,7 +238,7 @@ function onDragStart(e: DragEvent, taskId: string) {
 function onDrop(blockId: string) {
   // Keep fallback for browsers where module-scoped state is faster than dataTransfer.
   if (draggedTaskId) {
-    tasksStore.moveToMatrix(draggedTaskId, blockId)
+    void tasksStore.moveToMatrix(draggedTaskId, blockId)
     draggedTaskId = null
     dragTarget.value = null
   }

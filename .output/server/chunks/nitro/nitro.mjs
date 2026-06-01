@@ -4045,7 +4045,7 @@ const _inlineRuntimeConfig = {
     }
   },
   "public": {
-    "apiBaseUrl": "http://159.194.221.54:8005/api/v1/",
+    "apiBaseUrl": "https://admin.skkamni.ru/api/v1/",
     "firebase": {
       "apiKey": "AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4",
       "authDomain": "otter-6bdac.firebaseapp.com",

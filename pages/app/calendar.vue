@@ -182,7 +182,7 @@
                    :style="{ backgroundColor: getPriorityColor(task.priority) + '20', borderLeft: `3px solid ${getPriorityColor(task.priority)}` }"
                    @click.stop="selectedTaskId = task.id">
                 <p class="text-xs font-semibold" :style="{ color: getPriorityColor(task.priority) }">
-                  {{ task.dueTime }} {{ task.duration ? `– ${task.duration.end}` : '' }}
+                  {{ formatTaskScheduleLabel(task) }}
                 </p>
                 <p class="text-xs text-sber-black font-medium truncate">{{ task.title }}</p>
               </div>
@@ -227,7 +227,7 @@
               @dragend="endWeekTaskDrag"
               @click="selectedTaskId = task.id"
             >
-              <p class="truncate text-[9px] font-semibold text-sber-black">{{ task.dueTime }}</p>
+              <p class="truncate text-[9px] font-semibold text-sber-black">{{ formatTaskScheduleLabel(task) }}</p>
               <p class="truncate text-[9px] font-medium text-sber-black">{{ task.title }}</p>
             </div>
           </div>
@@ -325,6 +325,12 @@ import {
 } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import type { Task } from '~/data/mockData'
+import {
+  addMinutesToTime,
+  formatMinutesToTime,
+  getTaskScheduleStart,
+  parseTimeToMinutes,
+} from '~/utils/time'
 
 definePageMeta({ layout: 'app' })
 
@@ -425,8 +431,9 @@ const weekViewDays = computed(() => {
 
 function getHourTasks(hour: number) {
   return tasksStore.getTasksForDate(calendarStore.currentDate).filter(t => {
-    if (!t.dueTime) return false
-    const h = parseInt(t.dueTime.split(':')[0])
+    const start = getTaskScheduleStart(t)
+    if (!start) return false
+    const h = parseInt(start.split(':')[0])
     return h === hour
   })
 }
@@ -526,10 +533,11 @@ function dayTimelineTaskHorizontalStyle(layoutCols: number, layoutCol: number): 
 
 const dayTimelineTasks = computed(() => {
   const base = tasksStore.getTasksForDate(calendarStore.currentDate)
-    .filter(t => !!t.dueTime)
+    .filter(t => !!getTaskScheduleStart(t))
     .map((task) => {
       const preview = dragPreview.value?.taskId === task.id ? dragPreview.value : null
-      const startMinutes = preview ? preview.start : parseTimeToMinutes(task.dueTime || '00:00')
+      const scheduleStart = getTaskScheduleStart(task) || '00:00'
+      const startMinutes = preview ? preview.start : parseTimeToMinutes(scheduleStart)
       const durationMinutes = preview ? (preview.end - preview.start) : getTaskDurationMinutes(task)
       const endMinutes = Math.min(startMinutes + durationMinutes, mainEndMinutes)
       const clippedStart = Math.max(startMinutes, mainStartMinutes)
@@ -537,9 +545,9 @@ const dayTimelineTasks = computed(() => {
 
       const labelTime = preview
         ? `${formatMinutesToTime(preview.start)} – ${formatMinutesToTime(preview.end)}`
-        : task.duration?.end
-          ? `${task.dueTime} – ${task.duration.end}`
-          : (task.dueTime || '')
+        : task.duration?.start && task.duration?.end
+          ? `${task.duration.start} – ${task.duration.end}`
+          : (getTaskScheduleStart(task) || '')
 
       return {
         ...task,
@@ -568,10 +576,18 @@ const dayTimelineTasks = computed(() => {
 
 function getDateHourTasks(date: string, hour: number) {
   return tasksStore.getTasksForDate(date).filter(t => {
-    if (!t.dueTime) return false
-    const h = parseInt(t.dueTime.split(':')[0])
+    const start = getTaskScheduleStart(t)
+    if (!start) return false
+    const h = parseInt(start.split(':')[0])
     return h === hour
   })
+}
+
+function formatTaskScheduleLabel(task: Task) {
+  if (task.duration?.start && task.duration?.end) {
+    return `${task.duration.start} – ${task.duration.end}`
+  }
+  return getTaskScheduleStart(task) || ''
 }
 
 function getPriorityColor(priority: string) {
@@ -582,20 +598,6 @@ function getPriorityColor(priority: string) {
     none: '#8E8E93',
   }
   return colors[priority] || '#8E8E93'
-}
-
-function parseTimeToMinutes(time: string) {
-  const [h, m] = time.split(':').map(v => parseInt(v, 10))
-  const hours = Number.isFinite(h) ? h : 0
-  const minutes = Number.isFinite(m) ? m : 0
-  return hours * 60 + minutes
-}
-
-function formatMinutesToTime(totalMinutes: number) {
-  const clamped = Math.max(0, Math.min(23 * 60 + 59, totalMinutes))
-  const hours = Math.floor(clamped / 60)
-  const minutes = clamped % 60
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
 function roundToStep(value: number, step: number) {
@@ -690,6 +692,23 @@ function handleDragMove(event: PointerEvent) {
   }
 }
 
+function finishDragInteraction() {
+  if (didDrag.value) {
+    ignoreNextTaskCardClick.value = true
+    if (postDragClickIgnoreTimer) clearTimeout(postDragClickIgnoreTimer)
+    postDragClickIgnoreTimer = setTimeout(() => {
+      ignoreNextTaskCardClick.value = false
+      postDragClickIgnoreTimer = null
+    }, 450)
+  }
+  didDrag.value = false
+  dragState.value = null
+  dragPreview.value = null
+  window.removeEventListener('pointermove', handleDragMove)
+  window.removeEventListener('pointerup', handleDragEnd)
+  window.removeEventListener('pointercancel', handleDragEnd)
+}
+
 function handleDragEnd() {
   if (!dragState.value) return
 
@@ -704,44 +723,27 @@ function handleDragEnd() {
     }
   }
 
-  if (dragPreview.value && dragPreview.value.taskId === state.taskId) {
-    const { start, end } = dragPreview.value
-    const unchanged = start === state.initialStart && end === state.initialEnd
-    if (unchanged) {
-      /* noop */
-    } else {
-      const duration = Math.max(minDurationMinutes, end - start)
-      const updates: Partial<Task> = {
-        dueTime: formatMinutesToTime(start),
-      }
+  const preview = dragPreview.value
+  const shouldPersist = preview
+    && preview.taskId === state.taskId
+    && (preview.start !== state.initialStart || preview.end !== state.initialEnd)
 
-      const shouldSaveDuration = state.mode !== 'move' || state.hadDuration
-      if (shouldSaveDuration) {
-        updates.duration = {
-          start: formatMinutesToTime(start),
-          end: formatMinutesToTime(start + duration),
-        }
-      }
-
-      tasksStore.updateTask(state.taskId, updates)
-    }
+  if (!shouldPersist) {
+    finishDragInteraction()
+    return
   }
 
-  if (didDrag.value) {
-    ignoreNextTaskCardClick.value = true
-    if (postDragClickIgnoreTimer) clearTimeout(postDragClickIgnoreTimer)
-    postDragClickIgnoreTimer = setTimeout(() => {
-      ignoreNextTaskCardClick.value = false
-      postDragClickIgnoreTimer = null
-    }, 450)
+  const duration = Math.max(minDurationMinutes, preview.end - preview.start)
+  const updates: Partial<Task> = {
+    duration: {
+      start: formatMinutesToTime(preview.start),
+      end: formatMinutesToTime(preview.start + duration),
+    },
   }
-  didDrag.value = false
 
-  dragState.value = null
-  dragPreview.value = null
-  window.removeEventListener('pointermove', handleDragMove)
-  window.removeEventListener('pointerup', handleDragEnd)
-  window.removeEventListener('pointercancel', handleDragEnd)
+  void tasksStore
+    .updateTask(state.taskId, updates, { grouped: false, matrix: false })
+    .finally(finishDragInteraction)
 }
 
 function handleTaskCardClick(taskId: string) {
@@ -816,11 +818,15 @@ function goToMonth(monthIndex: number) {
   calendarStore.setView('month')
 }
 
+function buildNewTaskFromCalendarQuery(slotStart: string) {
+  const slotEnd = addMinutesToTime(slotStart, 60)
+  const returnTo = encodeURIComponent(`/app/calendar?view=${calendarStore.viewType}&date=${calendarStore.currentDate}`)
+  return `/app/new-task?returnTo=${returnTo}&dueDate=${calendarStore.currentDate}&durationStart=${slotStart}&durationEnd=${slotEnd}`
+}
+
 function openNewTaskFromCalendar(hour: number) {
-  const dueTime = `${String(hour).padStart(2, '0')}:00`
-  navigateTo(
-    `/app/new-task?returnTo=${encodeURIComponent(`/app/calendar?view=${calendarStore.viewType}&date=${calendarStore.currentDate}`)}&dueDate=${calendarStore.currentDate}&dueTime=${dueTime}`
-  )
+  const slotStart = `${String(hour).padStart(2, '0')}:00`
+  navigateTo(buildNewTaskFromCalendarQuery(slotStart))
 }
 
 function openNewTaskFromMainTimeline(event: MouseEvent) {
@@ -831,11 +837,7 @@ function openNewTaskFromMainTimeline(event: MouseEvent) {
   const offsetY = event.clientY - rect.top
   const rawMinutes = mainStartMinutes + Math.floor(offsetY / minuteHeightPx)
   const snappedMinutes = Math.max(mainStartMinutes, Math.min(mainEndMinutes - 1, roundToStep(rawMinutes, 5)))
-  const dueTime = formatMinutesToTime(snappedMinutes)
-
-  navigateTo(
-    `/app/new-task?returnTo=${encodeURIComponent(`/app/calendar?view=${calendarStore.viewType}&date=${calendarStore.currentDate}`)}&dueDate=${calendarStore.currentDate}&dueTime=${dueTime}`
-  )
+  navigateTo(buildNewTaskFromCalendarQuery(formatMinutesToTime(snappedMinutes)))
 }
 
 function startWeekTaskDrag(event: DragEvent, taskId: string) {
@@ -860,25 +862,25 @@ function handleWeekCellDrop(event: DragEvent, date: string, hour: number) {
     return
   }
 
-  const currentMinutes = task.dueTime ? parseTimeToMinutes(task.dueTime) % 60 : 0
+  const scheduleStart = getTaskScheduleStart(task)
+  const currentMinutes = scheduleStart ? parseTimeToMinutes(scheduleStart) % 60 : 0
   const nextStartMinutes = hour * 60 + currentMinutes
   const durationMinutes = getTaskDurationMinutes(task)
   const dayEndMinutes = 24 * 60 - 1
   const nextEndMinutes = Math.min(nextStartMinutes + durationMinutes, dayEndMinutes)
+  const nextStart = formatMinutesToTime(nextStartMinutes)
+  const nextEnd = formatMinutesToTime(nextEndMinutes)
 
   const updates: Partial<Task> = {
     dueDate: date,
-    dueTime: formatMinutesToTime(nextStartMinutes),
+    duration: { start: nextStart, end: nextEnd },
   }
 
-  if (task.duration) {
-    updates.duration = {
-      start: formatMinutesToTime(nextStartMinutes),
-      end: formatMinutesToTime(nextEndMinutes),
-    }
+  if (!task.duration && task.dueTime) {
+    updates.dueTime = nextStart
   }
 
-  tasksStore.updateTask(task.id, updates)
+  void tasksStore.updateTask(task.id, updates, { grouped: false, matrix: false })
   draggingWeekTaskId.value = null
 }
 
@@ -892,7 +894,7 @@ function handleMonthCellDrop(event: DragEvent, date: string) {
     return
   }
 
-  tasksStore.updateTask(task.id, { dueDate: date })
+  void tasksStore.updateTask(task.id, { dueDate: date }, { grouped: false, matrix: false })
   draggingWeekTaskId.value = null
 }
 

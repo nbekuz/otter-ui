@@ -2,6 +2,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (import.meta.server) return
 
   const authStore = useAuthStore()
+  authStore.syncTokensFromStorage()
 
   if ((to.path.startsWith('/app') || to.path === '/profile-fill') && !authStore.isLoggedIn) {
     return navigateTo('/')

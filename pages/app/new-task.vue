@@ -421,6 +421,7 @@
 import { Check, Bell, RefreshCw, Calendar, Flag, Grid2x2, ChevronLeft, Paperclip, X, Trash2 } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
+import { addMinutesToTime } from '~/utils/time'
 
 definePageMeta({ layout: 'app' })
 
@@ -557,13 +558,6 @@ const matrixBlocks = [
 const attachmentPreviewUrl = computed(() =>
   attachmentMimeType.value.startsWith('image/') ? attachmentDataUrl.value : ''
 )
-
-watch(() => form.dueTime, (newTime, oldTime) => {
-  if (!newTime) return
-  if (!form.durationStart || form.durationStart === oldTime) {
-    form.durationStart = newTime
-  }
-})
 
 watch(() => form.dueDate, (newDate) => {
   if (newDate !== '') {
@@ -847,19 +841,38 @@ function goBackToSource() {
   navigateTo(resolveReturnPath())
 }
 
+function readTimeQuery(key: string): string | undefined {
+  const raw = route.query[key]
+  const value = Array.isArray(raw) ? raw[0] : raw
+  return typeof value === 'string' && /^\d{2}:\d{2}$/.test(value) ? value : undefined
+}
+
 function applyPrefillFromQuery() {
   const dueDateParam = Array.isArray(route.query.dueDate) ? route.query.dueDate[0] : route.query.dueDate
-  const dueTimeParam = Array.isArray(route.query.dueTime) ? route.query.dueTime[0] : route.query.dueTime
+  const dueTimeParam = readTimeQuery('dueTime')
+  const durationStartParam = readTimeQuery('durationStart')
+  const durationEndParam = readTimeQuery('durationEnd')
 
   if (typeof dueDateParam === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dueDateParam)) {
     form.dueDate = dueDateParam
   }
 
-  if (typeof dueTimeParam === 'string' && /^\d{2}:\d{2}$/.test(dueTimeParam)) {
+  if (durationStartParam) {
+    form.durationStart = durationStartParam
+    form.durationEnd = durationEndParam ?? addMinutesToTime(durationStartParam, 60)
+    if (dueTimeParam) form.dueTime = dueTimeParam
+    return
+  }
+
+  // Календарь передаёт dueTime как начало слота, не как «время срока».
+  if (dueTimeParam && form.dueDate) {
+    form.durationStart = dueTimeParam
+    form.durationEnd = addMinutesToTime(dueTimeParam, 60)
+    return
+  }
+
+  if (dueTimeParam) {
     form.dueTime = dueTimeParam
-    if (!form.durationStart) {
-      form.durationStart = dueTimeParam
-    }
   }
 }
 

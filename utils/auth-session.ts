@@ -13,10 +13,41 @@ const LEGACY_ACCESS_KEY = 'otter.auth.access-token'
 const LEGACY_REFRESH_KEY = 'otter.auth.refresh-token'
 
 let legacyMigrated = false
+let onTokensChanged: (() => void) | null = null
+
+export function onAuthTokensChanged(callback: () => void) {
+  onTokensChanged = callback
+}
 
 export interface AuthTokens {
   access: string
   refresh: string
+}
+
+/** VueUse JSON va oddiy string formatlarini o‘qish. */
+function readStoredToken(key: string): string | null {
+  if (!import.meta.client) return null
+  const raw = localStorage.getItem(key)
+  if (!raw) return null
+
+  const trimmed = raw.trim()
+  if (!trimmed || trimmed === 'null') return null
+
+  if (trimmed.startsWith('"')) {
+    try {
+      const parsed = JSON.parse(trimmed)
+      return typeof parsed === 'string' && parsed.length > 0 ? parsed : null
+    }
+    catch {
+      return null
+    }
+  }
+
+  return trimmed
+}
+
+function writeStoredToken(key: string, value: string) {
+  localStorage.setItem(key, value)
 }
 
 export function migrateLegacyTokens() {
@@ -24,34 +55,42 @@ export function migrateLegacyTokens() {
   legacyMigrated = true
 
   if (!localStorage.getItem(ACCESS_TOKEN_KEY)) {
-    const old = localStorage.getItem(LEGACY_ACCESS_KEY)
-    if (old) localStorage.setItem(ACCESS_TOKEN_KEY, old)
+    const old = readStoredToken(LEGACY_ACCESS_KEY)
+      || localStorage.getItem(LEGACY_ACCESS_KEY)
+    if (old) writeStoredToken(ACCESS_TOKEN_KEY, old)
   }
   localStorage.removeItem(LEGACY_ACCESS_KEY)
 
   if (!localStorage.getItem(REFRESH_TOKEN_KEY)) {
-    const old = localStorage.getItem(LEGACY_REFRESH_KEY)
-    if (old) localStorage.setItem(REFRESH_TOKEN_KEY, old)
+    const old = readStoredToken(LEGACY_REFRESH_KEY)
+      || localStorage.getItem(LEGACY_REFRESH_KEY)
+    if (old) writeStoredToken(REFRESH_TOKEN_KEY, old)
   }
   localStorage.removeItem(LEGACY_REFRESH_KEY)
+
+  const access = readStoredToken(ACCESS_TOKEN_KEY)
+  if (access) writeStoredToken(ACCESS_TOKEN_KEY, access)
+  const refresh = readStoredToken(REFRESH_TOKEN_KEY)
+  if (refresh) writeStoredToken(REFRESH_TOKEN_KEY, refresh)
 }
 
 export function getAccessToken() {
   if (!import.meta.client) return null
   migrateLegacyTokens()
-  return localStorage.getItem(ACCESS_TOKEN_KEY)
+  return readStoredToken(ACCESS_TOKEN_KEY)
 }
 
 export function getRefreshToken() {
   if (!import.meta.client) return null
   migrateLegacyTokens()
-  return localStorage.getItem(REFRESH_TOKEN_KEY)
+  return readStoredToken(REFRESH_TOKEN_KEY)
 }
 
 export function setAuthTokens(tokens: AuthTokens) {
   if (!import.meta.client) return
-  localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access)
-  localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh)
+  writeStoredToken(ACCESS_TOKEN_KEY, tokens.access)
+  writeStoredToken(REFRESH_TOKEN_KEY, tokens.refresh)
+  onTokensChanged?.()
 }
 
 export function clearAuthSession() {
@@ -62,6 +101,7 @@ export function clearAuthSession() {
   localStorage.removeItem(LEGACY_REFRESH_KEY)
   localStorage.removeItem('otter.auth.user')
   localStorage.removeItem(FIREBASE_ID_TOKEN_STORAGE_KEY)
+  onTokensChanged?.()
 }
 
 if (import.meta.client) {

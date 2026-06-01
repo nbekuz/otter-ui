@@ -658,13 +658,6 @@ watch(desktopSelectedTask, (task) => {
   syncEditorForm(task)
 }, { immediate: true })
 
-watch(() => editorForm.dueTime, (newTime, oldTime) => {
-  if (!newTime) return
-  if (!editorForm.durationStart || editorForm.durationStart === oldTime) {
-    editorForm.durationStart = newTime
-  }
-})
-
 watch(() => editorForm.dueDate, (newDate) => {
   if (newDate !== '') return
   editorForm.dueTime = ''

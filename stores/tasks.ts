@@ -90,6 +90,88 @@ export const useTasksStore = defineStore('tasks', () => {
     tasks.value = flattenGroups(groups)
   }
 
+  function findTaskById(id: string) {
+    return tasks.value.find(t => t.id === id)
+      ?? calendarTasks.value.find(t => t.id === id)
+  }
+
+  function taskScheduleKey(task: Task) {
+    return [
+      task.dueDate,
+      task.dueTime,
+      task.duration?.start,
+      task.duration?.end,
+      task.completed,
+      task.title,
+      task.priority,
+      task.matrixBlock,
+    ].join('|')
+  }
+
+  function mergeTaskFields(
+    existing: Task | undefined,
+    updates: Partial<Task>,
+    id: string,
+  ): Task {
+    return {
+      ...(existing || {
+        id,
+        title: '',
+        priority: 'medium',
+        completed: false,
+        repeat: 'none',
+        createdAt: '',
+      }),
+      ...updates,
+      id,
+      duration: updates.duration ?? existing?.duration,
+      dueTime: updates.dueTime ?? existing?.dueTime,
+      dueDate: updates.dueDate ?? existing?.dueDate,
+    } as Task
+  }
+
+  function mergeTaskFromApi(
+    existing: Task | undefined,
+    updates: Partial<Task>,
+    fromApi: Task,
+  ): Task {
+    return {
+      ...existing,
+      ...fromApi,
+      ...updates,
+      id: fromApi.id,
+      duration: fromApi.duration ?? updates.duration ?? existing?.duration,
+      dueTime: fromApi.dueTime ?? updates.dueTime ?? existing?.dueTime,
+      dueDate: fromApi.dueDate ?? updates.dueDate ?? existing?.dueDate,
+    }
+  }
+
+  /** Matrix kesh bo‘lsa — vazifani to‘g‘ri blokка optimistik joylashtirish. */
+  function applyTaskToMatrixState(updated: Task) {
+    if (Object.keys(matrixTasksByBlock.value).length === 0) return
+
+    const next: Record<string, Task[]> = {}
+    for (const [blockId, list] of Object.entries(matrixTasksByBlock.value)) {
+      next[blockId] = list.filter(t => t.id !== updated.id)
+    }
+
+    if (!updated.completed && updated.matrixBlock) {
+      const blockId = updated.matrixBlock
+      next[blockId] = [updated, ...(next[blockId] || [])]
+    }
+
+    matrixTasksByBlock.value = next
+  }
+
+  function removeTaskFromMatrixState(id: string) {
+    if (Object.keys(matrixTasksByBlock.value).length === 0) return
+    const next: Record<string, Task[]> = {}
+    for (const [blockId, list] of Object.entries(matrixTasksByBlock.value)) {
+      next[blockId] = list.filter(t => t.id !== id)
+    }
+    matrixTasksByBlock.value = next
+  }
+
   function upsertTaskInState(updated: Task) {
     const idx = tasks.value.findIndex(t => t.id === updated.id)
     if (idx === -1) {
@@ -99,11 +181,56 @@ export const useTasksStore = defineStore('tasks', () => {
       tasks.value[idx] = updated
     }
     groupedFromApi.value = groupTasksByKey(tasks.value)
+
+    const calIdx = calendarTasks.value.findIndex(t => t.id === updated.id)
+    if (calIdx !== -1) {
+      calendarTasks.value[calIdx] = updated
+    }
+
+    applyTaskToMatrixState(updated)
+  }
+
+  async function refreshCalendarIfCached() {
+    const key = calendarCacheKey.value
+    if (!key) return
+
+    const colon = key.indexOf(':')
+    if (colon === -1) return
+
+    const view = key.slice(0, colon) as 'day' | 'week' | 'month' | 'year'
+    const date = key.slice(colon + 1)
+    if (!date) return
+
+    await fetchCalendar(view, date)
+  }
+
+  function refreshMatrixIfCached() {
+    if (Object.keys(matrixTasksByBlock.value).length === 0) return undefined
+    return fetchMatrix()
+  }
+
+  async function refreshTaskLists(options: {
+    grouped?: boolean
+    calendar?: boolean
+    matrix?: boolean
+  } = {}) {
+    const { grouped = true, calendar = true, matrix = true } = options
+    const jobs: Promise<unknown>[] = []
+    if (grouped) jobs.push(fetchGrouped())
+    if (calendar) jobs.push(refreshCalendarIfCached())
+    if (matrix) {
+      const matrixJob = refreshMatrixIfCached()
+      if (matrixJob) jobs.push(matrixJob)
+    }
+    if (jobs.length === 0) return
+    await Promise.all(jobs)
   }
 
   function removeTaskFromState(id: string) {
     tasks.value = tasks.value.filter(t => t.id !== id)
+    calendarTasks.value = calendarTasks.value.filter(t => t.id !== id)
     groupedFromApi.value = groupTasksByKey(tasks.value)
+    removeTaskFromMatrixState(id)
   }
 
   async function fetchGrouped() {
@@ -129,9 +256,18 @@ export const useTasksStore = defineStore('tasks', () => {
       tasks: ApiTask[]
     }>>('matrix/')
 
+    const prevById = new Map<string, Task>()
+    for (const list of Object.values(matrixTasksByBlock.value)) {
+      for (const task of list) prevById.set(task.id, task)
+    }
+
     const next: Record<string, Task[]> = {}
     for (const block of blocks) {
-      next[apiMatrixBlockToUi(block.block)] = block.tasks.map(apiTaskToUi)
+      next[apiMatrixBlockToUi(block.block)] = block.tasks.map((apiTask) => {
+        const task = apiTaskToUi(apiTask)
+        const prev = prevById.get(task.id)
+        return prev && taskScheduleKey(prev) === taskScheduleKey(task) ? prev : task
+      })
     }
     matrixTasksByBlock.value = next
     return next
@@ -142,8 +278,22 @@ export const useTasksStore = defineStore('tasks', () => {
       tasks: ApiTask[]
     }>('calendar/', { params: { view, date } })
 
-    calendarTasks.value = response.tasks.map(apiTaskToUi)
+    const incoming = response.tasks.map(apiTaskToUi)
     calendarCacheKey.value = `${view}:${date}`
+
+    if (calendarTasks.value.length === 0) {
+      calendarTasks.value = incoming
+      return calendarTasks.value
+    }
+
+    const prevById = new Map(calendarTasks.value.map(task => [task.id, task]))
+    calendarTasks.value = incoming.map((task) => {
+      const prev = prevById.get(task.id)
+      if (prev && taskScheduleKey(prev) === taskScheduleKey(task)) {
+        return prev
+      }
+      return task
+    })
     return calendarTasks.value
   }
 
@@ -176,46 +326,68 @@ export const useTasksStore = defineStore('tasks', () => {
     const created = await apiPost<ApiTask>('tasks/', payload)
     const task = apiTaskToUi(created)
     upsertTaskInState(task)
-    await fetchGrouped()
+    await refreshTaskLists()
     return task
   }
 
-  async function updateTask(id: string, updates: Partial<Task>) {
-    const existing = tasks.value.find(t => t.id === id)
+  type RefreshOptions = { grouped?: boolean, calendar?: boolean, matrix?: boolean }
+
+  async function updateTask(
+    id: string,
+    updates: Partial<Task>,
+    refresh: RefreshOptions = {},
+  ) {
+    const existing = findTaskById(id)
+    const optimistic = mergeTaskFields(existing, updates, id)
+    upsertTaskInState(optimistic)
+
     const merged = { ...existing, ...updates, id } as Partial<Task>
     const payload = uiTaskToApiPayload(merged)
     const updated = await apiPatch<ApiTask>(`tasks/${id}/`, payload)
-    const task = apiTaskToUi(updated)
+    const task = mergeTaskFromApi(existing, updates, apiTaskToUi(updated))
     upsertTaskInState(task)
-    await fetchGrouped()
+    await refreshTaskLists(refresh)
     return task
   }
 
-  async function deleteTask(id: string) {
-    await apiDelete(`tasks/${id}/`)
+  async function deleteTask(id: string, refresh: RefreshOptions = {}) {
     removeTaskFromState(id)
-    await fetchGrouped()
+    await apiDelete(`tasks/${id}/`)
+    await refreshTaskLists(refresh)
   }
 
-  async function completeTask(id: string) {
-    const existing = tasks.value.find(t => t.id === id)
+  async function completeTask(id: string, refresh: RefreshOptions = {}) {
+    const existing = findTaskById(id)
     if (!existing) return
+
+    upsertTaskInState({
+      ...existing,
+      completed: !existing.completed,
+      completedAt: !existing.completed
+        ? dayjs().format('YYYY-MM-DD')
+        : undefined,
+    })
 
     const endpoint = existing.completed ? 'uncomplete' : 'complete'
     const updated = await apiPost<ApiTask>(`tasks/${id}/${endpoint}/`)
     const task = apiTaskToUi(updated)
     upsertTaskInState(task)
-    await fetchGrouped()
+    await refreshTaskLists(refresh)
     return task
   }
 
   async function moveToMatrix(taskId: string, blockId: string) {
+    const existing = findTaskById(taskId)
+    const uiBlock = blockId as NonNullable<Task['matrixBlock']>
+    if (existing) {
+      upsertTaskInState({ ...existing, matrixBlock: uiBlock })
+    }
+
     const matrix_block = blockId.replace(/-/g, '_') as ApiMatrixBlock
     const updated = await apiPatch<ApiTask>(`tasks/${taskId}/`, { matrix_block })
     const task = apiTaskToUi(updated)
     upsertTaskInState(task)
-    await fetchMatrix()
-    await fetchGrouped()
+    await refreshTaskLists({ grouped: false, calendar: false, matrix: true })
     return task
   }
 
@@ -267,6 +439,8 @@ export const useTasksStore = defineStore('tasks', () => {
     fetchGrouped,
     fetchMatrix,
     fetchCalendar,
+    refreshCalendarIfCached,
+    refreshTaskLists,
     getTasksForDate,
     getTasksForWeek,
     getTasksForMatrix,

@@ -2,7 +2,12 @@ import { defineStore } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
 import type { User } from '~/data/mockData'
 import { apiGet, apiPost, apiPut } from '~/utils/api'
-import { clearAuthSession, setAuthTokens } from '~/utils/auth-session'
+import {
+  clearAuthSession,
+  getAccessToken,
+  getRefreshToken,
+  setAuthTokens,
+} from '~/utils/auth-session'
 
 interface BackendUser {
   id: number
@@ -34,12 +39,23 @@ interface RegisterOptions {
 
 export const useAuthStore = defineStore('auth', () => {
   const user = useLocalStorage<User | null>('otter.auth.user', null)
-  const accessToken = useLocalStorage<string | null>('access_token', null)
-  const refreshToken = useLocalStorage<string | null>('refresh_token', null)
+  const accessToken = ref<string | null>(import.meta.client ? getAccessToken() : null)
+  const refreshToken = ref<string | null>(import.meta.client ? getRefreshToken() : null)
+  const tokenRevision = ref(0)
   const profileFirstName = useLocalStorage<string>('otter.auth.first-name', '')
   const profileLastName = useLocalStorage<string>('otter.auth.last-name', '')
   const profileLoaded = ref(false)
-  const isLoggedIn = computed(() => !!accessToken.value)
+
+  function syncTokensFromStorage() {
+    accessToken.value = getAccessToken()
+    refreshToken.value = getRefreshToken()
+    tokenRevision.value += 1
+  }
+
+  const isLoggedIn = computed(() => {
+    tokenRevision.value
+    return !!getAccessToken()
+  })
   const requiresProfileFill = computed(() =>
     isLoggedIn.value && (!profileFirstName.value.trim() || !profileLastName.value.trim())
   )
@@ -56,14 +72,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function setSession(nextUser: BackendUser, tokens: LoginResponse['tokens']) {
+  function applyTokens(tokens: LoginResponse['tokens']) {
     setAuthTokens(tokens)
+    syncTokensFromStorage()
+  }
+
+  function setSession(nextUser: BackendUser, tokens: LoginResponse['tokens']) {
+    applyTokens(tokens)
     profileFirstName.value = nextUser.first_name || ''
     profileLastName.value = nextUser.last_name || ''
     profileLoaded.value = true
     user.value = mapBackendUser(nextUser)
-    accessToken.value = tokens.access
-    refreshToken.value = tokens.refresh
   }
 
   async function fetchMyProfile() {
@@ -97,9 +116,7 @@ export const useAuthStore = defineStore('auth', () => {
       email,
       password,
     })
-    accessToken.value = response.tokens.access
-    refreshToken.value = response.tokens.refresh
-    setAuthTokens(response.tokens)
+    applyTokens(response.tokens)
     await fetchMyProfile()
     navigateTo('/app')
   }
@@ -175,9 +192,8 @@ export const useAuthStore = defineStore('auth', () => {
     const tasksStore = useTasksStore()
     tasksStore.reset()
     clearAuthSession()
+    syncTokensFromStorage()
     user.value = null
-    accessToken.value = null
-    refreshToken.value = null
     profileFirstName.value = ''
     profileLastName.value = ''
     profileLoaded.value = false
@@ -215,6 +231,7 @@ export const useAuthStore = defineStore('auth', () => {
     profileLoaded,
     isLoggedIn,
     requiresProfileFill,
+    syncTokensFromStorage,
     fetchMyProfile,
     updateProfile,
     login,

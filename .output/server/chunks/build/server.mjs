@@ -1297,7 +1297,7 @@ function useLocalStorage(key, initialValue, options = {}) {
 function setAuthTokens(tokens) {
   return;
 }
-const DEFAULT_API_BASE_URL = "http://159.194.221.54:8005/api/v1/";
+const DEFAULT_API_BASE_URL = "https://admin.skkamni.ru/api/v1/";
 function resolveApiBaseUrl() {
   const fromEnv = process.env.NUXT_PUBLIC_API_BASE_URL;
   if (fromEnv) return fromEnv.endsWith("/") ? fromEnv : `${fromEnv}/`;

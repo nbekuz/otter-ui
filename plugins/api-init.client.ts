@@ -1,5 +1,9 @@
+import { onAuthTokensChanged } from '~/utils/auth-session'
+
 export default defineNuxtPlugin(() => {
   const authStore = useAuthStore()
+  authStore.syncTokensFromStorage()
+  onAuthTokensChanged(() => authStore.syncTokensFromStorage())
   const tasksStore = useTasksStore()
   const settingsStore = useSettingsStore()
   const pomodoroStore = usePomodoroStore()
