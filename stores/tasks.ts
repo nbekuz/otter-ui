@@ -297,20 +297,47 @@ export const useTasksStore = defineStore('tasks', () => {
     return calendarTasks.value
   }
 
-  function getTasksForDate(date: string) {
-    if (calendarTasks.value.length > 0) {
-      const fromCalendar = calendarTasks.value.filter(t => t.dueDate === date)
-      if (fromCalendar.length > 0) return fromCalendar
+  function parseCalendarCacheKey() {
+    const colon = calendarCacheKey.value.indexOf(':')
+    if (colon === -1) return null
+    return {
+      view: calendarCacheKey.value.slice(0, colon),
+      date: calendarCacheKey.value.slice(colon + 1),
     }
-    return tasks.value.filter(t => t.dueDate === date)
+  }
+
+  function taskScheduleDate(task: Task): string | undefined {
+    return task.dueDate
+  }
+
+  function getTasksForDate(date: string) {
+    const cache = parseCalendarCacheKey()
+    if (cache?.view === 'day' && cache.date === date) {
+      return calendarTasks.value.slice()
+    }
+
+    return tasks.value.filter(t => taskScheduleDate(t) === date)
   }
 
   function getTasksForWeek(startDate: string, endDate: string) {
-    const source = calendarTasks.value.length > 0 ? calendarTasks.value : tasks.value
-    return source.filter(t =>
-      t.dueDate
-      && !dayjs(t.dueDate).isBefore(startDate, 'day')
-      && !dayjs(t.dueDate).isAfter(endDate, 'day'),
+    const cache = parseCalendarCacheKey()
+    if (cache?.view === 'week') {
+      const weekStart = dayjs(cache.date).startOf('week').format('YYYY-MM-DD')
+      const weekEnd = dayjs(cache.date).endOf('week').format('YYYY-MM-DD')
+      if (!dayjs(startDate).isAfter(weekEnd, 'day') && !dayjs(endDate).isBefore(weekStart, 'day')) {
+        return calendarTasks.value.filter((t) => {
+          const d = taskScheduleDate(t)
+          return !!d
+            && !dayjs(d).isBefore(startDate, 'day')
+            && !dayjs(d).isAfter(endDate, 'day')
+        })
+      }
+    }
+
+    return tasks.value.filter(t =>
+      taskScheduleDate(t)
+      && !dayjs(taskScheduleDate(t)).isBefore(startDate, 'day')
+      && !dayjs(taskScheduleDate(t)).isAfter(endDate, 'day'),
     )
   }
 

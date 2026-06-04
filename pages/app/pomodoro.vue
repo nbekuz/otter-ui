@@ -31,13 +31,17 @@
             <span class="flex-1 text-sm text-sber-gray">Звук фоновый</span>
             <div class="flex flex-wrap justify-end gap-2">
               <button
-                v-for="s in workSoundOptions.slice(0, 4)"
-                :key="s.id"
+                v-for="s in soundsStore.workBackground"
+                :key="s.key"
+                type="button"
                 class="rounded-lg px-2 py-1 text-sm transition-colors"
-                :class="activeWorkSound === s.id ? 'bg-sber-green text-white' : 'bg-sber-gray-light text-sber-gray'"
-                @click="activeWorkSound = s.id"
+                :class="pomodoroStore.settings.workingSound === s.key
+                  ? 'bg-sber-green text-white'
+                  : 'bg-sber-gray-light text-sber-gray'"
+                :title="s.title"
+                @click="selectWorkSound(s)"
               >
-                {{ s.icon }}
+                {{ s.emoji }}
               </button>
             </div>
           </div>
@@ -208,13 +212,17 @@
           <div class="mb-5">
             <label class="text-sm font-semibold text-sber-black mb-3 block">Звук завершения</label>
             <div class="flex gap-2 flex-wrap">
-              <button v-for="s in soundOptions" :key="s.id"
-                      class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors"
-                      :class="pomodoroStore.settings.sound === s.id
-                        ? 'bg-sber-green text-white border-sber-green'
-                        : 'border-sber-gray-mid text-sber-black'"
-                      @click="pomodoroStore.updateSettings({ sound: s.id })">
-                {{ s.icon }} {{ s.name }}
+              <button
+                v-for="s in soundsStore.timerEnd"
+                :key="s.key"
+                type="button"
+                class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors"
+                :class="pomodoroStore.settings.sound === s.key
+                  ? 'bg-sber-green text-white border-sber-green'
+                  : 'border-sber-gray-mid text-sber-black'"
+                @click="selectTimerEndSound(s)"
+              >
+                {{ s.emoji }} {{ s.title }}
               </button>
             </div>
           </div>
@@ -229,19 +237,19 @@
 <script setup lang="ts">
 import {
   Settings, Play, Pause, Square, SkipForward,
-  Target, Music, Search, Check, X, ChevronRight
+  Target, Music, Search, Check, X, ChevronRight,
 } from 'lucide-vue-next'
-import { soundOptions, workSoundOptions } from '~/data/mockData'
+import type { ApiSound } from '~/types/mobile-api'
 
 definePageMeta({ layout: 'app' })
 
 const pomodoroStore = usePomodoroStore()
+const soundsStore = useSoundsStore()
 const tasksStore = useTasksStore()
 
 const settingsOpen = ref(false)
 const taskPickerOpen = ref(false)
 const taskSearch = ref('')
-const activeWorkSound = ref('rain')
 const progressPercent = computed(() => Math.round(Math.max(0, Math.min(1, pomodoroStore.progress)) * 100))
 
 const waterFillStyle = computed(() => {
@@ -271,12 +279,26 @@ function toggleTimer() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await Promise.all([
+    pomodoroStore.fetchSettings(),
+    soundsStore.fetchAll(),
+    pomodoroStore.fetchSessions(),
+  ])
   if (!tasksStore.initialized) {
     void tasksStore.fetchGrouped()
   }
-  void pomodoroStore.fetchSessions()
 })
+
+async function selectWorkSound(sound: ApiSound) {
+  pomodoroStore.previewSound(sound)
+  await pomodoroStore.setWorkSound(sound.key, sound)
+}
+
+async function selectTimerEndSound(sound: ApiSound) {
+  pomodoroStore.previewSound(sound)
+  await pomodoroStore.setTimerEndSound(sound.key, sound)
+}
 
 function selectTask(taskId: string | null) {
   pomodoroStore.selectTask(taskId)

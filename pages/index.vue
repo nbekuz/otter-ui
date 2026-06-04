@@ -87,7 +87,14 @@
             </div>
           </div>
 
-          <div class="mt-6 flex w-full flex-col items-center gap-2 md:mt-8 md:gap-3">
+          <div class="mt-6 flex w-full flex-wrap justify-center gap-4 text-sm text-sber-gray md:mt-8">
+            <span>После входа:</span>
+            <NuxtLink to="/app/faq" class="font-semibold text-sber-green hover:underline">FAQ</NuxtLink>
+            <span>·</span>
+            <NuxtLink to="/app/legal" class="font-semibold text-sber-green hover:underline">Документы</NuxtLink>
+          </div>
+
+          <div class="mt-4 flex w-full flex-col items-center gap-2 md:mt-6 md:gap-3">
             <div class="flex w-full flex-wrap justify-center gap-2 md:gap-3">
               <button
                 class="btn-primary !w-auto min-w-0 shrink px-4 sm:px-6 md:px-8"

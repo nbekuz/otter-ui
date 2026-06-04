@@ -2,6 +2,7 @@
 export {}
 declare global {
   const ACCESS_TOKEN_KEY: typeof import('../../utils/auth-session').ACCESS_TOKEN_KEY
+  const DURATION_END_AFTER_START_MESSAGE: typeof import('../../utils/time').DURATION_END_AFTER_START_MESSAGE
   const FIREBASE_ID_TOKEN_STORAGE_KEY: typeof import('../../utils/auth-session').FIREBASE_ID_TOKEN_STORAGE_KEY
   const PASSWORD_MAX_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MAX_LENGTH
   const PASSWORD_MIN_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MIN_LENGTH
@@ -66,6 +67,7 @@ declare global {
   const formatMinutesToTime: typeof import('../../utils/time').formatMinutesToTime
   const getAccessToken: typeof import('../../utils/auth-session').getAccessToken
   const getApiErrorMessage: typeof import('../../utils/api').getApiErrorMessage
+  const getApiFieldError: typeof import('../../utils/api').getApiFieldError
   const getAppManifest: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getAppManifest
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
@@ -410,6 +412,7 @@ declare global {
   const useWindowFocus: typeof import('@vueuse/core').useWindowFocus
   const useWindowScroll: typeof import('@vueuse/core').useWindowScroll
   const useWindowSize: typeof import('@vueuse/core').useWindowSize
+  const validateDurationFields: typeof import('../../utils/time').validateDurationFields
   const validateNewPassword: typeof import('../../utils/password-policy').validateNewPassword
   const watch: typeof import('vue').watch
   const watchArray: typeof import('@vueuse/core').watchArray
@@ -458,6 +461,7 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface ComponentCustomProperties {
     readonly ACCESS_TOKEN_KEY: UnwrapRef<typeof import('../../utils/auth-session')['ACCESS_TOKEN_KEY']>
+    readonly DURATION_END_AFTER_START_MESSAGE: UnwrapRef<typeof import('../../utils/time')['DURATION_END_AFTER_START_MESSAGE']>
     readonly FIREBASE_ID_TOKEN_STORAGE_KEY: UnwrapRef<typeof import('../../utils/auth-session')['FIREBASE_ID_TOKEN_STORAGE_KEY']>
     readonly PASSWORD_MAX_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MAX_LENGTH']>
     readonly PASSWORD_MIN_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MIN_LENGTH']>
@@ -522,6 +526,7 @@ declare module 'vue' {
     readonly formatMinutesToTime: UnwrapRef<typeof import('../../utils/time')['formatMinutesToTime']>
     readonly getAccessToken: UnwrapRef<typeof import('../../utils/auth-session')['getAccessToken']>
     readonly getApiErrorMessage: UnwrapRef<typeof import('../../utils/api')['getApiErrorMessage']>
+    readonly getApiFieldError: UnwrapRef<typeof import('../../utils/api')['getApiFieldError']>
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
@@ -866,6 +871,7 @@ declare module 'vue' {
     readonly useWindowFocus: UnwrapRef<typeof import('@vueuse/core')['useWindowFocus']>
     readonly useWindowScroll: UnwrapRef<typeof import('@vueuse/core')['useWindowScroll']>
     readonly useWindowSize: UnwrapRef<typeof import('@vueuse/core')['useWindowSize']>
+    readonly validateDurationFields: UnwrapRef<typeof import('../../utils/time')['validateDurationFields']>
     readonly validateNewPassword: UnwrapRef<typeof import('../../utils/password-policy')['validateNewPassword']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchArray: UnwrapRef<typeof import('@vueuse/core')['watchArray']>

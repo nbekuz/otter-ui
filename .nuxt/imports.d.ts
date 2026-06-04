@@ -33,11 +33,11 @@ export { definePageMeta } from '../node_modules/nuxt/dist/pages/runtime/composab
 export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
 export { useAppToast, AppToastType } from '../composables/useAppToast';
 export { useFirebaseAuth } from '../composables/useFirebaseAuth.client';
-export { api, getApiErrorMessage, apiGet, apiPost, apiPut, apiPatch, apiDelete } from '../utils/api';
+export { api, getApiFieldError, getApiErrorMessage, apiGet, apiPost, apiPut, apiPatch, apiDelete } from '../utils/api';
 export { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, FIREBASE_ID_TOKEN_STORAGE_KEY, onAuthTokensChanged, migrateLegacyTokens, getAccessToken, getRefreshToken, setAuthTokens, clearAuthSession, readRememberedLogin, writeRememberedLogin, clearRememberedLogin, AuthTokens } from '../utils/auth-session';
 export { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH, validateNewPassword } from '../utils/password-policy';
 export { apiTaskToUi, uiTaskToApiPayload, uiTaskToFormData, groupKeyToUi, apiMatrixBlockToUi } from '../utils/task-mapper';
-export { parseTimeToMinutes, formatMinutesToTime, addMinutesToTime, getTaskScheduleStart } from '../utils/time';
+export { parseTimeToMinutes, formatMinutesToTime, addMinutesToTime, DURATION_END_AFTER_START_MESSAGE, validateDurationFields, getTaskScheduleStart } from '../utils/time';
 export { useAuthStore } from '../stores/auth';
 export { useCalendarStore, CalendarViewType } from '../stores/calendar';
 export { useMobileApiStore } from '../stores/mobile-api';

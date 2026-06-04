@@ -164,7 +164,7 @@
       <!-- Late hours toggle -->
       <div class="flex items-center cursor-pointer px-3 py-2 bg-sber-gray-light"
            @click="calendarStore.toggleLateHours()">
-        <div class="w-14 text-xs text-sber-gray text-right pr-3">21–00</div>
+        <div class="w-14 text-xs text-sber-gray text-right pr-3">22–00</div>
         <div class="flex-1 h-px bg-sber-gray-mid" />
         <component :is="calendarStore.collapsedLateHours ? ChevronDown : ChevronUp"
                    class="w-4 h-4 text-sber-gray ml-2" />
@@ -371,8 +371,8 @@ const currentMainTimePx = computed(() => {
 })
 
 const earlyHours = [0, 1, 2, 3, 4, 5]
-const mainHours = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-const lateHours = [21, 22, 23]
+const mainHours = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+const lateHours = [22, 23]
 const mainStartMinutes = mainHours[0] * 60
 const mainEndMinutes = (mainHours[mainHours.length - 1] + 1) * 60
 const minuteHeightPx = 1
@@ -904,5 +904,35 @@ watch(
     void tasksStore.fetchCalendar(view, date)
   },
   { immediate: true },
+)
+
+watch(
+  () => tasksStore.calendarTasks,
+  (tasks) => {
+    if (calendarStore.viewType !== 'day') return
+
+    const hasLate = tasks.some((task) => {
+      const start = getTaskScheduleStart(task)
+      if (!start) return false
+      const hour = parseInt(start.split(':')[0], 10)
+      const endHour = task.duration?.end
+        ? parseInt(task.duration.end.split(':')[0], 10)
+        : hour
+      return hour >= 21 || endHour >= 21
+    })
+    if (hasLate) {
+      calendarStore.collapsedLateHours = false
+    }
+
+    const hasEarly = tasks.some((task) => {
+      const start = getTaskScheduleStart(task)
+      if (!start) return false
+      return parseInt(start.split(':')[0], 10) < 6
+    })
+    if (hasEarly) {
+      calendarStore.collapsedEarlyHours = false
+    }
+  },
+  { deep: true },
 )
 </script>

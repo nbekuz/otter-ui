@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
+import { parseTimeToMinutes } from '~/utils/time'
 import type {
   ApiMatrixBlock,
   ApiPriority,
@@ -81,6 +82,11 @@ function buildStartEnd(
   if (!dueDate || !duration?.start || !duration?.end) {
     return { start_at: null, end_at: null }
   }
+
+  if (parseTimeToMinutes(duration.end) <= parseTimeToMinutes(duration.start)) {
+    return { start_at: null, end_at: null }
+  }
+
   return {
     start_at: dayjs(`${dueDate}T${duration.start}`).format(),
     end_at: dayjs(`${dueDate}T${duration.end}`).format(),
@@ -91,12 +97,13 @@ export function apiTaskToUi(task: ApiTask): Task {
   const due = task.due_at ? dayjs(task.due_at) : null
   const start = task.start_at ? dayjs(task.start_at) : null
   const end = task.end_at ? dayjs(task.end_at) : null
+  const scheduleDay = start?.isValid() ? start : due
 
   return {
     id: String(task.id),
     title: task.title,
     description: task.description || undefined,
-    dueDate: due?.isValid() ? due.format('YYYY-MM-DD') : undefined,
+    dueDate: scheduleDay?.isValid() ? scheduleDay.format('YYYY-MM-DD') : undefined,
     dueTime: due?.isValid() && !(due.hour() === 0 && due.minute() === 0)
       ? due.format('HH:mm')
       : undefined,

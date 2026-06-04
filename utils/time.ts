@@ -16,6 +16,27 @@ export function addMinutesToTime(time: string, deltaMinutes: number): string {
   return formatMinutesToTime(parseTimeToMinutes(time) + deltaMinutes)
 }
 
+export const DURATION_END_AFTER_START_MESSAGE =
+  'Время окончания должно быть позже времени начала.'
+
+const DURATION_BOTH_REQUIRED_MESSAGE = 'Укажите и начало, и конец длительности'
+
+/** Длительность: оба поля и конец строго позже начала (как на бэкенде). */
+export function validateDurationFields(start: string, end: string): string | null {
+  const hasStart = !!start?.trim()
+  const hasEnd = !!end?.trim()
+
+  if (hasStart !== hasEnd) {
+    return DURATION_BOTH_REQUIRED_MESSAGE
+  }
+
+  if (hasStart && hasEnd && parseTimeToMinutes(end) <= parseTimeToMinutes(start)) {
+    return DURATION_END_AFTER_START_MESSAGE
+  }
+
+  return null
+}
+
 /** Начало отображения в календаре: слот длительности, иначе время срока (старые задачи). */
 export function getTaskScheduleStart(task: {
   dueTime?: string

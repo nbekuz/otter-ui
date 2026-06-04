@@ -64,11 +64,23 @@ export interface ApiMatrixSetting {
   date_filter: string
 }
 
+export interface ApiSound {
+  key: string
+  category: 'timer_end' | 'work_background' | 'notification' | 'completion'
+  title: string
+  emoji: string
+  audio_url: string | null
+  sort_order: number
+}
+
 export interface ApiPomodoroSettings {
   duration_minutes: number
+  short_break_minutes: number
   show_on_lock_screen: boolean
   timer_end_sound: string
+  timer_end_sound_detail?: ApiSound
   work_sound: string
+  work_sound_detail?: ApiSound
 }
 
 export interface ApiAppSettings {

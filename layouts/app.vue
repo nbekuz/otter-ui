@@ -56,6 +56,36 @@
           </NuxtLink>
         </nav>
 
+        <div
+          class="mt-4 space-y-1 rounded-[20px] p-2"
+          :class="isDarkTheme ? 'bg-[#10141b] border border-[#222833]' : 'bg-sber-gray-light'"
+        >
+          <NuxtLink
+            to="/app/faq"
+            class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+            :class="route.path === '/app/faq'
+              ? 'bg-sber-green text-white'
+              : isDarkTheme
+                ? 'text-slate-300 hover:bg-[#20242d]'
+                : 'text-sber-gray hover:bg-white'"
+          >
+            <HelpCircle class="h-4 w-4" />
+            <span>FAQ</span>
+          </NuxtLink>
+          <NuxtLink
+            to="/app/legal"
+            class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+            :class="route.path === '/app/legal'
+              ? 'bg-sber-green text-white'
+              : isDarkTheme
+                ? 'text-slate-300 hover:bg-[#20242d]'
+                : 'text-sber-gray hover:bg-white'"
+          >
+            <FileText class="h-4 w-4" />
+            <span>Документы</span>
+          </NuxtLink>
+        </div>
+
         <button class="mt-6 flex items-center justify-center gap-2 rounded-2xl bg-sber-green px-4 py-4 text-base font-semibold text-white transition-colors hover:bg-sber-green-dark" @click="openNewTask">
           <Plus class="h-5 w-5" />
           Новая задача
@@ -84,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { Calendar, CheckSquare, Grid2x2, Plus, Settings, Timer } from 'lucide-vue-next'
+import { Calendar, CheckSquare, FileText, Grid2x2, HelpCircle, Plus, Settings, Timer } from 'lucide-vue-next'
 
 const route = useRoute()
 const authStore = useAuthStore()

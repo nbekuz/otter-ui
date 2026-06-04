@@ -8,6 +8,22 @@
           <h1 class="text-xl font-bold text-sber-black">Мои задачи</h1>
         </div>
         <div class="flex items-center gap-2">
+          <NuxtLink
+            to="/app/faq"
+            class="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm"
+            title="Частые вопросы"
+            @click.stop
+          >
+            <HelpCircle class="h-5 w-5 text-sber-gray" />
+          </NuxtLink>
+          <NuxtLink
+            to="/app/legal"
+            class="hidden h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm sm:flex"
+            title="Юридические документы"
+            @click.stop
+          >
+            <FileText class="h-4 w-4 text-sber-gray" />
+          </NuxtLink>
           <button
             class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center"
             @click.stop="toggleSearch"
@@ -197,13 +213,25 @@
 
               <div>
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Начало</label>
-                <TimeFieldRu v-model="editorForm.durationStart" field-class="py-3" />
+                <TimeFieldRu
+                  v-model="editorForm.durationStart"
+                  field-class="py-3"
+                  @update:model-value="desktopEditorError = ''"
+                />
               </div>
 
               <div>
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Конец</label>
-                <TimeFieldRu v-model="editorForm.durationEnd" field-class="py-3" />
+                <TimeFieldRu
+                  v-model="editorForm.durationEnd"
+                  field-class="py-3"
+                  @update:model-value="desktopEditorError = ''"
+                />
               </div>
+
+              <p v-if="desktopEditorError" class="md:col-span-2 text-sm font-medium text-red-500">
+                {{ desktopEditorError }}
+              </p>
 
               <div>
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Приоритет</label>
@@ -330,9 +358,11 @@
 </template>
 
 <script setup lang="ts">
-import { Search, X, AlertCircle, Sun, Sunset, Moon, Star, Clock, CheckCircle2, Calendar } from 'lucide-vue-next'
+import { Search, X, AlertCircle, Sun, Sunset, Moon, Star, Clock, CheckCircle2, Calendar, HelpCircle, FileText } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
+import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
+import { validateDurationFields } from '~/utils/time'
 
 definePageMeta({ layout: 'app' })
 
@@ -449,6 +479,8 @@ watch(searchQuery, (query) => {
   }, 300)
 })
 
+const desktopEditorError = ref('')
+
 const editorForm = reactive({
   title: '',
   description: '',
@@ -502,6 +534,7 @@ function handlePageClick() {
 }
 
 function syncEditorForm(task: Task | null) {
+  desktopEditorError.value = ''
   editorForm.title = task?.title || ''
   editorForm.description = task?.description || ''
   editorForm.dueDate = task?.dueDate || ''
@@ -522,9 +555,16 @@ function syncEditorForm(task: Task | null) {
   desktopCustomRepeat.monthDay = task?.repeatCustom?.monthDay || dayjs().date()
 }
 
-function saveDesktopTask() {
+async function saveDesktopTask() {
   const task = desktopSelectedTask.value
   if (!task) return
+
+  desktopEditorError.value = ''
+  const durationError = validateDurationFields(editorForm.durationStart, editorForm.durationEnd)
+  if (durationError) {
+    desktopEditorError.value = durationError
+    return
+  }
 
   const updates: Partial<Task> = {
     title: editorForm.title.trim() || task.title,
@@ -559,7 +599,13 @@ function saveDesktopTask() {
     updates.duration = undefined
   }
 
-  tasksStore.updateTask(task.id, updates)
+  try {
+    await tasksStore.updateTask(task.id, updates)
+  }
+  catch (err: unknown) {
+    desktopEditorError.value = getApiFieldError(err, 'end_at')
+      || getApiErrorMessage(err, 'Не удалось сохранить задачу')
+  }
 }
 
 function toggleDesktopTaskComplete() {

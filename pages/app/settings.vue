@@ -53,28 +53,45 @@
       </div>
     </button>
 
+    <!-- Help & info (visible at top — no long scroll) -->
+    <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
+      <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Помощь и информация</p>
+      <SettingsRow label="Частые вопросы (FAQ)" @click="navigateTo('/app/faq')">
+        <template #icon><HelpCircle class="w-5 h-5 text-sber-gray mr-3" /></template>
+      </SettingsRow>
+      <SettingsRow label="Юридические документы" @click="navigateTo('/app/legal')">
+        <template #icon><FileText class="w-5 h-5 text-sber-gray mr-3" /></template>
+      </SettingsRow>
+      <SettingsRow label="Написать нам" @click="contactModal = true">
+        <template #icon><MessageSquareText class="w-5 h-5 text-sber-gray mr-3" /></template>
+      </SettingsRow>
+      <SettingsRow label="О приложении" @click="aboutModal = true">
+        <template #icon><Info class="w-5 h-5 text-sber-gray mr-3" /></template>
+      </SettingsRow>
+    </div>
+
     <!-- Account section -->
     <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
       <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Аккаунт</p>
 
-      <SettingsSettingsRow label="Имя" :value="profileFullNameDisplay" @click="openNameModal">
+      <SettingsRow label="Имя" :value="profileFullNameDisplay" @click="openNameModal">
         <template #icon><User class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="Аватар" @click="openAvatarModal">
+      </SettingsRow>
+      <SettingsRow label="Аватар" @click="openAvatarModal">
         <template #icon><Camera class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="Профиль" @click="navigateTo('/app/profile')">
+      </SettingsRow>
+      <SettingsRow label="Профиль" @click="navigateTo('/app/profile')">
         <template #icon><Info class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="Пароль" @click="passwordModal = true">
+      </SettingsRow>
+      <SettingsRow label="Пароль" @click="passwordModal = true">
         <template #icon><Lock class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="Устройства" @click="runStubAction">
+      </SettingsRow>
+      <SettingsRow label="Устройства" @click="runStubAction">
         <template #icon><Smartphone class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="Премиум" label-class="text-yellow-600" @click="premiumModal = true">
+      </SettingsRow>
+      <SettingsRow label="Премиум" label-class="text-yellow-600" @click="premiumModal = true">
         <template #icon><Crown class="w-5 h-5 text-yellow-500 mr-3" /></template>
-      </SettingsSettingsRow>
+      </SettingsRow>
     </div>
 
     <!-- Premium highlight -->
@@ -186,18 +203,18 @@
         </div>
       </div>
 
-      <SettingsSettingsRow label="Вид" @click="runStubAction">
+      <SettingsRow label="Вид" @click="runStubAction">
         <template #icon><EyeOff class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="Дата и время" @click="runStubAction">
+      </SettingsRow>
+      <SettingsRow label="Дата и время" @click="runStubAction">
         <template #icon><Clock class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="Интеграции и импорт" @click="runStubAction">
+      </SettingsRow>
+      <SettingsRow label="Интеграции и импорт" @click="runStubAction">
         <template #icon><Download class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="Рекомендовать друзьям" @click="shareApp">
+      </SettingsRow>
+      <SettingsRow label="Рекомендовать друзьям" @click="shareApp">
         <template #icon><Share2 class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
+      </SettingsRow>
     </div>
 
     <!-- Sound & Notifications -->
@@ -228,12 +245,12 @@
         </button>
       </div>
 
-      <SettingsSettingsRow label="Звук уведомления" :value="getSound(settingsStore.appSettings.notificationSound)" @click="soundModal = 'notification'">
+      <SettingsRow label="Звук уведомления" :value="getSound(settingsStore.appSettings.notificationSound)" @click="soundModal = 'notification'">
         <template #icon><Volume2 class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="Звук подтверждения" :value="getSound(settingsStore.appSettings.completionSound)" @click="soundModal = 'completion'">
+      </SettingsRow>
+      <SettingsRow label="Звук подтверждения" :value="getSound(settingsStore.appSettings.completionSound)" @click="soundModal = 'completion'">
         <template #icon><CheckCircle class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
+      </SettingsRow>
     </div>
 
     <!-- Visible groups -->
@@ -252,21 +269,12 @@
       </div>
     </div>
 
-    <!-- General / About -->
+    <!-- General -->
     <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
-      <!-- <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Общее</p> -->
-      <SettingsSettingsRow label="Язык" :value="selectedLanguageLabel" @click="languageModal = true">
+      <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Общее</p>
+      <SettingsRow label="Язык" :value="selectedLanguageLabel" @click="languageModal = true">
         <template #icon><Globe class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="Центр помощи" @click="helpModal = true">
-        <template #icon><HelpCircle class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="Написать нам" @click="contactModal = true">
-        <template #icon><MessageSquareText class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
-      <SettingsSettingsRow label="О приложении" @click="aboutModal = true">
-        <template #icon><Info class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsSettingsRow>
+      </SettingsRow>
     </div>
 
     <div class="h-8" />
@@ -439,51 +447,6 @@
       </Transition>
     </Teleport>
 
-    <!-- Help modal -->
-    <Teleport to="body">
-      <Transition name="overlay"><div v-if="helpModal" class="overlay" @click="helpModal = false" /></Transition>
-      <Transition name="modal">
-        <div v-if="helpModal" class="app-modal px-5 py-5" style="max-height: 85dvh; overflow-y: auto;" @click.stop>
-          <h3 class="text-lg font-bold mb-1">Центр помощи</h3>
-          <div class="relative mb-4">
-            <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-sber-gray" />
-            <input v-model="faqSearch" placeholder="Поиск по вопросам..." class="input-field pl-11 py-3 text-sm" />
-          </div>
-          <p v-if="settingsStore.helpFaqLoading" class="py-6 text-center text-sm text-sber-gray">
-            Загрузка…
-          </p>
-          <p v-else-if="settingsStore.helpFaqError" class="py-4 text-center text-sm text-red-500">
-            {{ settingsStore.helpFaqError }}
-          </p>
-          <button
-            v-if="settingsStore.helpFaqError"
-            class="btn-secondary mb-4 w-full"
-            type="button"
-            @click="loadHelpFaq"
-          >
-            Повторить
-          </button>
-          <p v-else-if="filteredFaq.length === 0" class="py-6 text-center text-sm text-sber-gray">
-            Вопросы не найдены
-          </p>
-          <div v-for="faq in filteredFaq" :key="faq.id" class="mb-3">
-            <button class="w-full text-left" @click="faq.open = !faq.open">
-              <div class="flex items-start justify-between gap-2 py-2">
-                <span class="text-sm font-semibold text-sber-black">{{ faq.question }}</span>
-                <ChevronDown class="w-4 h-4 text-sber-gray flex-shrink-0 mt-0.5"
-                             :class="faq.open ? 'rotate-180' : ''" />
-              </div>
-            </button>
-            <Transition name="slide-down">
-              <p v-if="faq.open" class="text-sm text-sber-gray pb-2 leading-relaxed">{{ faq.answer }}</p>
-            </Transition>
-            <div class="h-px bg-sber-gray-light" />
-          </div>
-          <button class="btn-primary mt-4" @click="openContactFromHelp">Связаться с нами</button>
-        </div>
-      </Transition>
-    </Teleport>
-
     <!-- Contact modal -->
     <Teleport to="body">
       <Transition name="overlay"><div v-if="contactModal" class="overlay" @click="contactModal = false" /></Transition>
@@ -534,62 +497,12 @@
               <Star class="w-4 h-4 text-sber-gray" />
               <span class="text-sm">Оценить в Google Play</span>
             </button>
-            <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" type="button" @click="openLegalModal">
-              <Info class="w-4 h-4 text-sber-gray" />
-              <span class="text-sm">Лицензии и информация</span>
+            <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" type="button" @click="navigateTo('/app/legal')">
+              <FileText class="w-4 h-4 text-sber-gray" />
+              <span class="text-sm">Юридические документы</span>
             </button>
           </div>
           <button class="btn-secondary mt-4" @click="aboutModal = false">Закрыть</button>
-        </div>
-      </Transition>
-    </Teleport>
-
-    <!-- Legal documents -->
-    <Teleport to="body">
-      <Transition name="overlay"><div v-if="legalModal" class="overlay" @click="legalModal = false" /></Transition>
-      <Transition name="modal">
-        <div
-          v-if="legalModal"
-          class="app-modal px-5 py-5"
-          style="max-height: 85dvh; overflow-y: auto;"
-          @click.stop
-        >
-          <h3 class="text-lg font-bold mb-3">Юридические документы</h3>
-          <p v-if="settingsStore.legalDocumentsLoading" class="py-6 text-center text-sm text-sber-gray">
-            Загрузка…
-          </p>
-          <p v-else-if="settingsStore.legalDocumentsError" class="py-4 text-center text-sm text-red-500">
-            {{ settingsStore.legalDocumentsError }}
-          </p>
-          <button
-            v-if="settingsStore.legalDocumentsError"
-            class="btn-secondary mb-4 w-full"
-            type="button"
-            @click="loadLegalDocuments"
-          >
-            Повторить
-          </button>
-          <template v-else-if="selectedLegalDoc">
-            <button class="mb-3 text-sm font-semibold text-sber-green" type="button" @click="selectedLegalDoc = null">
-              ← Назад к списку
-            </button>
-            <h4 class="text-base font-bold text-sber-black mb-2">{{ selectedLegalDoc.title }}</h4>
-            <p class="whitespace-pre-wrap text-sm leading-relaxed text-sber-gray">{{ selectedLegalDoc.content }}</p>
-          </template>
-          <div v-else class="space-y-2">
-            <button
-              v-for="doc in settingsStore.legalDocuments"
-              :key="doc.doc_type"
-              class="flex w-full items-center gap-3 rounded-2xl bg-sber-gray-light px-4 py-3 text-left"
-              type="button"
-              @click="selectedLegalDoc = doc"
-            >
-              <Info class="h-4 w-4 text-sber-gray" />
-              <span class="text-sm text-sber-black">{{ doc.title }}</span>
-              <ChevronRight class="ml-auto h-4 w-4 text-sber-gray" />
-            </button>
-          </div>
-          <button class="btn-secondary mt-4 w-full" type="button" @click="legalModal = false">Закрыть</button>
         </div>
       </Transition>
     </Teleport>
@@ -647,13 +560,12 @@
 <script setup lang="ts">
 import {
   Bell, Vibrate, Volume2, CheckCircle, Camera, Image, Globe,
-  HelpCircle, Info, Star, Check, ChevronDown, ChevronRight, Search, User, Lock,
+  HelpCircle, Info, Star, Check, ChevronDown, ChevronRight, User, Lock, FileText,
   EyeOff, Clock, Download, Share2, Smartphone, Crown, GripVertical, MessageSquareText,
   CheckSquare, Calendar, Grid2x2, Timer, Settings
 } from 'lucide-vue-next'
 import { Moon, Sun } from 'lucide-vue-next'
 import { soundOptions } from '~/data/mockData'
-import type { ApiLegalDocument } from '~/types/mobile-api'
 import { getApiErrorMessage } from '~/utils/api'
 import { validateNewPassword } from '~/utils/password-policy'
 
@@ -668,11 +580,8 @@ const passwordModal = ref(false)
 const premiumModal = ref(false)
 const soundModal = ref<string | null>(null)
 const languageModal = ref(false)
-const helpModal = ref(false)
 const contactModal = ref(false)
 const aboutModal = ref(false)
-const legalModal = ref(false)
-const selectedLegalDoc = ref<ApiLegalDocument | null>(null)
 const premiumCheckoutLoading = ref(false)
 const premiumActivateLoading = ref(false)
 const contactSending = ref(false)
@@ -700,8 +609,6 @@ const passwordErrors = reactive({
   next: '',
   confirm: '',
 })
-const faqSearch = ref('')
-
 const languages = [
   { id: 'ru', label: 'Русский' },
 ]
@@ -726,23 +633,15 @@ const selectedLanguageLabel = computed(() =>
   languages.find(l => l.id === selectedLanguage.value)?.label || 'Русский'
 )
 
-const filteredFaq = computed(() => {
-  const items = settingsStore.helpFaq
-  if (!faqSearch.value.trim()) return items
-  const q = faqSearch.value.trim().toLowerCase()
-  return items.filter(f =>
-    f.question.toLowerCase().includes(q)
-    || f.answer.toLowerCase().includes(q),
-  )
-})
+const route = useRoute()
 
-async function loadHelpFaq() {
-  await settingsStore.fetchHelpFaq()
-}
-
-watch(helpModal, (open) => {
-  if (open) void loadHelpFaq()
-})
+watch(
+  () => route.query.openContact,
+  (value) => {
+    if (value === '1') contactModal.value = true
+  },
+  { immediate: true },
+)
 
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
@@ -932,17 +831,6 @@ async function runStubAction() {
   }
 }
 
-async function loadLegalDocuments() {
-  await settingsStore.fetchLegalDocuments()
-}
-
-function openLegalModal() {
-  aboutModal.value = false
-  selectedLegalDoc.value = null
-  legalModal.value = true
-  void loadLegalDocuments()
-}
-
 watch(premiumModal, (open) => {
   if (open) void settingsStore.fetchPremiumFeatures()
 })
@@ -1035,11 +923,6 @@ function onBottomMenuDrop(targetItemId: string) {
   current.splice(toIndex, 0, moved)
   settingsStore.reorderNavItems(current)
   draggedBottomMenuId.value = null
-}
-
-function openContactFromHelp() {
-  helpModal.value = false
-  contactModal.value = true
 }
 
 async function sendContactMessage() {

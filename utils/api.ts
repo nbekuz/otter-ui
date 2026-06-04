@@ -110,6 +110,14 @@ api.interceptors.response.use(
   },
 )
 
+export function getApiFieldError(error: unknown, field: string): string | undefined {
+  const err = error as { response?: { data?: Record<string, unknown> } }
+  const raw = err?.response?.data?.[field]
+  if (Array.isArray(raw) && typeof raw[0] === 'string') return raw[0]
+  if (typeof raw === 'string') return raw
+  return undefined
+}
+
 export function getApiErrorMessage(error: unknown, fallback = 'Ошибка запроса'): string {
   const err = error as { response?: { data?: Record<string, unknown> }; message?: string }
   const data = err?.response?.data

@@ -421,7 +421,8 @@
 import { Check, Bell, RefreshCw, Calendar, Flag, Grid2x2, ChevronLeft, Paperclip, X, Trash2 } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
-import { addMinutesToTime } from '~/utils/time'
+import { addMinutesToTime, validateDurationFields } from '~/utils/time'
+import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
 
 definePageMeta({ layout: 'app' })
 
@@ -649,8 +650,9 @@ async function submit() {
     errors.title = 'Введите название задачи'
   }
 
-  if ((form.durationStart && !form.durationEnd) || (!form.durationStart && form.durationEnd)) {
-    errors.duration = 'Укажите и начало, и конец длительности'
+  const durationError = validateDurationFields(form.durationStart, form.durationEnd)
+  if (durationError) {
+    errors.duration = durationError
   }
 
   if (form.repeat === 'custom') {
@@ -748,8 +750,12 @@ async function submit() {
   navigateTo(resolveReturnPath())
   }
   catch (err: unknown) {
-    const e = err as { response?: { data?: { detail?: string } }; message?: string }
-    submitError.value = e?.response?.data?.detail || e?.message || 'Не удалось сохранить задачу'
+    const endAtError = getApiFieldError(err, 'end_at')
+    if (endAtError) {
+      errors.duration = endAtError
+      return
+    }
+    submitError.value = getApiErrorMessage(err, 'Не удалось сохранить задачу')
   }
   finally {
     submitting.value = false
