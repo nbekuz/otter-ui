@@ -291,12 +291,10 @@ onMounted(async () => {
 })
 
 async function selectWorkSound(sound: ApiSound) {
-  pomodoroStore.previewSound(sound)
   await pomodoroStore.setWorkSound(sound.key, sound)
 }
 
 async function selectTimerEndSound(sound: ApiSound) {
-  pomodoroStore.previewSound(sound)
   await pomodoroStore.setTimerEndSound(sound.key, sound)
 }
 

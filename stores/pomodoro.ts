@@ -3,9 +3,11 @@ import { defaultPomodoroSettings, type PomodoroSettings } from '~/data/mockData'
 import type { ApiPomodoroSession, ApiPomodoroSettings, ApiSound } from '~/types/mobile-api'
 import { apiGet, apiPatch, apiPost } from '~/utils/api'
 import {
+  pauseBackgroundAudio,
   playBackgroundLoop,
   playSoundOnce,
   stopBackgroundAudio,
+  stopEffectAudio,
 } from '~/utils/pomodoro-audio'
 
 type TimerState = 'idle' | 'running' | 'paused' | 'break'
@@ -71,6 +73,9 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
   }
 
   function syncBackgroundAudio() {
+    if (state.value === 'paused') {
+      return
+    }
     if (state.value !== 'running' || isBreak.value) {
       stopBackgroundAudio()
       return
@@ -136,6 +141,7 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
       }
       state.value = 'running'
       void syncSessionState('running')
+      stopEffectAudio()
       syncBackgroundAudio()
       if (intervalId) {
         clearInterval(intervalId)
@@ -161,7 +167,7 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
   function pause() {
     if (state.value === 'running') {
       state.value = 'paused'
-      stopBackgroundAudio()
+      pauseBackgroundAudio()
       void syncSessionState('paused')
       if (intervalId) {
         clearInterval(intervalId)
@@ -198,12 +204,16 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
 
   async function setWorkSound(key: string, sound?: ApiSound) {
     if (sound) workSoundDetail.value = sound
+    const isRunning = state.value === 'running'
+    if (isRunning) stopEffectAudio()
     await updateSettings({ workingSound: key })
+    if (!isRunning) previewSound(sound)
   }
 
   async function setTimerEndSound(key: string, sound?: ApiSound) {
     if (sound) timerEndSoundDetail.value = sound
     await updateSettings({ sound: key })
+    previewSound(sound)
   }
 
   async function startSession(taskId?: string | null) {
