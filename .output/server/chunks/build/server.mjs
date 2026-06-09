@@ -1,4 +1,4 @@
-import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { toRef, isRef, hasInjectionContext, inject, getCurrentInstance, ref, reactive, effectScope, isReactive, toRaw, getCurrentScope, onScopeDispose, watch, nextTick, toRefs, markRaw, computed, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, useSSRContext, defineAsyncComponent, unref, shallowReactive, Suspense, Fragment, createApp, mergeProps, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, onMounted, readonly, isReadonly, isShallow } from 'vue';
+import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { toRef, isRef, hasInjectionContext, inject, watch, getCurrentInstance, ref, reactive, effectScope, isReactive, toRaw, unref, getCurrentScope, onScopeDispose, nextTick, toRefs, markRaw, computed, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, useSSRContext, defineAsyncComponent, shallowReactive, Suspense, Fragment, createApp, mergeProps, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, onMounted, readonly, isReadonly, isShallow } from 'vue';
 import { i as hasProtocol, k as isScriptProtocol, f as joinURL, p as parseURL, l as encodePath, m as decodePath, w as withQuery, s as sanitizeStatusCode, n as getContext, $ as $fetch, o as defu, q as createHooks, c as createError$1, r as executeAsync } from '../nitro/nitro.mjs';
 import { b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
@@ -415,6 +415,8 @@ function getRouteRules(arg) {
     return {};
   }
 }
+const __nuxt_page_meta$8 = { layout: "app" };
+const __nuxt_page_meta$7 = { layout: "app" };
 const __nuxt_page_meta$6 = { layout: "app" };
 const __nuxt_page_meta$5 = { layout: "app" };
 const __nuxt_page_meta$4 = { layout: "app" };
@@ -426,84 +428,96 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-BXBnGYEj.mjs')
+    component: () => import('./index-ffmbPQLX.mjs')
   },
   {
     name: "login",
     path: "/login",
-    component: () => import('./login-Dio_M1us.mjs')
+    component: () => import('./login-BAaFgU3i.mjs')
   },
   {
     name: "matrix",
     path: "/matrix",
-    component: () => import('./matrix-BlkikQGg.mjs')
+    component: () => import('./matrix-BDWLK3dr.mjs')
+  },
+  {
+    name: "app-faq",
+    path: "/app/faq",
+    meta: __nuxt_page_meta$8 || {},
+    component: () => import('./faq-PbXGyqJt.mjs')
   },
   {
     name: "calendar",
     path: "/calendar",
-    component: () => import('./calendar-8rIVYj5j.mjs')
+    component: () => import('./calendar-DSzma8iE.mjs')
   },
   {
     name: "pomodoro",
     path: "/pomodoro",
-    component: () => import('./pomodoro-BFzOuHH3.mjs')
+    component: () => import('./pomodoro-Cnvr7ZvG.mjs')
   },
   {
     name: "register",
     path: "/register",
-    component: () => import('./register-DuQ1ouoV.mjs')
+    component: () => import('./register-MAEGYwZr.mjs')
   },
   {
     name: "settings",
     path: "/settings",
-    component: () => import('./settings-BAyOInp9.mjs')
+    component: () => import('./settings-Bby5Ah3C.mjs')
   },
   {
     name: "app",
     path: "/app",
+    meta: __nuxt_page_meta$7 || {},
+    component: () => import('./index-BDU-hVK4.mjs')
+  },
+  {
+    name: "app-legal",
+    path: "/app/legal",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import('./index-Sa6G1K7c.mjs')
+    component: () => import('./legal-DAL_X0Q2.mjs')
   },
   {
     name: "app-matrix",
     path: "/app/matrix",
     meta: __nuxt_page_meta$5 || {},
-    component: () => import('./matrix-C9GylDiv.mjs')
+    component: () => import('./matrix-BPjJpDiz.mjs')
   },
   {
     name: "app-profile",
     path: "/app/profile",
     meta: __nuxt_page_meta$4 || {},
-    component: () => import('./profile-C9Fda4N_.mjs')
+    component: () => import('./profile-Bydr__Bb.mjs')
   },
   {
     name: "app-calendar",
     path: "/app/calendar",
     meta: __nuxt_page_meta$3 || {},
-    component: () => import('./calendar-Ck4V4lIK.mjs')
+    component: () => import('./calendar-BYunOmLk.mjs')
   },
   {
     name: "app-new-task",
     path: "/app/new-task",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./new-task-DMIMkq5F.mjs')
+    component: () => import('./new-task-C7rsxK56.mjs')
   },
   {
     name: "app-pomodoro",
     path: "/app/pomodoro",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./pomodoro-CQnYyHbb.mjs')
+    component: () => import('./pomodoro-BfXT3eVW.mjs')
   },
   {
     name: "app-settings",
     path: "/app/settings",
     meta: __nuxt_page_meta || {},
-    component: () => import('./settings-B-dtX1jh.mjs')
+    component: () => import('./settings-CHxuNuC2.mjs')
   },
   {
     name: "profile-fill",
     path: "/profile-fill",
-    component: () => import('./profile-fill-DAwwwi-v.mjs')
+    component: () => import('./profile-fill-BL2Fk0Ls.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1119,6 +1133,52 @@ function useEventListener(...args) {
   tryOnScopeDispose(stop);
   return stop;
 }
+function onClickOutside(target, handler, options = {}) {
+  const { window: window2 = defaultWindow, ignore = [], capture = true, detectIframe = false } = options;
+  if (!window2)
+    return noop;
+  let shouldListen = true;
+  const shouldIgnore = (event) => {
+    return ignore.some((target2) => {
+      if (typeof target2 === "string") {
+        return Array.from(window2.document.querySelectorAll(target2)).some((el) => el === event.target || event.composedPath().includes(el));
+      } else {
+        const el = unrefElement(target2);
+        return el && (event.target === el || event.composedPath().includes(el));
+      }
+    });
+  };
+  const listener = (event) => {
+    const el = unrefElement(target);
+    if (!el || el === event.target || event.composedPath().includes(el))
+      return;
+    if (event.detail === 0)
+      shouldListen = !shouldIgnore(event);
+    if (!shouldListen) {
+      shouldListen = true;
+      return;
+    }
+    handler(event);
+  };
+  const cleanup = [
+    useEventListener(window2, "click", listener, { passive: true, capture }),
+    useEventListener(window2, "pointerdown", (e) => {
+      const el = unrefElement(target);
+      shouldListen = !shouldIgnore(e) && !!(el && !e.composedPath().includes(el));
+    }, { passive: true }),
+    detectIframe && useEventListener(window2, "blur", (event) => {
+      setTimeout(() => {
+        var _a;
+        const el = unrefElement(target);
+        if (((_a = window2.document.activeElement) == null ? void 0 : _a.tagName) === "IFRAME" && !(el == null ? void 0 : el.contains(window2.document.activeElement))) {
+          handler(event);
+        }
+      }, 0);
+    })
+  ].filter(Boolean);
+  const stop = () => cleanup.forEach((fn) => fn());
+  return stop;
+}
 const _global = typeof globalThis !== "undefined" ? globalThis : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 const globalKey = "__vueuse_ssr_handlers__";
 const handlers = /* @__PURE__ */ getHandlers();
@@ -1294,8 +1354,11 @@ function useLocalStorage(key, initialValue, options = {}) {
   const { window: window2 = defaultWindow } = options;
   return useStorage(key, initialValue, window2 == null ? void 0 : window2.localStorage, options);
 }
-function setAuthTokens(tokens) {
-  return;
+function getAccessToken() {
+  return null;
+}
+function getRefreshToken() {
+  return null;
 }
 const DEFAULT_API_BASE_URL = "https://admin.skkamni.ru/api/v1/";
 function resolveApiBaseUrl() {
@@ -1341,6 +1404,8 @@ api.interceptors.response.use(
       } catch {
       }
     }
+    const requestUrl = String(originalRequest?.url || "");
+    requestUrl.includes("auth/forgot-password") || requestUrl.includes("auth/login/") || requestUrl.includes("auth/register/");
     return Promise.reject(error);
   }
 );
@@ -1374,6 +1439,37 @@ async function apiPatch(url, data, config) {
 async function apiDelete(url, config) {
   const response = await api.delete(url, config);
   return response.data;
+}
+function resolveMediaUrl(url) {
+  if (!url) return void 0;
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:") || url.startsWith("blob:")) {
+    return url;
+  }
+  let apiBase = "https://admin.skkamni.ru/api/v1/";
+  {
+    const fromEnv = process.env.NUXT_PUBLIC_API_BASE_URL;
+    if (fromEnv) apiBase = fromEnv.endsWith("/") ? fromEnv : `${fromEnv}/`;
+  }
+  const origin = apiBase.replace(/\/api\/v1\/?$/, "");
+  return url.startsWith("/") ? `${origin}${url}` : `${origin}/${url}`;
+}
+function parseTimeToMinutes(time) {
+  const [h2, m] = time.split(":").map((v) => parseInt(v, 10));
+  const hours = Number.isFinite(h2) ? h2 : 0;
+  const minutes = Number.isFinite(m) ? m : 0;
+  return hours * 60 + minutes;
+}
+function formatMinutesToTime(totalMinutes) {
+  const clamped = Math.max(0, Math.min(23 * 60 + 59, totalMinutes));
+  const hours = Math.floor(clamped / 60);
+  const minutes = clamped % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+function addMinutesToTime(time, deltaMinutes) {
+  return formatMinutesToTime(parseTimeToMinutes(time) + deltaMinutes);
+}
+function getTaskScheduleStart(task) {
+  return task.duration?.start || task.dueTime;
 }
 const MATRIX_TO_UI = {
   urgent_important: "urgent-important",
@@ -1434,6 +1530,9 @@ function buildStartEnd(dueDate, duration) {
   if (!dueDate || !duration?.start || !duration?.end) {
     return { start_at: null, end_at: null };
   }
+  if (parseTimeToMinutes(duration.end) <= parseTimeToMinutes(duration.start)) {
+    return { start_at: null, end_at: null };
+  }
   return {
     start_at: dayjs(`${dueDate}T${duration.start}`).format(),
     end_at: dayjs(`${dueDate}T${duration.end}`).format()
@@ -1443,11 +1542,12 @@ function apiTaskToUi(task) {
   const due = task.due_at ? dayjs(task.due_at) : null;
   const start = task.start_at ? dayjs(task.start_at) : null;
   const end = task.end_at ? dayjs(task.end_at) : null;
+  const scheduleDay = start?.isValid() ? start : due;
   return {
     id: String(task.id),
     title: task.title,
     description: task.description || void 0,
-    dueDate: due?.isValid() ? due.format("YYYY-MM-DD") : void 0,
+    dueDate: scheduleDay?.isValid() ? scheduleDay.format("YYYY-MM-DD") : void 0,
     dueTime: due?.isValid() && !(due.hour() === 0 && due.minute() === 0) ? due.format("HH:mm") : void 0,
     duration: start?.isValid() && end?.isValid() ? { start: start.format("HH:mm"), end: end.format("HH:mm") } : void 0,
     priority: apiPriorityToUi(task.priority),
@@ -1501,23 +1601,32 @@ function flattenGroups(groups) {
   }
   return result;
 }
+function normalizeDueDate(dueDate) {
+  if (!dueDate) return "";
+  const parsed = dayjs(dueDate);
+  return parsed.isValid() ? parsed.format("YYYY-MM-DD") : "";
+}
 function groupTasksByKey(allTasks) {
   const today2 = dayjs().format("YYYY-MM-DD");
   const tomorrow2 = dayjs().add(1, "day").format("YYYY-MM-DD");
   return {
-    overdue: allTasks.filter(
-      (t) => !t.completed && t.dueDate && dayjs(t.dueDate).isBefore(today2, "day")
-    ),
-    today: allTasks.filter(
-      (t) => !t.completed && t.dueDate === today2
-    ),
-    tomorrow: allTasks.filter(
-      (t) => !t.completed && t.dueDate === tomorrow2
-    ),
-    later: allTasks.filter(
-      (t) => !t.completed && t.dueDate && dayjs(t.dueDate).isAfter(tomorrow2, "day")
-    ),
-    nodate: allTasks.filter((t) => !t.completed && !t.dueDate),
+    overdue: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate);
+      return !t.completed && !!d && dayjs(d).isBefore(today2, "day");
+    }),
+    today: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate);
+      return !t.completed && d === today2;
+    }),
+    tomorrow: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate);
+      return !t.completed && d === tomorrow2;
+    }),
+    later: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate);
+      return !t.completed && !!d && dayjs(d).isAfter(tomorrow2, "day");
+    }),
+    nodate: allTasks.filter((t) => !t.completed && !normalizeDueDate(t.dueDate)),
     completed: allTasks.filter((t) => t.completed)
   };
 }
@@ -1560,8 +1669,71 @@ const useTasksStore = /* @__PURE__ */ defineStore("tasks", () => {
         next[uiKey] = group.tasks.map(apiTaskToUi);
       }
     }
-    groupedFromApi.value = next;
     tasks.value = flattenGroups(groups);
+    groupedFromApi.value = groupTasksByKey(tasks.value);
+  }
+  function findTaskById(id) {
+    return tasks.value.find((t) => t.id === id) ?? calendarTasks.value.find((t) => t.id === id);
+  }
+  function taskScheduleKey(task) {
+    return [
+      task.dueDate,
+      task.dueTime,
+      task.duration?.start,
+      task.duration?.end,
+      task.completed,
+      task.title,
+      task.priority,
+      task.matrixBlock
+    ].join("|");
+  }
+  function mergeTaskFields(existing, updates, id) {
+    return {
+      ...existing || {
+        id,
+        title: "",
+        priority: "medium",
+        completed: false,
+        repeat: "none",
+        createdAt: ""
+      },
+      ...updates,
+      id,
+      duration: updates.duration ?? existing?.duration,
+      dueTime: updates.dueTime ?? existing?.dueTime,
+      dueDate: updates.dueDate ?? existing?.dueDate
+    };
+  }
+  function mergeTaskFromApi(existing, updates, fromApi) {
+    return {
+      ...existing,
+      ...fromApi,
+      ...updates,
+      id: fromApi.id,
+      duration: fromApi.duration ?? updates.duration ?? existing?.duration,
+      dueTime: fromApi.dueTime ?? updates.dueTime ?? existing?.dueTime,
+      dueDate: fromApi.dueDate ?? updates.dueDate ?? existing?.dueDate
+    };
+  }
+  function applyTaskToMatrixState(updated) {
+    if (Object.keys(matrixTasksByBlock.value).length === 0) return;
+    const next = {};
+    for (const [blockId, list] of Object.entries(matrixTasksByBlock.value)) {
+      next[blockId] = list.filter((t) => t.id !== updated.id);
+    }
+    if (!updated.completed && updated.matrixBlock) {
+      const blockId = updated.matrixBlock;
+      next[blockId] = [updated, ...next[blockId] || []];
+    }
+    matrixTasksByBlock.value = next;
+  }
+  function removeTaskFromMatrixState(id) {
+    if (Object.keys(matrixTasksByBlock.value).length === 0) return;
+    const next = {};
+    for (const [blockId, list] of Object.entries(matrixTasksByBlock.value)) {
+      next[blockId] = list.filter((t) => t.id !== id);
+    }
+    matrixTasksByBlock.value = next;
   }
   function upsertTaskInState(updated) {
     const idx = tasks.value.findIndex((t) => t.id === updated.id);
@@ -1571,10 +1743,43 @@ const useTasksStore = /* @__PURE__ */ defineStore("tasks", () => {
       tasks.value[idx] = updated;
     }
     groupedFromApi.value = groupTasksByKey(tasks.value);
+    const calIdx = calendarTasks.value.findIndex((t) => t.id === updated.id);
+    if (calIdx !== -1) {
+      calendarTasks.value[calIdx] = updated;
+    }
+    applyTaskToMatrixState(updated);
+  }
+  async function refreshCalendarIfCached() {
+    const key = calendarCacheKey.value;
+    if (!key) return;
+    const colon = key.indexOf(":");
+    if (colon === -1) return;
+    const view = key.slice(0, colon);
+    const date = key.slice(colon + 1);
+    if (!date) return;
+    await fetchCalendar(view, date);
+  }
+  function refreshMatrixIfCached() {
+    if (Object.keys(matrixTasksByBlock.value).length === 0) return void 0;
+    return fetchMatrix();
+  }
+  async function refreshTaskLists(options = {}) {
+    const { grouped = true, calendar = true, matrix = true } = options;
+    const jobs = [];
+    if (grouped) jobs.push(fetchGrouped());
+    if (calendar) jobs.push(refreshCalendarIfCached());
+    if (matrix) {
+      const matrixJob = refreshMatrixIfCached();
+      if (matrixJob) jobs.push(matrixJob);
+    }
+    if (jobs.length === 0) return;
+    await Promise.all(jobs);
   }
   function removeTaskFromState(id) {
     tasks.value = tasks.value.filter((t) => t.id !== id);
+    calendarTasks.value = calendarTasks.value.filter((t) => t.id !== id);
     groupedFromApi.value = groupTasksByKey(tasks.value);
+    removeTaskFromMatrixState(id);
   }
   async function fetchGrouped() {
     loading.value = true;
@@ -1592,30 +1797,71 @@ const useTasksStore = /* @__PURE__ */ defineStore("tasks", () => {
   }
   async function fetchMatrix() {
     const blocks = await apiGet("matrix/");
+    const prevById = /* @__PURE__ */ new Map();
+    for (const list of Object.values(matrixTasksByBlock.value)) {
+      for (const task of list) prevById.set(task.id, task);
+    }
     const next = {};
     for (const block of blocks) {
-      next[apiMatrixBlockToUi(block.block)] = block.tasks.map(apiTaskToUi);
+      next[apiMatrixBlockToUi(block.block)] = block.tasks.map((apiTask) => {
+        const task = apiTaskToUi(apiTask);
+        const prev = prevById.get(task.id);
+        return prev && taskScheduleKey(prev) === taskScheduleKey(task) ? prev : task;
+      });
     }
     matrixTasksByBlock.value = next;
     return next;
   }
   async function fetchCalendar(view, date) {
     const response = await apiGet("calendar/", { params: { view, date } });
-    calendarTasks.value = response.tasks.map(apiTaskToUi);
+    const incoming = response.tasks.map(apiTaskToUi);
     calendarCacheKey.value = `${view}:${date}`;
+    if (calendarTasks.value.length === 0) {
+      calendarTasks.value = incoming;
+      return calendarTasks.value;
+    }
+    const prevById = new Map(calendarTasks.value.map((task) => [task.id, task]));
+    calendarTasks.value = incoming.map((task) => {
+      const prev = prevById.get(task.id);
+      if (prev && taskScheduleKey(prev) === taskScheduleKey(task)) {
+        return prev;
+      }
+      return task;
+    });
     return calendarTasks.value;
   }
+  function parseCalendarCacheKey() {
+    const colon = calendarCacheKey.value.indexOf(":");
+    if (colon === -1) return null;
+    return {
+      view: calendarCacheKey.value.slice(0, colon),
+      date: calendarCacheKey.value.slice(colon + 1)
+    };
+  }
+  function taskScheduleDate(task) {
+    return task.dueDate;
+  }
   function getTasksForDate(date) {
-    if (calendarTasks.value.length > 0) {
-      const fromCalendar = calendarTasks.value.filter((t) => t.dueDate === date);
-      if (fromCalendar.length > 0) return fromCalendar;
+    const cache = parseCalendarCacheKey();
+    if (cache?.view === "day" && cache.date === date) {
+      return calendarTasks.value.slice();
     }
-    return tasks.value.filter((t) => t.dueDate === date);
+    return tasks.value.filter((t) => taskScheduleDate(t) === date);
   }
   function getTasksForWeek(startDate, endDate) {
-    const source = calendarTasks.value.length > 0 ? calendarTasks.value : tasks.value;
-    return source.filter(
-      (t) => t.dueDate && !dayjs(t.dueDate).isBefore(startDate, "day") && !dayjs(t.dueDate).isAfter(endDate, "day")
+    const cache = parseCalendarCacheKey();
+    if (cache?.view === "week") {
+      const weekStart = dayjs(cache.date).startOf("week").format("YYYY-MM-DD");
+      const weekEnd = dayjs(cache.date).endOf("week").format("YYYY-MM-DD");
+      if (!dayjs(startDate).isAfter(weekEnd, "day") && !dayjs(endDate).isBefore(weekStart, "day")) {
+        return calendarTasks.value.filter((t) => {
+          const d = taskScheduleDate(t);
+          return !!d && !dayjs(d).isBefore(startDate, "day") && !dayjs(d).isAfter(endDate, "day");
+        });
+      }
+    }
+    return tasks.value.filter(
+      (t) => taskScheduleDate(t) && !dayjs(taskScheduleDate(t)).isBefore(startDate, "day") && !dayjs(taskScheduleDate(t)).isAfter(endDate, "day")
     );
   }
   function getTasksForMatrix(blockId) {
@@ -1629,41 +1875,52 @@ const useTasksStore = /* @__PURE__ */ defineStore("tasks", () => {
     const created = await apiPost("tasks/", payload);
     const task = apiTaskToUi(created);
     upsertTaskInState(task);
-    await fetchGrouped();
+    await refreshTaskLists();
     return task;
   }
-  async function updateTask(id, updates) {
-    const existing = tasks.value.find((t) => t.id === id);
+  async function updateTask(id, updates, refresh = {}) {
+    const existing = findTaskById(id);
+    const optimistic = mergeTaskFields(existing, updates, id);
+    upsertTaskInState(optimistic);
     const merged = { ...existing, ...updates };
     const payload = uiTaskToApiPayload(merged);
     const updated = await apiPatch(`tasks/${id}/`, payload);
-    const task = apiTaskToUi(updated);
+    const task = mergeTaskFromApi(existing, updates, apiTaskToUi(updated));
     upsertTaskInState(task);
-    await fetchGrouped();
+    await refreshTaskLists(refresh);
     return task;
   }
-  async function deleteTask(id) {
-    await apiDelete(`tasks/${id}/`);
+  async function deleteTask(id, refresh = {}) {
     removeTaskFromState(id);
-    await fetchGrouped();
+    await apiDelete(`tasks/${id}/`);
+    await refreshTaskLists(refresh);
   }
-  async function completeTask(id) {
-    const existing = tasks.value.find((t) => t.id === id);
+  async function completeTask(id, refresh = {}) {
+    const existing = findTaskById(id);
     if (!existing) return;
+    upsertTaskInState({
+      ...existing,
+      completed: !existing.completed,
+      completedAt: !existing.completed ? dayjs().format("YYYY-MM-DD") : void 0
+    });
     const endpoint = existing.completed ? "uncomplete" : "complete";
     const updated = await apiPost(`tasks/${id}/${endpoint}/`);
     const task = apiTaskToUi(updated);
     upsertTaskInState(task);
-    await fetchGrouped();
+    await refreshTaskLists(refresh);
     return task;
   }
   async function moveToMatrix(taskId, blockId) {
+    const existing = findTaskById(taskId);
+    const uiBlock = blockId;
+    if (existing) {
+      upsertTaskInState({ ...existing, matrixBlock: uiBlock });
+    }
     const matrix_block = blockId.replace(/-/g, "_");
     const updated = await apiPatch(`tasks/${taskId}/`, { matrix_block });
     const task = apiTaskToUi(updated);
     upsertTaskInState(task);
-    await fetchMatrix();
-    await fetchGrouped();
+    await refreshTaskLists({ grouped: false, calendar: false, matrix: true });
     return task;
   }
   async function fetchTask(id) {
@@ -1711,6 +1968,8 @@ const useTasksStore = /* @__PURE__ */ defineStore("tasks", () => {
     fetchGrouped,
     fetchMatrix,
     fetchCalendar,
+    refreshCalendarIfCached,
+    refreshTaskLists,
     getTasksForDate,
     getTasksForWeek,
     getTasksForMatrix,
@@ -1988,13 +2247,10 @@ const soundOptions = [
   { id: "soft", name: "Мягкий", icon: "🎶" },
   { id: "none", name: "Без звука", icon: "🔇" }
 ];
-const workSoundOptions = [
-  { id: "rain", name: "Дождь", icon: "🌧️" },
-  { id: "forest", name: "Лес", icon: "🌲" },
-  { id: "cafe", name: "Кафе", icon: "☕" },
-  { id: "white-noise", name: "Белый шум", icon: "💨" },
-  { id: "none", name: "Без звука", icon: "🔇" }
-];
+function normalizeBottomNavItems(items) {
+  const withoutSettings = items.filter((id) => id !== "settings");
+  return [...withoutSettings, "settings"];
+}
 function apiToAppSettings(data) {
   const visibleGroups = [];
   if (data.show_overdue) visibleGroups.push("overdue");
@@ -2011,7 +2267,7 @@ function apiToAppSettings(data) {
     vibration: data.vibration_enabled,
     notificationSound: data.notification_sound,
     completionSound: data.completion_sound,
-    bottomNavItems: data.bottom_tabs?.length ? [...data.bottom_tabs] : [...defaultAppSettings.bottomNavItems]
+    bottomNavItems: data.bottom_tabs?.length ? normalizeBottomNavItems([...data.bottom_tabs]) : [...defaultAppSettings.bottomNavItems]
   };
 }
 function appSettingsToApiPatch(updates) {
@@ -2178,7 +2434,7 @@ const useSettingsStore = /* @__PURE__ */ defineStore("settings", () => {
     });
   }
   async function reorderNavItems(items) {
-    await updateSettings({ bottomNavItems: items });
+    await updateSettings({ bottomNavItems: normalizeBottomNavItems(items) });
   }
   async function premiumCheckout(tariff = "monthly") {
     return apiPost("premium/checkout/", { tariff });
@@ -2223,12 +2479,21 @@ const useSettingsStore = /* @__PURE__ */ defineStore("settings", () => {
 });
 const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
   const user = useLocalStorage("otter.auth.user", null);
-  const accessToken = useLocalStorage("access_token", null);
-  const refreshToken = useLocalStorage("refresh_token", null);
+  const accessToken = ref(null);
+  const refreshToken = ref(null);
+  const tokenRevision = ref(0);
   const profileFirstName = useLocalStorage("otter.auth.first-name", "");
   const profileLastName = useLocalStorage("otter.auth.last-name", "");
   const profileLoaded = ref(false);
-  const isLoggedIn = computed(() => !!accessToken.value);
+  function syncTokensFromStorage() {
+    accessToken.value = getAccessToken();
+    refreshToken.value = getRefreshToken();
+    tokenRevision.value += 1;
+  }
+  const isLoggedIn = computed(() => {
+    tokenRevision.value;
+    return false;
+  });
   const requiresProfileFill = computed(
     () => isLoggedIn.value && (!profileFirstName.value.trim() || !profileLastName.value.trim())
   );
@@ -2238,18 +2503,20 @@ const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
       id: String(nextUser.id),
       email: nextUser.email,
       name: fullName || nextUser.email.split("@")[0] || "User",
-      avatar: nextUser.avatar || void 0,
+      avatar: resolveMediaUrl(nextUser.avatar) || void 0,
       isPremium: user.value?.isPremium || false,
       premiumExpiresAt: user.value?.premiumExpiresAt
     };
   }
+  function applyTokens(tokens) {
+    syncTokensFromStorage();
+  }
   function setSession(nextUser, tokens) {
+    applyTokens();
     profileFirstName.value = nextUser.first_name || "";
     profileLastName.value = nextUser.last_name || "";
     profileLoaded.value = true;
     user.value = mapBackendUser(nextUser);
-    accessToken.value = tokens.access;
-    refreshToken.value = tokens.refresh;
   }
   async function fetchMyProfile() {
     const profile = await apiGet("profile/");
@@ -2278,9 +2545,7 @@ const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
       email,
       password
     });
-    accessToken.value = response.tokens.access;
-    refreshToken.value = response.tokens.refresh;
-    setAuthTokens(response.tokens);
+    applyTokens(response.tokens);
     await fetchMyProfile();
     navigateTo("/app");
   }
@@ -2339,9 +2604,8 @@ const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
   function logout() {
     const tasksStore = useTasksStore();
     tasksStore.reset();
+    syncTokensFromStorage();
     user.value = null;
-    accessToken.value = null;
-    refreshToken.value = null;
     profileFirstName.value = "";
     profileLastName.value = "";
     profileLoaded.value = false;
@@ -2374,6 +2638,7 @@ const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
     profileLoaded,
     isLoggedIn,
     requiresProfileFill,
+    syncTokensFromStorage,
     fetchMyProfile,
     updateProfile,
     login,
@@ -2404,7 +2669,7 @@ const globalMiddleware = [
   manifest_45route_45rule
 ];
 const namedMiddleware = {
-  auth: () => import('./auth-WEl_ZIMx.mjs')
+  auth: () => import('./auth-D1mj6QtQ.mjs')
 };
 const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:router",
@@ -2766,8 +3031,8 @@ _sfc_main$3.setup = (props, ctx) => {
 };
 const __nuxt_component_0 = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-ee22b97d"]]);
 const layouts = {
-  app: defineAsyncComponent(() => import('./app-CUVJbdwo.mjs').then((m) => m.default || m)),
-  default: defineAsyncComponent(() => import('./default-BCEfED5V.mjs').then((m) => m.default || m))
+  app: defineAsyncComponent(() => import('./app-C9j1qmnq.mjs').then((m) => m.default || m)),
+  default: defineAsyncComponent(() => import('./default-DE7Yy99t.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
@@ -3140,5 +3405,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { _export_sfc as _, useState as a, useTasksStore as b, useSettingsStore as c, useRoute as d, entry_default as default, useAppToast as e, defineStore as f, defaultPomodoroSettings as g, apiGet as h, apiPatch as i, apiPost as j, getApiErrorMessage as k, defineNuxtRouteMiddleware as l, useRouter as m, navigateTo as n, encodeRoutePath as o, useNuxtApp as p, useRuntimeConfig as q, resolveRouteObject as r, soundOptions as s, nuxtLinkDefaults as t, useAuthStore as u, workSoundOptions as w };
+export { _export_sfc as _, useState as a, useSettingsStore as b, useTasksStore as c, useRoute as d, entry_default as default, useAppToast as e, defineStore as f, getTaskScheduleStart as g, formatMinutesToTime as h, addMinutesToTime as i, defaultPomodoroSettings as j, apiGet as k, apiPatch as l, apiPost as m, navigateTo as n, onClickOutside as o, parseTimeToMinutes as p, getApiErrorMessage as q, defineNuxtRouteMiddleware as r, soundOptions as s, useRouter as t, useAuthStore as u, encodeRoutePath as v, resolveRouteObject as w, useNuxtApp as x, useRuntimeConfig as y, nuxtLinkDefaults as z };
 //# sourceMappingURL=server.mjs.map

@@ -6,6 +6,7 @@ declare global {
   const FIREBASE_ID_TOKEN_STORAGE_KEY: typeof import('../../utils/auth-session').FIREBASE_ID_TOKEN_STORAGE_KEY
   const PASSWORD_MAX_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MAX_LENGTH
   const PASSWORD_MIN_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MIN_LENGTH
+  const PRIORITY_COLORS: typeof import('../../utils/priority-colors').PRIORITY_COLORS
   const REFRESH_TOKEN_KEY: typeof import('../../utils/auth-session').REFRESH_TOKEN_KEY
   const abortNavigation: typeof import('../../node_modules/nuxt/dist/app/composables/router').abortNavigation
   const acceptHMRUpdate: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').acceptHMRUpdate
@@ -122,11 +123,15 @@ declare global {
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
   const parseTimeToMinutes: typeof import('../../utils/time').parseTimeToMinutes
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
+  const pauseBackgroundAudio: typeof import('../../utils/pomodoro-audio').pauseBackgroundAudio
+  const playBackgroundLoop: typeof import('../../utils/pomodoro-audio').playBackgroundLoop
+  const playSoundOnce: typeof import('../../utils/pomodoro-audio').playSoundOnce
   const prefetchComponents: typeof import('../../node_modules/nuxt/dist/app/composables/preload').prefetchComponents
   const preloadComponents: typeof import('../../node_modules/nuxt/dist/app/composables/preload').preloadComponents
   const preloadPayload: typeof import('../../node_modules/nuxt/dist/app/composables/payload').preloadPayload
   const preloadRouteComponents: typeof import('../../node_modules/nuxt/dist/app/composables/preload').preloadRouteComponents
   const prerenderRoutes: typeof import('../../node_modules/nuxt/dist/app/composables/ssr').prerenderRoutes
+  const priorityColor: typeof import('../../utils/priority-colors').priorityColor
   const provide: typeof import('vue').provide
   const provideLocal: typeof import('@vueuse/core').provideLocal
   const proxyRefs: typeof import('vue').proxyRefs
@@ -149,6 +154,7 @@ declare global {
   const reloadNuxtApp: typeof import('../../node_modules/nuxt/dist/app/composables/chunk').reloadNuxtApp
   const requestIdleCallback: typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback').requestIdleCallback
   const resolveComponent: typeof import('vue').resolveComponent
+  const resolveMediaUrl: typeof import('../../utils/media').resolveMediaUrl
   const resolveRef: typeof import('@vueuse/core').resolveRef
   const resolveUnref: typeof import('@vueuse/core').resolveUnref
   const setAuthTokens: typeof import('../../utils/auth-session').setAuthTokens
@@ -159,6 +165,8 @@ declare global {
   const shallowReadonly: typeof import('vue').shallowReadonly
   const shallowRef: typeof import('vue').shallowRef
   const showError: typeof import('../../node_modules/nuxt/dist/app/composables/error').showError
+  const stopBackgroundAudio: typeof import('../../utils/pomodoro-audio').stopBackgroundAudio
+  const stopEffectAudio: typeof import('../../utils/pomodoro-audio').stopEffectAudio
   const storeToRefs: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').storeToRefs
   const syncRef: typeof import('@vueuse/core').syncRef
   const syncRefs: typeof import('@vueuse/core').syncRefs
@@ -371,6 +379,7 @@ declare global {
   const useShare: typeof import('@vueuse/core').useShare
   const useSlots: typeof import('vue').useSlots
   const useSorted: typeof import('@vueuse/core').useSorted
+  const useSoundsStore: typeof import('../../stores/sounds').useSoundsStore
   const useSpeechRecognition: typeof import('@vueuse/core').useSpeechRecognition
   const useSpeechSynthesis: typeof import('@vueuse/core').useSpeechSynthesis
   const useState: typeof import('../../node_modules/nuxt/dist/app/composables/state').useState
@@ -379,6 +388,7 @@ declare global {
   const useStyleTag: typeof import('@vueuse/core').useStyleTag
   const useSupported: typeof import('@vueuse/core').useSupported
   const useSwipe: typeof import('@vueuse/core').useSwipe
+  const useTaskTimeSync: typeof import('../../composables/useTaskTimeSync').useTaskTimeSync
   const useTasksStore: typeof import('../../stores/tasks').useTasksStore
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useTemplateRefsList: typeof import('@vueuse/core').useTemplateRefsList
@@ -465,6 +475,7 @@ declare module 'vue' {
     readonly FIREBASE_ID_TOKEN_STORAGE_KEY: UnwrapRef<typeof import('../../utils/auth-session')['FIREBASE_ID_TOKEN_STORAGE_KEY']>
     readonly PASSWORD_MAX_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MAX_LENGTH']>
     readonly PASSWORD_MIN_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MIN_LENGTH']>
+    readonly PRIORITY_COLORS: UnwrapRef<typeof import('../../utils/priority-colors')['PRIORITY_COLORS']>
     readonly REFRESH_TOKEN_KEY: UnwrapRef<typeof import('../../utils/auth-session')['REFRESH_TOKEN_KEY']>
     readonly abortNavigation: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['abortNavigation']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['acceptHMRUpdate']>
@@ -581,11 +592,15 @@ declare module 'vue' {
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
     readonly parseTimeToMinutes: UnwrapRef<typeof import('../../utils/time')['parseTimeToMinutes']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
+    readonly pauseBackgroundAudio: UnwrapRef<typeof import('../../utils/pomodoro-audio')['pauseBackgroundAudio']>
+    readonly playBackgroundLoop: UnwrapRef<typeof import('../../utils/pomodoro-audio')['playBackgroundLoop']>
+    readonly playSoundOnce: UnwrapRef<typeof import('../../utils/pomodoro-audio')['playSoundOnce']>
     readonly prefetchComponents: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preload')['prefetchComponents']>
     readonly preloadComponents: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preload')['preloadComponents']>
     readonly preloadPayload: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['preloadPayload']>
     readonly preloadRouteComponents: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preload')['preloadRouteComponents']>
     readonly prerenderRoutes: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/ssr')['prerenderRoutes']>
+    readonly priorityColor: UnwrapRef<typeof import('../../utils/priority-colors')['priorityColor']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideLocal: UnwrapRef<typeof import('@vueuse/core')['provideLocal']>
     readonly proxyRefs: UnwrapRef<typeof import('vue')['proxyRefs']>
@@ -608,6 +623,7 @@ declare module 'vue' {
     readonly reloadNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/chunk')['reloadNuxtApp']>
     readonly requestIdleCallback: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback')['requestIdleCallback']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
+    readonly resolveMediaUrl: UnwrapRef<typeof import('../../utils/media')['resolveMediaUrl']>
     readonly resolveRef: UnwrapRef<typeof import('@vueuse/core')['resolveRef']>
     readonly resolveUnref: UnwrapRef<typeof import('@vueuse/core')['resolveUnref']>
     readonly setAuthTokens: UnwrapRef<typeof import('../../utils/auth-session')['setAuthTokens']>
@@ -618,6 +634,8 @@ declare module 'vue' {
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
     readonly showError: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/error')['showError']>
+    readonly stopBackgroundAudio: UnwrapRef<typeof import('../../utils/pomodoro-audio')['stopBackgroundAudio']>
+    readonly stopEffectAudio: UnwrapRef<typeof import('../../utils/pomodoro-audio')['stopEffectAudio']>
     readonly storeToRefs: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['storeToRefs']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
@@ -830,6 +848,7 @@ declare module 'vue' {
     readonly useShare: UnwrapRef<typeof import('@vueuse/core')['useShare']>
     readonly useSlots: UnwrapRef<typeof import('vue')['useSlots']>
     readonly useSorted: UnwrapRef<typeof import('@vueuse/core')['useSorted']>
+    readonly useSoundsStore: UnwrapRef<typeof import('../../stores/sounds')['useSoundsStore']>
     readonly useSpeechRecognition: UnwrapRef<typeof import('@vueuse/core')['useSpeechRecognition']>
     readonly useSpeechSynthesis: UnwrapRef<typeof import('@vueuse/core')['useSpeechSynthesis']>
     readonly useState: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/state')['useState']>
@@ -838,6 +857,7 @@ declare module 'vue' {
     readonly useStyleTag: UnwrapRef<typeof import('@vueuse/core')['useStyleTag']>
     readonly useSupported: UnwrapRef<typeof import('@vueuse/core')['useSupported']>
     readonly useSwipe: UnwrapRef<typeof import('@vueuse/core')['useSwipe']>
+    readonly useTaskTimeSync: UnwrapRef<typeof import('../../composables/useTaskTimeSync')['useTaskTimeSync']>
     readonly useTasksStore: UnwrapRef<typeof import('../../stores/tasks')['useTasksStore']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
     readonly useTemplateRefsList: UnwrapRef<typeof import('@vueuse/core')['useTemplateRefsList']>

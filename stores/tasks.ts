@@ -22,24 +22,34 @@ function flattenGroups(groups: ApiTaskGroup[]): Task[] {
   return result
 }
 
+function normalizeDueDate(dueDate?: string) {
+  if (!dueDate) return ''
+  const parsed = dayjs(dueDate)
+  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : ''
+}
+
 function groupTasksByKey(allTasks: Task[]) {
   const today = dayjs().format('YYYY-MM-DD')
   const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD')
 
   return {
-    overdue: allTasks.filter(t =>
-      !t.completed && t.dueDate && dayjs(t.dueDate).isBefore(today, 'day'),
-    ),
-    today: allTasks.filter(t =>
-      !t.completed && t.dueDate === today,
-    ),
-    tomorrow: allTasks.filter(t =>
-      !t.completed && t.dueDate === tomorrow,
-    ),
-    later: allTasks.filter(t =>
-      !t.completed && t.dueDate && dayjs(t.dueDate).isAfter(tomorrow, 'day'),
-    ),
-    nodate: allTasks.filter(t => !t.completed && !t.dueDate),
+    overdue: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate)
+      return !t.completed && !!d && dayjs(d).isBefore(today, 'day')
+    }),
+    today: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate)
+      return !t.completed && d === today
+    }),
+    tomorrow: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate)
+      return !t.completed && d === tomorrow
+    }),
+    later: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate)
+      return !t.completed && !!d && dayjs(d).isAfter(tomorrow, 'day')
+    }),
+    nodate: allTasks.filter(t => !t.completed && !normalizeDueDate(t.dueDate)),
     completed: allTasks.filter(t => t.completed),
   }
 }
@@ -86,8 +96,8 @@ export const useTasksStore = defineStore('tasks', () => {
         next[uiKey] = group.tasks.map(apiTaskToUi)
       }
     }
-    groupedFromApi.value = next
     tasks.value = flattenGroups(groups)
+    groupedFromApi.value = groupTasksByKey(tasks.value)
   }
 
   function findTaskById(id: string) {

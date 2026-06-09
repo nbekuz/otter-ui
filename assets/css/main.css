@@ -126,6 +126,16 @@
   .safe-top { padding-top: env(safe-area-inset-top); }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
+  .page-header-top {
+    padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+  }
+
+  @media (min-width: 1024px) {
+    .page-header-top {
+      padding-top: 1rem;
+    }
+  }
+
   /* Custom scrollbar */
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -282,4 +292,20 @@
 .dark .shadow-card,
 .dark .shadow-modal {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark select.input-field,
+.dark select.input-field option {
+  background-color: #11151b !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .border-sber-green.bg-sber-green-light\/25,
+.dark .bg-sber-green-light\/25 {
+  background-color: rgba(33, 160, 56, 0.18) !important;
+}
+
+.dark .border-sber-green.bg-sber-green-light\/40,
+.dark .bg-sber-green-light\/40 {
+  background-color: rgba(33, 160, 56, 0.22) !important;
 }

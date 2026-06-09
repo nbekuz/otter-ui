@@ -15,6 +15,7 @@ export default defineNuxtPlugin(() => {
     }
 
     await Promise.all([
+      authStore.fetchMyProfile().catch(() => undefined),
       tasksStore.fetchGrouped().catch(() => undefined),
       settingsStore.fetchFromApi().catch(() => undefined),
       pomodoroStore.fetchSettings().catch(() => undefined),

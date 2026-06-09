@@ -15,9 +15,6 @@
           <h1 class="truncate text-lg font-bold text-sber-black lg:text-xl">
             {{ isEditMode ? 'Редактирование задачи' : 'Новая задача' }}
           </h1>
-          <p class="hidden text-sm text-sber-gray lg:block">
-            {{ isEditMode ? 'Измените поля и нажмите «Сохранить».' : 'Заполните название и при необходимости добавьте детали.' }}
-          </p>
         </div>
       </div>
     </div>
@@ -120,7 +117,7 @@
             @click="activeTab = tab.id"
           >
             <component :is="tab.icon" class="h-3.5 w-3.5 shrink-0 lg:h-4 lg:w-4" />
-            <span v-if="!tab.iconOnly">{{ tab.label }}</span>
+            <span :class="tab.iconOnly ? 'max-lg:sr-only' : ''">{{ tab.label }}</span>
           </button>
         </div>
 
@@ -140,46 +137,41 @@
           </div>
 
           <template v-if="!explicitNoDeadline">
-            <div class="grid max-lg:grid-cols-2 max-lg:gap-x-2 max-lg:gap-y-1 lg:grid-cols-1 lg:gap-y-3">
+            <div class="grid grid-cols-2 gap-x-2 gap-y-1.5 lg:gap-3">
               <div class="min-w-0">
                 <p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-2 lg:text-xs">Дата</p>
                 <DateFieldRu
                   ref="dueDateFieldRef"
                   v-model="form.dueDate"
-                  field-class="border-2 border-sber-green/50 py-2 text-xs max-lg:!px-2 lg:py-2.5 lg:pr-12 lg:text-base"
+                  field-class="border-2 border-sber-green/50 py-2 text-xs max-lg:!px-2 lg:py-2.5 lg:text-base"
                   @keydown="onDueDateKeydown"
                 />
               </div>
               <div class="min-w-0">
-                <p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:hidden">Время</p>
-                <p class="mb-2 hidden text-xs font-semibold uppercase tracking-wide text-sber-gray lg:block">Время срока</p>
+                <p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-2 lg:text-xs">Время срока</p>
                 <TimeFieldRu
                   ref="dueTimeFieldRef"
                   v-model="form.dueTime"
-                  field-class="border-2 border-sber-green/50 py-2 text-xs max-lg:!px-2 lg:py-2.5 lg:pr-12 lg:text-base"
+                  field-class="border-2 border-sber-green/50 py-2 text-xs max-lg:!px-2 lg:py-2.5 lg:text-base"
                   @keydown="onDueTimeKeydown"
                 />
               </div>
-            </div>
-
-            <p class="mb-0.5 mt-1.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-2 lg:mt-3 lg:text-xs">Длительность</p>
-            <div class="flex gap-1.5 lg:gap-2">
-              <div class="min-w-0 flex-1">
-                <label class="mb-0.5 block text-[10px] text-sber-gray lg:mb-1 lg:text-xs">Начало</label>
+              <div class="min-w-0">
+                <p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-2 lg:text-xs">Начало</p>
                 <TimeFieldRu
                   ref="durationStartFieldRef"
                   v-model="form.durationStart"
-                  field-class="border-2 border-sber-green/50 py-2 text-xs !px-2 max-lg:py-1.5 lg:py-4 lg:!px-4 lg:text-base"
+                  field-class="border-2 border-sber-green/50 py-2 text-xs !px-2 max-lg:py-1.5 lg:py-2.5 lg:!px-4 lg:text-base"
                   @keydown="onDurationStartKeydown"
                   @update:model-value="errors.duration = ''"
                 />
               </div>
-              <div class="min-w-0 flex-1">
-                <label class="mb-0.5 block text-[10px] text-sber-gray lg:mb-1 lg:text-xs">Конец</label>
+              <div class="min-w-0">
+                <p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-2 lg:text-xs">Конец</p>
                 <TimeFieldRu
                   ref="durationEndFieldRef"
                   v-model="form.durationEnd"
-                  field-class="border-2 border-sber-green/50 py-2 text-xs !px-2 max-lg:py-1.5 lg:py-4 lg:!px-4 lg:text-base"
+                  field-class="border-2 border-sber-green/50 py-2 text-xs !px-2 max-lg:py-1.5 lg:py-2.5 lg:!px-4 lg:text-base"
                   @keydown="onDurationEndKeydown"
                   @update:model-value="errors.duration = ''"
                 />
@@ -201,7 +193,11 @@
                     :style="form.priority === p.value ? { borderColor: p.color, backgroundColor: p.color + '15' } : {}"
                     @click="form.priority = p.value">
               <div class="w-4 h-4 rounded-full" :style="{ backgroundColor: p.color }" />
-              <span class="text-xs font-medium text-sber-black lg:text-sm">{{ p.label }}</span>
+              <span
+                class="text-xs font-medium lg:text-sm"
+                :class="form.priority === p.value ? '' : 'text-sber-black'"
+                :style="form.priority === p.value ? { color: p.color } : undefined"
+              >{{ p.label }}</span>
               <Check v-if="form.priority === p.value" class="ml-auto h-4 w-4 text-sber-green" />
             </button>
           </div>
@@ -218,7 +214,7 @@
                       : 'border-sber-gray-light bg-white'"
                     @click="form.notification = n.value">
               <Bell class="w-4 h-4" :class="form.notification === n.value ? 'text-sber-green' : 'text-sber-gray'" />
-              <span class="text-xs text-sber-black lg:text-sm">{{ n.label }}</span>
+              <span class="text-xs lg:text-sm" :class="form.notification === n.value ? 'font-medium text-sber-green' : 'text-sber-black'">{{ n.label }}</span>
               <Check v-if="form.notification === n.value" class="ml-auto h-4 w-4 text-sber-green" />
             </button>
           </div>
@@ -235,7 +231,7 @@
                       : 'border-sber-gray-light bg-white'"
                     @click="selectRepeatOption(r.value)">
               <RefreshCw class="w-4 h-4" :class="form.repeat === r.value ? 'text-sber-green' : 'text-sber-gray'" />
-              <span class="text-xs text-sber-black lg:text-sm">{{ r.label }}</span>
+              <span class="text-xs lg:text-sm" :class="form.repeat === r.value ? 'font-medium text-sber-green' : 'text-sber-black'">{{ r.label }}</span>
               <Check v-if="form.repeat === r.value" class="ml-auto h-4 w-4 text-sber-green" />
             </button>
           </div>
@@ -332,7 +328,7 @@
                 @click="toggleEditComplete"
               >
                 <Check class="h-4 w-4" />
-                {{ editingTask.completed ? 'В работе' : 'Выполнено' }}
+                {{ editingTask.completed ? 'Восстановить' : 'Выполнено' }}
               </button>
               <div class="flex gap-1.5">
                 <button
@@ -361,9 +357,6 @@
             </div>
 
             <div class="hidden lg:block">
-              <button class="btn-secondary mb-3" type="button" @click="goBackToSource">
-                Отмена
-              </button>
               <div class="mb-3 space-y-2">
                 <button
                   class="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold transition-colors"
@@ -372,7 +365,7 @@
                   @click="toggleEditComplete"
                 >
                   <Check class="h-5 w-5" />
-                  {{ editingTask.completed ? 'В работе' : 'Выполнено' }}
+                  {{ editingTask.completed ? 'Восстановить' : 'Выполнено' }}
                 </button>
                 <button
                   class="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-50 py-3.5 text-sm font-semibold text-red-500 transition-colors"
@@ -383,9 +376,14 @@
                   Удалить
                 </button>
               </div>
-              <button ref="desktopSubmitRef" class="btn-primary" type="submit">
-                Сохранить
-              </button>
+              <div class="flex gap-3">
+                <button class="btn-secondary !w-auto flex-1" type="button" @click="goBackToSource">
+                  Отмена
+                </button>
+                <button ref="desktopSubmitRef" class="btn-primary !w-auto flex-1" type="submit">
+                  Сохранить
+                </button>
+              </div>
             </div>
           </template>
 
@@ -402,11 +400,11 @@
                 Добавить задачу
               </button>
             </div>
-            <div class="hidden lg:block">
-              <button class="btn-secondary mb-3" type="button" @click="goBackToSource">
+            <div class="hidden lg:flex lg:gap-3">
+              <button class="btn-secondary !w-auto flex-1" type="button" @click="goBackToSource">
                 Отмена
               </button>
-              <button ref="desktopSubmitRef" class="btn-primary" type="submit">
+              <button ref="desktopSubmitRef" class="btn-primary !w-auto flex-1" type="submit">
                 Добавить задачу
               </button>
             </div>
@@ -414,6 +412,18 @@
         </div>
       </form>
     </div>
+
+    <Teleport to="body">
+      <Transition name="overlay"><div v-if="deleteModal" class="overlay" @click="deleteModal = false" /></Transition>
+      <Transition name="modal">
+        <div v-if="deleteModal" class="app-modal px-5 py-5" @click.stop>
+          <h3 class="mb-2 text-lg font-bold text-sber-black">Удалить повторяющуюся задачу?</h3>
+          <button class="btn-primary mb-2" type="button" @click="deleteTaskOccurrence">Только эту</button>
+          <button class="btn-secondary mb-2" type="button" @click="deleteAllOccurrences">Все повторения</button>
+          <button class="w-full rounded-2xl py-4 text-sm font-semibold text-sber-gray" type="button" @click="deleteModal = false">Отмена</button>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -428,6 +438,8 @@ definePageMeta({ layout: 'app' })
 
 const route = useRoute()
 const tasksStore = useTasksStore()
+
+const deleteModal = ref(false)
 
 const editTaskId = computed(() => {
   const raw = route.query.id
@@ -458,7 +470,7 @@ const form = reactive({
   durationStart: '',
   durationEnd: '',
   priority: 'none' as Priority,
-  notification: '',
+  notification: '0',
   repeat: 'none' as RepeatType,
   matrixBlock: 'not-urgent-not-important',
 })
@@ -548,6 +560,8 @@ const customRepeat = reactive({
   weekdays: [1] as number[],
   monthDay: dayjs().date(),
 })
+
+useTaskTimeSync(form)
 
 const matrixBlocks = [
   { id: 'urgent-important', title: 'Срочно и важно', color: '#FF3B30' },
@@ -870,8 +884,8 @@ function applyPrefillFromQuery() {
     return
   }
 
-  // Календарь передаёт dueTime как начало слота, не как «время срока».
   if (dueTimeParam && form.dueDate) {
+    form.dueTime = dueTimeParam
     form.durationStart = dueTimeParam
     form.durationEnd = addMinutesToTime(dueTimeParam, 60)
     return
@@ -879,6 +893,8 @@ function applyPrefillFromQuery() {
 
   if (dueTimeParam) {
     form.dueTime = dueTimeParam
+    form.durationStart = dueTimeParam
+    form.durationEnd = addMinutesToTime(dueTimeParam, 60)
   }
 }
 
@@ -936,7 +952,26 @@ async function toggleEditComplete() {
 }
 
 async function deleteEditingTask() {
+  if (!editTaskId.value || !editingTask.value) return
+  if (editingTask.value.repeat && editingTask.value.repeat !== 'none') {
+    deleteModal.value = true
+    return
+  }
+  await tasksStore.deleteTask(editTaskId.value)
+  navigateTo(resolveReturnPath())
+}
+
+async function deleteTaskOccurrence() {
   if (!editTaskId.value) return
+  deleteModal.value = false
+  await tasksStore.updateTask(editTaskId.value, { repeat: 'none', repeatCustom: undefined, repeatDays: undefined })
+  await tasksStore.deleteTask(editTaskId.value)
+  navigateTo(resolveReturnPath())
+}
+
+async function deleteAllOccurrences() {
+  if (!editTaskId.value) return
+  deleteModal.value = false
   await tasksStore.deleteTask(editTaskId.value)
   navigateTo(resolveReturnPath())
 }

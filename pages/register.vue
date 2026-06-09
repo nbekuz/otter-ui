@@ -2,7 +2,7 @@
   <div class="min-h-dvh bg-white md:px-2 lg:flex lg:items-center lg:justify-center lg:bg-sber-gray-light lg:px-6 lg:py-10">
     <div class="w-full max-w-full overflow-hidden lg:grid lg:max-w-5xl lg:grid-cols-[0.95fr_1.05fr] lg:rounded-[32px] lg:bg-white lg:shadow-xl">
       <div class="min-h-dvh bg-white lg:order-2 lg:min-h-0">
-        <div class="flex items-center px-4 pt-14 pb-4 sm:px-6 lg:px-8 lg:pt-8">
+        <div class="page-header-top flex items-center px-4 pb-4 sm:px-6 lg:px-8 lg:pt-8">
           <button class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light" type="button" @click="$router.back()">
             <ChevronLeft class="h-5 w-5 text-sber-black" />
           </button>

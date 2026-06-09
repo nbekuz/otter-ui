@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-dvh lg:px-6 lg:py-6" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
-    <div class="mx-auto flex min-h-dvh max-w-[1440px] lg:h-[calc(100dvh-3rem)] lg:min-h-[calc(100dvh-3rem)] lg:gap-6 rounded">
+  <div class="min-h-dvh lg:px-3 lg:py-2" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
+    <div class="mx-auto flex min-h-dvh w-full max-w-none lg:h-[calc(100dvh-1rem)] lg:min-h-[calc(100dvh-1rem)] lg:gap-4">
       <aside
         class="hidden lg:flex lg:h-full lg:w-72 lg:flex-shrink-0 lg:flex-col lg:rounded-[32px] lg:p-6"
         :class="isDarkTheme ? 'lg:bg-[#171a21] lg:text-white lg:border lg:border-[#2a303a]' : 'lg:bg-white lg:shadow-card'"
@@ -13,35 +13,12 @@
           </p> -->
         </div>
 
-        <NuxtLink
-          to="/app/profile"
-          class="mb-6 block rounded-[28px] p-4 transition-colors"
-          :class="isDarkTheme ? 'bg-[#10141b] border border-[#2a303a] hover:bg-[#1b212b]' : 'bg-sber-gray-light hover:bg-[#ececef]'"
-        >
-          <p class="text-xs font-semibold uppercase tracking-wide text-sber-gray">Профиль</p>
-          <div class="mt-4 flex items-center gap-3">
-            <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-sber-green text-base font-bold text-white">
-              <span v-if="!authStore.user?.avatar">{{ authStore.user?.name?.[0]?.toUpperCase() || 'A' }}</span>
-              <img v-else :src="authStore.user.avatar" class="h-full w-full object-cover" />
-            </div>
-            <div class="min-w-0">
-              <div class="flex items-center gap-2">
-                <p class="truncate text-sm font-semibold text-sber-black">{{ authStore.user?.name || 'Пользователь' }}</p>
-                <span v-if="authStore.user?.isPremium" class="rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-yellow-700">
-                  Pro
-                </span>
-              </div>
-              <p v-if="authStore.user?.email" class="truncate text-xs text-sber-gray">{{ authStore.user.email }}</p>
-            </div>
-          </div>
-        </NuxtLink>
-
         <nav
           class="flex flex-1 flex-col gap-2 rounded-[28px] p-2"
           :class="isDarkTheme ? 'bg-[#10141b] border border-[#222833]' : 'bg-transparent'"
         >
           <NuxtLink
-            v-for="item in navItems"
+            v-for="item in sidebarNavItems"
             :key="item.id"
             :to="item.to"
             class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors"
@@ -72,18 +49,17 @@
             <HelpCircle class="h-4 w-4" />
             <span>FAQ</span>
           </NuxtLink>
-          <NuxtLink
-            to="/app/legal"
-            class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
-            :class="route.path === '/app/legal'
-              ? 'bg-sber-green text-white'
-              : isDarkTheme
-                ? 'text-slate-300 hover:bg-[#20242d]'
-                : 'text-sber-gray hover:bg-white'"
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+            :class="isDarkTheme
+              ? 'text-slate-300 hover:bg-[#20242d]'
+              : 'text-sber-gray hover:bg-white'"
+            @click="shareApp"
           >
-            <FileText class="h-4 w-4" />
-            <span>Документы</span>
-          </NuxtLink>
+            <Share2 class="h-4 w-4" />
+            <span>Рекомендовать друзьям</span>
+          </button>
         </div>
 
         <button class="mt-6 flex items-center justify-center gap-2 rounded-2xl bg-sber-green px-4 py-4 text-base font-semibold text-white transition-colors hover:bg-sber-green-dark" @click="openNewTask">
@@ -93,7 +69,7 @@
       </aside>
 
       <div
-        class="phone-frame relative flex-1 lg:h-[calc(100dvh-3rem)]  lg:rounded-3xl"
+        class="phone-frame relative flex-1 lg:h-[calc(100dvh-1rem)] lg:rounded-3xl"
         :class="isDarkTheme ? 'bg-[#0f1115] lg:border lg:border-[#2a303a]' : 'bg-white lg:border lg:border-[#e9ebf1] lg:shadow-[0_20px_48px_rgba(15,23,42,0.10)]'"
       >
         <div class="min-h-dvh lg:h-full lg:min-h-0 lg:overflow-y-auto ">
@@ -114,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { Calendar, CheckSquare, FileText, Grid2x2, HelpCircle, Plus, Settings, Timer } from 'lucide-vue-next'
+import { Calendar, CheckSquare, Crown, Grid2x2, HelpCircle, List, Plus, Settings, Share2, Timer } from 'lucide-vue-next'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -122,7 +98,7 @@ const settingsStore = useSettingsStore()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 const isTasksPage = computed(() => route.path === '/app')
 
-const navItems = [
+const allNavItems = [
   { id: 'tasks', to: '/app', icon: CheckSquare, label: 'Задачи' },
   { id: 'calendar', to: '/app/calendar', icon: Calendar, label: 'Календарь' },
   { id: 'matrix', to: '/app/matrix', icon: Grid2x2, label: 'Матрица' },
@@ -130,8 +106,35 @@ const navItems = [
   { id: 'settings', to: '/app/settings', icon: Settings, label: 'Настройки' },
 ]
 
+const sidebarExtraItems = [
+  { id: 'all-tasks', to: '/app?group=all', icon: List, label: 'Все задачи' },
+  { id: 'premium', to: '/app/settings?openPremium=1', icon: Crown, label: 'Premium' },
+]
+
+const sidebarNavItems = computed(() => {
+  const order = settingsStore.appSettings.bottomNavItems || []
+  const byId = new Map(allNavItems.map(item => [item.id, item]))
+  const ordered = order.map(id => byId.get(id)).filter(Boolean) as typeof allNavItems
+  if (!ordered.some(item => item.id === 'settings')) {
+    ordered.push(byId.get('settings')!)
+  }
+  return [...ordered, ...sidebarExtraItems]
+})
+
+function shareApp() {
+  if (navigator.share) {
+    void navigator.share({ title: 'Otter - Планировщик', url: window.location.origin })
+  }
+}
+
 function isActive(to: string) {
-  if (to === '/app') return route.path === '/app'
+  if (to.startsWith('/app?group=all')) {
+    return route.path === '/app' && route.query.group === 'all'
+  }
+  if (to.startsWith('/app/settings')) {
+    return route.path.startsWith('/app/settings')
+  }
+  if (to === '/app') return route.path === '/app' && route.query.group !== 'all'
   return route.path.startsWith(to)
 }
 

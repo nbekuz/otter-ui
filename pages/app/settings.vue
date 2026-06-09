@@ -1,7 +1,7 @@
 <template>
   <div class="page-container" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
     <!-- Header -->
-    <div class="px-4 pt-14 pb-4" :class="isDarkTheme ? 'bg-[#171a21] border-b border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
+    <div class="page-header-top px-4 pb-4" :class="isDarkTheme ? 'bg-[#171a21] border-b border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
       <div class="flex items-center justify-between">
         <h1 class="text-xl font-bold text-sber-black">Настройки</h1>
         <button class="text-sm font-semibold text-red-500" @click="showLogout = true">
@@ -36,39 +36,35 @@
         </div>
 
         <!-- User info -->
-        <div class="flex-1">
+        <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2">
-            <p class="text-base font-bold text-sber-black">{{ authStore.user?.name }}</p>
+            <p class="truncate text-base font-bold text-sber-black">{{ authStore.user?.name }}</p>
             <span v-if="authStore.user?.isPremium"
-                  class="text-[10px] font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">
+                  class="shrink-0 text-[10px] font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">
               ⭐ ПРЕМИУМ
             </span>
           </div>
-          <p class="text-sm text-sber-gray">{{ authStore.user?.email }}</p>
+          <p class="truncate text-sm text-sber-gray">{{ authStore.user?.email }}</p>
           <p v-if="authStore.user?.isPremium && premiumExpiresLabel" class="mt-1 text-xs font-medium text-yellow-700">
             Срок до {{ premiumExpiresLabel }}
           </p>
+          <button
+            type="button"
+            class="mt-3 w-full rounded-xl border px-3 py-2 text-left transition-colors"
+            :class="isDarkTheme
+              ? 'border-yellow-500/30 bg-yellow-500/10 hover:bg-yellow-500/15'
+              : 'border-yellow-300 bg-gradient-to-r from-yellow-50 to-amber-50 hover:from-yellow-100 hover:to-amber-100'"
+            @click.stop="premiumModal = true"
+          >
+            <p class="text-[10px] font-semibold uppercase tracking-wide text-yellow-600">Premium</p>
+            <p class="mt-0.5 text-xs font-semibold text-sber-black">
+              {{ authStore.user?.isPremium ? 'Premium активен' : 'Подключить Premium' }}
+            </p>
+          </button>
         </div>
         <ChevronRight class="w-5 h-5 text-sber-gray-mid flex-shrink-0" />
       </div>
     </button>
-
-    <!-- Help & info (visible at top — no long scroll) -->
-    <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
-      <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Помощь и информация</p>
-      <SettingsRow label="Частые вопросы (FAQ)" @click="navigateTo('/app/faq')">
-        <template #icon><HelpCircle class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsRow>
-      <SettingsRow label="Юридические документы" @click="navigateTo('/app/legal')">
-        <template #icon><FileText class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsRow>
-      <SettingsRow label="Написать нам" @click="contactModal = true">
-        <template #icon><MessageSquareText class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsRow>
-      <SettingsRow label="О приложении" @click="aboutModal = true">
-        <template #icon><Info class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsRow>
-    </div>
 
     <!-- Account section -->
     <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
@@ -94,28 +90,6 @@
       </SettingsRow>
     </div>
 
-    <!-- Premium highlight -->
-    <div class="mx-4 mt-4 rounded-2xl border p-4 shadow-sm" :class="isDarkTheme ? 'border-yellow-500/30 bg-[#171a21]' : 'border-yellow-300 bg-gradient-to-r from-yellow-50 to-amber-50'">
-      <div class="flex items-center justify-between gap-3">
-        <div class="min-w-0">
-          <p class="text-xs font-semibold uppercase tracking-wide text-yellow-600">Premium</p>
-          <p class="mt-1 text-sm font-semibold text-sber-black">
-            {{ authStore.user?.isPremium ? 'Premium активен' : 'Расширьте возможности приложения' }}
-          </p>
-          <p class="mt-1 text-xs text-sber-gray">
-            {{ authStore.user?.isPremium ? 'Синхронизация, расширенная статистика и дополнительные инструменты уже доступны.' : 'Подключите Premium для расширенной статистики и синхронизации.' }}
-          </p>
-        </div>
-        <button
-          class="rounded-xl px-3 py-2 text-sm font-semibold text-white transition-colors"
-          :class="authStore.user?.isPremium ? 'bg-yellow-500/70' : 'bg-gradient-to-r from-yellow-400 to-yellow-600'"
-          @click="premiumModal = true"
-        >
-          {{ authStore.user?.isPremium ? 'Управлять' : 'Подключить Premium' }}
-        </button>
-      </div>
-    </div>
-
     <!-- Bottom menu customization -->
     <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
       <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Нижнее меню</p>
@@ -132,7 +106,9 @@
         <GripVertical class="w-4 h-4 text-sber-gray cursor-grab" />
         <component :is="item.icon" class="w-5 h-5 text-sber-gray" />
         <span class="text-sm font-medium text-sber-black flex-1">{{ item.label }}</span>
+        <span v-if="item.id === 'settings'" class="text-xs font-medium text-sber-gray">Всегда</span>
         <button
+          v-else
           class="w-12 h-6 rounded-full transition-colors relative"
           :class="isBottomMenuEnabled(item.id) ? 'bg-sber-green' : 'bg-sber-gray-mid'"
           @click="toggleBottomMenuItem(item.id)"
@@ -204,16 +180,13 @@
       </div>
 
       <SettingsRow label="Вид" @click="runStubAction">
-        <template #icon><EyeOff class="w-5 h-5 text-sber-gray mr-3" /></template>
+        <template #icon><Paintbrush class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
       <SettingsRow label="Дата и время" @click="runStubAction">
         <template #icon><Clock class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
       <SettingsRow label="Интеграции и импорт" @click="runStubAction">
         <template #icon><Download class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsRow>
-      <SettingsRow label="Рекомендовать друзьям" @click="shareApp">
-        <template #icon><Share2 class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
     </div>
 
@@ -255,7 +228,7 @@
 
     <!-- Visible groups -->
     <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
-      <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Разделы списка</p>
+      <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Разделы списка задач</p>
       <div v-for="group in taskGroups" :key="group.id"
            class="flex items-center px-4 py-3 border-b border-sber-gray-light last:border-0">
         <div class="w-3 h-3 rounded-full mr-3" :style="{ backgroundColor: group.color }" />
@@ -274,6 +247,26 @@
       <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Общее</p>
       <SettingsRow label="Язык" :value="selectedLanguageLabel" @click="languageModal = true">
         <template #icon><Globe class="w-5 h-5 text-sber-gray mr-3" /></template>
+      </SettingsRow>
+    </div>
+
+    <!-- Help & info -->
+    <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
+      <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Помощь и информация</p>
+      <SettingsRow label="Частые вопросы (FAQ)" @click="navigateTo('/app/faq')">
+        <template #icon><HelpCircle class="w-5 h-5 text-sber-gray mr-3" /></template>
+      </SettingsRow>
+      <SettingsRow label="Юридические документы" @click="navigateTo('/app/legal')">
+        <template #icon><FileText class="w-5 h-5 text-sber-gray mr-3" /></template>
+      </SettingsRow>
+      <SettingsRow label="Рекомендовать друзьям" @click="shareApp">
+        <template #icon><Share2 class="w-5 h-5 text-sber-gray mr-3" /></template>
+      </SettingsRow>
+      <SettingsRow label="Написать нам" @click="contactModal = true">
+        <template #icon><MessageSquareText class="w-5 h-5 text-sber-gray mr-3" /></template>
+      </SettingsRow>
+      <SettingsRow label="О приложении" @click="aboutModal = true">
+        <template #icon><Info class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
     </div>
 
@@ -481,11 +474,9 @@
       <Transition name="modal">
         <div v-if="aboutModal" class="app-modal px-5 py-5" @click.stop>
           <div class="text-center mb-6">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-sber-green to-sber-blue mx-auto mb-3
-                        flex items-center justify-center">
-              <span class="text-white font-bold text-2xl">🦦</span>
+            <div class="mx-auto mb-3 flex justify-center">
+              <BrandLogo size="lg" show-name-from="always" />
             </div>
-            <h3 class="text-lg font-bold">Otter</h3>
             <p class="text-sm text-sber-gray">Версия 1.0.0</p>
           </div>
           <div class="space-y-2">
@@ -540,10 +531,15 @@
         <div v-if="avatarModal" class="app-modal px-5 py-5" @click.stop>
           <h3 class="text-lg font-bold mb-4">Фото профиля</h3>
           <p v-if="avatarSettingsError" class="mb-3 text-xs text-red-500">{{ avatarSettingsError }}</p>
-          <input ref="avatarInputRef" type="file" accept="image/*" class="hidden" @change="handleAvatarFileChange">
+          <input ref="avatarInputRef" type="file" accept="image/*" capture="environment" class="hidden" @change="handleAvatarFileChange">
+          <input ref="avatarGalleryInputRef" type="file" accept="image/*" class="hidden" @change="handleAvatarFileChange">
           <button class="w-full flex items-center gap-3 px-4 py-4 bg-sber-gray-light rounded-2xl mb-2"
                   @click="avatarInputRef?.click()">
-            <Image class="w-5 h-5 text-sber-gray" /> Выбрать изображение
+            <Camera class="w-5 h-5 text-sber-gray" /> Сделать фото
+          </button>
+          <button class="w-full flex items-center gap-3 px-4 py-4 bg-sber-gray-light rounded-2xl mb-2"
+                  @click="pickAvatarFromGallery">
+            <Image class="w-5 h-5 text-sber-gray" /> Выбрать из галереи
           </button>
           <button class="mb-3 w-full rounded-2xl bg-sber-gray-light px-4 py-4" type="button" @click="onClearAvatarTap">
             <span class="flex items-center gap-3 text-sber-black">
@@ -561,7 +557,7 @@
 import {
   Bell, Vibrate, Volume2, CheckCircle, Camera, Image, Globe,
   HelpCircle, Info, Star, Check, ChevronDown, ChevronRight, User, Lock, FileText,
-  EyeOff, Clock, Download, Share2, Smartphone, Crown, GripVertical, MessageSquareText,
+  Paintbrush, Clock, Download, Share2, Smartphone, Crown, GripVertical, MessageSquareText,
   CheckSquare, Calendar, Grid2x2, Timer, Settings
 } from 'lucide-vue-next'
 import { Moon, Sun } from 'lucide-vue-next'
@@ -589,6 +585,7 @@ const contactScreenshotFile = ref<File | null>(null)
 const avatarModal = ref(false)
 const avatarSettingsError = ref('')
 const avatarInputRef = ref<HTMLInputElement | null>(null)
+const avatarGalleryInputRef = ref<HTMLInputElement | null>(null)
 const contactScreenshotInputRef = ref<HTMLInputElement | null>(null)
 const showLogout = ref(false)
 const comingSoonVisible = ref(false)
@@ -643,6 +640,14 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => route.query.openPremium,
+  (value) => {
+    if (value === '1') premiumModal.value = true
+  },
+  { immediate: true },
+)
+
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
 const profileFullNameDisplay = computed(() => {
@@ -686,6 +691,10 @@ function openAvatarModal() {
 function closeAvatarModal() {
   avatarSettingsError.value = ''
   avatarModal.value = false
+}
+
+function pickAvatarFromGallery() {
+  avatarGalleryInputRef.value?.click()
 }
 
 function shareApp() {
@@ -894,6 +903,7 @@ function isBottomMenuEnabled(itemId: string) {
 }
 
 function toggleBottomMenuItem(itemId: string) {
+  if (itemId === 'settings') return
   const current = [...settingsStore.appSettings.bottomNavItems]
   if (current.includes(itemId)) {
     if (current.length <= 2) {

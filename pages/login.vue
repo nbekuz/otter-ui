@@ -35,7 +35,7 @@
       </div>
 
       <div class="min-h-dvh bg-white lg:min-h-0">
-        <div class="flex items-center px-4 pt-14 pb-4 sm:px-6 lg:px-8 lg:pt-8">
+        <div class="page-header-top flex items-center px-4 pb-4 sm:px-6 lg:px-8 lg:pt-8">
           <button class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light" type="button" @click="$router.back()">
             <ChevronLeft class="h-5 w-5 text-sber-black" />
           </button>

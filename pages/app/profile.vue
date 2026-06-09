@@ -1,6 +1,6 @@
 <template>
   <div class="page-container bg-sber-gray-light">
-    <div class="bg-white px-4 pt-14 pb-4 shadow-sm lg:px-6">
+    <div class="page-header-top bg-white px-4 pb-4 shadow-sm lg:px-6">
       <div class="flex items-center gap-3">
         <button class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light" type="button" @click="$router.back()">
           <ChevronLeft class="h-5 w-5 text-sber-black" />
@@ -36,14 +36,9 @@
                 </span>
               </div>
               <p class="mt-1 truncate text-sm text-sber-gray">{{ authStore.user?.email }}</p>
-              <div v-if="authStore.user?.isPremium && premiumExpiresLabel" class="mt-2 flex flex-wrap items-center gap-2">
-                <span class="rounded-full bg-yellow-100 px-2.5 py-1 text-[11px] font-bold text-yellow-700">
-                  ⭐ ПРЕМИУМ
-                </span>
-                <span class="text-xs font-medium text-yellow-700">
-                  Срок до {{ premiumExpiresLabel }}
-                </span>
-              </div>
+              <p v-if="authStore.user?.isPremium && premiumExpiresLabel" class="mt-2 text-xs font-medium text-yellow-700">
+                Срок до {{ premiumExpiresLabel }}
+              </p>
               <div class="mt-4 flex flex-wrap gap-3">
                 <button class="rounded-2xl bg-sber-green px-4 py-2.5 text-sm font-semibold text-white" type="button" @click="openNameModal">
                   Изменить имя
@@ -181,20 +176,37 @@
           <p class="mb-4 text-xs text-sber-gray">Фото с устройства или готовый шаблон ниже.</p>
 
           <input
-            ref="avatarFileInputRef"
+            ref="avatarCameraInputRef"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            class="hidden"
+            @change="handleDeviceAvatarChange"
+          />
+          <input
+            ref="avatarGalleryInputRef"
             type="file"
             accept="image/*"
             class="hidden"
             @change="handleDeviceAvatarChange"
           />
           <button
+            class="mb-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-sber-gray-mid bg-sber-gray-light py-3.5 text-sm font-semibold text-sber-black transition-colors active:bg-sber-gray-mid/30 disabled:opacity-50"
+            type="button"
+            :disabled="avatarUploading"
+            @click="pickCameraAvatar"
+          >
+            <Camera class="h-5 w-5 text-sber-gray" />
+            {{ avatarUploading ? 'Загрузка…' : 'Сделать фото' }}
+          </button>
+          <button
             class="mb-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-sber-gray-mid bg-sber-gray-light py-3.5 text-sm font-semibold text-sber-black transition-colors active:bg-sber-gray-mid/30 disabled:opacity-50"
             type="button"
             :disabled="avatarUploading"
-            @click="pickDeviceAvatar"
+            @click="pickGalleryAvatar"
           >
             <Image class="h-5 w-5 text-sber-gray" />
-            {{ avatarUploading ? 'Загрузка…' : 'Выбрать фото с устройства' }}
+            Выбрать из галереи
           </button>
           <p v-if="avatarUploadError" class="mb-3 text-xs text-red-500">{{ avatarUploadError }}</p>
 
@@ -278,7 +290,8 @@ const premiumCheckoutLoading = ref(false)
 const premiumActivateLoading = ref(false)
 const showLogout = ref(false)
 
-const avatarFileInputRef = ref<HTMLInputElement | null>(null)
+const avatarCameraInputRef = ref<HTMLInputElement | null>(null)
+const avatarGalleryInputRef = ref<HTMLInputElement | null>(null)
 const avatarUploading = ref(false)
 const avatarUploadError = ref('')
 
@@ -433,24 +446,27 @@ async function savePassword() {
 function closeAvatarModal() {
   avatarUploadError.value = ''
   avatarUploading.value = false
-  if (avatarFileInputRef.value) {
-    avatarFileInputRef.value.value = ''
-  }
+  if (avatarCameraInputRef.value) avatarCameraInputRef.value.value = ''
+  if (avatarGalleryInputRef.value) avatarGalleryInputRef.value.value = ''
   avatarModal.value = false
 }
 
-function pickDeviceAvatar() {
+function pickCameraAvatar() {
   avatarUploadError.value = ''
-  avatarFileInputRef.value?.click()
+  avatarCameraInputRef.value?.click()
+}
+
+function pickGalleryAvatar() {
+  avatarUploadError.value = ''
+  avatarGalleryInputRef.value?.click()
 }
 
 async function handleDeviceAvatarChange(event: Event) {
   avatarUploadError.value = ''
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
-  if (avatarFileInputRef.value) {
-    avatarFileInputRef.value.value = ''
-  }
+  if (avatarCameraInputRef.value) avatarCameraInputRef.value.value = ''
+  if (avatarGalleryInputRef.value) avatarGalleryInputRef.value.value = ''
   if (!file || avatarUploading.value) return
 
   if (!file.type.startsWith('image/')) {

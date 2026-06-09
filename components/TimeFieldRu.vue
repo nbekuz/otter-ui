@@ -2,34 +2,47 @@
   <div
     class="relative rounded-2xl focus-within:border-sber-green focus-within:bg-white focus-within:ring-2 focus-within:ring-sber-green/20"
     :class="wrapperClass"
+    @click="openPicker"
   >
-    <div
-      class="input-field pointer-events-none flex min-h-0 items-center pr-9 text-left tabular-nums"
-      :class="fieldClass"
-    >
-      <span :class="displayText ? 'text-sber-black' : 'text-sber-gray'">
-        {{ displayText || '__:__' }}
-      </span>
-    </div>
     <input
-      ref="nativeRef"
+      ref="textRef"
+      type="text"
+      inputmode="numeric"
+      placeholder="ЧЧ:ММ"
+      maxlength="5"
+      class="input-field w-full cursor-text pr-9 text-left tabular-nums"
+      :class="fieldClass"
+      :value="textValue"
+      @input="onTextInput"
+      @blur="commitText"
+      @keydown="onKeydown"
+      @click.stop
+    >
+    <input
+      ref="pickerRef"
       type="time"
       lang="ru-RU"
       step="60"
-      class="absolute inset-0 z-[1] h-full w-full cursor-pointer opacity-0"
+      class="sr-only"
+      tabindex="-1"
       :value="modelValue"
-      @input="onPick"
-      @change="onPick"
-      @keydown="emit('keydown', $event)"
+      @input="onPickerInput"
+      @change="onPickerInput"
     >
-    <Clock
-      class="pointer-events-none absolute right-2 top-1/2 z-[2] h-3.5 w-3.5 -translate-y-1/2 text-sber-green lg:right-4 lg:h-4 lg:w-4"
-    />
+    <button
+      type="button"
+      class="absolute right-2 top-1/2 z-[2] -translate-y-1/2 rounded-lg p-0.5 text-sber-green hover:bg-sber-green-light lg:right-4"
+      tabindex="-1"
+      @click.stop="openPicker"
+    >
+      <Clock class="h-3.5 w-3.5 lg:h-4 lg:w-4" />
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Clock } from 'lucide-vue-next'
+import { formatMinutesToTime, parseTimeToMinutes } from '~/utils/time'
 
 const props = withDefaults(defineProps<{
   modelValue: string
@@ -43,9 +56,10 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{ 'update:modelValue': [value: string]; keydown: [e: KeyboardEvent] }>()
 
-const nativeRef = ref<HTMLInputElement | null>(null)
+const textRef = ref<HTMLInputElement | null>(null)
+const pickerRef = ref<HTMLInputElement | null>(null)
+const textValue = ref('')
 
-/** Показ в 24ч (ЧЧ:ММ), значение в модели — как у input type="time" (ЧЧ:ММ). */
 function formatHHMM(v: string): string {
   if (!v?.trim()) return ''
   const m = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(v.trim())
@@ -55,26 +69,66 @@ function formatHHMM(v: string): string {
   return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`
 }
 
-const displayText = computed(() => formatHHMM(props.modelValue))
+watch(() => props.modelValue, (v) => {
+  textValue.value = formatHHMM(v)
+}, { immediate: true })
 
-function onPick(e: Event) {
+function onTextInput(e: Event) {
+  textValue.value = (e.target as HTMLInputElement).value
+}
+
+function parseText(raw: string): string {
+  const trimmed = raw.trim()
+  if (!trimmed) return ''
+  const formatted = formatHHMM(trimmed)
+  if (!formatted) return ''
+  parseTimeToMinutes(formatted)
+  return formatted
+}
+
+function commitText() {
+  if (!textValue.value.trim()) {
+    emit('update:modelValue', '')
+    textValue.value = ''
+    return
+  }
+  const parsed = parseText(textValue.value)
+  if (parsed) {
+    emit('update:modelValue', parsed)
+    textValue.value = parsed
+  }
+}
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Backspace' || e.key === 'Delete') {
+    if (textValue.value === '') {
+      emit('update:modelValue', '')
+    }
+  }
+  emit('keydown', e)
+}
+
+function onPickerInput(e: Event) {
   const raw = (e.target as HTMLInputElement).value
   emit('update:modelValue', raw ? formatHHMM(raw) : '')
 }
 
-defineExpose({
-  focus: () => {
-    const el = nativeRef.value
-    if (!el) return
-    if (typeof el.showPicker === 'function') {
-      try {
-        el.showPicker()
-        return
-      } catch {
-        /* ignore */
-      }
+function openPicker() {
+  const picker = pickerRef.value
+  if (!picker) return
+  if (typeof picker.showPicker === 'function') {
+    try {
+      picker.showPicker()
+      return
     }
-    el.focus()
-  },
+    catch {
+      /* ignore */
+    }
+  }
+  picker.click()
+}
+
+defineExpose({
+  focus: () => textRef.value?.focus(),
 })
 </script>

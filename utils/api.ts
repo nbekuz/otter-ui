@@ -99,7 +99,12 @@ api.interceptors.response.use(
       }
     }
 
-    if (status === 401) {
+    const requestUrl = String(originalRequest?.url || '')
+    const isPublicAuthRequest = requestUrl.includes('auth/forgot-password')
+      || requestUrl.includes('auth/login/')
+      || requestUrl.includes('auth/register/')
+
+    if (status === 401 && !isPublicAuthRequest) {
       clearAuthSession()
       if (import.meta.client && window.location.pathname.startsWith('/app')) {
         window.location.href = '/login'

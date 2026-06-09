@@ -1,83 +1,74 @@
 <template>
   <Teleport to="body">
     <Transition name="overlay">
-      <div class="overlay" @click="$emit('close')" />
+      <div class="overlay" @click="onCancel" />
     </Transition>
     <Transition name="modal">
-      <div v-if="task" class="app-modal pt-4" style="max-height: 80dvh; overflow-y: auto;" @click.stop>
-
-        <!-- Priority banner -->
-        <div class="mx-4 mb-5 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5"
-             :style="{ backgroundColor: priorityColor + '20' }">
-          <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: priorityColor }" />
-          <span class="text-xs font-medium" :style="{ color: priorityColor }">
-            {{ priorityLabel }}
-          </span>
+      <div v-if="task" class="app-modal px-4 py-5" style="max-height: 85dvh; overflow-y: auto;" @click.stop>
+        <div class="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5"
+             :style="{ backgroundColor: priorityColor(form.priority) + '20' }">
+          <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: priorityColor(form.priority) }" />
+          <select v-model="form.priority" class="bg-transparent text-xs font-medium outline-none"
+                  :style="{ color: priorityColor(form.priority) }">
+            <option value="high">Высокий</option>
+            <option value="medium">Средний</option>
+            <option value="low">Низкий</option>
+            <option value="none">Без приоритета</option>
+          </select>
         </div>
 
-        <!-- Title -->
-        <div class="px-4 mb-4">
-          <h2 class="text-lg font-bold text-sber-black leading-snug">{{ task.title }}</h2>
-          <p v-if="task.description" class="text-sm text-sber-gray mt-1">{{ task.description }}</p>
-        </div>
-
-        <!-- Details -->
-        <div class="px-4 space-y-3 mb-6">
-          <div v-if="task.dueDate" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
-            <Calendar class="w-4 h-4 text-sber-gray" />
-            <span class="text-sm text-sber-gray">{{ formatDate }}</span>
+        <div class="space-y-3">
+          <div>
+            <label class="mb-1 block text-xs font-semibold text-sber-gray">Название</label>
+            <input v-model="form.title" class="input-field py-3" type="text">
           </div>
-          <div v-if="task.dueTime" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
-            <Clock class="w-4 h-4 text-sber-gray" />
-            <span class="text-sm text-sber-gray">{{ task.dueTime }}</span>
+          <div>
+            <label class="mb-1 block text-xs font-semibold text-sber-gray">Описание</label>
+            <textarea v-model="form.description" class="input-field min-h-[72px] resize-none py-3" />
           </div>
-          <div v-if="task.duration" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
-            <Timer class="w-4 h-4 text-sber-gray" />
-            <span class="text-sm text-sber-gray">{{ task.duration.start }} – {{ task.duration.end }}</span>
-          </div>
-          <div v-if="task.repeat !== 'none'" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
-            <RefreshCw class="w-4 h-4 text-sber-gray" />
-            <span class="text-sm text-sber-gray">{{ repeatLabel }}</span>
-          </div>
-          <div v-if="task.notification" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
-            <Bell class="w-4 h-4 text-sber-gray" />
-            <span class="text-sm text-sber-gray">{{ notifyLabel }}</span>
-          </div>
-          <div v-if="task.attachment" class="flex items-center gap-3 py-2 border-b border-sber-gray-light">
-            <Paperclip class="w-4 h-4 text-sber-gray" />
-            <div class="min-w-0 flex-1">
-              <p class="truncate text-sm text-sber-gray">{{ task.attachment.name }}</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-sber-gray">Дата</label>
+              <DateFieldRu v-model="form.dueDate" field-class="py-3" />
             </div>
-            <button
-              type="button"
-              class="rounded-lg bg-sber-green-light px-3 py-1 text-xs font-semibold text-sber-green"
-              @click="openAttachment"
-            >
-              Открыть
-            </button>
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-sber-gray">Время срока</label>
+              <TimeFieldRu v-model="form.dueTime" field-class="py-3" />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-sber-gray">Начало</label>
+              <TimeFieldRu v-model="form.durationStart" field-class="py-3" />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-sber-gray">Конец</label>
+              <TimeFieldRu v-model="form.durationEnd" field-class="py-3" />
+            </div>
           </div>
-          <div v-if="task.attachment && isAttachmentImage" class="overflow-hidden rounded-2xl border border-sber-gray-light">
-            <img :src="task.attachment.dataUrl" alt="Вложение задачи" class="h-36 w-full object-cover" />
-          </div>
+          <p v-if="saveError" class="text-sm text-red-500">{{ saveError }}</p>
         </div>
 
-        <!-- Actions -->
-        <div class="flex flex-col gap-2 px-4 pb-6">
+        <div class="mt-5 grid grid-cols-3 gap-2">
+          <button class="btn-primary !w-auto col-span-1 !py-3 text-sm" type="button" :disabled="saving" @click="saveTask">
+            {{ saving ? '…' : 'Сохранить' }}
+          </button>
+          <button class="btn-secondary !w-auto col-span-1 !py-3 text-sm" type="button" @click="onCancel">
+            Отмена
+          </button>
           <button
-            class="flex items-center justify-center gap-2 rounded-2xl bg-red-50 py-3.5 text-sm font-semibold text-red-500 transition-colors"
+            v-if="task.completed"
+            class="col-span-1 rounded-2xl bg-sber-blue-light px-3 py-3 text-sm font-semibold text-sber-blue"
+            type="button"
+            @click="restoreTask"
+          >
+            Восстановить
+          </button>
+          <button
+            v-else
+            class="col-span-1 rounded-2xl bg-red-50 px-3 py-3 text-sm font-semibold text-red-500"
             type="button"
             @click="deleteTask"
           >
-            <Trash2 class="h-5 w-5" />
             Удалить
-          </button>
-          <button
-            class="btn-primary flex items-center justify-center gap-2 py-3.5 text-sm font-semibold"
-            type="button"
-            @click="openEditor"
-          >
-            <Save class="h-5 w-5" />
-            Сохранить
           </button>
         </div>
       </div>
@@ -86,96 +77,92 @@
 </template>
 
 <script setup lang="ts">
-import { Calendar, Clock, Timer, RefreshCw, Bell, Trash2, Paperclip, Save } from 'lucide-vue-next'
-import dayjs from 'dayjs'
+import type { Priority, Task } from '~/data/mockData'
+import { priorityColor } from '~/utils/priority-colors'
+import { validateDurationFields } from '~/utils/time'
+import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
 
 const props = defineProps<{ taskId: string }>()
-const emit = defineEmits<{ close: []; edit: [taskId: string] }>()
+const emit = defineEmits<{ close: []; saved: [] }>()
 const tasksStore = useTasksStore()
 
 const task = computed(() => tasksStore.tasks.find(t => t.id === props.taskId))
+const saving = ref(false)
+const saveError = ref('')
 
-const priorityColor = computed(() => {
-  switch (task.value?.priority) {
-    case 'high': return '#FF3B30'
-    case 'medium': return '#FF9500'
-    case 'low': return '#34C759'
-    default: return '#C7C7CC'
-  }
+const form = reactive({
+  title: '',
+  description: '',
+  dueDate: '',
+  dueTime: '',
+  durationStart: '',
+  durationEnd: '',
+  priority: 'none' as Priority,
 })
 
-const priorityLabel = computed(() => {
-  switch (task.value?.priority) {
-    case 'high': return 'Высокий приоритет'
-    case 'medium': return 'Средний приоритет'
-    case 'low': return 'Низкий приоритет'
-    default: return 'Без приоритета'
-  }
-})
+useTaskTimeSync(form)
 
-const formatDate = computed(() => {
-  if (!task.value?.dueDate) return ''
-  return dayjs(task.value.dueDate).format('D MMMM YYYY')
-})
+function syncFormFromTask(t: Task | undefined) {
+  if (!t) return
+  form.title = t.title
+  form.description = t.description || ''
+  form.dueDate = t.dueDate || ''
+  form.dueTime = t.dueTime || ''
+  form.durationStart = t.duration?.start || ''
+  form.durationEnd = t.duration?.end || ''
+  form.priority = t.priority || 'none'
+}
 
-const repeatLabel = computed(() => {
-  const labels: Record<string, string> = {
-    daily: 'Каждый день',
-    weekly: 'Каждую неделю',
-    monthly: 'Каждый месяц',
-    yearly: 'Каждый год',
+watch(task, syncFormFromTask, { immediate: true })
+
+function onCancel() {
+  emit('close')
+}
+
+async function saveTask() {
+  if (!task.value) return
+  saveError.value = ''
+  const durationError = validateDurationFields(form.durationStart, form.durationEnd)
+  if (durationError) {
+    saveError.value = durationError
+    return
   }
-  if (task.value?.repeat === 'custom' && task.value.repeatCustom) {
-    const { interval, unit, weekdays, monthDay } = task.value.repeatCustom
-    if (unit === 'week') {
-      const dayNames: Record<number, string> = {
-        1: 'Пн',
-        2: 'Вт',
-        3: 'Ср',
-        4: 'Чт',
-        5: 'Пт',
-        6: 'Сб',
-        7: 'Вс',
-      }
-      const selectedDays = (weekdays || []).map(d => dayNames[d]).filter(Boolean).join(', ')
-      return selectedDays
-        ? `Каждые ${interval} нед. (${selectedDays})`
-        : `Каждые ${interval} нед.`
+
+  saving.value = true
+  try {
+    const updates: Partial<Task> = {
+      title: form.title.trim() || task.value.title,
+      description: form.description.trim() || undefined,
+      dueDate: form.dueDate || undefined,
+      dueTime: form.dueTime || undefined,
+      priority: form.priority,
     }
-    return `Каждые ${interval} мес. (день ${monthDay || 1})`
-  }
-  return labels[task.value?.repeat || ''] || ''
-})
-
-const notifyLabel = computed(() => {
-  const v = task.value?.notification
-  if (!v || v === '0') return 'В момент срока'
-  if (v === '5') return 'За 5 минут'
-  if (v === '15') return 'За 15 минут'
-  if (v === '30') return 'За 30 минут'
-  if (v === '60') return 'За 1 час'
-  if (v === '1440') return 'За 1 день'
-  return `За ${v} минут`
-})
-
-const isAttachmentImage = computed(() =>
-  task.value?.attachment?.mimeType?.startsWith('image/') ?? false
-)
-
-function deleteTask() {
-  if (task.value) {
-    tasksStore.deleteTask(task.value.id)
+    if (form.durationStart && form.durationEnd) {
+      updates.duration = { start: form.durationStart, end: form.durationEnd }
+    } else {
+      updates.duration = undefined
+    }
+    await tasksStore.updateTask(task.value.id, updates)
+    emit('saved')
     emit('close')
   }
+  catch (err: unknown) {
+    saveError.value = getApiFieldError(err, 'end_at') || getApiErrorMessage(err, 'Не удалось сохранить')
+  }
+  finally {
+    saving.value = false
+  }
 }
 
-function openEditor() {
-  emit('edit', props.taskId)
+async function deleteTask() {
+  if (!task.value) return
+  await tasksStore.deleteTask(task.value.id)
+  emit('close')
 }
 
-function openAttachment() {
-  const dataUrl = task.value?.attachment?.dataUrl
-  if (!dataUrl) return
-  window.open(dataUrl, '_blank')
+async function restoreTask() {
+  if (!task.value) return
+  await tasksStore.completeTask(task.value.id)
+  emit('close')
 }
 </script>

@@ -46,7 +46,12 @@ const allNavItems = [
 const navItems = computed(() => {
   const order = settingsStore.appSettings.bottomNavItems || []
   const byId = new Map(allNavItems.map(item => [item.id, item]))
-  return order.map(id => byId.get(id)).filter(Boolean) as typeof allNavItems
+  const items = order.map(id => byId.get(id)).filter(Boolean) as typeof allNavItems
+  if (!items.some(item => item.id === 'settings')) {
+    const settingsItem = byId.get('settings')
+    if (settingsItem) items.push(settingsItem)
+  }
+  return items
 })
 
 function isActive(to: string) {

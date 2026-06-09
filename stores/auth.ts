@@ -8,6 +8,7 @@ import {
   getRefreshToken,
   setAuthTokens,
 } from '~/utils/auth-session'
+import { resolveMediaUrl } from '~/utils/media'
 
 interface BackendUser {
   id: number
@@ -66,7 +67,7 @@ export const useAuthStore = defineStore('auth', () => {
       id: String(nextUser.id),
       email: nextUser.email,
       name: fullName || nextUser.email.split('@')[0] || 'User',
-      avatar: nextUser.avatar || undefined,
+      avatar: resolveMediaUrl(nextUser.avatar) || undefined,
       isPremium: user.value?.isPremium || false,
       premiumExpiresAt: user.value?.premiumExpiresAt,
     }

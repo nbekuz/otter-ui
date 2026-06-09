@@ -1,7 +1,7 @@
 <template>
   <div class="page-container" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
     <div
-      class="px-4 pt-14 pb-4"
+      class="page-header-top px-4 pb-4"
       :class="isDarkTheme ? 'bg-[#171a21] border-b border-[#2a303a] shadow-none' : 'bg-white shadow-sm'"
     >
       <div class="flex items-center gap-3">

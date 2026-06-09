@@ -1,7 +1,7 @@
 <template>
-  <div class="page-container flex flex-col bg-sber-gray-light">
+  <div class="page-container flex min-h-0 flex-col bg-sber-gray-light lg:h-full">
     <!-- Header -->
-    <div class="flex items-center justify-between px-4 pt-14 pb-4 lg:px-6">
+    <div class="page-header-top flex shrink-0 items-center justify-between px-4 pb-3 lg:px-6">
       <h1 class="text-xl font-bold text-sber-black">Помодоро</h1>
       <button class="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm transition-colors active:bg-sber-gray-light"
               @click="settingsOpen = true">
@@ -9,15 +9,15 @@
       </button>
     </div>
 
-    <div class="flex-1 px-4 pb-6 lg:px-6">
-      <div class="mx-auto max-w-3xl space-y-4">
+    <div class="flex min-h-0 flex-1 flex-col px-4 pb-4 lg:px-6">
+      <div class="mx-auto flex w-full max-w-4xl min-h-0 flex-1 flex-col gap-4">
         <div class="grid gap-3 lg:grid-cols-2">
           <button
-            class="flex w-full items-center gap-3 rounded-[28px] border border-sber-gray-light bg-white px-4 py-4 shadow-sm transition-colors active:bg-sber-gray-light"
+            class="flex min-w-0 w-full items-center gap-3 rounded-[28px] border border-sber-gray-light bg-white px-4 py-4 shadow-sm transition-colors active:bg-sber-gray-light"
             @click="taskPickerOpen = true"
           >
-            <Target class="h-5 w-5 text-sber-green" />
-            <div class="flex-1 text-left">
+            <Target class="h-5 w-5 shrink-0 text-sber-green" />
+            <div class="min-w-0 flex-1 text-left">
               <p class="text-xs text-sber-gray">Задача для фокуса</p>
               <p class="truncate text-sm font-medium text-sber-black">
                 {{ selectedTask?.title || 'Выбрать задачу...' }}
@@ -47,9 +47,9 @@
           </div>
         </div>
 
-        <div class="mx-auto w-full rounded-[32px] bg-white px-6 py-6 shadow-card">
+        <div class="mx-auto flex w-full min-h-0 flex-1 flex-col justify-center rounded-[32px] bg-white px-6 py-6 shadow-card lg:px-10 lg:py-8">
           <!-- Session count -->
-          <div class="mb-6 flex justify-center gap-2">
+          <div class="mb-4 flex justify-center gap-2 lg:mb-6">
             <div v-for="i in pomodoroStore.settings.sessionsUntilLong" :key="i"
                  class="h-2 w-8 rounded-full transition-colors"
                  :class="i <= pomodoroStore.sessionCount % pomodoroStore.settings.sessionsUntilLong || (pomodoroStore.sessionCount > 0 && pomodoroStore.sessionCount % pomodoroStore.settings.sessionsUntilLong === 0)
@@ -59,8 +59,8 @@
 
           <!-- Timer circle -->
           <div class="flex flex-col items-center justify-center">
-            <div class="relative mb-8 flex h-64 w-64 items-center justify-center rounded-full border border-sber-gray-light bg-sber-gray-light/60 p-3 shadow-inner">
-              <div class="relative h-[224px] w-[224px] overflow-hidden rounded-full bg-white">
+            <div class="relative mb-6 flex h-64 w-64 items-center justify-center rounded-full border border-sber-gray-light bg-sber-gray-light/60 p-3 shadow-inner lg:mb-8 lg:h-[min(52vh,28rem)] lg:w-[min(52vh,28rem)] lg:p-4">
+              <div class="relative h-[224px] w-[224px] overflow-hidden rounded-full bg-white lg:h-[calc(100%-1.5rem)] lg:w-[calc(100%-1.5rem)]">
                 <div class="absolute inset-x-0 bottom-0 transition-all duration-500" :style="waterFillStyle">
                   <div class="water-wave water-wave-1" />
                   <div class="water-wave water-wave-2" />
@@ -69,7 +69,7 @@
 
               <!-- Time display -->
               <div class="absolute inset-0 z-20 flex flex-col items-center justify-center">
-                <p class="text-5xl font-bold tracking-tight text-sber-black">{{ pomodoroStore.displayTime }}</p>
+                <p class="text-5xl font-bold tracking-tight text-sber-black lg:text-7xl">{{ pomodoroStore.displayTime }}</p>
                 <p v-if="pomodoroStore.state === 'paused'" class="mt-1 text-sm text-sber-gray">На паузе</p>
                 <p v-else-if="pomodoroStore.isBreak" class="mt-1 text-sm text-sber-blue">Перерыв</p>
                 <p v-else class="mt-1 text-sm text-sber-gray">
@@ -118,32 +118,38 @@
         <div v-if="taskPickerOpen" class="overlay" @click="taskPickerOpen = false" />
       </Transition>
       <Transition name="modal">
-        <div v-if="taskPickerOpen" class="app-modal px-4 py-5" style="max-height: 75dvh; overflow-y: auto;" @click.stop>
-          <h3 class="text-lg font-bold text-sber-black mb-3">Выбрать задачу</h3>
+        <div v-if="taskPickerOpen" class="app-modal flex max-h-[75dvh] flex-col px-4 py-5" @click.stop>
+          <h3 class="mb-3 text-lg font-bold text-sber-black">Выбрать задачу</h3>
 
-          <!-- Search -->
-          <div class="relative mb-4">
-            <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-sber-gray" />
-            <input v-model="taskSearch" placeholder="Поиск..." class="input-field pl-11 py-3 text-sm" />
+          <div class="sticky top-0 z-10 shrink-0 bg-white pb-2">
+            <div class="relative mb-3">
+              <Search class="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-sber-gray" />
+              <input v-model="taskSearch" placeholder="Поиск..." class="input-field py-3 pl-11 text-sm" />
+            </div>
+
+            <button
+              class="mb-2 flex w-full items-center gap-3 rounded-2xl bg-sber-gray-light px-4 py-3 text-sm text-sber-gray"
+              @click="selectTask(null)"
+            >
+              <X class="h-4 w-4" /> Без задачи
+            </button>
           </div>
 
-          <button
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-2
-                   bg-sber-gray-light text-sber-gray text-sm"
-            @click="selectTask(null)"
-          >
-            <X class="w-4 h-4" /> Без задачи
-          </button>
-
-          <div v-for="task in filteredTasks" :key="task.id"
-               class="flex items-center gap-3 px-4 py-3 rounded-2xl mb-2 cursor-pointer
-                      transition-colors active:bg-sber-gray-light"
-               :class="pomodoroStore.selectedTaskId === task.id ? 'bg-sber-green-light' : 'bg-white border border-sber-gray-light'"
-               @click="selectTask(task.id)">
-            <div class="w-3 h-3 rounded-full flex-shrink-0"
-                 :style="{ backgroundColor: getPriorityColor(task.priority) }" />
-            <p class="text-sm text-sber-black font-medium flex-1 truncate">{{ task.title }}</p>
-            <Check v-if="pomodoroStore.selectedTaskId === task.id" class="w-4 h-4 text-sber-green" />
+          <div class="min-h-0 flex-1 overflow-y-auto">
+            <div
+              v-for="task in filteredTasks"
+              :key="task.id"
+              class="mb-2 flex cursor-pointer items-center gap-3 rounded-2xl px-4 py-3 transition-colors active:bg-sber-gray-light"
+              :class="pomodoroStore.selectedTaskId === task.id ? 'bg-sber-green-light' : 'border border-sber-gray-light bg-white'"
+              @click="selectTask(task.id)"
+            >
+              <div
+                class="h-3 w-3 shrink-0 rounded-full"
+                :style="{ backgroundColor: getPriorityColor(task.priority) }"
+              />
+              <p class="flex-1 truncate text-sm font-medium text-sber-black">{{ task.title }}</p>
+              <Check v-if="pomodoroStore.selectedTaskId === task.id" class="h-4 w-4 text-sber-green" />
+            </div>
           </div>
         </div>
       </Transition>
@@ -291,6 +297,11 @@ onMounted(async () => {
 })
 
 async function selectWorkSound(sound: ApiSound) {
+  if (pomodoroStore.settings.workingSound === sound.key) {
+    pomodoroStore.stopBackgroundAudio()
+    await pomodoroStore.setWorkSound('none')
+    return
+  }
   await pomodoroStore.setWorkSound(sound.key, sound)
 }
 

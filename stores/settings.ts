@@ -21,6 +21,11 @@ export interface HelpFaqItem {
   open: boolean
 }
 
+function normalizeBottomNavItems(items: string[]) {
+  const withoutSettings = items.filter(id => id !== 'settings')
+  return [...withoutSettings, 'settings']
+}
+
 function apiToAppSettings(data: ApiAppSettings): AppSettings {
   const visibleGroups: string[] = []
   if (data.show_overdue) visibleGroups.push('overdue')
@@ -39,7 +44,7 @@ function apiToAppSettings(data: ApiAppSettings): AppSettings {
     notificationSound: data.notification_sound,
     completionSound: data.completion_sound,
     bottomNavItems: data.bottom_tabs?.length
-      ? [...data.bottom_tabs]
+      ? normalizeBottomNavItems([...data.bottom_tabs])
       : [...defaultAppSettings.bottomNavItems],
   }
 }
@@ -250,7 +255,7 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function reorderNavItems(items: string[]) {
-    await updateSettings({ bottomNavItems: items })
+    await updateSettings({ bottomNavItems: normalizeBottomNavItems(items) })
   }
 
   async function premiumCheckout(tariff = 'monthly') {
