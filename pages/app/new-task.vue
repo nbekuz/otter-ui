@@ -431,6 +431,7 @@
 import { Check, Bell, RefreshCw, Calendar, Flag, Grid2x2, ChevronLeft, Paperclip, X, Trash2 } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
+import { matrixBlockDefaults } from '~/data/mockData'
 import { addMinutesToTime, validateDurationFields } from '~/utils/time'
 import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
 
@@ -594,6 +595,13 @@ onMounted(async () => {
 watch(editTaskId, () => {
   loadEditTaskFromRoute()
 })
+
+watch(
+  () => route.query.matrixBlock,
+  () => {
+    if (!editTaskId.value) applyPrefillFromQuery()
+  },
+)
 
 async function focusDueDateField() {
   activeTab.value = 'date'
@@ -874,12 +882,31 @@ const MATRIX_BLOCK_IDS = new Set([
   'not-urgent-not-important',
 ])
 
+const PRIORITY_VALUES = new Set<Priority>(['high', 'medium', 'low', 'none'])
+
+function getMatrixBlockDefaultPriority(blockId: string): Priority {
+  const block = matrixBlockDefaults[blockId as keyof typeof matrixBlockDefaults]
+  const priority = block?.priorityFilter?.[0]
+  return priority && PRIORITY_VALUES.has(priority as Priority)
+    ? priority as Priority
+    : 'none'
+}
+
 function applyPrefillFromQuery() {
   const matrixBlockParam = Array.isArray(route.query.matrixBlock)
     ? route.query.matrixBlock[0]
     : route.query.matrixBlock
   if (typeof matrixBlockParam === 'string' && MATRIX_BLOCK_IDS.has(matrixBlockParam)) {
     form.matrixBlock = matrixBlockParam as Task['matrixBlock']
+    form.priority = getMatrixBlockDefaultPriority(matrixBlockParam)
+    activeTab.value = 'matrix'
+  }
+
+  const priorityParam = Array.isArray(route.query.priority)
+    ? route.query.priority[0]
+    : route.query.priority
+  if (typeof priorityParam === 'string' && PRIORITY_VALUES.has(priorityParam as Priority)) {
+    form.priority = priorityParam as Priority
   }
 
   const dueDateParam = Array.isArray(route.query.dueDate) ? route.query.dueDate[0] : route.query.dueDate
