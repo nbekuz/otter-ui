@@ -139,7 +139,10 @@
                 >
                   <Check v-if="task.completed" class="h-2 w-2 text-white" />
                 </button>
-                <p class="truncate text-xs font-medium text-sber-black">{{ task.title }}</p>
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-xs font-medium text-sber-black">{{ task.title }}</p>
+                  <p v-if="task.continuesAfter" class="text-[10px] text-sber-gray">продолжается ↓</p>
+                </div>
               </div>
             </div>
           </div>
@@ -192,6 +195,7 @@
             @click.stop.prevent="handleTaskCardClick(task.id)"
           >
             <button
+              v-if="!task.isContinuation"
               type="button"
               class="absolute left-1/2 top-0 z-40 flex h-8 w-full max-w-[5.5rem] -translate-x-1/2 cursor-ns-resize items-start justify-center pt-1"
               aria-label="Изменить начало"
@@ -199,7 +203,12 @@
             >
               <span class="pointer-events-none h-2 w-10 shrink-0 rounded-full bg-sber-gray/50" />
             </button>
-            <div class="pointer-events-none relative z-10 flex items-start gap-1">
+            <div
+              v-if="task.isContinuation"
+              class="pointer-events-none absolute inset-x-0 top-0 h-1 rounded-t-xl opacity-60"
+              :style="{ backgroundColor: getPriorityColor(task.priority) }"
+            />
+            <div v-if="!task.isContinuation" class="pointer-events-none relative z-10 flex items-start gap-1">
               <button
                 type="button"
                 class="pointer-events-auto mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border"
@@ -726,9 +735,14 @@ const dayTimelineTasks = computed(() => {
       const scheduleStart = getTaskScheduleStart(task) || '00:00'
       const startMinutes = preview ? preview.start : parseTimeToMinutes(scheduleStart)
       const durationMinutes = preview ? (preview.end - preview.start) : getTaskDurationMinutes(task)
-      const endMinutes = Math.min(startMinutes + durationMinutes, mainEndMinutes)
+      const fullEndMinutes = startMinutes + durationMinutes
+
+      if (fullEndMinutes <= mainStartMinutes || startMinutes >= mainEndMinutes) return null
+
+      const clippedEnd = Math.min(fullEndMinutes, mainEndMinutes)
       const clippedStart = Math.max(startMinutes, mainStartMinutes)
-      const clippedDuration = Math.max(endMinutes - clippedStart, 15)
+      const clippedDuration = Math.max(clippedEnd - clippedStart, 15)
+      const isContinuation = startMinutes < mainStartMinutes
 
       const labelTime = preview
         ? `${formatMinutesToTime(preview.start)} – ${formatMinutesToTime(preview.end)}`
@@ -739,13 +753,14 @@ const dayTimelineTasks = computed(() => {
       return {
         ...task,
         rawStart: startMinutes,
-        rawEnd: startMinutes + durationMinutes,
+        rawEnd: fullEndMinutes,
         labelTime,
+        isContinuation,
         topPx: (clippedStart - mainStartMinutes) * minuteHeightPx,
         heightPx: clippedDuration * minuteHeightPx,
       }
     })
-    .filter(task => task.topPx < (mainEndMinutes - mainStartMinutes) * minuteHeightPx)
+    .filter((task): task is NonNullable<typeof task> => !!task)
 
   const layout = assignDayTimelineOverlapLayout(
     base.map(t => ({ id: t.id, rawStart: t.rawStart, rawEnd: t.rawEnd })),
@@ -792,16 +807,18 @@ function buildSectionTimelineTasks(
       const clippedStart = Math.max(startMinutes, rangeStart)
       const clippedEnd = Math.min(endMinutes, rangeEnd)
       const clippedDuration = Math.max(clippedEnd - clippedStart, 15)
+      const continuesAfter = endMinutes > rangeEnd
 
       return {
         ...task,
         rawStart: startMinutes,
         rawEnd: endMinutes,
+        continuesAfter,
         topPx: (clippedStart - rangeStart) * pxPerMinute,
         heightPx: clippedDuration * pxPerMinute,
       }
     })
-    .filter((task): task is Task & { rawStart: number; rawEnd: number; topPx: number; heightPx: number } => !!task)
+    .filter((task): task is Task & { rawStart: number; rawEnd: number; continuesAfter: boolean; topPx: number; heightPx: number } => !!task)
 }
 
 const earlyTimelineTasks = computed(() =>
@@ -979,11 +996,11 @@ function handleDragEnd() {
   }
 
   const duration = Math.max(minDurationMinutes, preview.end - preview.start)
+  const nextStart = formatMinutesToTime(preview.start)
+  const nextEnd = formatMinutesToTime(preview.start + duration)
   const updates: Partial<Task> = {
-    duration: {
-      start: formatMinutesToTime(preview.start),
-      end: formatMinutesToTime(preview.start + duration),
-    },
+    dueTime: nextStart,
+    duration: { start: nextStart, end: nextEnd },
   }
 
   void tasksStore
@@ -1157,11 +1174,8 @@ function handleWeekCellDrop(event: DragEvent, date: string, hour: number) {
 
   const updates: Partial<Task> = {
     dueDate: date,
+    dueTime: nextStart,
     duration: { start: nextStart, end: nextEnd },
-  }
-
-  if (!task.duration && task.dueTime) {
-    updates.dueTime = nextStart
   }
 
   void tasksStore.updateTask(task.id, updates, { grouped: false, matrix: false })

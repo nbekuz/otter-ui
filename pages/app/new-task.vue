@@ -867,7 +867,21 @@ function readTimeQuery(key: string): string | undefined {
   return typeof value === 'string' && /^\d{2}:\d{2}$/.test(value) ? value : undefined
 }
 
+const MATRIX_BLOCK_IDS = new Set([
+  'urgent-important',
+  'not-urgent-important',
+  'urgent-not-important',
+  'not-urgent-not-important',
+])
+
 function applyPrefillFromQuery() {
+  const matrixBlockParam = Array.isArray(route.query.matrixBlock)
+    ? route.query.matrixBlock[0]
+    : route.query.matrixBlock
+  if (typeof matrixBlockParam === 'string' && MATRIX_BLOCK_IDS.has(matrixBlockParam)) {
+    form.matrixBlock = matrixBlockParam as Task['matrixBlock']
+  }
+
   const dueDateParam = Array.isArray(route.query.dueDate) ? route.query.dueDate[0] : route.query.dueDate
   const dueTimeParam = readTimeQuery('dueTime')
   const durationStartParam = readTimeQuery('durationStart')

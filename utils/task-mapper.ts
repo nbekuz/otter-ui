@@ -59,10 +59,14 @@ function reminderMinutes(dueAt: string | null, reminderAt: string | null): strin
   return String(diff)
 }
 
+function toApiDateTime(dueDate: string, time: string): string {
+  const hhmm = time.length >= 5 ? time.slice(0, 5) : time
+  return `${dueDate}T${hhmm}:00.000`
+}
+
 function buildDueAt(dueDate?: string, dueTime?: string): string | null {
   if (!dueDate) return null
-  const time = dueTime || '00:00'
-  return dayjs(`${dueDate}T${time}`).format()
+  return toApiDateTime(dueDate, dueTime || '00:00')
 }
 
 function buildReminderAt(
@@ -72,7 +76,7 @@ function buildReminderAt(
   if (!dueAt || !notification) return null
   const minutes = Number(notification)
   if (!Number.isFinite(minutes) || minutes < 0) return null
-  return dayjs(dueAt).subtract(minutes, 'minute').format()
+  return dayjs(dueAt).subtract(minutes, 'minute').format('YYYY-MM-DDTHH:mm:ss.SSS')
 }
 
 function buildStartEnd(
@@ -88,8 +92,8 @@ function buildStartEnd(
   }
 
   return {
-    start_at: dayjs(`${dueDate}T${duration.start}`).format(),
-    end_at: dayjs(`${dueDate}T${duration.end}`).format(),
+    start_at: toApiDateTime(dueDate, duration.start),
+    end_at: toApiDateTime(dueDate, duration.end),
   }
 }
 

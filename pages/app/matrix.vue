@@ -49,12 +49,21 @@
         <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-2 py-2">
           <!-- Drop zone -->
           <div
-            class="sticky top-0 z-20 mb-2 flex items-center justify-center rounded-xl border-2 border-dashed py-[5px] transition-colors"
+            class="sticky top-0 z-20 mb-2 flex items-center gap-1 rounded-xl border-2 border-dashed px-2 py-[5px] transition-colors"
             :style="{ borderColor: block.color + '50', backgroundColor: isDarkTheme ? '#171a21' : block.bgColor }"
             :class="dragTarget === block.id ? (isDarkTheme ? 'bg-[#20242d]' : 'bg-white/90') : ''"
           >
-            <span class="text-[10px]" :style="{ color: block.color }">
-              {{ dragTarget === block.id ? 'Отпустите здесь' : '+ перетащите' }}
+            <button
+              type="button"
+              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-base font-bold leading-none transition-opacity active:opacity-60"
+              :style="{ color: block.color }"
+              aria-label="Добавить задачу"
+              @click.stop="openNewTaskForBlock(block.id)"
+            >
+              +
+            </button>
+            <span class="flex-1 text-center text-[10px]" :style="{ color: block.color }">
+              {{ dragTarget === block.id ? 'Отпустите здесь' : 'перетащите' }}
             </span>
           </div>
 
@@ -180,6 +189,7 @@ import dayjs from 'dayjs'
 
 definePageMeta({ layout: 'app' })
 
+const route = useRoute()
 const tasksStore = useTasksStore()
 const settingsStore = useSettingsStore()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
@@ -273,6 +283,16 @@ function toggleDateFilter(blockId: string, filter: string) {
 
 function onTaskDetailSaved() {
   void tasksStore.fetchMatrix()
+}
+
+function openNewTaskForBlock(blockId: string) {
+  navigateTo({
+    path: '/app/new-task',
+    query: {
+      matrixBlock: blockId,
+      returnTo: route.path,
+    },
+  })
 }
 
 function togglePriorityFilter(blockId: string, filter: string) {
