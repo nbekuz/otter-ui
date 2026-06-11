@@ -74,6 +74,7 @@ declare global {
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getRefreshToken: typeof import('../../utils/auth-session').getRefreshToken
   const getRouteRules: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getRouteRules
+  const getTaskDurationMinutes: typeof import('../../utils/time').getTaskDurationMinutes
   const getTaskScheduleStart: typeof import('../../utils/time').getTaskScheduleStart
   const groupKeyToUi: typeof import('../../utils/task-mapper').groupKeyToUi
   const h: typeof import('vue').h
@@ -121,6 +122,7 @@ declare global {
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
+  const parseApiWallClock: typeof import('../../utils/time').parseApiWallClock
   const parseTimeToMinutes: typeof import('../../utils/time').parseTimeToMinutes
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
   const pauseBackgroundAudio: typeof import('../../utils/pomodoro-audio').pauseBackgroundAudio
@@ -543,6 +545,7 @@ declare module 'vue' {
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getRefreshToken: UnwrapRef<typeof import('../../utils/auth-session')['getRefreshToken']>
     readonly getRouteRules: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getRouteRules']>
+    readonly getTaskDurationMinutes: UnwrapRef<typeof import('../../utils/time')['getTaskDurationMinutes']>
     readonly getTaskScheduleStart: UnwrapRef<typeof import('../../utils/time')['getTaskScheduleStart']>
     readonly groupKeyToUi: UnwrapRef<typeof import('../../utils/task-mapper')['groupKeyToUi']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
@@ -590,6 +593,7 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
+    readonly parseApiWallClock: UnwrapRef<typeof import('../../utils/time')['parseApiWallClock']>
     readonly parseTimeToMinutes: UnwrapRef<typeof import('../../utils/time')['parseTimeToMinutes']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
     readonly pauseBackgroundAudio: UnwrapRef<typeof import('../../utils/pomodoro-audio')['pauseBackgroundAudio']>

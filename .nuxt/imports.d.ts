@@ -41,7 +41,7 @@ export { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH, validateNewPassword } from '.
 export { stopEffectAudio, stopBackgroundAudio, pauseBackgroundAudio, playBackgroundLoop, playSoundOnce } from '../utils/pomodoro-audio';
 export { PRIORITY_COLORS, priorityColor } from '../utils/priority-colors';
 export { apiTaskToUi, uiTaskToApiPayload, uiTaskToFormData, groupKeyToUi, apiMatrixBlockToUi } from '../utils/task-mapper';
-export { parseTimeToMinutes, formatMinutesToTime, addMinutesToTime, DURATION_END_AFTER_START_MESSAGE, validateDurationFields, getTaskScheduleStart } from '../utils/time';
+export { parseApiWallClock, parseTimeToMinutes, formatMinutesToTime, addMinutesToTime, DURATION_END_AFTER_START_MESSAGE, validateDurationFields, getTaskScheduleStart, getTaskDurationMinutes } from '../utils/time';
 export { useAuthStore } from '../stores/auth';
 export { useCalendarStore, CalendarViewType } from '../stores/calendar';
 export { useMobileApiStore } from '../stores/mobile-api';

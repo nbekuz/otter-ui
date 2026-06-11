@@ -1,3 +1,12 @@
+/** Дата и время «как в строке API», без сдвига в локальную TZ браузера. */
+export function parseApiWallClock(iso: string): { date: string; time: string } | null {
+  const match = iso.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/)
+  if (match) {
+    return { date: match[1], time: `${match[2]}:${match[3]}` }
+  }
+  return null
+}
+
 export function parseTimeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(v => parseInt(v, 10))
   const hours = Number.isFinite(h) ? h : 0
@@ -43,4 +52,18 @@ export function getTaskScheduleStart(task: {
   duration?: { start: string; end: string }
 }): string | undefined {
   return task.duration?.start || task.dueTime
+}
+
+/** Длительность задачи в минутах по полям duration (включая переход через полночь). */
+export function getTaskDurationMinutes(task: {
+  dueTime?: string
+  duration?: { start: string; end: string }
+}): number {
+  if (task.duration?.start && task.duration?.end) {
+    const start = parseTimeToMinutes(task.duration.start)
+    const end = parseTimeToMinutes(task.duration.end)
+    if (end > start) return end - start
+    if (end < start) return (24 * 60 - start) + end
+  }
+  return 60
 }

@@ -499,6 +499,7 @@ import type { Task } from '~/data/mockData'
 import {
   addMinutesToTime,
   formatMinutesToTime,
+  getTaskDurationMinutes,
   getTaskScheduleStart,
   parseTimeToMinutes,
 } from '~/utils/time'
@@ -848,15 +849,6 @@ function getPriorityColor(priority: string) {
 
 function roundToStep(value: number, step: number) {
   return Math.round(value / step) * step
-}
-
-function getTaskDurationMinutes(task: { dueTime?: string; duration?: { start: string; end: string } }) {
-  if (task.duration?.start && task.duration?.end) {
-    const start = parseTimeToMinutes(task.duration.start)
-    const end = parseTimeToMinutes(task.duration.end)
-    if (end > start) return end - start
-  }
-  return 60
 }
 
 function snapMinutes(minutes: number) {

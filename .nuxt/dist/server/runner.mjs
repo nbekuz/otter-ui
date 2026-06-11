@@ -1,0 +1,1 @@
+export { default } from "file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/@nuxt/vite-builder/dist/vite-node-runner.mjs"

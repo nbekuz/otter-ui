@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
-import { parseTimeToMinutes } from '~/utils/time'
+import { parseApiWallClock, parseTimeToMinutes } from '~/utils/time'
 import type {
   ApiMatrixBlock,
   ApiPriority,
@@ -94,21 +94,19 @@ function buildStartEnd(
 }
 
 export function apiTaskToUi(task: ApiTask): Task {
-  const due = task.due_at ? dayjs(task.due_at) : null
-  const start = task.start_at ? dayjs(task.start_at) : null
-  const end = task.end_at ? dayjs(task.end_at) : null
-  const scheduleDay = start?.isValid() ? start : due
+  const dueFields = task.due_at ? parseApiWallClock(task.due_at) : null
+  const startFields = task.start_at ? parseApiWallClock(task.start_at) : null
+  const endFields = task.end_at ? parseApiWallClock(task.end_at) : null
+  const scheduleDay = startFields ?? dueFields
 
   return {
     id: String(task.id),
     title: task.title,
     description: task.description || undefined,
-    dueDate: scheduleDay?.isValid() ? scheduleDay.format('YYYY-MM-DD') : undefined,
-    dueTime: due?.isValid() && !(due.hour() === 0 && due.minute() === 0)
-      ? due.format('HH:mm')
-      : undefined,
-    duration: start?.isValid() && end?.isValid()
-      ? { start: start.format('HH:mm'), end: end.format('HH:mm') }
+    dueDate: scheduleDay?.date,
+    dueTime: dueFields && dueFields.time !== '00:00' ? dueFields.time : undefined,
+    duration: startFields && endFields
+      ? { start: startFields.time, end: endFields.time }
       : undefined,
     priority: apiPriorityToUi(task.priority),
     completed: task.is_completed,
