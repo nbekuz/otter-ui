@@ -6,8 +6,11 @@ declare global {
   const FIREBASE_ID_TOKEN_STORAGE_KEY: typeof import('../../utils/auth-session').FIREBASE_ID_TOKEN_STORAGE_KEY
   const PASSWORD_MAX_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MAX_LENGTH
   const PASSWORD_MIN_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MIN_LENGTH
+  const PREMIUM_LANDING: typeof import('../../utils/site-info').PREMIUM_LANDING
   const PRIORITY_COLORS: typeof import('../../utils/priority-colors').PRIORITY_COLORS
   const REFRESH_TOKEN_KEY: typeof import('../../utils/auth-session').REFRESH_TOKEN_KEY
+  const SITE_LEGAL_INFO: typeof import('../../utils/site-info').SITE_LEGAL_INFO
+  const STATIC_LEGAL_DOCUMENTS: typeof import('../../utils/legal-static').STATIC_LEGAL_DOCUMENTS
   const abortNavigation: typeof import('../../node_modules/nuxt/dist/app/composables/router').abortNavigation
   const acceptHMRUpdate: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').acceptHMRUpdate
   const addMinutesToTime: typeof import('../../utils/time').addMinutesToTime
@@ -65,6 +68,7 @@ declare global {
   const effect: typeof import('vue').effect
   const effectScope: typeof import('vue').effectScope
   const extendRef: typeof import('@vueuse/core').extendRef
+  const formatLegalUpdatedAt: typeof import('../../utils/legal-static').formatLegalUpdatedAt
   const formatMinutesToTime: typeof import('../../utils/time').formatMinutesToTime
   const getAccessToken: typeof import('../../utils/auth-session').getAccessToken
   const getApiErrorMessage: typeof import('../../utils/api').getApiErrorMessage
@@ -74,6 +78,7 @@ declare global {
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getRefreshToken: typeof import('../../utils/auth-session').getRefreshToken
   const getRouteRules: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getRouteRules
+  const getStaticLegalDocument: typeof import('../../utils/legal-static').getStaticLegalDocument
   const getTaskDurationMinutes: typeof import('../../utils/time').getTaskDurationMinutes
   const getTaskScheduleStart: typeof import('../../utils/time').getTaskScheduleStart
   const groupKeyToUi: typeof import('../../utils/task-mapper').groupKeyToUi
@@ -462,6 +467,9 @@ declare global {
   export type { AuthTokens } from '../../utils/auth-session'
   import('../../utils/auth-session')
   // @ts-ignore
+  export type { LegalSlug, StaticLegalDocument } from '../../utils/legal-static'
+  import('../../utils/legal-static')
+  // @ts-ignore
   export type { CalendarViewType } from '../../stores/calendar'
   import('../../stores/calendar')
   // @ts-ignore
@@ -477,8 +485,11 @@ declare module 'vue' {
     readonly FIREBASE_ID_TOKEN_STORAGE_KEY: UnwrapRef<typeof import('../../utils/auth-session')['FIREBASE_ID_TOKEN_STORAGE_KEY']>
     readonly PASSWORD_MAX_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MAX_LENGTH']>
     readonly PASSWORD_MIN_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MIN_LENGTH']>
+    readonly PREMIUM_LANDING: UnwrapRef<typeof import('../../utils/site-info')['PREMIUM_LANDING']>
     readonly PRIORITY_COLORS: UnwrapRef<typeof import('../../utils/priority-colors')['PRIORITY_COLORS']>
     readonly REFRESH_TOKEN_KEY: UnwrapRef<typeof import('../../utils/auth-session')['REFRESH_TOKEN_KEY']>
+    readonly SITE_LEGAL_INFO: UnwrapRef<typeof import('../../utils/site-info')['SITE_LEGAL_INFO']>
+    readonly STATIC_LEGAL_DOCUMENTS: UnwrapRef<typeof import('../../utils/legal-static')['STATIC_LEGAL_DOCUMENTS']>
     readonly abortNavigation: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['abortNavigation']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['acceptHMRUpdate']>
     readonly addMinutesToTime: UnwrapRef<typeof import('../../utils/time')['addMinutesToTime']>
@@ -536,6 +547,7 @@ declare module 'vue' {
     readonly effect: UnwrapRef<typeof import('vue')['effect']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
+    readonly formatLegalUpdatedAt: UnwrapRef<typeof import('../../utils/legal-static')['formatLegalUpdatedAt']>
     readonly formatMinutesToTime: UnwrapRef<typeof import('../../utils/time')['formatMinutesToTime']>
     readonly getAccessToken: UnwrapRef<typeof import('../../utils/auth-session')['getAccessToken']>
     readonly getApiErrorMessage: UnwrapRef<typeof import('../../utils/api')['getApiErrorMessage']>
@@ -545,6 +557,7 @@ declare module 'vue' {
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getRefreshToken: UnwrapRef<typeof import('../../utils/auth-session')['getRefreshToken']>
     readonly getRouteRules: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getRouteRules']>
+    readonly getStaticLegalDocument: UnwrapRef<typeof import('../../utils/legal-static')['getStaticLegalDocument']>
     readonly getTaskDurationMinutes: UnwrapRef<typeof import('../../utils/time')['getTaskDurationMinutes']>
     readonly getTaskScheduleStart: UnwrapRef<typeof import('../../utils/time')['getTaskScheduleStart']>
     readonly groupKeyToUi: UnwrapRef<typeof import('../../utils/task-mapper')['groupKeyToUi']>

@@ -1,5 +1,6 @@
 <template>
-  <div class="min-h-dvh bg-white md:px-2 lg:flex lg:items-center lg:justify-center lg:bg-sber-gray-light lg:px-6 lg:py-10">
+  <div class="flex min-h-dvh flex-col bg-white md:px-2 lg:bg-sber-gray-light lg:px-6 lg:py-10">
+    <div class="flex flex-1 items-center justify-center">
     <div class="w-full max-w-full overflow-hidden lg:grid lg:max-w-5xl lg:grid-cols-[1.05fr_0.95fr] lg:rounded-[32px] lg:bg-white lg:shadow-xl">
       <div class="hidden lg:flex lg:flex-col lg:justify-between lg:border-r lg:border-sber-gray-light lg:bg-white lg:p-10 lg:text-sber-black">
         <div>
@@ -133,8 +134,13 @@
             </svg>
             {{ googleLoading ? 'Вход…' : 'Войти через Google' }}
           </button>
+
+          <div class="mt-8">
+            <LegalAcceptanceText />
+          </div>
         </div>
       </div>
+    </div>
     </div>
 
     <Teleport to="body">
@@ -255,6 +261,8 @@
         </form>
       </Transition>
     </Teleport>
+
+    <SiteFooter />
   </div>
 </template>
 

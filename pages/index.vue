@@ -1,5 +1,6 @@
 <template>
-  <div class="min-h-dvh w-full overflow-x-hidden bg-white lg:flex lg:items-center lg:justify-center">
+  <div class="flex min-h-dvh w-full flex-col overflow-x-hidden bg-white">
+    <div class="flex flex-1 flex-col lg:items-center lg:justify-center lg:py-6">
     <div
       class="w-full px-4 pt-6 pb-8 md:px-8 md:pt-8 md:pb-10 lg:grid lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch lg:gap-12 lg:px-10 lg:py-10 xl:gap-16 xl:px-14 2xl:px-20"
     >
@@ -53,6 +54,8 @@
             </li>
           </ul>
         </div>
+
+        <LandingPremiumBlock class="mt-4" />
       </div>
 
       <div class="w-full max-w-none pb-10 pt-2 md:pb-12 lg:max-w-none lg:pb-0 lg:pt-0">
@@ -122,9 +125,16 @@
               </button>
             </div>
           </div>
+
+          <div class="mt-6">
+            <LegalAcceptanceText />
+          </div>
         </div>
       </div>
     </div>
+    </div>
+
+    <SiteFooter />
   </div>
 </template>
 

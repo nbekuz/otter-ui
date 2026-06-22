@@ -1,0 +1,1 @@
+{"version":3,"file":"default-DE7Yy99t.js","sources":["../../../../layouts/default.vue"],"sourcesContent":["<template>\n  <div class=\"phone-frame\">\n    <slot />\n  </div>\n</template>\n"],"names":["_ssrRenderAttrs","_mergeProps"],"mappings":";;;;;;;;;;;;;;;;;;AACO,QAAA,OAAAA,eAAAC,WAAA,EAAA,OAAM,iBAAa,MAAA,CAAA,CAAA,GAAA;;;;;;;;;;;"}

@@ -373,7 +373,7 @@
             :disabled="premiumCheckoutLoading"
             @click="purchasePremium"
           >
-            {{ premiumCheckoutLoading ? 'Открываем оплату…' : 'Оплатить 299 ₽/месяц' }}
+            {{ premiumCheckoutLoading ? 'Открываем оплату…' : 'Оплатить 150 ₽/месяц' }}
           </button>
           <button
             v-if="!authStore.user?.isPremium"

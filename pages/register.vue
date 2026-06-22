@@ -1,5 +1,6 @@
 <template>
-  <div class="min-h-dvh bg-white md:px-2 lg:flex lg:items-center lg:justify-center lg:bg-sber-gray-light lg:px-6 lg:py-10">
+  <div class="flex min-h-dvh flex-col bg-white md:px-2 lg:bg-sber-gray-light lg:px-6 lg:py-10">
+    <div class="flex flex-1 items-center justify-center">
     <div class="w-full max-w-full overflow-hidden lg:grid lg:max-w-5xl lg:grid-cols-[0.95fr_1.05fr] lg:rounded-[32px] lg:bg-white lg:shadow-xl">
       <div class="min-h-dvh bg-white lg:order-2 lg:min-h-0">
         <div class="page-header-top flex items-center px-4 pb-4 sm:px-6 lg:px-8 lg:pt-8">
@@ -83,9 +84,13 @@
               <OtterCheckbox v-model="agreeTerms" @update:model-value="onTermsToggle">
                 <p class="text-sm leading-relaxed text-sber-gray">
                   Я соглашаюсь с
-                  <span class="font-medium text-sber-green">Пользовательским соглашением</span>
+                  <NuxtLink to="/legal/terms-of-use" class="font-medium text-sber-green underline" @click.stop>
+                    Пользовательским соглашением
+                  </NuxtLink>
                   и
-                  <span class="font-medium text-sber-green">Политикой конфиденциальности</span>
+                  <NuxtLink to="/legal/privacy-policy" class="font-medium text-sber-green underline" @click.stop>
+                    Политикой конфиденциальности
+                  </NuxtLink>
                 </p>
               </OtterCheckbox>
               <p v-if="errors.terms" class="mt-2 ml-1 text-xs text-red-500">{{ errors.terms }}</p>
@@ -148,6 +153,9 @@
         </div>
       </div>
     </div>
+    </div>
+
+    <SiteFooter />
   </div>
 </template>
 

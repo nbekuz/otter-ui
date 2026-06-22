@@ -18,7 +18,11 @@ export const AppGlobalToast: typeof import("../components/AppGlobalToast.vue")['
 export const BrandLogo: typeof import("../components/BrandLogo.vue")['default']
 export const DateFieldRu: typeof import("../components/DateFieldRu.vue")['default']
 export const GoogleLoginButton: typeof import("../components/GoogleLoginButton.client.vue")['default']
+export const LandingPremiumBlock: typeof import("../components/LandingPremiumBlock.vue")['default']
+export const LegalAcceptanceText: typeof import("../components/LegalAcceptanceText.vue")['default']
+export const LegalDocumentBody: typeof import("../components/LegalDocumentBody.vue")['default']
 export const OtterCheckbox: typeof import("../components/OtterCheckbox.vue")['default']
+export const SiteFooter: typeof import("../components/SiteFooter.vue")['default']
 export const TimeFieldRu: typeof import("../components/TimeFieldRu.vue")['default']
 export const LayoutBottomNav: typeof import("../components/layout/BottomNav.vue")['default']
 export const SettingsRow: typeof import("../components/settings/Row.vue")['default']
@@ -52,7 +56,11 @@ export const LazyAppGlobalToast: LazyComponent<typeof import("../components/AppG
 export const LazyBrandLogo: LazyComponent<typeof import("../components/BrandLogo.vue")['default']>
 export const LazyDateFieldRu: LazyComponent<typeof import("../components/DateFieldRu.vue")['default']>
 export const LazyGoogleLoginButton: LazyComponent<typeof import("../components/GoogleLoginButton.client.vue")['default']>
+export const LazyLandingPremiumBlock: LazyComponent<typeof import("../components/LandingPremiumBlock.vue")['default']>
+export const LazyLegalAcceptanceText: LazyComponent<typeof import("../components/LegalAcceptanceText.vue")['default']>
+export const LazyLegalDocumentBody: LazyComponent<typeof import("../components/LegalDocumentBody.vue")['default']>
 export const LazyOtterCheckbox: LazyComponent<typeof import("../components/OtterCheckbox.vue")['default']>
+export const LazySiteFooter: LazyComponent<typeof import("../components/SiteFooter.vue")['default']>
 export const LazyTimeFieldRu: LazyComponent<typeof import("../components/TimeFieldRu.vue")['default']>
 export const LazyLayoutBottomNav: LazyComponent<typeof import("../components/layout/BottomNav.vue")['default']>
 export const LazySettingsRow: LazyComponent<typeof import("../components/settings/Row.vue")['default']>
