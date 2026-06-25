@@ -429,12 +429,12 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-BZm4IW6S.mjs')
+    component: () => import('./index-Bp9_sOzf.mjs')
   },
   {
     name: "login",
     path: "/login",
-    component: () => import('./login-5m-X6qFJ.mjs')
+    component: () => import('./login-D9jkEdZf.mjs')
   },
   {
     name: "matrix",
@@ -460,7 +460,7 @@ const _routes = [
   {
     name: "register",
     path: "/register",
-    component: () => import('./register-_H8wRd_Y.mjs')
+    component: () => import('./register-BkU8kmvO.mjs')
   },
   {
     name: "settings",
@@ -513,7 +513,7 @@ const _routes = [
     name: "app-settings",
     path: "/app/settings",
     meta: __nuxt_page_meta || {},
-    component: () => import('./settings-CaAgX-1N.mjs')
+    component: () => import('./settings-DnDAdd3k.mjs')
   },
   {
     name: "legal-slug",
@@ -3048,7 +3048,7 @@ _sfc_main$3.setup = (props, ctx) => {
 };
 const __nuxt_component_0 = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-ee22b97d"]]);
 const layouts = {
-  app: defineAsyncComponent(() => import('./app-DAEO106w.mjs').then((m) => m.default || m)),
+  app: defineAsyncComponent(() => import('./app-nCinP-Jy.mjs').then((m) => m.default || m)),
   default: defineAsyncComponent(() => import('./default-DE7Yy99t.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;

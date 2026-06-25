@@ -1,38 +1,38 @@
 <template>
   <div class="flex min-h-dvh w-full flex-col overflow-x-hidden bg-white">
-    <div class="flex flex-1 flex-col lg:h-dvh lg:max-h-dvh lg:justify-center lg:overflow-y-auto lg:py-3 xl:py-4">
+    <div class="flex flex-1 flex-col">
       <div
-        class="w-full px-4 pt-4 pb-6 md:px-8 md:pt-6 md:pb-8 lg:grid lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-8 lg:px-8 lg:py-0 xl:gap-10 xl:px-12"
+        class="mx-auto w-full max-w-[1380px] px-4 pt-4 pb-6 md:px-8 md:pt-6 md:pb-8 lg:grid lg:grid-cols-[1.06fr_0.94fr] lg:items-start lg:gap-10 lg:px-8 lg:py-6 xl:gap-12 xl:px-12 xl:py-8"
       >
-        <div class="flex w-full flex-col items-center justify-start md:items-stretch lg:items-start">
-          <div class="relative mb-4 w-fit lg:mb-3">
+        <div class="flex w-full flex-col items-stretch justify-start">
+          <div class="relative mb-4 w-fit self-center md:self-start lg:mb-3">
             <BrandLogo size="md" show-name-from="always" text-class="text-sber-black lg:text-2xl" />
           </div>
-          <p class="mb-0 w-full text-center text-base leading-relaxed text-sber-gray md:text-left lg:max-w-xl lg:text-lg lg:leading-snug">
+          <p class="mb-0 w-full text-center text-base leading-relaxed text-sber-gray md:text-left lg:max-w-2xl lg:text-lg lg:leading-snug">
             Планировщик задач для тех, кто ценит время
           </p>
 
-          <div class="mt-5 grid w-full grid-cols-1 gap-3 md:grid-cols-2 lg:mt-4 lg:gap-3">
+          <div class="mt-5 grid w-full grid-cols-1 gap-3 md:grid-cols-2 lg:mt-4 lg:gap-4">
             <div
               v-for="feature in features"
               :key="feature.text"
-              class="flex items-start gap-3 rounded-[20px] bg-sber-gray-light px-4 py-3.5 text-left shadow-sm lg:rounded-[18px] lg:px-3.5 lg:py-3"
+              class="flex items-start gap-3 rounded-[20px] bg-sber-gray-light px-4 py-3.5 text-left shadow-sm lg:min-h-[108px] lg:rounded-[20px] lg:px-4 lg:py-4"
             >
-              <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-lg lg:h-9 lg:w-9" :class="feature.bg">
+              <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-lg lg:h-10 lg:w-10" :class="feature.bg">
                 {{ feature.icon }}
               </div>
               <div class="min-w-0">
-                <p class="text-sm font-semibold text-sber-black lg:text-[15px]">{{ feature.title }}</p>
-                <p class="mt-0.5 text-xs leading-5 text-sber-gray lg:text-[13px]">{{ feature.text }}</p>
+                <p class="text-sm font-semibold text-sber-black lg:text-base">{{ feature.title }}</p>
+                <p class="mt-0.5 text-xs leading-5 text-sber-gray lg:text-sm">{{ feature.text }}</p>
               </div>
             </div>
           </div>
 
-          <LandingPremiumBlock class="mt-3 lg:mt-3" />
+          <LandingPremiumBlock class="mt-3 lg:mt-4" />
         </div>
 
         <div class="w-full max-w-none pt-4 pb-2 md:pt-6 lg:pt-0 lg:pb-0">
-          <div class="w-full rounded-[28px] bg-sber-gray-light p-5 md:p-6 lg:p-5 xl:p-6">
+          <div class="w-full rounded-[28px] bg-sber-gray-light p-5 md:p-6 lg:min-h-full lg:p-6 xl:p-7">
             <p class="text-sm font-semibold text-sber-green">Планирование, фокус и порядок</p>
             <h2 class="mt-2 text-xl font-bold text-sber-black lg:text-2xl lg:leading-tight">
               Все основные инструменты для работы с задачами в одном месте.
@@ -41,20 +41,20 @@
               Ведите списки задач, планируйте время в календаре, расставляйте приоритеты и сохраняйте фокус в течение дня.
             </p>
 
-            <div class="relative mt-4 grid grid-cols-2 items-start gap-2 sm:gap-3 lg:mt-4">
+            <div class="relative mt-4 grid grid-cols-2 items-start gap-2 sm:gap-3 lg:mt-5">
               <div
                 v-for="(metric, index) in metrics"
                 :key="metric"
-                class="flex min-h-[88px] min-w-0 items-center justify-center rounded-2xl bg-white px-2 py-3 text-center shadow-sm sm:px-3 lg:min-h-[76px]"
-                :class="{ 'sm:mt-6 lg:mt-5': index % 2 === 1 }"
+                class="flex min-h-[88px] min-w-0 items-center justify-center rounded-2xl bg-white px-2 py-3 text-center shadow-sm sm:px-3 lg:min-h-[92px] lg:px-4 lg:py-4"
+                :class="{ 'sm:mt-6 lg:mt-6': index % 2 === 1 }"
               >
-                <p class="w-full min-w-0 text-balance text-center text-[11px] font-bold uppercase leading-tight tracking-tight text-sber-black sm:text-sm lg:text-[13px]">
+                <p class="w-full min-w-0 text-balance text-center text-[11px] font-bold uppercase leading-tight tracking-tight text-sber-black sm:text-sm lg:text-sm">
                   {{ metric }}
                 </p>
               </div>
-              <div class="pointer-events-none absolute left-1/2 top-1/2 z-10 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sber-gray-light lg:h-14 lg:w-14">
-                <div class="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm lg:h-10 lg:w-10">
-                  <img :src="logoUrl" :alt="`${BRAND_NAME} logo`" class="h-7 w-7 brightness-0 lg:h-6 lg:w-6" />
+              <div class="pointer-events-none absolute left-1/2 top-1/2 z-10 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sber-gray-light lg:h-[72px] lg:w-[72px]">
+                <div class="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm lg:h-12 lg:w-12">
+                  <img :src="logoUrl" :alt="`${BRAND_NAME} logo`" class="h-7 w-7 brightness-0 lg:h-7 lg:w-7" />
                 </div>
               </div>
             </div>
