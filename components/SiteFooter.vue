@@ -41,14 +41,14 @@
       </div>
 
       <p class="mt-8 text-center text-xs text-sber-gray">
-        © {{ currentYear }} Otter. {{ SITE_LEGAL_INFO.businessName }}
+        © {{ currentYear }} {{ BRAND_NAME }}. {{ SITE_LEGAL_INFO.businessName }}
       </p>
     </div>
   </footer>
 </template>
 
 <script setup lang="ts">
-import { SITE_LEGAL_INFO } from '~/utils/site-info'
+import { BRAND_NAME, SITE_LEGAL_INFO } from '~/utils/site-info'
 import { STATIC_LEGAL_DOCUMENTS } from '~/utils/legal-static'
 
 const currentYear = 2026

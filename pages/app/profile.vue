@@ -71,7 +71,7 @@
             <button class="flex w-full items-center gap-3 rounded-2xl bg-sber-gray-light px-4 py-3 text-left" type="button" @click="premiumModal = true">
               <Crown class="h-5 w-5 text-yellow-500" />
               <div class="flex-1">
-                <p class="text-sm font-semibold text-sber-black">Otter Premium</p>
+                <p class="text-sm font-semibold text-sber-black">{{ BRAND_NAME }} Premium</p>
                 <p class="text-xs text-sber-gray">Расширенные возможности и синхронизация</p>
               </div>
               <ChevronRight class="h-4 w-4 text-sber-gray" />
@@ -223,7 +223,7 @@
         <div v-if="premiumModal" class="app-modal px-5 py-6" @click.stop>
           <div class="text-center mb-4">
             <div class="mb-3 text-4xl">⭐</div>
-            <h3 class="text-xl font-bold text-sber-black">Otter Premium</h3>
+            <h3 class="text-xl font-bold text-sber-black">{{ BRAND_NAME }} Premium</h3>
           </div>
           <p v-if="settingsStore.premiumFeaturesLoading" class="mb-4 text-center text-sm text-sber-gray">Загрузка…</p>
           <ul v-else class="mb-4 max-h-40 space-y-2 overflow-y-auto text-sm text-sber-black">
@@ -273,6 +273,7 @@
 
 <script setup lang="ts">
 import { ChevronLeft, Camera, Image, Settings, Crown, ChevronRight } from 'lucide-vue-next'
+import { BRAND_NAME } from '~/utils/site-info'
 import { getApiErrorMessage } from '~/utils/api'
 import { validateNewPassword } from '~/utils/password-policy'
 

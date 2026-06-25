@@ -1,3 +1,5 @@
+export const BRAND_NAME = 'ОТТЕР'
+
 export const SITE_LEGAL_INFO = {
   businessName: 'ИП Наринян А.Б.',
   email: 'nab1985nab@gmail.com',
@@ -8,7 +10,7 @@ export const SITE_LEGAL_INFO = {
 } as const
 
 export const PREMIUM_LANDING = {
-  title: 'Otter Premium',
+  title: `${BRAND_NAME} Premium`,
   price: 150,
   period: 'месяц',
   features: ['Календарь', 'Помодоро', 'Матрица Эйзенхауэра'],

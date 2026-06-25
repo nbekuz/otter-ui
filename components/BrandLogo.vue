@@ -1,6 +1,6 @@
 <template>
   <div class="inline-flex items-center gap-2" :class="centered ? 'justify-center' : ''">
-    <img :src="logoUrl" alt="Otter logo" :class="[logoClass, logoToneClass]" />
+    <img :src="logoUrl" :alt="`${BRAND_NAME} logo`" :class="[logoClass, logoToneClass]" />
     <span :class="[nameClassMap[showNameFrom], textClass, textSizeClass, 'font-bold tracking-tight']">
       {{ name }}
     </span>
@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+import { BRAND_NAME } from '~/utils/site-info'
 import logoUrl from '~/assets/img/logo.svg'
 
 const props = withDefaults(defineProps<{
@@ -17,7 +18,7 @@ const props = withDefaults(defineProps<{
   size?: 'sm' | 'md' | 'lg'
   centered?: boolean
 }>(), {
-  name: 'Otter',
+  name: BRAND_NAME,
   textClass: 'text-sber-black',
   showNameFrom: 'md',
   size: 'md',

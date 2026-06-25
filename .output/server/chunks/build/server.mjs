@@ -429,12 +429,12 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-9JN4VxW2.mjs')
+    component: () => import('./index-BZm4IW6S.mjs')
   },
   {
     name: "login",
     path: "/login",
-    component: () => import('./login-DiD7Gm6i.mjs')
+    component: () => import('./login-5m-X6qFJ.mjs')
   },
   {
     name: "matrix",
@@ -460,7 +460,7 @@ const _routes = [
   {
     name: "register",
     path: "/register",
-    component: () => import('./register-Cl1EZUcP.mjs')
+    component: () => import('./register-_H8wRd_Y.mjs')
   },
   {
     name: "settings",
@@ -471,13 +471,13 @@ const _routes = [
     name: "app",
     path: "/app",
     meta: __nuxt_page_meta$7 || {},
-    component: () => import('./index-DS192vMf.mjs')
+    component: () => import('./index-CQz7Fz6P.mjs')
   },
   {
     name: "app-legal",
     path: "/app/legal",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import('./legal-NFsr82Jk.mjs')
+    component: () => import('./legal-Ccl9QKhT.mjs')
   },
   {
     name: "app-matrix",
@@ -489,7 +489,7 @@ const _routes = [
     name: "app-profile",
     path: "/app/profile",
     meta: __nuxt_page_meta$4 || {},
-    component: () => import('./profile-Bydr__Bb.mjs')
+    component: () => import('./profile-BxUDrJSZ.mjs')
   },
   {
     name: "app-calendar",
@@ -513,12 +513,12 @@ const _routes = [
     name: "app-settings",
     path: "/app/settings",
     meta: __nuxt_page_meta || {},
-    component: () => import('./settings-S0XLaLly.mjs')
+    component: () => import('./settings-CaAgX-1N.mjs')
   },
   {
     name: "legal-slug",
     path: "/legal/:slug()",
-    component: () => import('./_slug_-D1a9ZTtC.mjs')
+    component: () => import('./_slug_-r6L6d4uh.mjs')
   },
   {
     name: "profile-fill",
@@ -2264,14 +2264,6 @@ const matrixBlockDefaults = {
     priorityFilter: ["low", "none"]
   }
 };
-const soundOptions = [
-  { id: "bell", name: "Колокольчик", icon: "🔔" },
-  { id: "chime", name: "Перезвон", icon: "🎵" },
-  { id: "success", name: "Успех", icon: "✅" },
-  { id: "ding", name: "Динь", icon: "🔊" },
-  { id: "soft", name: "Мягкий", icon: "🎶" },
-  { id: "none", name: "Без звука", icon: "🔇" }
-];
 function normalizeBottomNavItems(items) {
   const withoutSettings = items.filter((id) => id !== "settings");
   return [...withoutSettings, "settings"];
@@ -2694,7 +2686,7 @@ const globalMiddleware = [
   manifest_45route_45rule
 ];
 const namedMiddleware = {
-  auth: () => import('./auth-B7AEK2pI.mjs')
+  auth: () => import('./auth-nNFHWeiS.mjs')
 };
 const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:router",
@@ -3056,7 +3048,7 @@ _sfc_main$3.setup = (props, ctx) => {
 };
 const __nuxt_component_0 = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-ee22b97d"]]);
 const layouts = {
-  app: defineAsyncComponent(() => import('./app-xb-4vWOO.mjs').then((m) => m.default || m)),
+  app: defineAsyncComponent(() => import('./app-DAEO106w.mjs').then((m) => m.default || m)),
   default: defineAsyncComponent(() => import('./default-DE7Yy99t.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
@@ -3430,5 +3422,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { useNuxtApp as A, useRuntimeConfig as B, nuxtLinkDefaults as C, _export_sfc as _, useState as a, useSettingsStore as b, useTasksStore as c, useRoute as d, entry_default as default, useAppToast as e, defineStore as f, getTaskScheduleStart as g, getTaskDurationMinutes as h, formatMinutesToTime as i, addMinutesToTime as j, defaultPomodoroSettings as k, apiGet as l, matrixBlockDefaults as m, navigateTo as n, onClickOutside as o, parseTimeToMinutes as p, apiPatch as q, apiPost as r, soundOptions as s, getApiErrorMessage as t, useAuthStore as u, tryUseNuxtApp as v, useRouter as w, defineNuxtRouteMiddleware as x, encodeRoutePath as y, resolveRouteObject as z };
+export { useRuntimeConfig as A, nuxtLinkDefaults as B, _export_sfc as _, useState as a, useSettingsStore as b, useTasksStore as c, useRoute as d, entry_default as default, useAppToast as e, defineStore as f, getTaskScheduleStart as g, getTaskDurationMinutes as h, formatMinutesToTime as i, addMinutesToTime as j, defaultPomodoroSettings as k, apiGet as l, matrixBlockDefaults as m, navigateTo as n, onClickOutside as o, parseTimeToMinutes as p, apiPatch as q, apiPost as r, getApiErrorMessage as s, tryUseNuxtApp as t, useAuthStore as u, useRouter as v, defineNuxtRouteMiddleware as w, encodeRoutePath as x, resolveRouteObject as y, useNuxtApp as z };
 //# sourceMappingURL=server.mjs.map

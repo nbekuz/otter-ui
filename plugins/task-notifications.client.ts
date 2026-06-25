@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import { BRAND_NAME } from '~/utils/site-info'
 
 const firedKeys = new Set<string>()
 
@@ -49,7 +50,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       firedKeys.add(dueKey)
       try {
-        new Notification('Otter — напоминание', {
+        new Notification(`${BRAND_NAME} — напоминание`, {
           body: task.title,
           icon: '/favicon.ico',
           tag: dueKey,

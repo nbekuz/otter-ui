@@ -91,6 +91,7 @@
 
 <script setup lang="ts">
 import { Calendar, CheckSquare, Crown, Grid2x2, HelpCircle, List, Plus, Settings, Share2, Timer } from 'lucide-vue-next'
+import { BRAND_NAME } from '~/utils/site-info'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -123,7 +124,7 @@ const sidebarNavItems = computed(() => {
 
 function shareApp() {
   if (navigator.share) {
-    void navigator.share({ title: 'Otter - Планировщик', url: window.location.origin })
+    void navigator.share({ title: `${BRAND_NAME} - Планировщик`, url: window.location.origin })
   }
 }
 

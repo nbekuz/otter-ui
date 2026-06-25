@@ -41,7 +41,7 @@ export { resolveMediaUrl } from '../utils/media';
 export { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH, validateNewPassword } from '../utils/password-policy';
 export { stopEffectAudio, stopBackgroundAudio, pauseBackgroundAudio, playBackgroundLoop, playSoundOnce } from '../utils/pomodoro-audio';
 export { PRIORITY_COLORS, priorityColor } from '../utils/priority-colors';
-export { SITE_LEGAL_INFO, PREMIUM_LANDING } from '../utils/site-info';
+export { BRAND_NAME, SITE_LEGAL_INFO, PREMIUM_LANDING } from '../utils/site-info';
 export { apiTaskToUi, uiTaskToApiPayload, uiTaskToFormData, groupKeyToUi, apiMatrixBlockToUi } from '../utils/task-mapper';
 export { parseApiWallClock, parseTimeToMinutes, formatMinutesToTime, addMinutesToTime, DURATION_END_AFTER_START_MESSAGE, validateDurationFields, getTaskScheduleStart, getTaskDurationMinutes } from '../utils/time';
 export { useAuthStore } from '../stores/auth';

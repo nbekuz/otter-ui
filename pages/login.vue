@@ -5,7 +5,7 @@
       <div class="hidden lg:flex lg:flex-col lg:justify-between lg:border-r lg:border-sber-gray-light lg:bg-white lg:p-10 lg:text-sber-black">
         <div>
           <NuxtLink to="/" class="inline-flex">
-            <img :src="logoUrl" alt="Otter logo" class="h-11 w-11 rounded-2xl brightness-0" />
+            <img :src="logoUrl" :alt="`${BRAND_NAME} logo`" class="h-11 w-11 rounded-2xl brightness-0" />
           </NuxtLink>
           <h1 class="mt-6 text-4xl font-bold leading-tight text-sber-black">Пару кликов, и задача готова. Ничего лишнего.</h1>
           <p class="mt-4 max-w-md text-sm leading-7 text-sber-gray">
@@ -28,7 +28,7 @@
             </div>
             <div class="pointer-events-none absolute left-1/2 top-1/2 z-20 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sber-gray-light/95">
               <div class="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-white shadow-sm">
-                <img :src="logoUrl" alt="Otter logo" class="h-8 w-8 brightness-0" />
+                <img :src="logoUrl" :alt="`${BRAND_NAME} logo`" class="h-8 w-8 brightness-0" />
               </div>
             </div>
           </div>
@@ -45,7 +45,7 @@
 
         <div class="flex-1 px-4 pt-6 pb-10 sm:px-6 lg:px-8">
           <p class="mb-8 text-sm leading-relaxed text-sber-gray">
-            Введите данные вашей учётной записи для входа в Otter
+            Введите данные вашей учётной записи для входа в {{ BRAND_NAME }}
           </p>
 
           <form class="space-y-4" @submit.prevent="handleLogin">
@@ -268,6 +268,7 @@
 
 <script setup lang="ts">
 import { ChevronLeft, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-vue-next'
+import { BRAND_NAME } from '~/utils/site-info'
 import logoUrl from '~/assets/img/logo.svg'
 import { validateNewPassword } from '~/utils/password-policy'
 import { clearRememberedLogin, readRememberedLogin, writeRememberedLogin } from '~/utils/auth-session'

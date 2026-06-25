@@ -348,7 +348,7 @@
         <div v-if="premiumModal" class="app-modal px-5 py-6" @click.stop>
           <div class="text-center mb-6">
             <div class="text-4xl mb-3">⭐</div>
-            <h3 class="text-xl font-bold text-sber-black">Otter Premium</h3>
+            <h3 class="text-xl font-bold text-sber-black">{{ BRAND_NAME }} Premium</h3>
             <p class="text-sm text-sber-gray mt-1">Больше функций в приложении</p>
           </div>
           <p v-if="settingsStore.premiumFeaturesLoading" class="mb-4 text-center text-sm text-sber-gray">
@@ -561,7 +561,7 @@ import {
   CheckSquare, Calendar, Grid2x2, Timer, Settings
 } from 'lucide-vue-next'
 import { Moon, Sun } from 'lucide-vue-next'
-import { soundOptions } from '~/data/mockData'
+import { BRAND_NAME } from '~/utils/site-info'
 import { getApiErrorMessage } from '~/utils/api'
 import { validateNewPassword } from '~/utils/password-policy'
 
@@ -699,7 +699,7 @@ function pickAvatarFromGallery() {
 
 function shareApp() {
   if (navigator.share) {
-    navigator.share({ title: 'Otter - Планировщик', url: window.location.origin })
+    navigator.share({ title: `${BRAND_NAME} - Планировщик`, url: window.location.origin })
   } else {
     showComingSoon()
   }

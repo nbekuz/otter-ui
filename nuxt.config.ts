@@ -41,10 +41,10 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   app: {
     head: {
-      title: 'Otter - Планировщик задач',
+      title: 'ОТТЕР - Планировщик задач',
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1' },
-        { name: 'description', content: 'Otter - умный планировщик задач' },
+        { name: 'description', content: 'ОТТЕР - умный планировщик задач' },
         { name: 'theme-color', content: '#21A038' },
       ],
       link: [
