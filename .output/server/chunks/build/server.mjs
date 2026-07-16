@@ -429,12 +429,12 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-Bp9_sOzf.mjs')
+    component: () => import('./index-DWl7XCW8.mjs')
   },
   {
     name: "login",
     path: "/login",
-    component: () => import('./login-D9jkEdZf.mjs')
+    component: () => import('./login-bz9Eo1dO.mjs')
   },
   {
     name: "matrix",
@@ -460,7 +460,7 @@ const _routes = [
   {
     name: "register",
     path: "/register",
-    component: () => import('./register-BkU8kmvO.mjs')
+    component: () => import('./register-Bsh3vErb.mjs')
   },
   {
     name: "settings",
@@ -471,54 +471,54 @@ const _routes = [
     name: "app",
     path: "/app",
     meta: __nuxt_page_meta$7 || {},
-    component: () => import('./index-CQz7Fz6P.mjs')
+    component: () => import('./index-B0ZtAARQ.mjs')
   },
   {
     name: "app-legal",
     path: "/app/legal",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import('./legal-Ccl9QKhT.mjs')
+    component: () => import('./legal-B7ZCpL8t.mjs')
   },
   {
     name: "app-matrix",
     path: "/app/matrix",
     meta: __nuxt_page_meta$5 || {},
-    component: () => import('./matrix-Cbmr3ZYC.mjs')
+    component: () => import('./matrix-wDFmHZmR.mjs')
   },
   {
     name: "app-profile",
     path: "/app/profile",
     meta: __nuxt_page_meta$4 || {},
-    component: () => import('./profile-BxUDrJSZ.mjs')
+    component: () => import('./profile-DKykqZgH.mjs')
   },
   {
     name: "app-calendar",
     path: "/app/calendar",
     meta: __nuxt_page_meta$3 || {},
-    component: () => import('./calendar-DqERtExy.mjs')
+    component: () => import('./calendar-Ct9chL9b.mjs')
   },
   {
     name: "app-new-task",
     path: "/app/new-task",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./new-task-Dk3n6wqr.mjs')
+    component: () => import('./new-task-BzZkgQqB.mjs')
   },
   {
     name: "app-pomodoro",
     path: "/app/pomodoro",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./pomodoro-Bx92tIB5.mjs')
+    component: () => import('./pomodoro-DmfJotY5.mjs')
   },
   {
     name: "app-settings",
     path: "/app/settings",
     meta: __nuxt_page_meta || {},
-    component: () => import('./settings-DnDAdd3k.mjs')
+    component: () => import('./settings-BN2Yo3ZB.mjs')
   },
   {
     name: "legal-slug",
     path: "/legal/:slug()",
-    component: () => import('./_slug_-r6L6d4uh.mjs')
+    component: () => import('./_slug_-C4ctSTev.mjs')
   },
   {
     name: "profile-fill",
@@ -2453,11 +2453,24 @@ const useSettingsStore = /* @__PURE__ */ defineStore("settings", () => {
   async function reorderNavItems(items) {
     await updateSettings({ bottomNavItems: normalizeBottomNavItems(items) });
   }
-  async function premiumCheckout(tariff = "monthly") {
-    return apiPost("premium/checkout/", { tariff });
+  async function premiumCheckout(tariff = "monthly", consent) {
+    return apiPost("premium/checkout/", {
+      tariff,
+      recurring_consent: consent?.accepted ?? false,
+      offer_version: consent?.offerVersion,
+      consent_text: consent?.consentText
+    });
   }
   async function premiumActivate() {
     const updated = await apiPost("premium/activate/");
+    appSettings.value = { ...appSettings.value, ...apiToAppSettings(updated) };
+    isPremium.value = updated.is_premium;
+    premiumActivatedAt.value = updated.premium_activated_at;
+    syncPremiumToAuth(updated);
+    return updated;
+  }
+  async function premiumCancel() {
+    const updated = await apiPost("premium/cancel/");
     appSettings.value = { ...appSettings.value, ...apiToAppSettings(updated) };
     isPremium.value = updated.is_premium;
     premiumActivatedAt.value = updated.premium_activated_at;
@@ -2491,7 +2504,8 @@ const useSettingsStore = /* @__PURE__ */ defineStore("settings", () => {
     updateMatrixBlock,
     reorderNavItems,
     premiumCheckout,
-    premiumActivate
+    premiumActivate,
+    premiumCancel
   };
 });
 const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
@@ -2634,13 +2648,21 @@ const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
   function updateName(name) {
     if (user.value) user.value.name = name;
   }
-  async function startPremiumCheckout(tariff = "monthly") {
+  async function startPremiumCheckout(tariff = "monthly", consent) {
     const settingsStore = useSettingsStore();
-    return settingsStore.premiumCheckout(tariff);
+    return settingsStore.premiumCheckout(tariff, consent);
   }
   async function activatePremium() {
     const settingsStore = useSettingsStore();
     await settingsStore.premiumActivate();
+    if (user.value) {
+      user.value.isPremium = settingsStore.isPremium;
+      user.value.premiumExpiresAt = settingsStore.premiumActivatedAt || void 0;
+    }
+  }
+  async function cancelPremiumSubscription() {
+    const settingsStore = useSettingsStore();
+    await settingsStore.premiumCancel();
     if (user.value) {
       user.value.isPremium = settingsStore.isPremium;
       user.value.premiumExpiresAt = settingsStore.premiumActivatedAt || void 0;
@@ -2669,7 +2691,8 @@ const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
     updateAvatar,
     updateName,
     startPremiumCheckout,
-    activatePremium
+    activatePremium,
+    cancelPremiumSubscription
   };
 });
 const app_45auth_45global = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
@@ -3048,7 +3071,7 @@ _sfc_main$3.setup = (props, ctx) => {
 };
 const __nuxt_component_0 = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-ee22b97d"]]);
 const layouts = {
-  app: defineAsyncComponent(() => import('./app-nCinP-Jy.mjs').then((m) => m.default || m)),
+  app: defineAsyncComponent(() => import('./app-ChwCPMUq.mjs').then((m) => m.default || m)),
   default: defineAsyncComponent(() => import('./default-DE7Yy99t.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
@@ -3422,5 +3445,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { useRuntimeConfig as A, nuxtLinkDefaults as B, _export_sfc as _, useState as a, useSettingsStore as b, useTasksStore as c, useRoute as d, entry_default as default, useAppToast as e, defineStore as f, getTaskScheduleStart as g, getTaskDurationMinutes as h, formatMinutesToTime as i, addMinutesToTime as j, defaultPomodoroSettings as k, apiGet as l, matrixBlockDefaults as m, navigateTo as n, onClickOutside as o, parseTimeToMinutes as p, apiPatch as q, apiPost as r, getApiErrorMessage as s, tryUseNuxtApp as t, useAuthStore as u, useRouter as v, defineNuxtRouteMiddleware as w, encodeRoutePath as x, resolveRouteObject as y, useNuxtApp as z };
+export { useRuntimeConfig as A, nuxtLinkDefaults as B, _export_sfc as _, useState as a, useSettingsStore as b, useTasksStore as c, useRoute as d, entry_default as default, useAppToast as e, defineStore as f, getApiErrorMessage as g, getTaskScheduleStart as h, getTaskDurationMinutes as i, formatMinutesToTime as j, addMinutesToTime as k, defaultPomodoroSettings as l, matrixBlockDefaults as m, navigateTo as n, onClickOutside as o, parseTimeToMinutes as p, apiGet as q, apiPatch as r, apiPost as s, tryUseNuxtApp as t, useAuthStore as u, useRouter as v, defineNuxtRouteMiddleware as w, encodeRoutePath as x, resolveRouteObject as y, useNuxtApp as z };
 //# sourceMappingURL=server.mjs.map

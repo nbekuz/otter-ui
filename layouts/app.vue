@@ -22,7 +22,7 @@
             :key="item.id"
             :to="item.to"
             class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors"
-            :class="isActive(item.to)
+            :class="isActive(item)
               ? 'bg-sber-green text-white shadow-sm'
               : isDarkTheme
                 ? 'text-slate-300 hover:bg-[#20242d] hover:text-white'
@@ -90,37 +90,23 @@
 </template>
 
 <script setup lang="ts">
-import { Calendar, CheckSquare, Crown, Grid2x2, HelpCircle, List, Plus, Settings, Share2, Timer } from 'lucide-vue-next'
+import { Calendar, CheckSquare, Grid2x2, HelpCircle, Plus, Settings, Share2, Timer } from 'lucide-vue-next'
 import { BRAND_NAME } from '~/utils/site-info'
 
 const route = useRoute()
-const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
-const isTasksPage = computed(() => route.path === '/app')
 
-const allNavItems = [
+/** Desktop sidebar — doim bir xil; mobil pastki menyu (bottomNavItems) ga bog‘lanmaydi */
+const sidebarNavItems = [
   { id: 'tasks', to: '/app', icon: CheckSquare, label: 'Задачи' },
   { id: 'calendar', to: '/app/calendar', icon: Calendar, label: 'Календарь' },
   { id: 'matrix', to: '/app/matrix', icon: Grid2x2, label: 'Матрица' },
   { id: 'pomodoro', to: '/app/pomodoro', icon: Timer, label: 'Помодоро' },
   { id: 'settings', to: '/app/settings', icon: Settings, label: 'Настройки' },
-]
+] as const
 
-const sidebarExtraItems = [
-  { id: 'all-tasks', to: '/app?group=all', icon: List, label: 'Все задачи' },
-  { id: 'premium', to: '/app/settings?openPremium=1', icon: Crown, label: 'Premium' },
-]
-
-const sidebarNavItems = computed(() => {
-  const order = settingsStore.appSettings.bottomNavItems || []
-  const byId = new Map(allNavItems.map(item => [item.id, item]))
-  const ordered = order.map(id => byId.get(id)).filter(Boolean) as typeof allNavItems
-  if (!ordered.some(item => item.id === 'settings')) {
-    ordered.push(byId.get('settings')!)
-  }
-  return [...ordered, ...sidebarExtraItems]
-})
+type SidebarNavItem = (typeof sidebarNavItems)[number]
 
 function shareApp() {
   if (navigator.share) {
@@ -128,15 +114,14 @@ function shareApp() {
   }
 }
 
-function isActive(to: string) {
-  if (to.startsWith('/app?group=all')) {
-    return route.path === '/app' && route.query.group === 'all'
-  }
-  if (to.startsWith('/app/settings')) {
+function isActive(item: SidebarNavItem) {
+  if (item.id === 'settings') {
     return route.path.startsWith('/app/settings')
   }
-  if (to === '/app') return route.path === '/app' && route.query.group !== 'all'
-  return route.path.startsWith(to)
+  if (item.to === '/app') {
+    return route.path === '/app'
+  }
+  return route.path.startsWith(item.to)
 }
 
 function openNewTask() {

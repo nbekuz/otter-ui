@@ -539,6 +539,7 @@ import {
   CheckSquare, Calendar, Grid2x2, Timer, Settings
 } from 'lucide-vue-next'
 import { Moon, Sun } from 'lucide-vue-next'
+import { soundOptions } from '~/data/mockData'
 import { BRAND_NAME } from '~/utils/site-info'
 import { getApiErrorMessage } from '~/utils/api'
 import { validateNewPassword } from '~/utils/password-policy'
@@ -625,6 +626,19 @@ watch(
   },
   { immediate: true },
 )
+
+watch(premiumModal, (open) => {
+  if (open) {
+    void premiumStore.loadAll()
+    return
+  }
+  // Modal yopilganda query ni tozalaymiz — Premium yana bosilganda ochiladi
+  if (route.query.openPremium != null) {
+    const nextQuery = { ...route.query }
+    delete nextQuery.openPremium
+    void navigateTo({ path: '/app/settings', query: nextQuery }, { replace: true })
+  }
+})
 
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
@@ -817,10 +831,6 @@ async function runStubAction() {
     showToast(getApiErrorMessage(err), 'error')
   }
 }
-
-watch(premiumModal, (open) => {
-  if (open) void premiumStore.loadAll()
-})
 
 async function onPremiumTrial(payload: { tariff: string; recurringConsent: boolean }) {
   try {

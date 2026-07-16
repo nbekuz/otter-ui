@@ -76,7 +76,7 @@ function createHead(options = {}) {
 
 const NUXT_RUNTIME_PAYLOAD_EXTRACTION = false;
 
-const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1, maximum-scale=1"},{"name":"description","content":"ОТТЕР - умный планировщик задач"},{"name":"theme-color","content":"#21A038"}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"}],"style":[],"script":[],"noscript":[],"title":"ОТТЕР - Планировщик задач"};
+const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1, maximum-scale=1"},{"name":"description","content":"ОТТЕР - умный планировщик задач"},{"name":"theme-color","content":"#21A038"}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"},{"rel":"icon","type":"image/svg+xml","href":"/favicon.svg"}],"style":[],"script":[],"noscript":[],"title":"ОТТЕР - Планировщик задач"};
 
 const appRootTag = "div";
 
@@ -482,5 +482,5 @@ const renderer = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: handler
 }, Symbol.toStringTag, { value: 'Module' }));
 
-export { baseURL as b, headSymbol as h, renderer as r, useHead as u };
+export { buildAssetsURL as a, baseURL as b, headSymbol as h, renderer as r, useHead as u };
 //# sourceMappingURL=renderer.mjs.map

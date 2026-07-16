@@ -8,6 +8,7 @@ declare global {
   const PASSWORD_MAX_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MAX_LENGTH
   const PASSWORD_MIN_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MIN_LENGTH
   const PREMIUM_LANDING: typeof import('../../utils/site-info').PREMIUM_LANDING
+  const PREMIUM_SUBSCRIPTION: typeof import('../../utils/site-info').PREMIUM_SUBSCRIPTION
   const PRIORITY_COLORS: typeof import('../../utils/priority-colors').PRIORITY_COLORS
   const REFRESH_TOKEN_KEY: typeof import('../../utils/auth-session').REFRESH_TOKEN_KEY
   const SITE_LEGAL_INFO: typeof import('../../utils/site-info').SITE_LEGAL_INFO
@@ -326,6 +327,7 @@ declare global {
   const usePreferredDark: typeof import('@vueuse/core').usePreferredDark
   const usePreferredLanguages: typeof import('@vueuse/core').usePreferredLanguages
   const usePreferredReducedMotion: typeof import('@vueuse/core').usePreferredReducedMotion
+  const usePremiumStore: typeof import('../../stores/premium').usePremiumStore
   const usePreviewMode: typeof import('../../node_modules/nuxt/dist/app/composables/preview').usePreviewMode
   const usePrevious: typeof import('@vueuse/core').usePrevious
   const useRafFn: typeof import('@vueuse/core').useRafFn
@@ -488,6 +490,7 @@ declare module 'vue' {
     readonly PASSWORD_MAX_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MAX_LENGTH']>
     readonly PASSWORD_MIN_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MIN_LENGTH']>
     readonly PREMIUM_LANDING: UnwrapRef<typeof import('../../utils/site-info')['PREMIUM_LANDING']>
+    readonly PREMIUM_SUBSCRIPTION: UnwrapRef<typeof import('../../utils/site-info')['PREMIUM_SUBSCRIPTION']>
     readonly PRIORITY_COLORS: UnwrapRef<typeof import('../../utils/priority-colors')['PRIORITY_COLORS']>
     readonly REFRESH_TOKEN_KEY: UnwrapRef<typeof import('../../utils/auth-session')['REFRESH_TOKEN_KEY']>
     readonly SITE_LEGAL_INFO: UnwrapRef<typeof import('../../utils/site-info')['SITE_LEGAL_INFO']>
@@ -806,6 +809,7 @@ declare module 'vue' {
     readonly usePreferredDark: UnwrapRef<typeof import('@vueuse/core')['usePreferredDark']>
     readonly usePreferredLanguages: UnwrapRef<typeof import('@vueuse/core')['usePreferredLanguages']>
     readonly usePreferredReducedMotion: UnwrapRef<typeof import('@vueuse/core')['usePreferredReducedMotion']>
+    readonly usePremiumStore: UnwrapRef<typeof import('../../stores/premium')['usePremiumStore']>
     readonly usePreviewMode: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preview')['usePreviewMode']>
     readonly usePrevious: UnwrapRef<typeof import('@vueuse/core')['usePrevious']>
     readonly useRafFn: UnwrapRef<typeof import('@vueuse/core')['useRafFn']>

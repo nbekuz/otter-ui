@@ -22,6 +22,7 @@ interface _GlobalComponents {
   LegalAcceptanceText: typeof import("../../components/LegalAcceptanceText.vue")['default']
   LegalDocumentBody: typeof import("../../components/LegalDocumentBody.vue")['default']
   OtterCheckbox: typeof import("../../components/OtterCheckbox.vue")['default']
+  PremiumSubscriptionPanel: typeof import("../../components/PremiumSubscriptionPanel.vue")['default']
   SiteFooter: typeof import("../../components/SiteFooter.vue")['default']
   TimeFieldRu: typeof import("../../components/TimeFieldRu.vue")['default']
   LayoutBottomNav: typeof import("../../components/layout/BottomNav.vue")['default']
@@ -60,6 +61,7 @@ interface _GlobalComponents {
   LazyLegalAcceptanceText: LazyComponent<typeof import("../../components/LegalAcceptanceText.vue")['default']>
   LazyLegalDocumentBody: LazyComponent<typeof import("../../components/LegalDocumentBody.vue")['default']>
   LazyOtterCheckbox: LazyComponent<typeof import("../../components/OtterCheckbox.vue")['default']>
+  LazyPremiumSubscriptionPanel: LazyComponent<typeof import("../../components/PremiumSubscriptionPanel.vue")['default']>
   LazySiteFooter: LazyComponent<typeof import("../../components/SiteFooter.vue")['default']>
   LazyTimeFieldRu: LazyComponent<typeof import("../../components/TimeFieldRu.vue")['default']>
   LazyLayoutBottomNav: LazyComponent<typeof import("../../components/layout/BottomNav.vue")['default']>
