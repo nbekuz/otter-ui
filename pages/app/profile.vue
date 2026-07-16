@@ -225,29 +225,23 @@
             <div class="mb-3 text-4xl">⭐</div>
             <h3 class="text-xl font-bold text-sber-black">{{ BRAND_NAME }} Premium</h3>
           </div>
-          <p v-if="settingsStore.premiumFeaturesLoading" class="mb-4 text-center text-sm text-sber-gray">Загрузка…</p>
-          <ul v-else class="mb-4 max-h-40 space-y-2 overflow-y-auto text-sm text-sber-black">
-            <li v-for="feat in settingsStore.premiumFeatures" :key="feat.key">• {{ feat.title }}</li>
-          </ul>
-          <button
-            v-if="!authStore.user?.isPremium"
-            class="w-full rounded-2xl bg-gradient-to-r from-yellow-400 to-yellow-600 py-4 font-bold text-white disabled:opacity-60"
-            type="button"
-            :disabled="premiumCheckoutLoading"
-            @click="purchasePremium"
-          >
-            {{ premiumCheckoutLoading ? 'Открываем оплату…' : 'Оплатить Premium' }}
-          </button>
-          <button
-            v-if="!authStore.user?.isPremium"
-            class="btn-secondary mt-2 w-full"
-            type="button"
-            :disabled="premiumActivateLoading"
-            @click="confirmPremiumPayment"
-          >
-            {{ premiumActivateLoading ? 'Активация…' : 'Я оплатил — активировать' }}
-          </button>
-          <p v-else class="text-center text-sm font-semibold text-sber-green">Premium активен</p>
+          <PremiumSubscriptionPanel
+            :features="premiumStore.features"
+            :features-loading="premiumStore.featuresLoading"
+            :tariffs="premiumStore.tariffs"
+            :tariffs-loading="premiumStore.tariffsLoading"
+            :selected-tariff-code="premiumStore.selectedTariffCode"
+            :subscription="premiumStore.subscription"
+            :is-premium="premiumStore.isPremium"
+            :expires-label="premiumExpiresLabel"
+            :action-loading="premiumStore.actionLoading"
+            :refresh-loading="premiumRefreshLoading"
+            @select-tariff="premiumStore.selectTariff"
+            @trial="onPremiumTrial"
+            @checkout="onPremiumCheckout"
+            @refresh="onPremiumRefresh"
+            @cancel="cancelPremiumSubscription"
+          />
           <button class="btn-secondary mt-3 w-full" type="button" @click="premiumModal = false">Закрыть</button>
         </div>
       </Transition>
@@ -281,14 +275,14 @@ definePageMeta({ layout: 'app' })
 
 const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
+const premiumStore = usePremiumStore()
 const { showToast } = useAppToast()
 
 const nameModal = ref(false)
 const passwordModal = ref(false)
 const avatarModal = ref(false)
 const premiumModal = ref(false)
-const premiumCheckoutLoading = ref(false)
-const premiumActivateLoading = ref(false)
+const premiumRefreshLoading = ref(false)
 const showLogout = ref(false)
 
 const avatarCameraInputRef = ref<HTMLInputElement | null>(null)
@@ -322,7 +316,7 @@ const initials = computed(() => {
 })
 
 const premiumExpiresLabel = computed(() => {
-  const expiresAt = authStore.user?.premiumExpiresAt
+  const expiresAt = premiumStore.expiresAt || authStore.user?.premiumExpiresAt
   if (!expiresAt) return ''
 
   const date = new Date(expiresAt)
@@ -506,36 +500,59 @@ async function handleDeviceAvatarChange(event: Event) {
 }
 
 watch(premiumModal, (open) => {
-  if (open) void settingsStore.fetchPremiumFeatures()
+  if (open) void premiumStore.loadAll()
 })
 
-async function purchasePremium() {
-  premiumCheckoutLoading.value = true
+async function onPremiumTrial(payload: { tariff: string; recurringConsent: boolean }) {
   try {
-    const { checkout_url } = await authStore.startPremiumCheckout()
-    window.open(checkout_url, '_blank', 'noopener,noreferrer')
-    showToast('После оплаты нажмите «Я оплатил — активировать».', 'success', 6000)
+    await premiumStore.startTrial(payload.tariff, payload.recurringConsent)
+    showToast('Пробный период Premium активирован', 'success')
   }
   catch (err) {
     showToast(getApiErrorMessage(err), 'error')
-  }
-  finally {
-    premiumCheckoutLoading.value = false
   }
 }
 
-async function confirmPremiumPayment() {
-  premiumActivateLoading.value = true
+async function onPremiumCheckout(payload: { tariff: string; recurringConsent: boolean }) {
   try {
-    await authStore.activatePremium()
-    showToast('Premium активирован', 'success')
-    premiumModal.value = false
+    const { checkout_url } = await premiumStore.checkout(payload.tariff, {
+      recurringConsent: payload.recurringConsent,
+    })
+    window.open(checkout_url, '_blank', 'noopener,noreferrer')
+    showToast('Откройте вкладку оплаты Robokassa. После оплаты нажмите «обновить статус».', 'success', 6000)
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err), 'error')
+  }
+}
+
+async function onPremiumRefresh() {
+  premiumRefreshLoading.value = true
+  try {
+    const sub = await premiumStore.fetchSubscription()
+    if (sub.is_premium) {
+      showToast('Premium активен', 'success')
+      premiumModal.value = false
+    }
+    else {
+      showToast('Оплата ещё не подтверждена. Подождите немного и обновите снова.', 'error')
+    }
   }
   catch (err) {
     showToast(getApiErrorMessage(err), 'error')
   }
   finally {
-    premiumActivateLoading.value = false
+    premiumRefreshLoading.value = false
+  }
+}
+
+async function cancelPremiumSubscription() {
+  try {
+    await premiumStore.cancel()
+    showToast('Автопродление отключено. Доступ сохранится до конца периода.', 'success')
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err), 'error')
   }
 }
 </script>

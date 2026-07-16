@@ -156,6 +156,7 @@ const docTypeLabels: Record<string, string> = {
   privacy: 'Политика конфиденциальности',
   terms: 'Пользовательское соглашение',
   license: 'Лицензия',
+  consent: 'Согласие на обработку данных',
 }
 
 function docTypeLabel(type: string) {

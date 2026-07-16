@@ -97,6 +97,7 @@ export interface ApiAppSettings {
   vibration_enabled: boolean
   is_premium: boolean
   premium_activated_at: string | null
+  premium_until?: string | null
 }
 
 export interface ApiHelpItem {
@@ -116,6 +117,61 @@ export interface ApiPremiumFeature {
   title: string
   is_premium: boolean
   is_enabled: boolean
+}
+
+export interface ApiTariff {
+  code: string
+  title: string
+  description: string
+  price: string
+  currency: string
+  duration_days: number
+  promo_days: number
+  is_recurring: boolean
+  sort_order: number
+}
+
+export type ApiSubscriptionStatus =
+  | 'none'
+  | 'trial'
+  | 'active'
+  | 'past_due'
+  | 'cancelled'
+  | 'expired'
+
+export interface ApiSubscription {
+  status: ApiSubscriptionStatus
+  tariff: ApiTariff | null
+  promo_until: string | null
+  premium_until: string | null
+  recurring_enabled: boolean
+  cancelled_at: string | null
+  is_premium: boolean
+  updated_at: string
+}
+
+export interface ApiPremiumCheckoutConsent {
+  recurring_consent: boolean
+  offer_version?: string
+  consent_text?: string
+}
+
+export interface ApiPremiumPayment {
+  invoice_id: number
+  tariff: string
+  amount: string
+  currency: string
+  kind: 'one_time' | 'initial' | 'recurring'
+  status: 'pending' | 'paid' | 'failed' | 'cancelled'
+  checkout_url: string
+  paid_at: string | null
+  created_at: string
+}
+
+export interface ApiPremiumCheckoutResponse {
+  checkout_url: string
+  provider: string
+  payment?: ApiPremiumPayment
 }
 
 export type ApiPomodoroSessionState = 'idle' | 'running' | 'paused' | 'stopped' | 'completed'

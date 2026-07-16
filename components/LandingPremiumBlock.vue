@@ -15,7 +15,7 @@
           <span class="text-sm font-medium text-sber-gray">/ {{ PREMIUM_LANDING.period }}</span>
         </p>
         <p class="mt-1 text-xs text-sber-gray lg:text-[13px]">
-          Расширенный доступ к разделам:
+          Расширенный доступ к разделам. Подписка с автопродлением — {{ PREMIUM_SUBSCRIPTION.price }} ₽/{{ PREMIUM_SUBSCRIPTION.period }}.
         </p>
         <ul class="mt-2 flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:gap-x-4 sm:gap-y-1">
           <li
@@ -36,5 +36,5 @@
 
 <script setup lang="ts">
 import { Check, Crown } from 'lucide-vue-next'
-import { PREMIUM_LANDING } from '~/utils/site-info'
+import { PREMIUM_LANDING, PREMIUM_SUBSCRIPTION } from '~/utils/site-info'
 </script>

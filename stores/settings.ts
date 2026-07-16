@@ -96,7 +96,9 @@ function syncPremiumToAuth(settings: ApiAppSettings) {
   const authStore = useAuthStore()
   if (authStore.user) {
     authStore.user.isPremium = settings.is_premium
-    authStore.user.premiumExpiresAt = settings.premium_activated_at || undefined
+    authStore.user.premiumExpiresAt = settings.premium_until
+      || settings.premium_activated_at
+      || undefined
   }
 }
 
@@ -194,7 +196,8 @@ export const useSettingsStore = defineStore('settings', () => {
       }
       matrixBlocks.value = apiMatrixToBlocks(matrixSettings)
       isPremium.value = settings.is_premium
-      premiumActivatedAt.value = settings.premium_activated_at
+      premiumActivatedAt.value = settings.premium_until
+        || settings.premium_activated_at
       syncPremiumToAuth(settings)
     }
     catch (err) {
@@ -258,19 +261,6 @@ export const useSettingsStore = defineStore('settings', () => {
     await updateSettings({ bottomNavItems: normalizeBottomNavItems(items) })
   }
 
-  async function premiumCheckout(tariff = 'monthly') {
-    return apiPost<{ checkout_url: string; provider: string }>('premium/checkout/', { tariff })
-  }
-
-  async function premiumActivate() {
-    const updated = await apiPost<ApiAppSettings>('premium/activate/')
-    appSettings.value = { ...appSettings.value, ...apiToAppSettings(updated) }
-    isPremium.value = updated.is_premium
-    premiumActivatedAt.value = updated.premium_activated_at
-    syncPremiumToAuth(updated)
-    return updated
-  }
-
   return {
     appSettings,
     matrixBlocks,
@@ -297,7 +287,5 @@ export const useSettingsStore = defineStore('settings', () => {
     isGroupVisible,
     updateMatrixBlock,
     reorderNavItems,
-    premiumCheckout,
-    premiumActivate,
   }
 })

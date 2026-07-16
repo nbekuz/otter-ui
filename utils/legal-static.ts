@@ -1,13 +1,14 @@
 import termsRaw from '~/content/legal/terms-of-use.md?raw'
 import privacyRaw from '~/content/legal/privacy-policy.md?raw'
 import offerRaw from '~/content/legal/public-offer.md?raw'
+import consentRaw from '~/content/legal/personal-data-consent.md?raw'
 
-export type LegalSlug = 'terms-of-use' | 'privacy-policy' | 'public-offer'
+export type LegalSlug = 'terms-of-use' | 'privacy-policy' | 'public-offer' | 'personal-data-consent'
 
 export interface StaticLegalDocument {
   slug: LegalSlug
   title: string
-  docType: 'terms' | 'privacy' | 'offer'
+  docType: 'terms' | 'privacy' | 'offer' | 'consent'
   updatedAt: string
   content: string
   docxPath: string
@@ -26,7 +27,7 @@ export const STATIC_LEGAL_DOCUMENTS: StaticLegalDocument[] = [
     slug: 'privacy-policy',
     title: 'Политика конфиденциальности',
     docType: 'privacy',
-    updatedAt: '2026-06-17',
+    updatedAt: '2026-07-08',
     content: privacyRaw,
     docxPath: '/legal/Политика_конфиденциальности_17_06_26.docx',
   },
@@ -34,9 +35,17 @@ export const STATIC_LEGAL_DOCUMENTS: StaticLegalDocument[] = [
     slug: 'public-offer',
     title: 'Публичная оферта',
     docType: 'offer',
-    updatedAt: '2026-06-17',
+    updatedAt: '2026-07-08',
     content: offerRaw,
     docxPath: '/legal/public-offer.docx',
+  },
+  {
+    slug: 'personal-data-consent',
+    title: 'Согласие на обработку персональных данных',
+    docType: 'consent',
+    updatedAt: '2026-07-08',
+    content: consentRaw,
+    docxPath: '/legal/personal-data-consent.docx',
   },
 ]
 

@@ -209,18 +209,27 @@ export const useAuthStore = defineStore('auth', () => {
     if (user.value) user.value.name = name
   }
 
-  async function startPremiumCheckout(tariff = 'monthly') {
-    const settingsStore = useSettingsStore()
-    return settingsStore.premiumCheckout(tariff)
+  async function startPremiumCheckout(
+    tariff = 'monthly',
+    options: { recurringConsent?: boolean } = {},
+  ) {
+    const premiumStore = usePremiumStore()
+    return premiumStore.checkout(tariff, options)
   }
 
-  async function activatePremium() {
-    const settingsStore = useSettingsStore()
-    await settingsStore.premiumActivate()
-    if (user.value) {
-      user.value.isPremium = settingsStore.isPremium
-      user.value.premiumExpiresAt = settingsStore.premiumActivatedAt || undefined
-    }
+  async function refreshPremiumSubscription() {
+    const premiumStore = usePremiumStore()
+    return premiumStore.fetchSubscription()
+  }
+
+  async function startPremiumTrial(tariff = 'monthly', recurringConsent = false) {
+    const premiumStore = usePremiumStore()
+    return premiumStore.startTrial(tariff, recurringConsent)
+  }
+
+  async function cancelPremiumSubscription() {
+    const premiumStore = usePremiumStore()
+    return premiumStore.cancel()
   }
 
   return {
@@ -246,6 +255,8 @@ export const useAuthStore = defineStore('auth', () => {
     updateAvatar,
     updateName,
     startPremiumCheckout,
-    activatePremium,
+    refreshPremiumSubscription,
+    startPremiumTrial,
+    cancelPremiumSubscription,
   }
 })
