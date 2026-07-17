@@ -5,7 +5,7 @@ export function resolveMediaUrl(url?: string | null): string | undefined {
     return url
   }
 
-  let apiBase = 'https://admin.skkamni.ru/api/v1/'
+  let apiBase = 'https://admin.ottertime.ru/api/v1/'
   if (import.meta.client) {
     try {
       const config = useRuntimeConfig()

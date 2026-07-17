@@ -748,7 +748,7 @@ interface CheckoutResponse {
 ## 10. Minimal client sketch
 
 ```typescript
-const API = "https://admin.skkamni.ru/api/v1";
+const API = "https://admin.ottertime.ru/api/v1";
 
 async function api(path: string, options: RequestInit = {}) {
   const token = await getAccessToken();

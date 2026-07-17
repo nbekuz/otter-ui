@@ -1366,7 +1366,7 @@ function getAccessToken() {
 function getRefreshToken() {
   return null;
 }
-const DEFAULT_API_BASE_URL = "https://admin.skkamni.ru/api/v1/";
+const DEFAULT_API_BASE_URL = "https://admin.ottertime.ru/api/v1/";
 function resolveApiBaseUrl() {
   const fromEnv = process.env.NUXT_PUBLIC_API_BASE_URL;
   if (fromEnv) return fromEnv.endsWith("/") ? fromEnv : `${fromEnv}/`;
@@ -1451,7 +1451,7 @@ function resolveMediaUrl(url) {
   if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:") || url.startsWith("blob:")) {
     return url;
   }
-  let apiBase = "https://admin.skkamni.ru/api/v1/";
+  let apiBase = "https://admin.ottertime.ru/api/v1/";
   {
     const fromEnv = process.env.NUXT_PUBLIC_API_BASE_URL;
     if (fromEnv) apiBase = fromEnv.endsWith("/") ? fromEnv : `${fromEnv}/`;
