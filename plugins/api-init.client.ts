@@ -11,6 +11,7 @@ export default defineNuxtPlugin(() => {
   async function loadAppData() {
     if (!authStore.isLoggedIn) {
       tasksStore.reset()
+      usePremiumStore().reset()
       return
     }
 
@@ -18,6 +19,7 @@ export default defineNuxtPlugin(() => {
       authStore.fetchMyProfile().catch(() => undefined),
       tasksStore.fetchGrouped().catch(() => undefined),
       settingsStore.fetchFromApi().catch(() => undefined),
+      usePremiumStore().fetchSubscription().catch(() => undefined),
       pomodoroStore.fetchSettings().catch(() => undefined),
       pomodoroStore.fetchSessions().catch(() => undefined),
     ])

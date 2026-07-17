@@ -92,6 +92,14 @@ export const useAuthStore = defineStore('auth', () => {
     profileLastName.value = profile.last_name || ''
     profileLoaded.value = true
     user.value = mapBackendUser(profile)
+
+    // Profile API premium bermaydi — settings / subscription dan qayta sync
+    const settingsStore = useSettingsStore()
+    if (settingsStore.isPremium && user.value) {
+      user.value.isPremium = true
+      user.value.premiumExpiresAt = settingsStore.premiumActivatedAt || user.value.premiumExpiresAt
+    }
+
     return profile
   }
 
@@ -191,7 +199,12 @@ export const useAuthStore = defineStore('auth', () => {
 
   function logout() {
     const tasksStore = useTasksStore()
+    const premiumStore = usePremiumStore()
+    const settingsStore = useSettingsStore()
     tasksStore.reset()
+    premiumStore.reset()
+    settingsStore.isPremium = false
+    settingsStore.premiumActivatedAt = null
     clearAuthSession()
     syncTokensFromStorage()
     user.value = null

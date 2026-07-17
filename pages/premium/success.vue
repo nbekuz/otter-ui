@@ -12,6 +12,7 @@
       <p v-if="loading" class="mt-6 text-sm text-sber-gray">Проверяем подписку…</p>
       <p v-else-if="premiumStore.isPremium" class="mt-6 text-sm font-semibold text-sber-green">
         Premium активен
+        <span v-if="tariffTitle"> · {{ tariffTitle }}</span>
         <span v-if="expiresLabel"> до {{ expiresLabel }}</span>
       </p>
       <p v-else-if="error" class="mt-6 text-sm text-red-500">{{ error }}</p>
@@ -60,6 +61,8 @@ const expiresLabel = computed(() => {
     year: 'numeric',
   }).format(date)
 })
+
+const tariffTitle = computed(() => premiumStore.subscription?.tariff?.title || '')
 
 async function refresh() {
   if (!authStore.isLoggedIn) {

@@ -1,43 +1,70 @@
 <template>
   <div>
-    <p v-if="featuresLoading || tariffsLoading" class="mb-4 text-center text-sm text-sber-gray">
+    <p v-if="featuresLoading || tariffsLoading || (subscriptionLoading && !subscription)" class="mb-4 text-center text-sm text-sber-gray">
       Загрузка…
     </p>
 
-    <div v-else class="mb-4 max-h-40 space-y-3 overflow-y-auto">
-      <div
-        v-for="feat in features"
-        :key="feat.key"
-        class="flex items-center gap-3"
-      >
-        <div class="flex h-6 w-6 items-center justify-center rounded-full bg-yellow-100">
-          <Check class="h-3.5 w-3.5 text-yellow-600" />
-        </div>
-        <span class="text-sm text-sber-black">{{ feat.title }}</span>
-      </div>
-    </div>
+    <template v-else-if="isPremium">
+      <div class="mb-4 rounded-2xl border border-yellow-200 bg-yellow-50/80 px-4 py-4">
+        <p class="text-center text-sm font-semibold text-sber-green">
+          {{ statusLabel }}
+        </p>
 
-    <template v-if="isPremium">
-      <p class="text-center text-sm font-semibold text-sber-green">
-        {{ statusLabel }}
-      </p>
-      <p v-if="expiresLabel" class="mt-1 text-center text-xs text-sber-gray">
-        Срок до {{ expiresLabel }}
-      </p>
-      <p v-if="subscription?.tariff" class="mt-3 text-center text-xs text-sber-gray">
-        Тариф: {{ subscription.tariff.title }}
-        · {{ formatPrice(subscription.tariff) }}
-      </p>
-      <p
-        v-if="subscription?.recurring_enabled"
-        class="mt-4 rounded-2xl bg-sber-gray-light px-4 py-3 text-xs leading-relaxed text-sber-gray"
-      >
-        Автопродление включено.
-        {{ subscription.cancelled_at ? 'Отмена запрошена — доступ сохранится до конца периода.' : '' }}
-      </p>
+        <div class="mt-3 space-y-2 text-sm text-sber-black">
+          <div v-if="subscription?.tariff" class="flex items-start justify-between gap-3">
+            <span class="text-sber-gray">Тариф</span>
+            <span class="text-right font-semibold">{{ subscription.tariff.title }}</span>
+          </div>
+          <div v-if="subscription?.tariff" class="flex items-start justify-between gap-3">
+            <span class="text-sber-gray">Стоимость</span>
+            <span class="text-right font-semibold">{{ formatPrice(subscription.tariff) }}</span>
+          </div>
+          <div v-if="statusText" class="flex items-start justify-between gap-3">
+            <span class="text-sber-gray">Статус</span>
+            <span class="text-right font-semibold">{{ statusText }}</span>
+          </div>
+          <div v-if="expiresLabel || isLifetime" class="flex items-start justify-between gap-3">
+            <span class="text-sber-gray">Действует до</span>
+            <span class="text-right font-semibold">
+              {{ isLifetime ? 'Бессрочно' : expiresLabel }}
+            </span>
+          </div>
+          <div v-if="promoUntilLabel" class="flex items-start justify-between gap-3">
+            <span class="text-sber-gray">Пробный период до</span>
+            <span class="text-right font-semibold">{{ promoUntilLabel }}</span>
+          </div>
+          <div class="flex items-start justify-between gap-3">
+            <span class="text-sber-gray">Автопродление</span>
+            <span class="text-right font-semibold">
+              {{ subscription?.recurring_enabled ? 'Включено' : 'Выключено' }}
+            </span>
+          </div>
+        </div>
+
+        <p
+          v-if="subscription?.cancelled_at"
+          class="mt-3 text-xs leading-relaxed text-sber-gray"
+        >
+          Автопродление отключено. Доступ сохранится до конца оплаченного периода.
+        </p>
+      </div>
+
+      <div v-if="features.length" class="mb-4 max-h-32 space-y-2 overflow-y-auto">
+        <div
+          v-for="feat in features"
+          :key="feat.key"
+          class="flex items-center gap-3"
+        >
+          <div class="flex h-6 w-6 items-center justify-center rounded-full bg-yellow-100">
+            <Check class="h-3.5 w-3.5 text-yellow-600" />
+          </div>
+          <span class="text-sm text-sber-black">{{ feat.title }}</span>
+        </div>
+      </div>
+
       <button
         v-if="canCancel"
-        class="mt-4 w-full rounded-2xl border border-red-200 bg-red-50 py-3.5 text-sm font-semibold text-red-600 disabled:opacity-60"
+        class="w-full rounded-2xl border border-red-200 bg-red-50 py-3.5 text-sm font-semibold text-red-600 disabled:opacity-60"
         type="button"
         :disabled="actionLoading"
         @click="cancelModal = true"
@@ -55,6 +82,19 @@
     </template>
 
     <template v-else>
+      <div v-if="features.length" class="mb-4 max-h-40 space-y-3 overflow-y-auto">
+        <div
+          v-for="feat in features"
+          :key="feat.key"
+          class="flex items-center gap-3"
+        >
+          <div class="flex h-6 w-6 items-center justify-center rounded-full bg-yellow-100">
+            <Check class="h-3.5 w-3.5 text-yellow-600" />
+          </div>
+          <span class="text-sm text-sber-black">{{ feat.title }}</span>
+        </div>
+      </div>
+
       <div v-if="tariffs.length" class="mb-4 space-y-2">
         <button
           v-for="tariff in tariffs"
@@ -178,6 +218,7 @@ const props = defineProps<{
   tariffsLoading?: boolean
   selectedTariffCode: string
   subscription: ApiSubscription | null
+  subscriptionLoading?: boolean
   isPremium: boolean
   expiresLabel?: string
   actionLoading?: boolean
@@ -210,12 +251,36 @@ const canCancel = computed(() =>
   && !props.subscription?.cancelled_at,
 )
 
+const isLifetime = computed(() =>
+  props.subscription?.status === 'active'
+  && !props.subscription?.premium_until
+  && props.subscription?.tariff?.duration_days === 0,
+)
+
 const statusLabel = computed(() => {
   const status = props.subscription?.status
   if (status === 'trial') return 'Пробный период активен'
-  if (status === 'cancelled') return 'Premium активен (автопродление отключено)'
+  if (status === 'cancelled') return 'Premium активен (без автопродления)'
   if (status === 'active') return 'Premium активен'
   return 'Premium активен'
+})
+
+const statusText = computed(() => {
+  const map: Record<string, string> = {
+    none: 'Нет подписки',
+    trial: 'Пробный период',
+    active: 'Оплачен',
+    past_due: 'Просрочен',
+    cancelled: 'Отменён (доступ сохранён)',
+    expired: 'Истёк',
+  }
+  const status = props.subscription?.status
+  return status ? (map[status] || status) : ''
+})
+
+const promoUntilLabel = computed(() => {
+  if (props.subscription?.status !== 'trial') return ''
+  return formatDate(props.subscription?.promo_until)
 })
 
 const payButtonLabel = computed(() => {
@@ -223,6 +288,17 @@ const payButtonLabel = computed(() => {
   if (!tariff) return `Оплатить ${PREMIUM_SUBSCRIPTION.price} ₽`
   return `Оплатить ${formatPrice(tariff)}`
 })
+
+function formatDate(value?: string | null) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date)
+}
 
 function formatPrice(tariff: ApiTariff) {
   const amount = Number(tariff.price)

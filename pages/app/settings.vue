@@ -20,7 +20,7 @@
         <!-- Avatar -->
         <div class="relative">
           <div class="w-16 h-16 rounded-full overflow-hidden"
-               :class="authStore.user?.isPremium ? 'ring-2 ring-yellow-400 ring-offset-2' : ''">
+               :class="premiumStore.isPremium ? 'ring-2 ring-yellow-400 ring-offset-2' : ''">
             <div v-if="!authStore.user?.avatar"
                  class="w-full h-full bg-sber-green flex items-center justify-center">
               <span class="text-white text-2xl font-bold">
@@ -39,13 +39,13 @@
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2">
             <p class="truncate text-base font-bold text-sber-black">{{ authStore.user?.name }}</p>
-            <span v-if="authStore.user?.isPremium"
+            <span v-if="premiumStore.isPremium"
                   class="shrink-0 text-[10px] font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">
               ⭐ ПРЕМИУМ
             </span>
           </div>
           <p class="truncate text-sm text-sber-gray">{{ authStore.user?.email }}</p>
-          <p v-if="authStore.user?.isPremium && premiumExpiresLabel" class="mt-1 text-xs font-medium text-yellow-700">
+          <p v-if="premiumStore.isPremium && premiumExpiresLabel" class="mt-1 text-xs font-medium text-yellow-700">
             Срок до {{ premiumExpiresLabel }}
           </p>
           <button
@@ -58,7 +58,10 @@
           >
             <p class="text-[10px] font-semibold uppercase tracking-wide text-yellow-600">Premium</p>
             <p class="mt-0.5 text-xs font-semibold text-sber-black">
-              {{ authStore.user?.isPremium ? 'Premium активен' : 'Подключить Premium' }}
+              {{ premiumBannerTitle }}
+            </p>
+            <p v-if="premiumBannerSubtitle" class="mt-0.5 text-[11px] text-sber-gray">
+              {{ premiumBannerSubtitle }}
             </p>
           </button>
         </div>
@@ -358,6 +361,7 @@
             :tariffs-loading="premiumStore.tariffsLoading"
             :selected-tariff-code="premiumStore.selectedTariffCode"
             :subscription="premiumStore.subscription"
+            :subscription-loading="premiumStore.subscriptionLoading"
             :is-premium="premiumStore.isPremium"
             :expires-label="premiumExpiresLabel"
             :action-loading="premiumStore.actionLoading"
@@ -661,6 +665,24 @@ const premiumExpiresLabel = computed(() => {
   }).format(date)
 })
 
+const premiumBannerTitle = computed(() => {
+  if (!premiumStore.isPremium) return 'Подключить Premium'
+  const status = premiumStore.subscription?.status
+  if (status === 'trial') return 'Пробный период активен'
+  if (status === 'cancelled') return 'Premium активен (без автопродления)'
+  return 'Premium активен'
+})
+
+const premiumBannerSubtitle = computed(() => {
+  if (!premiumStore.isPremium) return ''
+  const tariff = premiumStore.subscription?.tariff?.title
+  const until = premiumExpiresLabel.value
+  if (tariff && until) return `${tariff} · до ${until}`
+  if (tariff) return tariff
+  if (until) return `до ${until}`
+  return ''
+})
+
 const taskGroups = [
   { id: 'overdue', label: 'Просрочено', color: '#FF3B30' },
   { id: 'today', label: 'Сегодня', color: '#FF9500' },
@@ -860,8 +882,12 @@ async function onPremiumRefresh() {
   try {
     const sub = await premiumStore.fetchSubscription()
     if (sub.is_premium) {
-      showToast('Premium активен', 'success')
-      premiumModal.value = false
+      const until = premiumExpiresLabel.value
+      const tariff = sub.tariff?.title
+      const parts = ['Premium активен']
+      if (tariff) parts.push(tariff)
+      if (until) parts.push(`до ${until}`)
+      showToast(parts.join(' · '), 'success')
     }
     else {
       showToast('Оплата ещё не подтверждена. Подождите немного и обновите снова.', 'error')

@@ -44,8 +44,12 @@ export const usePremiumStore = defineStore('premium', () => {
     || null,
   )
 
-  const isPremium = computed(() => subscription.value?.is_premium
-    ?? useSettingsStore().isPremium)
+  const isPremium = computed(() => {
+    if (subscription.value) return !!subscription.value.is_premium
+    const settingsStore = useSettingsStore()
+    const authStore = useAuthStore()
+    return !!(settingsStore.isPremium || authStore.user?.isPremium)
+  })
 
   const status = computed(() => subscription.value?.status ?? 'none')
 
@@ -53,6 +57,7 @@ export const usePremiumStore = defineStore('premium', () => {
     subscription.value?.premium_until
     || subscription.value?.promo_until
     || useSettingsStore().premiumActivatedAt
+    || useAuthStore().user?.premiumExpiresAt
     || null,
   )
 
@@ -165,6 +170,15 @@ export const usePremiumStore = defineStore('premium', () => {
     selectedTariffCode.value = code
   }
 
+  function reset() {
+    tariffs.value = []
+    subscription.value = null
+    features.value = []
+    selectedTariffCode.value = 'monthly'
+    tariffsError.value = ''
+    subscriptionError.value = ''
+  }
+
   return {
     tariffs,
     tariffsLoading,
@@ -188,5 +202,6 @@ export const usePremiumStore = defineStore('premium', () => {
     checkout,
     cancel,
     selectTariff,
+    reset,
   }
 })

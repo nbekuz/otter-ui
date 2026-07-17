@@ -17,7 +17,7 @@
         <div class="rounded-[28px] bg-white p-5 shadow-sm">
           <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
             <button class="relative self-start" type="button" @click="avatarModal = true">
-              <div class="h-24 w-24 overflow-hidden rounded-[28px]" :class="authStore.user?.isPremium ? 'ring-2 ring-yellow-400 ring-offset-2' : ''">
+              <div class="h-24 w-24 overflow-hidden rounded-[28px]" :class="premiumStore.isPremium ? 'ring-2 ring-yellow-400 ring-offset-2' : ''">
                 <div v-if="!authStore.user?.avatar" class="flex h-full w-full items-center justify-center bg-sber-green">
                   <span class="text-3xl font-bold text-white">{{ initials }}</span>
                 </div>
@@ -31,12 +31,12 @@
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
                 <h2 class="truncate text-2xl font-bold text-sber-black">{{ authStore.user?.name || 'Пользователь' }}</h2>
-                <span v-if="authStore.user?.isPremium" class="rounded-full bg-yellow-100 px-2.5 py-1 text-[11px] font-bold text-yellow-700">
+                <span v-if="premiumStore.isPremium" class="rounded-full bg-yellow-100 px-2.5 py-1 text-[11px] font-bold text-yellow-700">
                   ⭐ ПРЕМИУМ
                 </span>
               </div>
               <p class="mt-1 truncate text-sm text-sber-gray">{{ authStore.user?.email }}</p>
-              <p v-if="authStore.user?.isPremium && premiumExpiresLabel" class="mt-2 text-xs font-medium text-yellow-700">
+              <p v-if="premiumStore.isPremium && premiumExpiresLabel" class="mt-2 text-xs font-medium text-yellow-700">
                 Срок до {{ premiumExpiresLabel }}
               </p>
               <div class="mt-4 flex flex-wrap gap-3">
@@ -232,6 +232,7 @@
             :tariffs-loading="premiumStore.tariffsLoading"
             :selected-tariff-code="premiumStore.selectedTariffCode"
             :subscription="premiumStore.subscription"
+            :subscription-loading="premiumStore.subscriptionLoading"
             :is-premium="premiumStore.isPremium"
             :expires-label="premiumExpiresLabel"
             :action-loading="premiumStore.actionLoading"
@@ -531,8 +532,12 @@ async function onPremiumRefresh() {
   try {
     const sub = await premiumStore.fetchSubscription()
     if (sub.is_premium) {
-      showToast('Premium активен', 'success')
-      premiumModal.value = false
+      const until = premiumExpiresLabel.value
+      const tariff = sub.tariff?.title
+      const parts = ['Premium активен']
+      if (tariff) parts.push(tariff)
+      if (until) parts.push(`до ${until}`)
+      showToast(parts.join(' · '), 'success')
     }
     else {
       showToast('Оплата ещё не подтверждена. Подождите немного и обновите снова.', 'error')
