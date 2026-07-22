@@ -31,9 +31,12 @@
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
                 <h2 class="truncate text-2xl font-bold text-sber-black">{{ authStore.user?.name || 'Пользователь' }}</h2>
-                <span v-if="premiumStore.isPremium" class="rounded-full bg-yellow-100 px-2.5 py-1 text-[11px] font-bold text-yellow-700">
-                  ⭐ ПРЕМИУМ
-                </span>
+                <span
+                  v-if="premiumStore.isPremium"
+                  class="shrink-0 text-lg leading-none"
+                  title="Премиум"
+                  aria-label="Премиум"
+                >⭐</span>
               </div>
               <p class="mt-1 truncate text-sm text-sber-gray">{{ authStore.user?.email }}</p>
               <p v-if="premiumStore.isPremium && premiumExpiresLabel" class="mt-2 text-xs font-medium text-yellow-700">

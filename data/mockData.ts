@@ -61,6 +61,7 @@ export interface AppSettings {
   notificationSound: string
   completionSound: string
   bottomNavItems: string[]
+  timezone?: string
 }
 
 // ─── Mock User ───────────────────────────────────────────────────────────────

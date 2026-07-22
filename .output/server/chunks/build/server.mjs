@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { toRef, isRef, hasInjectionContext, inject, getCurrentInstance, watch, ref, reactive, effectScope, isReactive, toRaw, unref, getCurrentScope, onScopeDispose, nextTick, toRefs, markRaw, computed, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, useSSRContext, defineAsyncComponent, shallowReactive, Suspense, Fragment, createApp, mergeProps, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, onMounted, readonly, isReadonly, isShallow } from 'vue';
-import { i as hasProtocol, k as isScriptProtocol, f as joinURL, p as parseURL, l as encodePath, m as decodePath, w as withQuery, s as sanitizeStatusCode, n as getContext, $ as $fetch, o as defu, q as createHooks, c as createError$1, r as executeAsync } from '../nitro/nitro.mjs';
+import { p as parseURL, i as encodePath, k as decodePath, w as withQuery, l as hasProtocol, m as isScriptProtocol, f as joinURL, s as sanitizeStatusCode, n as getContext, $ as $fetch, o as defu, q as createHooks, c as createError$1, r as executeAsync } from '../nitro/nitro.mjs';
 import { b as baseURL } from '../routes/renderer.mjs';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
 import axios from 'axios';
@@ -416,6 +416,8 @@ function getRouteRules(arg) {
     return {};
   }
 }
+const __nuxt_page_meta$a = { layout: "app" };
+const __nuxt_page_meta$9 = { layout: "app" };
 const __nuxt_page_meta$8 = { layout: "app" };
 const __nuxt_page_meta$7 = { layout: "app" };
 const __nuxt_page_meta$6 = { layout: "app" };
@@ -423,18 +425,18 @@ const __nuxt_page_meta$5 = { layout: "app" };
 const __nuxt_page_meta$4 = { layout: "app" };
 const __nuxt_page_meta$3 = { layout: "app" };
 const __nuxt_page_meta$2 = { layout: "app" };
-const __nuxt_page_meta$1 = { layout: "app" };
-const __nuxt_page_meta = { layout: "app" };
+const __nuxt_page_meta$1 = { layout: false };
+const __nuxt_page_meta = { layout: false };
 const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-DWl7XCW8.mjs')
+    component: () => import('./index-AqMH-7dd.mjs')
   },
   {
     name: "login",
     path: "/login",
-    component: () => import('./login-bz9Eo1dO.mjs')
+    component: () => import('./login-CpjE_ESt.mjs')
   },
   {
     name: "matrix",
@@ -444,8 +446,8 @@ const _routes = [
   {
     name: "app-faq",
     path: "/app/faq",
-    meta: __nuxt_page_meta$8 || {},
-    component: () => import('./faq-PbXGyqJt.mjs')
+    meta: __nuxt_page_meta$a || {},
+    component: () => import('./faq-CFfrtmAQ.mjs')
   },
   {
     name: "calendar",
@@ -460,7 +462,7 @@ const _routes = [
   {
     name: "register",
     path: "/register",
-    component: () => import('./register-Bsh3vErb.mjs')
+    component: () => import('./register-CWbfEOI0.mjs')
   },
   {
     name: "settings",
@@ -470,60 +472,72 @@ const _routes = [
   {
     name: "app",
     path: "/app",
-    meta: __nuxt_page_meta$7 || {},
-    component: () => import('./index-B0ZtAARQ.mjs')
+    meta: __nuxt_page_meta$9 || {},
+    component: () => import('./index-J4qwnQM6.mjs')
   },
   {
     name: "app-legal",
     path: "/app/legal",
-    meta: __nuxt_page_meta$6 || {},
-    component: () => import('./legal-B7ZCpL8t.mjs')
+    meta: __nuxt_page_meta$8 || {},
+    component: () => import('./legal-DAgakCI4.mjs')
   },
   {
     name: "app-matrix",
     path: "/app/matrix",
-    meta: __nuxt_page_meta$5 || {},
-    component: () => import('./matrix-wDFmHZmR.mjs')
+    meta: __nuxt_page_meta$7 || {},
+    component: () => import('./matrix-Cw-eCj2k.mjs')
   },
   {
     name: "app-profile",
     path: "/app/profile",
-    meta: __nuxt_page_meta$4 || {},
-    component: () => import('./profile-DKykqZgH.mjs')
+    meta: __nuxt_page_meta$6 || {},
+    component: () => import('./profile-Df8UDubc.mjs')
   },
   {
     name: "app-calendar",
     path: "/app/calendar",
-    meta: __nuxt_page_meta$3 || {},
-    component: () => import('./calendar-Ct9chL9b.mjs')
+    meta: __nuxt_page_meta$5 || {},
+    component: () => import('./calendar-1dv_NLAd.mjs')
   },
   {
     name: "app-new-task",
     path: "/app/new-task",
-    meta: __nuxt_page_meta$2 || {},
-    component: () => import('./new-task-BzZkgQqB.mjs')
+    meta: __nuxt_page_meta$4 || {},
+    component: () => import('./new-task-DWtw_GrU.mjs')
   },
   {
     name: "app-pomodoro",
     path: "/app/pomodoro",
-    meta: __nuxt_page_meta$1 || {},
-    component: () => import('./pomodoro-DmfJotY5.mjs')
+    meta: __nuxt_page_meta$3 || {},
+    component: () => import('./pomodoro-1xASxeRE.mjs')
   },
   {
     name: "app-settings",
     path: "/app/settings",
-    meta: __nuxt_page_meta || {},
-    component: () => import('./settings-BN2Yo3ZB.mjs')
+    meta: __nuxt_page_meta$2 || {},
+    component: () => import('./settings-CDmRneI_.mjs')
   },
   {
     name: "legal-slug",
     path: "/legal/:slug()",
-    component: () => import('./_slug_-C4ctSTev.mjs')
+    component: () => import('./_slug_-doOv9vdD.mjs')
+  },
+  {
+    name: "premium-fail",
+    path: "/premium/fail",
+    meta: __nuxt_page_meta$1 || {},
+    component: () => import('./fail-DPKDAUyi.mjs')
   },
   {
     name: "profile-fill",
     path: "/profile-fill",
     component: () => import('./profile-fill-BL2Fk0Ls.mjs')
+  },
+  {
+    name: "premium-success",
+    path: "/premium/success",
+    meta: __nuxt_page_meta || {},
+    component: () => import('./success-dzyyM74c.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1459,555 +1473,6 @@ function resolveMediaUrl(url) {
   const origin = apiBase.replace(/\/api\/v1\/?$/, "");
   return url.startsWith("/") ? `${origin}${url}` : `${origin}/${url}`;
 }
-function parseApiWallClock(iso) {
-  const match = iso.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/);
-  if (match) {
-    return { date: match[1], time: `${match[2]}:${match[3]}` };
-  }
-  return null;
-}
-function parseTimeToMinutes(time) {
-  const [h2, m] = time.split(":").map((v) => parseInt(v, 10));
-  const hours = Number.isFinite(h2) ? h2 : 0;
-  const minutes = Number.isFinite(m) ? m : 0;
-  return hours * 60 + minutes;
-}
-function formatMinutesToTime(totalMinutes) {
-  const clamped = Math.max(0, Math.min(23 * 60 + 59, totalMinutes));
-  const hours = Math.floor(clamped / 60);
-  const minutes = clamped % 60;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-}
-function addMinutesToTime(time, deltaMinutes) {
-  return formatMinutesToTime(parseTimeToMinutes(time) + deltaMinutes);
-}
-function getTaskScheduleStart(task) {
-  return task.duration?.start || task.dueTime;
-}
-function getTaskDurationMinutes(task) {
-  if (task.duration?.start && task.duration?.end) {
-    const start = parseTimeToMinutes(task.duration.start);
-    const end = parseTimeToMinutes(task.duration.end);
-    if (end > start) return end - start;
-    if (end < start) return 24 * 60 - start + end;
-  }
-  return 60;
-}
-const MATRIX_TO_UI = {
-  urgent_important: "urgent-important",
-  not_urgent_important: "not-urgent-important",
-  urgent_not_important: "urgent-not-important",
-  not_urgent_not_important: "not-urgent-not-important"
-};
-const MATRIX_TO_API = {
-  "urgent-important": "urgent_important",
-  "not-urgent-important": "not_urgent_important",
-  "urgent-not-important": "urgent_not_important",
-  "not-urgent-not-important": "not_urgent_not_important"
-};
-const REPEAT_TO_UI = {
-  none: "none",
-  day: "daily",
-  week: "weekly",
-  month: "monthly",
-  year: "yearly"
-};
-const REPEAT_TO_API = {
-  none: "none",
-  daily: "day",
-  weekly: "week",
-  monthly: "month",
-  yearly: "year",
-  custom: "week"
-};
-function apiPriorityToUi(priority) {
-  if (priority === "critical") return "high";
-  if (priority === "low" || priority === "medium" || priority === "high") return priority;
-  return "medium";
-}
-function uiPriorityToApi(priority) {
-  if (priority === "none") return "medium";
-  if (priority === "high") return "high";
-  if (priority === "low") return "low";
-  return "medium";
-}
-function reminderMinutes(dueAt, reminderAt) {
-  if (!dueAt || !reminderAt) return void 0;
-  const diff = dayjs(dueAt).diff(dayjs(reminderAt), "minute");
-  if (diff < 0) return void 0;
-  return String(diff);
-}
-function toApiDateTime(dueDate, time) {
-  const hhmm = time.length >= 5 ? time.slice(0, 5) : time;
-  return `${dueDate}T${hhmm}:00.000`;
-}
-function buildDueAt(dueDate, dueTime) {
-  if (!dueDate) return null;
-  return toApiDateTime(dueDate, dueTime || "00:00");
-}
-function buildReminderAt(dueAt, notification) {
-  if (!dueAt || !notification) return null;
-  const minutes = Number(notification);
-  if (!Number.isFinite(minutes) || minutes < 0) return null;
-  return dayjs(dueAt).subtract(minutes, "minute").format("YYYY-MM-DDTHH:mm:ss.SSS");
-}
-function buildStartEnd(dueDate, duration) {
-  if (!dueDate || !duration?.start || !duration?.end) {
-    return { start_at: null, end_at: null };
-  }
-  if (parseTimeToMinutes(duration.end) <= parseTimeToMinutes(duration.start)) {
-    return { start_at: null, end_at: null };
-  }
-  return {
-    start_at: toApiDateTime(dueDate, duration.start),
-    end_at: toApiDateTime(dueDate, duration.end)
-  };
-}
-function apiTaskToUi(task) {
-  const dueFields = task.due_at ? parseApiWallClock(task.due_at) : null;
-  const startFields = task.start_at ? parseApiWallClock(task.start_at) : null;
-  const endFields = task.end_at ? parseApiWallClock(task.end_at) : null;
-  const scheduleDay = startFields ?? dueFields;
-  return {
-    id: String(task.id),
-    title: task.title,
-    description: task.description || void 0,
-    dueDate: scheduleDay?.date,
-    dueTime: dueFields && dueFields.time !== "00:00" ? dueFields.time : void 0,
-    duration: startFields && endFields ? { start: startFields.time, end: endFields.time } : void 0,
-    priority: apiPriorityToUi(task.priority),
-    completed: task.is_completed,
-    completedAt: task.completed_at ? dayjs(task.completed_at).format("YYYY-MM-DD") : void 0,
-    notification: reminderMinutes(task.due_at, task.reminder_at),
-    repeat: REPEAT_TO_UI[task.repeat_unit] || "none",
-    repeatCustom: task.repeat_unit !== "none" && task.repeat_interval > 1 ? { interval: task.repeat_interval, unit: "week" } : void 0,
-    imageUrl: task.image || void 0,
-    matrixBlock: MATRIX_TO_UI[task.matrix_block],
-    createdAt: task.created_at
-  };
-}
-function uiTaskToApiPayload(task) {
-  const due_at = buildDueAt(task.dueDate, task.dueTime);
-  const { start_at, end_at } = buildStartEnd(task.dueDate, task.duration);
-  const payload = {
-    title: task.title,
-    description: task.description ?? null,
-    due_at,
-    start_at,
-    end_at,
-    reminder_at: buildReminderAt(due_at, task.notification),
-    repeat_unit: REPEAT_TO_API[task.repeat || "none"],
-    repeat_interval: task.repeatCustom?.interval ?? 1,
-    priority: uiPriorityToApi(task.priority || "none"),
-    matrix_block: MATRIX_TO_API[task.matrixBlock || "not-urgent-not-important"]
-  };
-  if (task.completed !== void 0) {
-    payload.is_completed = task.completed;
-  }
-  return payload;
-}
-function groupKeyToUi(key) {
-  if (key === "no_deadline") return "nodate";
-  return key;
-}
-function apiMatrixBlockToUi(block) {
-  return MATRIX_TO_UI[block];
-}
-const GROUP_ORDER = ["overdue", "today", "tomorrow", "later", "nodate", "completed"];
-function flattenGroups(groups) {
-  const seen = /* @__PURE__ */ new Set();
-  const result = [];
-  for (const group of groups) {
-    for (const task of group.tasks) {
-      if (seen.has(task.id)) continue;
-      seen.add(task.id);
-      result.push(apiTaskToUi(task));
-    }
-  }
-  return result;
-}
-function normalizeDueDate(dueDate) {
-  if (!dueDate) return "";
-  const parsed = dayjs(dueDate);
-  return parsed.isValid() ? parsed.format("YYYY-MM-DD") : "";
-}
-function groupTasksByKey(allTasks) {
-  const today2 = dayjs().format("YYYY-MM-DD");
-  const tomorrow2 = dayjs().add(1, "day").format("YYYY-MM-DD");
-  return {
-    overdue: allTasks.filter((t) => {
-      const d = normalizeDueDate(t.dueDate);
-      return !t.completed && !!d && dayjs(d).isBefore(today2, "day");
-    }),
-    today: allTasks.filter((t) => {
-      const d = normalizeDueDate(t.dueDate);
-      return !t.completed && d === today2;
-    }),
-    tomorrow: allTasks.filter((t) => {
-      const d = normalizeDueDate(t.dueDate);
-      return !t.completed && d === tomorrow2;
-    }),
-    later: allTasks.filter((t) => {
-      const d = normalizeDueDate(t.dueDate);
-      return !t.completed && !!d && dayjs(d).isAfter(tomorrow2, "day");
-    }),
-    nodate: allTasks.filter((t) => !t.completed && !normalizeDueDate(t.dueDate)),
-    completed: allTasks.filter((t) => t.completed)
-  };
-}
-const useTasksStore = /* @__PURE__ */ defineStore("tasks", () => {
-  const tasks = ref([]);
-  const groupedFromApi = ref({
-    overdue: [],
-    today: [],
-    tomorrow: [],
-    later: [],
-    nodate: [],
-    completed: []
-  });
-  const matrixTasksByBlock = ref({});
-  const calendarTasks = ref([]);
-  const calendarCacheKey = ref("");
-  const loading = ref(false);
-  const error = ref("");
-  const initialized = ref(false);
-  const today2 = computed(() => dayjs().format("YYYY-MM-DD"));
-  const tomorrow2 = computed(() => dayjs().add(1, "day").format("YYYY-MM-DD"));
-  const overdueTasks = computed(() => groupedFromApi.value.overdue);
-  const todayTasks = computed(() => groupedFromApi.value.today);
-  const tomorrowTasks = computed(() => groupedFromApi.value.tomorrow);
-  const laterTasks = computed(() => groupedFromApi.value.later);
-  const noDateTasks = computed(() => groupedFromApi.value.nodate);
-  const completedTasks = computed(() => groupedFromApi.value.completed);
-  function applyGrouped(groups) {
-    const next = {
-      overdue: [],
-      today: [],
-      tomorrow: [],
-      later: [],
-      nodate: [],
-      completed: []
-    };
-    for (const group of groups) {
-      const uiKey = groupKeyToUi(group.key);
-      if (uiKey in next) {
-        next[uiKey] = group.tasks.map(apiTaskToUi);
-      }
-    }
-    tasks.value = flattenGroups(groups);
-    groupedFromApi.value = groupTasksByKey(tasks.value);
-  }
-  function findTaskById(id) {
-    return tasks.value.find((t) => t.id === id) ?? calendarTasks.value.find((t) => t.id === id);
-  }
-  function taskScheduleKey(task) {
-    return [
-      task.dueDate,
-      task.dueTime,
-      task.duration?.start,
-      task.duration?.end,
-      task.completed,
-      task.title,
-      task.priority,
-      task.matrixBlock
-    ].join("|");
-  }
-  function mergeTaskFields(existing, updates, id) {
-    return {
-      ...existing || {
-        id,
-        title: "",
-        priority: "medium",
-        completed: false,
-        repeat: "none",
-        createdAt: ""
-      },
-      ...updates,
-      id,
-      duration: updates.duration ?? existing?.duration,
-      dueTime: updates.dueTime ?? existing?.dueTime,
-      dueDate: updates.dueDate ?? existing?.dueDate
-    };
-  }
-  function mergeTaskFromApi(existing, updates, fromApi) {
-    return {
-      ...existing,
-      ...fromApi,
-      ...updates,
-      id: fromApi.id,
-      duration: fromApi.duration ?? updates.duration ?? existing?.duration,
-      dueTime: fromApi.dueTime ?? updates.dueTime ?? existing?.dueTime,
-      dueDate: fromApi.dueDate ?? updates.dueDate ?? existing?.dueDate
-    };
-  }
-  function applyTaskToMatrixState(updated) {
-    if (Object.keys(matrixTasksByBlock.value).length === 0) return;
-    const next = {};
-    for (const [blockId, list] of Object.entries(matrixTasksByBlock.value)) {
-      next[blockId] = list.filter((t) => t.id !== updated.id);
-    }
-    if (!updated.completed && updated.matrixBlock) {
-      const blockId = updated.matrixBlock;
-      next[blockId] = [updated, ...next[blockId] || []];
-    }
-    matrixTasksByBlock.value = next;
-  }
-  function removeTaskFromMatrixState(id) {
-    if (Object.keys(matrixTasksByBlock.value).length === 0) return;
-    const next = {};
-    for (const [blockId, list] of Object.entries(matrixTasksByBlock.value)) {
-      next[blockId] = list.filter((t) => t.id !== id);
-    }
-    matrixTasksByBlock.value = next;
-  }
-  function upsertTaskInState(updated) {
-    const idx = tasks.value.findIndex((t) => t.id === updated.id);
-    if (idx === -1) {
-      tasks.value.unshift(updated);
-    } else {
-      tasks.value[idx] = updated;
-    }
-    groupedFromApi.value = groupTasksByKey(tasks.value);
-    const calIdx = calendarTasks.value.findIndex((t) => t.id === updated.id);
-    if (calIdx !== -1) {
-      calendarTasks.value[calIdx] = updated;
-    }
-    applyTaskToMatrixState(updated);
-  }
-  async function refreshCalendarIfCached() {
-    const key = calendarCacheKey.value;
-    if (!key) return;
-    const colon = key.indexOf(":");
-    if (colon === -1) return;
-    const view = key.slice(0, colon);
-    const date = key.slice(colon + 1);
-    if (!date) return;
-    await fetchCalendar(view, date);
-  }
-  function refreshMatrixIfCached() {
-    if (Object.keys(matrixTasksByBlock.value).length === 0) return void 0;
-    return fetchMatrix();
-  }
-  async function refreshTaskLists(options = {}) {
-    const { grouped = true, calendar = true, matrix = true } = options;
-    const jobs = [];
-    if (grouped) jobs.push(fetchGrouped());
-    if (calendar) jobs.push(refreshCalendarIfCached());
-    if (matrix) {
-      const matrixJob = refreshMatrixIfCached();
-      if (matrixJob) jobs.push(matrixJob);
-    }
-    if (jobs.length === 0) return;
-    await Promise.all(jobs);
-  }
-  function removeTaskFromState(id) {
-    tasks.value = tasks.value.filter((t) => t.id !== id);
-    calendarTasks.value = calendarTasks.value.filter((t) => t.id !== id);
-    groupedFromApi.value = groupTasksByKey(tasks.value);
-    removeTaskFromMatrixState(id);
-  }
-  async function fetchGrouped() {
-    loading.value = true;
-    error.value = "";
-    try {
-      const groups = await apiGet("tasks/grouped/");
-      applyGrouped(groups);
-      initialized.value = true;
-    } catch (err) {
-      error.value = getApiErrorMessage(err);
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  }
-  async function fetchMatrix() {
-    const blocks = await apiGet("matrix/");
-    const prevById = /* @__PURE__ */ new Map();
-    for (const list of Object.values(matrixTasksByBlock.value)) {
-      for (const task of list) prevById.set(task.id, task);
-    }
-    const next = {};
-    for (const block of blocks) {
-      next[apiMatrixBlockToUi(block.block)] = block.tasks.map((apiTask) => {
-        const task = apiTaskToUi(apiTask);
-        const prev = prevById.get(task.id);
-        return prev && taskScheduleKey(prev) === taskScheduleKey(task) ? prev : task;
-      });
-    }
-    matrixTasksByBlock.value = next;
-    return next;
-  }
-  async function fetchCalendar(view, date) {
-    const response = await apiGet("calendar/", { params: { view, date } });
-    const incoming = response.tasks.map(apiTaskToUi);
-    calendarCacheKey.value = `${view}:${date}`;
-    if (calendarTasks.value.length === 0) {
-      calendarTasks.value = incoming;
-      return calendarTasks.value;
-    }
-    const prevById = new Map(calendarTasks.value.map((task) => [task.id, task]));
-    calendarTasks.value = incoming.map((task) => {
-      const prev = prevById.get(task.id);
-      if (prev && taskScheduleKey(prev) === taskScheduleKey(task)) {
-        return prev;
-      }
-      return task;
-    });
-    return calendarTasks.value;
-  }
-  function parseCalendarCacheKey() {
-    const colon = calendarCacheKey.value.indexOf(":");
-    if (colon === -1) return null;
-    return {
-      view: calendarCacheKey.value.slice(0, colon),
-      date: calendarCacheKey.value.slice(colon + 1)
-    };
-  }
-  function taskScheduleDate(task) {
-    return task.dueDate;
-  }
-  function getTasksForDate(date) {
-    const cache = parseCalendarCacheKey();
-    if (cache?.view === "day" && cache.date === date) {
-      return calendarTasks.value.slice();
-    }
-    return tasks.value.filter((t) => taskScheduleDate(t) === date);
-  }
-  function getTasksForWeek(startDate, endDate) {
-    const cache = parseCalendarCacheKey();
-    if (cache?.view === "week") {
-      const weekStart = dayjs(cache.date).startOf("week").format("YYYY-MM-DD");
-      const weekEnd = dayjs(cache.date).endOf("week").format("YYYY-MM-DD");
-      if (!dayjs(startDate).isAfter(weekEnd, "day") && !dayjs(endDate).isBefore(weekStart, "day")) {
-        return calendarTasks.value.filter((t) => {
-          const d = taskScheduleDate(t);
-          return !!d && !dayjs(d).isBefore(startDate, "day") && !dayjs(d).isAfter(endDate, "day");
-        });
-      }
-    }
-    return tasks.value.filter(
-      (t) => taskScheduleDate(t) && !dayjs(taskScheduleDate(t)).isBefore(startDate, "day") && !dayjs(taskScheduleDate(t)).isAfter(endDate, "day")
-    );
-  }
-  function getTasksForMatrix(blockId) {
-    if (matrixTasksByBlock.value[blockId]?.length) {
-      return matrixTasksByBlock.value[blockId];
-    }
-    return tasks.value.filter((t) => !t.completed && t.matrixBlock === blockId);
-  }
-  async function addTask(taskData) {
-    const payload = uiTaskToApiPayload(taskData);
-    const created = await apiPost("tasks/", payload);
-    const task = apiTaskToUi(created);
-    upsertTaskInState(task);
-    await refreshTaskLists();
-    return task;
-  }
-  async function updateTask(id, updates, refresh = {}) {
-    const existing = findTaskById(id);
-    const optimistic = mergeTaskFields(existing, updates, id);
-    upsertTaskInState(optimistic);
-    const merged = { ...existing, ...updates };
-    const payload = uiTaskToApiPayload(merged);
-    const updated = await apiPatch(`tasks/${id}/`, payload);
-    const task = mergeTaskFromApi(existing, updates, apiTaskToUi(updated));
-    upsertTaskInState(task);
-    await refreshTaskLists(refresh);
-    return task;
-  }
-  async function deleteTask(id, refresh = {}) {
-    removeTaskFromState(id);
-    await apiDelete(`tasks/${id}/`);
-    await refreshTaskLists(refresh);
-  }
-  async function completeTask(id, refresh = {}) {
-    const existing = findTaskById(id);
-    if (!existing) return;
-    upsertTaskInState({
-      ...existing,
-      completed: !existing.completed,
-      completedAt: !existing.completed ? dayjs().format("YYYY-MM-DD") : void 0
-    });
-    const endpoint = existing.completed ? "uncomplete" : "complete";
-    const updated = await apiPost(`tasks/${id}/${endpoint}/`);
-    const task = apiTaskToUi(updated);
-    upsertTaskInState(task);
-    await refreshTaskLists(refresh);
-    return task;
-  }
-  async function moveToMatrix(taskId, blockId) {
-    const existing = findTaskById(taskId);
-    const uiBlock = blockId;
-    if (existing) {
-      upsertTaskInState({ ...existing, matrixBlock: uiBlock });
-    }
-    const matrix_block = blockId.replace(/-/g, "_");
-    const updated = await apiPatch(`tasks/${taskId}/`, { matrix_block });
-    const task = apiTaskToUi(updated);
-    upsertTaskInState(task);
-    await refreshTaskLists({ grouped: false, calendar: false, matrix: true });
-    return task;
-  }
-  async function fetchTask(id) {
-    const task = await apiGet(`tasks/${id}/`);
-    const ui = apiTaskToUi(task);
-    upsertTaskInState(ui);
-    return ui;
-  }
-  async function searchTasks(query) {
-    if (!query.trim()) return [];
-    const response = await apiGet("tasks/", {
-      params: { search: query.trim(), limit: 50 }
-    });
-    return (response.results || []).map(apiTaskToUi);
-  }
-  function reset() {
-    tasks.value = [];
-    groupedFromApi.value = GROUP_ORDER.reduce((acc, key) => {
-      acc[key] = [];
-      return acc;
-    }, {});
-    matrixTasksByBlock.value = {};
-    calendarTasks.value = [];
-    calendarCacheKey.value = "";
-    initialized.value = false;
-    error.value = "";
-  }
-  return {
-    tasks,
-    groupedFromApi,
-    matrixTasksByBlock,
-    calendarTasks,
-    calendarCacheKey,
-    loading,
-    error,
-    initialized,
-    today: today2,
-    tomorrow: tomorrow2,
-    overdueTasks,
-    todayTasks,
-    tomorrowTasks,
-    laterTasks,
-    noDateTasks,
-    completedTasks,
-    fetchGrouped,
-    fetchMatrix,
-    fetchCalendar,
-    refreshCalendarIfCached,
-    refreshTaskLists,
-    getTasksForDate,
-    getTasksForWeek,
-    getTasksForMatrix,
-    addTask,
-    updateTask,
-    deleteTask,
-    completeTask,
-    moveToMatrix,
-    fetchTask,
-    searchTasks,
-    reset
-  };
-});
 const today = dayjs().format("YYYY-MM-DD");
 const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
 const twoDaysAgo = dayjs().subtract(3, "day").format("YYYY-MM-DD");
@@ -2264,6 +1729,14 @@ const matrixBlockDefaults = {
     priorityFilter: ["low", "none"]
   }
 };
+const soundOptions = [
+  { id: "bell", name: "Колокольчик", icon: "🔔" },
+  { id: "chime", name: "Перезвон", icon: "🎵" },
+  { id: "success", name: "Успех", icon: "✅" },
+  { id: "ding", name: "Динь", icon: "🔊" },
+  { id: "soft", name: "Мягкий", icon: "🎶" },
+  { id: "none", name: "Без звука", icon: "🔇" }
+];
 function normalizeBottomNavItems(items) {
   const withoutSettings = items.filter((id) => id !== "settings");
   return [...withoutSettings, "settings"];
@@ -2322,7 +1795,7 @@ function syncPremiumToAuth(settings) {
   const authStore = useAuthStore();
   if (authStore.user) {
     authStore.user.isPremium = settings.is_premium;
-    authStore.user.premiumExpiresAt = settings.premium_activated_at || void 0;
+    authStore.user.premiumExpiresAt = settings.premium_until || settings.premium_activated_at || void 0;
   }
 }
 const useSettingsStore = /* @__PURE__ */ defineStore("settings", () => {
@@ -2405,7 +1878,7 @@ const useSettingsStore = /* @__PURE__ */ defineStore("settings", () => {
       };
       matrixBlocks.value = apiMatrixToBlocks(matrixSettings);
       isPremium.value = settings.is_premium;
-      premiumActivatedAt.value = settings.premium_activated_at;
+      premiumActivatedAt.value = settings.premium_until || settings.premium_activated_at;
       syncPremiumToAuth(settings);
     } catch (err) {
       error.value = getApiErrorMessage(err);
@@ -2420,9 +1893,13 @@ const useSettingsStore = /* @__PURE__ */ defineStore("settings", () => {
     const patch = appSettingsToApiPatch(updates);
     if (Object.keys(patch).length === 0) return;
     const updated = await apiPatch("settings/", patch);
+    const fromApi = apiToAppSettings(updated);
+    if (updates.bottomNavItems !== void 0) {
+      fromApi.bottomNavItems = next.bottomNavItems;
+    }
     appSettings.value = {
       ...next,
-      ...apiToAppSettings(updated)
+      ...fromApi
     };
     isPremium.value = updated.is_premium;
     premiumActivatedAt.value = updated.premium_activated_at;
@@ -2453,30 +1930,6 @@ const useSettingsStore = /* @__PURE__ */ defineStore("settings", () => {
   async function reorderNavItems(items) {
     await updateSettings({ bottomNavItems: normalizeBottomNavItems(items) });
   }
-  async function premiumCheckout(tariff = "monthly", consent) {
-    return apiPost("premium/checkout/", {
-      tariff,
-      recurring_consent: consent?.accepted ?? false,
-      offer_version: consent?.offerVersion,
-      consent_text: consent?.consentText
-    });
-  }
-  async function premiumActivate() {
-    const updated = await apiPost("premium/activate/");
-    appSettings.value = { ...appSettings.value, ...apiToAppSettings(updated) };
-    isPremium.value = updated.is_premium;
-    premiumActivatedAt.value = updated.premium_activated_at;
-    syncPremiumToAuth(updated);
-    return updated;
-  }
-  async function premiumCancel() {
-    const updated = await apiPost("premium/cancel/");
-    appSettings.value = { ...appSettings.value, ...apiToAppSettings(updated) };
-    isPremium.value = updated.is_premium;
-    premiumActivatedAt.value = updated.premium_activated_at;
-    syncPremiumToAuth(updated);
-    return updated;
-  }
   return {
     appSettings,
     matrixBlocks,
@@ -2502,10 +1955,944 @@ const useSettingsStore = /* @__PURE__ */ defineStore("settings", () => {
     toggleGroup,
     isGroupVisible,
     updateMatrixBlock,
-    reorderNavItems,
-    premiumCheckout,
-    premiumActivate,
-    premiumCancel
+    reorderNavItems
+  };
+});
+function parseApiWallClock(iso) {
+  const match = iso.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/);
+  if (match) {
+    return { date: match[1], time: `${match[2]}:${match[3]}` };
+  }
+  return null;
+}
+function parseTimeToMinutes(time) {
+  const [h2, m] = time.split(":").map((v) => parseInt(v, 10));
+  const hours = Number.isFinite(h2) ? h2 : 0;
+  const minutes = Number.isFinite(m) ? m : 0;
+  return hours * 60 + minutes;
+}
+function formatMinutesToTime(totalMinutes) {
+  const clamped = Math.max(0, Math.min(23 * 60 + 59, totalMinutes));
+  const hours = Math.floor(clamped / 60);
+  const minutes = clamped % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+function addMinutesToTime(time, deltaMinutes) {
+  return formatMinutesToTime(parseTimeToMinutes(time) + deltaMinutes);
+}
+function getTaskScheduleStart(task) {
+  return task.duration?.start || task.dueTime;
+}
+function getTaskDurationMinutes(task) {
+  if (task.duration?.start && task.duration?.end) {
+    const start = parseTimeToMinutes(task.duration.start);
+    const end = parseTimeToMinutes(task.duration.end);
+    if (end > start) return end - start;
+    if (end < start) return 24 * 60 - start + end;
+  }
+  return 60;
+}
+const MATRIX_TO_UI = {
+  urgent_important: "urgent-important",
+  not_urgent_important: "not-urgent-important",
+  urgent_not_important: "urgent-not-important",
+  not_urgent_not_important: "not-urgent-not-important"
+};
+const MATRIX_TO_API = {
+  "urgent-important": "urgent_important",
+  "not-urgent-important": "not_urgent_important",
+  "urgent-not-important": "urgent_not_important",
+  "not-urgent-not-important": "not_urgent_not_important"
+};
+const REPEAT_TO_UI = {
+  none: "none",
+  day: "daily",
+  week: "weekly",
+  month: "monthly",
+  year: "yearly"
+};
+const REPEAT_TO_API = {
+  none: "none",
+  daily: "day",
+  weekly: "week",
+  monthly: "month",
+  yearly: "year",
+  custom: "week"
+};
+function resolveRepeatApi(task) {
+  const repeat = task.repeat || "none";
+  if (repeat === "custom" && task.repeatCustom) {
+    const unit = task.repeatCustom.unit === "month" ? "month" : "week";
+    return {
+      unit,
+      interval: Math.max(1, Math.min(31, task.repeatCustom.interval || 1))
+    };
+  }
+  if (repeat !== "none" && task.repeatCustom?.interval) {
+    return {
+      unit: REPEAT_TO_API[repeat],
+      interval: Math.max(1, Math.min(31, task.repeatCustom.interval))
+    };
+  }
+  return {
+    unit: REPEAT_TO_API[repeat],
+    interval: 1
+  };
+}
+function apiPriorityToUi(priority) {
+  if (priority === "critical") return "high";
+  if (priority === "low" || priority === "medium" || priority === "high") return priority;
+  return "medium";
+}
+function uiPriorityToApi(priority) {
+  if (priority === "none") return "medium";
+  if (priority === "high") return "high";
+  if (priority === "low") return "low";
+  return "medium";
+}
+function reminderMinutes(dueAt, reminderAt) {
+  if (!dueAt || !reminderAt) return void 0;
+  const diff = dayjs(dueAt).diff(dayjs(reminderAt), "minute");
+  if (diff < 0) return void 0;
+  return String(diff);
+}
+function toApiDateTime(dueDate, time) {
+  const hhmm = time.length >= 5 ? time.slice(0, 5) : time;
+  return `${dueDate}T${hhmm}:00.000`;
+}
+function buildDueAt(dueDate, dueTime) {
+  if (!dueDate) return null;
+  return toApiDateTime(dueDate, dueTime || "00:00");
+}
+function buildReminderAt(dueAt, notification) {
+  if (!dueAt || !notification) return null;
+  const minutes = Number(notification);
+  if (!Number.isFinite(minutes) || minutes < 0) return null;
+  return dayjs(dueAt).subtract(minutes, "minute").format("YYYY-MM-DDTHH:mm:ss.SSS");
+}
+function buildStartEnd(dueDate, duration) {
+  if (!dueDate || !duration?.start || !duration?.end) {
+    return { start_at: null, end_at: null };
+  }
+  if (parseTimeToMinutes(duration.end) <= parseTimeToMinutes(duration.start)) {
+    return { start_at: null, end_at: null };
+  }
+  return {
+    start_at: toApiDateTime(dueDate, duration.start),
+    end_at: toApiDateTime(dueDate, duration.end)
+  };
+}
+function apiTaskToUi(task) {
+  const dueFields = task.due_at ? parseApiWallClock(task.due_at) : null;
+  const startFields = task.start_at ? parseApiWallClock(task.start_at) : null;
+  const endFields = task.end_at ? parseApiWallClock(task.end_at) : null;
+  const scheduleDay = startFields ?? dueFields;
+  const repeat = REPEAT_TO_UI[task.repeat_unit] || "none";
+  const hasCustomInterval = task.repeat_unit !== "none" && task.repeat_interval > 1;
+  const customUnit = task.repeat_unit === "month" ? "month" : "week";
+  return {
+    id: String(task.id),
+    title: task.title,
+    description: task.description || void 0,
+    dueDate: scheduleDay?.date,
+    dueTime: dueFields && dueFields.time !== "00:00" ? dueFields.time : void 0,
+    duration: startFields && endFields ? { start: startFields.time, end: endFields.time } : void 0,
+    priority: apiPriorityToUi(task.priority),
+    completed: task.is_completed,
+    completedAt: task.completed_at ? dayjs(task.completed_at).format("YYYY-MM-DD") : void 0,
+    notification: reminderMinutes(task.due_at, task.reminder_at),
+    repeat: hasCustomInterval ? "custom" : repeat,
+    repeatCustom: hasCustomInterval ? { interval: task.repeat_interval, unit: customUnit } : void 0,
+    imageUrl: task.image || void 0,
+    attachment: task.image ? {
+      name: "attachment",
+      mimeType: "image/*",
+      dataUrl: task.image
+    } : void 0,
+    matrixBlock: MATRIX_TO_UI[task.matrix_block],
+    createdAt: task.created_at
+  };
+}
+function uiTaskToApiPayload(task) {
+  const due_at = buildDueAt(task.dueDate, task.dueTime);
+  const { start_at, end_at } = buildStartEnd(task.dueDate, task.duration);
+  const { unit: repeat_unit, interval: repeat_interval } = resolveRepeatApi(task);
+  const payload = {
+    title: task.title,
+    description: task.description ?? null,
+    due_at,
+    start_at,
+    end_at,
+    reminder_at: buildReminderAt(due_at, task.notification),
+    repeat_unit,
+    repeat_interval,
+    priority: uiPriorityToApi(task.priority || "none"),
+    matrix_block: MATRIX_TO_API[task.matrixBlock || "not-urgent-not-important"]
+  };
+  if (task.completed !== void 0) {
+    payload.is_completed = task.completed;
+  }
+  return payload;
+}
+async function dataUrlToFile(dataUrl, name, mimeType) {
+  if (!dataUrl.startsWith("data:")) return null;
+  try {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    return new File([blob], name || "attachment", { type: mimeType || blob.type || "application/octet-stream" });
+  } catch {
+    return null;
+  }
+}
+function uiTaskToFormData(task, imageFile) {
+  const formData = new FormData();
+  const payload = uiTaskToApiPayload(task);
+  for (const [key, value] of Object.entries(payload)) {
+    if (value === null || value === void 0) continue;
+    formData.append(key, String(value));
+  }
+  if (imageFile) {
+    formData.append("image", imageFile);
+  }
+  return formData;
+}
+function groupKeyToUi(key) {
+  if (key === "no_deadline") return "nodate";
+  return key;
+}
+function apiMatrixBlockToUi(block) {
+  return MATRIX_TO_UI[block];
+}
+function isoWeekday(d) {
+  const wd = d.day();
+  return wd === 0 ? 7 : wd;
+}
+function matchesCustom(task, date, anchor) {
+  const custom = task.repeatCustom;
+  if (!custom) return false;
+  const interval = Math.max(1, custom.interval || 1);
+  if (custom.unit === "week") {
+    const weekdays = custom.weekdays?.length ? custom.weekdays : task.repeatDays?.length ? task.repeatDays : [isoWeekday(anchor)];
+    if (!weekdays.includes(isoWeekday(date))) return false;
+    const weeksDiff = date.startOf("week").diff(anchor.startOf("week"), "week");
+    return weeksDiff >= 0 && weeksDiff % interval === 0;
+  }
+  const monthDay = custom.monthDay || anchor.date();
+  if (date.date() !== Math.min(monthDay, date.daysInMonth())) return false;
+  const monthsDiff = (date.year() - anchor.year()) * 12 + (date.month() - anchor.month());
+  return monthsDiff >= 0 && monthsDiff % interval === 0;
+}
+function taskOccursOnDate(task, dateStr) {
+  const due = task.dueDate;
+  if (!due) return false;
+  if (task.completed) return due === dateStr;
+  const date = dayjs(dateStr);
+  const anchor = dayjs(due);
+  if (!date.isValid() || !anchor.isValid()) return false;
+  if (date.isBefore(anchor, "day")) return false;
+  if (due === dateStr) return true;
+  const repeat = task.repeat || "none";
+  if (repeat === "none") return false;
+  if (repeat === "daily") {
+    const interval = task.repeatCustom?.interval || 1;
+    const days = date.diff(anchor, "day");
+    return days >= 0 && days % Math.max(1, interval) === 0;
+  }
+  if (repeat === "weekly") {
+    if (isoWeekday(date) !== isoWeekday(anchor)) return false;
+    const weeks = date.startOf("week").diff(anchor.startOf("week"), "week");
+    return weeks >= 0 && weeks % Math.max(1, task.repeatCustom?.interval || 1) === 0;
+  }
+  if (repeat === "monthly") {
+    if (date.date() !== Math.min(anchor.date(), date.daysInMonth())) return false;
+    const months = (date.year() - anchor.year()) * 12 + (date.month() - anchor.month());
+    return months >= 0 && months % Math.max(1, task.repeatCustom?.interval || 1) === 0;
+  }
+  if (repeat === "yearly") {
+    if (date.month() !== anchor.month()) return false;
+    if (date.date() !== Math.min(anchor.date(), date.daysInMonth())) return false;
+    const years = date.year() - anchor.year();
+    return years >= 0 && years % Math.max(1, task.repeatCustom?.interval || 1) === 0;
+  }
+  if (repeat === "custom") {
+    return matchesCustom(task, date, anchor);
+  }
+  return false;
+}
+function expandTasksForDate(tasks, dateStr) {
+  const result = [];
+  for (const task of tasks) {
+    if (!task.dueDate) continue;
+    if (!taskOccursOnDate(task, dateStr)) continue;
+    if (task.dueDate === dateStr) {
+      result.push(task);
+      continue;
+    }
+    result.push({
+      ...task,
+      id: `${task.id}__${dateStr}`,
+      dueDate: dateStr
+    });
+  }
+  return result;
+}
+function expandTasksForRange(tasks, startDate, endDate) {
+  const start = dayjs(startDate);
+  const end = dayjs(endDate);
+  if (!start.isValid() || !end.isValid()) return [];
+  const result = [];
+  let cursor = start;
+  while (!cursor.isAfter(end, "day")) {
+    result.push(...expandTasksForDate(tasks, cursor.format("YYYY-MM-DD")));
+    cursor = cursor.add(1, "day");
+  }
+  return result;
+}
+const GROUP_ORDER = ["overdue", "today", "tomorrow", "later", "nodate", "completed"];
+function flattenGroups(groups) {
+  const seen = /* @__PURE__ */ new Set();
+  const result = [];
+  for (const group of groups) {
+    for (const task of group.tasks) {
+      if (seen.has(task.id)) continue;
+      seen.add(task.id);
+      result.push(apiTaskToUi(task));
+    }
+  }
+  return result;
+}
+function normalizeDueDate(dueDate) {
+  if (!dueDate) return "";
+  const parsed = dayjs(dueDate);
+  return parsed.isValid() ? parsed.format("YYYY-MM-DD") : "";
+}
+function groupTasksByKey(allTasks) {
+  const today2 = dayjs().format("YYYY-MM-DD");
+  const tomorrow2 = dayjs().add(1, "day").format("YYYY-MM-DD");
+  return {
+    overdue: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate);
+      return !t.completed && !!d && dayjs(d).isBefore(today2, "day");
+    }),
+    today: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate);
+      return !t.completed && d === today2;
+    }),
+    tomorrow: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate);
+      return !t.completed && d === tomorrow2;
+    }),
+    later: allTasks.filter((t) => {
+      const d = normalizeDueDate(t.dueDate);
+      return !t.completed && !!d && dayjs(d).isAfter(tomorrow2, "day");
+    }),
+    nodate: allTasks.filter((t) => !t.completed && !normalizeDueDate(t.dueDate)),
+    completed: allTasks.filter((t) => t.completed)
+  };
+}
+const useTasksStore = /* @__PURE__ */ defineStore("tasks", () => {
+  const tasks = ref([]);
+  const groupedFromApi = ref({
+    overdue: [],
+    today: [],
+    tomorrow: [],
+    later: [],
+    nodate: [],
+    completed: []
+  });
+  const matrixTasksByBlock = ref({});
+  const calendarTasks = ref([]);
+  const calendarCacheKey = ref("");
+  const loading = ref(false);
+  const error = ref("");
+  const initialized = ref(false);
+  const today2 = computed(() => dayjs().format("YYYY-MM-DD"));
+  const tomorrow2 = computed(() => dayjs().add(1, "day").format("YYYY-MM-DD"));
+  const overdueTasks = computed(() => groupedFromApi.value.overdue);
+  const todayTasks = computed(() => groupedFromApi.value.today);
+  const tomorrowTasks = computed(() => groupedFromApi.value.tomorrow);
+  const laterTasks = computed(() => groupedFromApi.value.later);
+  const noDateTasks = computed(() => groupedFromApi.value.nodate);
+  const completedTasks = computed(() => groupedFromApi.value.completed);
+  function preserveImages(incoming) {
+    const prevById = new Map(tasks.value.map((t) => [t.id, t]));
+    for (const task of incoming) {
+      if (task.imageUrl || task.attachment) continue;
+      const prev = prevById.get(task.id);
+      if (prev?.imageUrl || prev?.attachment) {
+        task.imageUrl = prev.imageUrl;
+        task.attachment = prev.attachment;
+      }
+    }
+    return incoming;
+  }
+  function applyGrouped(groups) {
+    const next = {
+      overdue: [],
+      today: [],
+      tomorrow: [],
+      later: [],
+      nodate: [],
+      completed: []
+    };
+    for (const group of groups) {
+      const uiKey = groupKeyToUi(group.key);
+      if (uiKey in next) {
+        next[uiKey] = group.tasks.map(apiTaskToUi);
+      }
+    }
+    tasks.value = preserveImages(flattenGroups(groups));
+    groupedFromApi.value = groupTasksByKey(tasks.value);
+  }
+  function findTaskById(id) {
+    const realId = id.includes("__") && /^\d{4}-\d{2}-\d{2}$/.test(id.split("__").pop() || "") ? id.slice(0, id.lastIndexOf("__")) : id;
+    return tasks.value.find((t) => t.id === realId) ?? calendarTasks.value.find((t) => t.id === realId);
+  }
+  function taskScheduleKey(task) {
+    return [
+      task.dueDate,
+      task.dueTime,
+      task.duration?.start,
+      task.duration?.end,
+      task.completed,
+      task.title,
+      task.priority,
+      task.matrixBlock
+    ].join("|");
+  }
+  function mergeTaskFields(existing, updates, id) {
+    return {
+      ...existing || {
+        id,
+        title: "",
+        priority: "medium",
+        completed: false,
+        repeat: "none",
+        createdAt: ""
+      },
+      ...updates,
+      id,
+      duration: updates.duration ?? existing?.duration,
+      dueTime: updates.dueTime ?? existing?.dueTime,
+      dueDate: updates.dueDate ?? existing?.dueDate
+    };
+  }
+  function mergeTaskFromApi(existing, updates, fromApi) {
+    return {
+      ...existing,
+      ...fromApi,
+      ...updates,
+      id: fromApi.id,
+      duration: fromApi.duration ?? updates.duration ?? existing?.duration,
+      dueTime: fromApi.dueTime ?? updates.dueTime ?? existing?.dueTime,
+      dueDate: fromApi.dueDate ?? updates.dueDate ?? existing?.dueDate
+    };
+  }
+  function applyTaskToMatrixState(updated) {
+    if (Object.keys(matrixTasksByBlock.value).length === 0) return;
+    const next = {};
+    for (const [blockId, list] of Object.entries(matrixTasksByBlock.value)) {
+      next[blockId] = list.filter((t) => t.id !== updated.id);
+    }
+    if (!updated.completed && updated.matrixBlock) {
+      const blockId = updated.matrixBlock;
+      next[blockId] = [updated, ...next[blockId] || []];
+    }
+    matrixTasksByBlock.value = next;
+  }
+  function removeTaskFromMatrixState(id) {
+    if (Object.keys(matrixTasksByBlock.value).length === 0) return;
+    const next = {};
+    for (const [blockId, list] of Object.entries(matrixTasksByBlock.value)) {
+      next[blockId] = list.filter((t) => t.id !== id);
+    }
+    matrixTasksByBlock.value = next;
+  }
+  function upsertTaskInState(updated) {
+    const idx = tasks.value.findIndex((t) => t.id === updated.id);
+    if (idx === -1) {
+      tasks.value.unshift(updated);
+    } else {
+      tasks.value[idx] = updated;
+    }
+    groupedFromApi.value = groupTasksByKey(tasks.value);
+    const calIdx = calendarTasks.value.findIndex((t) => t.id === updated.id);
+    if (calIdx !== -1) {
+      calendarTasks.value[calIdx] = updated;
+    }
+    applyTaskToMatrixState(updated);
+  }
+  async function refreshCalendarIfCached() {
+    const key = calendarCacheKey.value;
+    if (!key) return;
+    const colon = key.indexOf(":");
+    if (colon === -1) return;
+    const view = key.slice(0, colon);
+    const date = key.slice(colon + 1);
+    if (!date) return;
+    await fetchCalendar(view, date);
+  }
+  function refreshMatrixIfCached() {
+    if (Object.keys(matrixTasksByBlock.value).length === 0) return void 0;
+    return fetchMatrix();
+  }
+  async function refreshTaskLists(options = {}) {
+    const { grouped = true, calendar = true, matrix = true } = options;
+    const jobs = [];
+    if (grouped) jobs.push(fetchGrouped());
+    if (calendar) jobs.push(refreshCalendarIfCached());
+    if (matrix) {
+      const matrixJob = refreshMatrixIfCached();
+      if (matrixJob) jobs.push(matrixJob);
+    }
+    if (jobs.length === 0) return;
+    await Promise.all(jobs);
+  }
+  function removeTaskFromState(id) {
+    tasks.value = tasks.value.filter((t) => t.id !== id);
+    calendarTasks.value = calendarTasks.value.filter((t) => t.id !== id);
+    groupedFromApi.value = groupTasksByKey(tasks.value);
+    removeTaskFromMatrixState(id);
+  }
+  async function fetchGrouped() {
+    loading.value = true;
+    error.value = "";
+    try {
+      const groups = await apiGet("tasks/grouped/");
+      applyGrouped(groups);
+      initialized.value = true;
+    } catch (err) {
+      error.value = getApiErrorMessage(err);
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  }
+  async function fetchMatrix() {
+    const blocks = await apiGet("matrix/");
+    const prevById = /* @__PURE__ */ new Map();
+    for (const list of Object.values(matrixTasksByBlock.value)) {
+      for (const task of list) prevById.set(task.id, task);
+    }
+    const next = {};
+    for (const block of blocks) {
+      next[apiMatrixBlockToUi(block.block)] = block.tasks.map((apiTask) => {
+        const task = apiTaskToUi(apiTask);
+        const prev = prevById.get(task.id);
+        return prev && taskScheduleKey(prev) === taskScheduleKey(task) ? prev : task;
+      });
+    }
+    matrixTasksByBlock.value = next;
+    return next;
+  }
+  async function fetchCalendar(view, date) {
+    const response = await apiGet("calendar/", { params: { view, date } });
+    const incoming = response.tasks.map(apiTaskToUi);
+    calendarCacheKey.value = `${view}:${date}`;
+    if (calendarTasks.value.length === 0) {
+      calendarTasks.value = incoming;
+      return calendarTasks.value;
+    }
+    const prevById = new Map(calendarTasks.value.map((task) => [task.id, task]));
+    calendarTasks.value = incoming.map((task) => {
+      const prev = prevById.get(task.id);
+      if (prev && taskScheduleKey(prev) === taskScheduleKey(task)) {
+        return prev;
+      }
+      return task;
+    });
+    return calendarTasks.value;
+  }
+  function getTasksForDate(date) {
+    const pool = /* @__PURE__ */ new Map();
+    for (const t of tasks.value) pool.set(t.id, t);
+    for (const t of calendarTasks.value) {
+      if (!pool.has(t.id)) pool.set(t.id, t);
+    }
+    return expandTasksForDate(Array.from(pool.values()), date);
+  }
+  function getTasksForWeek(startDate, endDate) {
+    const pool = /* @__PURE__ */ new Map();
+    for (const t of tasks.value) pool.set(t.id, t);
+    for (const t of calendarTasks.value) {
+      if (!pool.has(t.id)) pool.set(t.id, t);
+    }
+    return expandTasksForRange(Array.from(pool.values()), startDate, endDate);
+  }
+  function getTasksForMatrix(blockId) {
+    const settingsStore = useSettingsStore();
+    const block = settingsStore.matrixBlocks[blockId];
+    const dateFilters = block?.dateFilter || [];
+    const priorityFilters = block?.priorityFilter || [];
+    const groups = groupTasksByKey(tasks.value);
+    let candidates = tasks.value.filter((t) => !t.completed);
+    if (dateFilters.length > 0) {
+      const allowedIds = /* @__PURE__ */ new Set();
+      for (const key of dateFilters) {
+        const list = groups[key];
+        if (list) {
+          for (const t of list) allowedIds.add(t.id);
+        }
+      }
+      candidates = candidates.filter((t) => allowedIds.has(t.id));
+    }
+    if (priorityFilters.length > 0) {
+      candidates = candidates.filter((t) => priorityFilters.includes(t.priority));
+    }
+    if (dateFilters.length > 0 || priorityFilters.length > 0) {
+      const assigned = tasks.value.filter((t) => !t.completed && t.matrixBlock === blockId);
+      const byId = /* @__PURE__ */ new Map();
+      for (const t of [...candidates, ...assigned]) byId.set(t.id, t);
+      return Array.from(byId.values());
+    }
+    if (matrixTasksByBlock.value[blockId]?.length) {
+      return matrixTasksByBlock.value[blockId];
+    }
+    return tasks.value.filter((t) => !t.completed && t.matrixBlock === blockId);
+  }
+  async function resolveAttachmentFile(taskData) {
+    const att = taskData.attachment;
+    if (!att?.dataUrl?.startsWith("data:")) return void 0;
+    const file = await dataUrlToFile(att.dataUrl, att.name, att.mimeType);
+    return file || void 0;
+  }
+  async function addTask(taskData) {
+    const imageFile = await resolveAttachmentFile(taskData);
+    const created = imageFile ? await apiPost("tasks/", uiTaskToFormData(taskData, imageFile)) : await apiPost("tasks/", uiTaskToApiPayload(taskData));
+    const task = apiTaskToUi(created);
+    upsertTaskInState(task);
+    await refreshTaskLists();
+    return task;
+  }
+  function computeNextOccurrenceDate(task) {
+    if (!task.dueDate || !task.repeat || task.repeat === "none") return null;
+    const anchor = dayjs(task.dueDate);
+    if (!anchor.isValid()) return null;
+    const probe = { ...task, completed: false };
+    let cursor = anchor.add(1, "day");
+    const limit = anchor.add(3, "year");
+    while (!cursor.isAfter(limit, "day")) {
+      const dateStr = cursor.format("YYYY-MM-DD");
+      if (taskOccursOnDate(probe, dateStr)) return dateStr;
+      cursor = cursor.add(1, "day");
+    }
+    return null;
+  }
+  async function spawnNextOccurrence(task) {
+    const nextDate = computeNextOccurrenceDate(task);
+    if (!nextDate) return null;
+    const alreadyExists = tasks.value.some(
+      (t) => t.id !== task.id && !t.completed && t.title === task.title && (t.repeat || "none") === task.repeat && normalizeDueDate(t.dueDate) === nextDate
+    );
+    if (alreadyExists) return null;
+    return addTask({
+      title: task.title,
+      description: task.description,
+      dueDate: nextDate,
+      dueTime: task.dueTime,
+      duration: task.duration ? { ...task.duration } : void 0,
+      priority: task.priority,
+      notification: task.notification,
+      repeat: task.repeat,
+      repeatDays: task.repeatDays ? [...task.repeatDays] : void 0,
+      repeatCustom: task.repeatCustom ? { ...task.repeatCustom } : void 0,
+      matrixBlock: task.matrixBlock
+    });
+  }
+  async function updateTask(id, updates, refresh = {}) {
+    const existing = findTaskById(id);
+    const optimistic = mergeTaskFields(existing, updates, id);
+    upsertTaskInState(optimistic);
+    const merged = { ...existing, ...updates };
+    const imageFile = await resolveAttachmentFile(updates);
+    const updated = imageFile ? await apiPatch(`tasks/${id}/`, uiTaskToFormData(merged, imageFile)) : await apiPatch(`tasks/${id}/`, uiTaskToApiPayload(merged));
+    const task = mergeTaskFromApi(existing, updates, apiTaskToUi(updated));
+    upsertTaskInState(task);
+    await refreshTaskLists(refresh);
+    return task;
+  }
+  async function deleteTask(id, refresh = {}) {
+    removeTaskFromState(id);
+    await apiDelete(`tasks/${id}/`);
+    await refreshTaskLists(refresh);
+  }
+  async function completeTask(id, refresh = {}) {
+    const existing = findTaskById(id);
+    if (!existing) return;
+    const willComplete = !existing.completed;
+    upsertTaskInState({
+      ...existing,
+      completed: willComplete,
+      completedAt: willComplete ? dayjs().format("YYYY-MM-DD") : void 0
+    });
+    const endpoint = existing.completed ? "uncomplete" : "complete";
+    const updated = await apiPost(`tasks/${id}/${endpoint}/`);
+    const task = apiTaskToUi(updated);
+    upsertTaskInState(task);
+    if (willComplete && existing.repeat && existing.repeat !== "none" && existing.dueDate) {
+      try {
+        await spawnNextOccurrence(existing);
+      } catch {
+      }
+    }
+    await refreshTaskLists(refresh);
+    return task;
+  }
+  async function moveToMatrix(taskId, blockId) {
+    const existing = findTaskById(taskId);
+    const uiBlock = blockId;
+    if (existing) {
+      upsertTaskInState({ ...existing, matrixBlock: uiBlock });
+    }
+    const matrix_block = blockId.replace(/-/g, "_");
+    const updated = await apiPatch(`tasks/${taskId}/`, { matrix_block });
+    const task = apiTaskToUi(updated);
+    upsertTaskInState(task);
+    await refreshTaskLists({ grouped: false, calendar: false, matrix: true });
+    return task;
+  }
+  async function fetchTask(id) {
+    const task = await apiGet(`tasks/${id}/`);
+    const ui = apiTaskToUi(task);
+    upsertTaskInState(ui);
+    return ui;
+  }
+  async function searchTasks(query) {
+    if (!query.trim()) return [];
+    const response = await apiGet("tasks/", {
+      params: { search: query.trim(), limit: 50 }
+    });
+    return (response.results || []).map(apiTaskToUi);
+  }
+  function reset() {
+    tasks.value = [];
+    groupedFromApi.value = GROUP_ORDER.reduce((acc, key) => {
+      acc[key] = [];
+      return acc;
+    }, {});
+    matrixTasksByBlock.value = {};
+    calendarTasks.value = [];
+    calendarCacheKey.value = "";
+    initialized.value = false;
+    error.value = "";
+  }
+  return {
+    tasks,
+    groupedFromApi,
+    matrixTasksByBlock,
+    calendarTasks,
+    calendarCacheKey,
+    loading,
+    error,
+    initialized,
+    today: today2,
+    tomorrow: tomorrow2,
+    overdueTasks,
+    todayTasks,
+    tomorrowTasks,
+    laterTasks,
+    noDateTasks,
+    completedTasks,
+    fetchGrouped,
+    fetchMatrix,
+    fetchCalendar,
+    refreshCalendarIfCached,
+    refreshTaskLists,
+    getTasksForDate,
+    getTasksForWeek,
+    getTasksForMatrix,
+    addTask,
+    updateTask,
+    deleteTask,
+    completeTask,
+    spawnNextOccurrence,
+    computeNextOccurrenceDate,
+    moveToMatrix,
+    fetchTask,
+    searchTasks,
+    reset
+  };
+});
+const BRAND_NAME = "ОТТЕР";
+const SITE_LEGAL_INFO = {
+  businessName: "ИП Наринян А.Б.",
+  email: "nab1985nab@gmail.com",
+  phone: "89283285202",
+  phoneHref: "tel:+79283285202",
+  inn: "262514605435",
+  ogrnip: "326265100087984"
+};
+const PREMIUM_LANDING = {
+  title: `${BRAND_NAME} Premium`,
+  price: 150,
+  period: "месяц",
+  features: ["Календарь", "Помодоро", "Матрица Эйзенхауэра"]
+};
+const PREMIUM_SUBSCRIPTION = {
+  price: PREMIUM_LANDING.price,
+  period: PREMIUM_LANDING.period,
+  periodDays: 30,
+  chargeSchedule: "первое списание — при оформлении, далее каждые 30 календарных дней в 10:00 по московскому времени (UTC+3)",
+  offerVersion: "2026-07-08",
+  offerSlug: "public-offer",
+  consentText: "Я согласен на автоматические списания согласно условиям оферты"
+};
+function syncPremiumFlags(subscription) {
+  const settingsStore = useSettingsStore();
+  const authStore = useAuthStore();
+  settingsStore.isPremium = subscription.is_premium;
+  settingsStore.premiumActivatedAt = subscription.premium_until || subscription.promo_until || null;
+  if (authStore.user) {
+    authStore.user.isPremium = subscription.is_premium;
+    authStore.user.premiumExpiresAt = subscription.premium_until || subscription.promo_until || void 0;
+  }
+}
+const usePremiumStore = /* @__PURE__ */ defineStore("premium", () => {
+  const tariffs = ref([]);
+  const tariffsLoading = ref(false);
+  const tariffsError = ref("");
+  const subscription = ref(null);
+  const subscriptionLoading = ref(false);
+  const subscriptionError = ref("");
+  const features = ref([]);
+  const featuresLoading = ref(false);
+  const selectedTariffCode = ref("monthly");
+  const actionLoading = ref(false);
+  const selectedTariff = computed(
+    () => tariffs.value.find((t) => t.code === selectedTariffCode.value) || tariffs.value[0] || null
+  );
+  const isPremium = computed(() => {
+    if (subscription.value) return !!subscription.value.is_premium;
+    const settingsStore = useSettingsStore();
+    const authStore = useAuthStore();
+    return !!(settingsStore.isPremium || authStore.user?.isPremium);
+  });
+  const status = computed(() => subscription.value?.status ?? "none");
+  const expiresAt = computed(
+    () => subscription.value?.premium_until || subscription.value?.promo_until || useSettingsStore().premiumActivatedAt || useAuthStore().user?.premiumExpiresAt || null
+  );
+  async function fetchTariffs() {
+    tariffsLoading.value = true;
+    tariffsError.value = "";
+    try {
+      const list = await apiGet("premium/tariffs/");
+      tariffs.value = [...list].sort((a, b) => a.sort_order - b.sort_order);
+      if (!tariffs.value.some((t) => t.code === selectedTariffCode.value)) {
+        selectedTariffCode.value = tariffs.value[0]?.code || "monthly";
+      }
+    } catch (err) {
+      tariffsError.value = getApiErrorMessage(err, "Не удалось загрузить тарифы");
+      throw err;
+    } finally {
+      tariffsLoading.value = false;
+    }
+  }
+  async function fetchSubscription() {
+    subscriptionLoading.value = true;
+    subscriptionError.value = "";
+    try {
+      const data = await apiGet("premium/subscription/");
+      subscription.value = data;
+      syncPremiumFlags(data);
+      return data;
+    } catch (err) {
+      subscriptionError.value = getApiErrorMessage(err, "Не удалось загрузить подписку");
+      throw err;
+    } finally {
+      subscriptionLoading.value = false;
+    }
+  }
+  async function fetchFeatures() {
+    featuresLoading.value = true;
+    try {
+      features.value = await apiGet("premium/features/");
+    } finally {
+      featuresLoading.value = false;
+    }
+  }
+  async function loadAll() {
+    await Promise.allSettled([
+      fetchTariffs(),
+      fetchSubscription(),
+      fetchFeatures()
+    ]);
+  }
+  async function startTrial(tariffCode, recurringConsent = false) {
+    const code = tariffCode || selectedTariffCode.value;
+    actionLoading.value = true;
+    try {
+      const data = await apiPost("premium/trial/", {
+        tariff: code,
+        recurring_consent: recurringConsent,
+        offer_version: PREMIUM_SUBSCRIPTION.offerVersion
+      });
+      subscription.value = data;
+      syncPremiumFlags(data);
+      return data;
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+  async function checkout(tariffCode, options = {}) {
+    const code = tariffCode || selectedTariffCode.value;
+    actionLoading.value = true;
+    try {
+      const response = await apiPost("premium/checkout/", {
+        tariff: code,
+        recurring_consent: options.recurringConsent ?? false,
+        offer_version: PREMIUM_SUBSCRIPTION.offerVersion
+      });
+      return response;
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+  async function cancel() {
+    actionLoading.value = true;
+    try {
+      const data = await apiPost("premium/cancel/", {});
+      subscription.value = data;
+      syncPremiumFlags(data);
+      return data;
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+  function selectTariff(code) {
+    selectedTariffCode.value = code;
+  }
+  function reset() {
+    tariffs.value = [];
+    subscription.value = null;
+    features.value = [];
+    selectedTariffCode.value = "monthly";
+    tariffsError.value = "";
+    subscriptionError.value = "";
+  }
+  return {
+    tariffs,
+    tariffsLoading,
+    tariffsError,
+    subscription,
+    subscriptionLoading,
+    subscriptionError,
+    features,
+    featuresLoading,
+    selectedTariffCode,
+    selectedTariff,
+    actionLoading,
+    isPremium,
+    status,
+    expiresAt,
+    fetchTariffs,
+    fetchSubscription,
+    fetchFeatures,
+    loadAll,
+    startTrial,
+    checkout,
+    cancel,
+    selectTariff,
+    reset
   };
 });
 const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
@@ -2555,6 +2942,11 @@ const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
     profileLastName.value = profile.last_name || "";
     profileLoaded.value = true;
     user.value = mapBackendUser(profile);
+    const settingsStore = useSettingsStore();
+    if (settingsStore.isPremium && user.value) {
+      user.value.isPremium = true;
+      user.value.premiumExpiresAt = settingsStore.premiumActivatedAt || user.value.premiumExpiresAt;
+    }
     return profile;
   }
   async function updateProfile(first_name, last_name, avatar) {
@@ -2634,7 +3026,12 @@ const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
   }
   function logout() {
     const tasksStore = useTasksStore();
+    const premiumStore = usePremiumStore();
+    const settingsStore = useSettingsStore();
     tasksStore.reset();
+    premiumStore.reset();
+    settingsStore.isPremium = false;
+    settingsStore.premiumActivatedAt = null;
     syncTokensFromStorage();
     user.value = null;
     profileFirstName.value = "";
@@ -2648,25 +3045,21 @@ const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
   function updateName(name) {
     if (user.value) user.value.name = name;
   }
-  async function startPremiumCheckout(tariff = "monthly", consent) {
-    const settingsStore = useSettingsStore();
-    return settingsStore.premiumCheckout(tariff, consent);
+  async function startPremiumCheckout(tariff = "monthly", options = {}) {
+    const premiumStore = usePremiumStore();
+    return premiumStore.checkout(tariff, options);
   }
-  async function activatePremium() {
-    const settingsStore = useSettingsStore();
-    await settingsStore.premiumActivate();
-    if (user.value) {
-      user.value.isPremium = settingsStore.isPremium;
-      user.value.premiumExpiresAt = settingsStore.premiumActivatedAt || void 0;
-    }
+  async function refreshPremiumSubscription() {
+    const premiumStore = usePremiumStore();
+    return premiumStore.fetchSubscription();
+  }
+  async function startPremiumTrial(tariff = "monthly", recurringConsent = false) {
+    const premiumStore = usePremiumStore();
+    return premiumStore.startTrial(tariff, recurringConsent);
   }
   async function cancelPremiumSubscription() {
-    const settingsStore = useSettingsStore();
-    await settingsStore.premiumCancel();
-    if (user.value) {
-      user.value.isPremium = settingsStore.isPremium;
-      user.value.premiumExpiresAt = settingsStore.premiumActivatedAt || void 0;
-    }
+    const premiumStore = usePremiumStore();
+    return premiumStore.cancel();
   }
   return {
     user,
@@ -2691,7 +3084,8 @@ const useAuthStore = /* @__PURE__ */ defineStore("auth", () => {
     updateAvatar,
     updateName,
     startPremiumCheckout,
-    activatePremium,
+    refreshPremiumSubscription,
+    startPremiumTrial,
     cancelPremiumSubscription
   };
 });
@@ -2709,7 +3103,7 @@ const globalMiddleware = [
   manifest_45route_45rule
 ];
 const namedMiddleware = {
-  auth: () => import('./auth-nNFHWeiS.mjs')
+  auth: () => import('./auth-Csu5taJD.mjs')
 };
 const plugin$1 = /* @__PURE__ */ defineNuxtPlugin({
   name: "nuxt:router",
@@ -3071,7 +3465,7 @@ _sfc_main$3.setup = (props, ctx) => {
 };
 const __nuxt_component_0 = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-ee22b97d"]]);
 const layouts = {
-  app: defineAsyncComponent(() => import('./app-ChwCPMUq.mjs').then((m) => m.default || m)),
+  app: defineAsyncComponent(() => import('./app-RJT_2ap4.mjs').then((m) => m.default || m)),
   default: defineAsyncComponent(() => import('./default-DE7Yy99t.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
@@ -3445,5 +3839,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { useRuntimeConfig as A, nuxtLinkDefaults as B, _export_sfc as _, useState as a, useSettingsStore as b, useTasksStore as c, useRoute as d, entry_default as default, useAppToast as e, defineStore as f, getApiErrorMessage as g, getTaskScheduleStart as h, getTaskDurationMinutes as i, formatMinutesToTime as j, addMinutesToTime as k, defaultPomodoroSettings as l, matrixBlockDefaults as m, navigateTo as n, onClickOutside as o, parseTimeToMinutes as p, apiGet as q, apiPatch as r, apiPost as s, tryUseNuxtApp as t, useAuthStore as u, useRouter as v, defineNuxtRouteMiddleware as w, encodeRoutePath as x, resolveRouteObject as y, useNuxtApp as z };
+export { defineNuxtRouteMiddleware as A, BRAND_NAME as B, encodeRoutePath as C, resolveRouteObject as D, useNuxtApp as E, useRuntimeConfig as F, nuxtLinkDefaults as G, PREMIUM_LANDING as P, SITE_LEGAL_INFO as S, _export_sfc as _, PREMIUM_SUBSCRIPTION as a, useState as b, useSettingsStore as c, useTasksStore as d, entry_default as default, useRoute as e, usePremiumStore as f, useAppToast as g, getApiErrorMessage as h, defineStore as i, getTaskScheduleStart as j, getTaskDurationMinutes as k, formatMinutesToTime as l, addMinutesToTime as m, navigateTo as n, onClickOutside as o, parseTimeToMinutes as p, matrixBlockDefaults as q, resolveMediaUrl as r, defaultPomodoroSettings as s, apiGet as t, useAuthStore as u, apiPatch as v, apiPost as w, soundOptions as x, tryUseNuxtApp as y, useRouter as z };
 //# sourceMappingURL=server.mjs.map

@@ -26,10 +26,17 @@ interface _GlobalComponents {
   SiteFooter: typeof import("../../components/SiteFooter.vue")['default']
   TimeFieldRu: typeof import("../../components/TimeFieldRu.vue")['default']
   LayoutBottomNav: typeof import("../../components/layout/BottomNav.vue")['default']
+  NavItemCalendar: typeof import("../../components/nav/NavItemCalendar.vue")['default']
+  NavItemMatrix: typeof import("../../components/nav/NavItemMatrix.vue")['default']
+  NavItemPomodoro: typeof import("../../components/nav/NavItemPomodoro.vue")['default']
+  NavItemProfile: typeof import("../../components/nav/NavItemProfile.vue")['default']
+  NavItemSettings: typeof import("../../components/nav/NavItemSettings.vue")['default']
+  NavItemTasks: typeof import("../../components/nav/NavItemTasks.vue")['default']
   SettingsRow: typeof import("../../components/settings/Row.vue")['default']
   TasksTaskDetailModal: typeof import("../../components/tasks/TaskDetailModal.vue")['default']
   TasksTaskGroup: typeof import("../../components/tasks/TaskGroup.vue")['default']
   TasksTaskItem: typeof import("../../components/tasks/TaskItem.vue")['default']
+  UiAppSelect: typeof import("../../components/ui/AppSelect.vue")['default']
   NuxtWelcome: typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']
   NuxtLayout: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
   NuxtErrorBoundary: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -65,10 +72,17 @@ interface _GlobalComponents {
   LazySiteFooter: LazyComponent<typeof import("../../components/SiteFooter.vue")['default']>
   LazyTimeFieldRu: LazyComponent<typeof import("../../components/TimeFieldRu.vue")['default']>
   LazyLayoutBottomNav: LazyComponent<typeof import("../../components/layout/BottomNav.vue")['default']>
+  LazyNavItemCalendar: LazyComponent<typeof import("../../components/nav/NavItemCalendar.vue")['default']>
+  LazyNavItemMatrix: LazyComponent<typeof import("../../components/nav/NavItemMatrix.vue")['default']>
+  LazyNavItemPomodoro: LazyComponent<typeof import("../../components/nav/NavItemPomodoro.vue")['default']>
+  LazyNavItemProfile: LazyComponent<typeof import("../../components/nav/NavItemProfile.vue")['default']>
+  LazyNavItemSettings: LazyComponent<typeof import("../../components/nav/NavItemSettings.vue")['default']>
+  LazyNavItemTasks: LazyComponent<typeof import("../../components/nav/NavItemTasks.vue")['default']>
   LazySettingsRow: LazyComponent<typeof import("../../components/settings/Row.vue")['default']>
   LazyTasksTaskDetailModal: LazyComponent<typeof import("../../components/tasks/TaskDetailModal.vue")['default']>
   LazyTasksTaskGroup: LazyComponent<typeof import("../../components/tasks/TaskGroup.vue")['default']>
   LazyTasksTaskItem: LazyComponent<typeof import("../../components/tasks/TaskItem.vue")['default']>
+  LazyUiAppSelect: LazyComponent<typeof import("../../components/ui/AppSelect.vue")['default']>
   LazyNuxtWelcome: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
   LazyNuxtLayout: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
   LazyNuxtErrorBoundary: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>

@@ -7,35 +7,23 @@
           <p class="text-sm font-semibold text-sber-black">{{ greeting }}</p>
         </div>
         <div class="flex items-center gap-2">
-          <NuxtLink
-            to="/app/faq"
-            class="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm"
-            title="Частые вопросы"
-            @click.stop
-          >
-            <HelpCircle class="h-5 w-5 text-sber-gray" />
-          </NuxtLink>
-          <NuxtLink
-            to="/app/legal"
-            class="hidden h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm sm:flex"
-            title="Юридические документы"
-            @click.stop
-          >
-            <FileText class="h-4 w-4 text-sber-gray" />
-          </NuxtLink>
           <button
             class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center"
             @click.stop="toggleSearch"
           >
             <Search class="w-5 h-5 text-sber-gray" />
           </button>
-          <!-- <NuxtLink to="/app/profile" class="w-10 h-10 overflow-hidden rounded-full bg-sber-green
-                                               flex items-center justify-center shadow-sm">
-            <span v-if="!authStore.user?.avatar" class="text-white font-bold text-sm">
+          <NuxtLink
+            to="/app/profile"
+            class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-sber-green shadow-sm"
+            title="Профиль"
+            @click.stop
+          >
+            <span v-if="!authStore.user?.avatar" class="text-sm font-bold text-white">
               {{ authStore.user?.name?.[0]?.toUpperCase() || 'A' }}
             </span>
-            <img v-else :src="authStore.user.avatar" class="w-full h-full object-cover" />
-          </NuxtLink> -->
+            <img v-else :src="authStore.user.avatar" class="h-full w-full object-cover" alt="">
+          </NuxtLink>
         </div>
       </div>
 
@@ -66,7 +54,7 @@
         </div>
       </div>
 
-      <div v-if="!showSearch" class="hidden lg:grid lg:grid-cols-6 lg:gap-3">
+      <div v-if="!showSearch" class="hidden lg:grid lg:grid-cols-7 lg:gap-3">
         <button
           v-for="group in desktopGroups"
           :key="group.id"
@@ -100,7 +88,7 @@
           :key="task.id"
           :task="task"
           @complete="tasksStore.completeTask($event)"
-          @delete="tasksStore.deleteTask($event)"
+          @delete="requestDeleteTask"
           @open="openTask"
         />
       </div>
@@ -126,6 +114,7 @@
           :color="group.color"
           :icon="group.icon"
           @open-task="openTask"
+          @delete-task="requestDeleteTask"
         />
       </div>
 
@@ -136,7 +125,7 @@
       >
         <!-- Left: tasks list -->
         <section
-          class="min-w-[360px] border-r border-sber-gray-light px-4 py-4"
+          class="flex min-h-0 min-w-[360px] flex-col border-r border-sber-gray-light px-4 py-4"
           :style="{ width: `${leftPaneWidth}%` }"
         >
           <div class="mb-3 flex items-center justify-between">
@@ -152,50 +141,58 @@
             </button>
           </div>
 
-          <div class="space-y-2 overflow-y-auto pr-1" style="max-height: calc(100dvh - 12.5rem);">
-            <div
-              v-for="task in activeDesktopTasks"
-              :key="task.id"
-              class="flex items-center gap-2 rounded-2xl border px-2 py-2 transition-colors"
-              :class="desktopSelectedTaskId === task.id
-                ? 'border-sber-green bg-sber-green-light/25'
-                : isDarkTheme
-                  ? 'border-[#2a303a] bg-[#10141b] hover:bg-[#1b212b]'
-                  : 'border-sber-gray-light bg-white hover:bg-sber-gray-light/60'"
-              :style="!task.completed && task.priority !== 'none'
-                ? { borderLeftWidth: '3px', borderLeftColor: priorityColor(task.priority) }
-                : undefined"
-            >
-              <button
-                type="button"
-                class="flex h-5 w-5 shrink-0 items-center justify-center rounded border"
+          <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain pr-1">
+            <template v-if="activeDesktopTasks.length">
+              <div
+                v-for="task in activeDesktopTasks"
+                :key="`desktop-task-${task.id}`"
+                class="box-border flex w-full flex-none grow-0 items-center gap-2 rounded-2xl border px-2 py-2 transition-colors"
+                :class="desktopSelectedTaskId === task.id
+                  ? 'border-sber-green bg-sber-green-light/25'
+                  : isDarkTheme
+                    ? 'border-[#2a303a] bg-[#10141b] hover:bg-[#1b212b]'
+                    : 'border-sber-gray-light bg-white hover:bg-sber-gray-light/60'"
                 :style="{
-                  borderColor: priorityColor(task.priority),
-                  backgroundColor: task.completed ? priorityColor(task.priority) : 'transparent',
+                  height: 'auto',
+                  minHeight: '0',
+                  ...(!task.completed && task.priority !== 'none'
+                    ? { borderLeftWidth: '3px', borderLeftColor: priorityColor(task.priority) }
+                    : {}),
                 }"
-                @click.stop="toggleDesktopTaskCheck(task.id)"
               >
-                <Check v-if="task.completed" class="h-3 w-3 text-white" />
-              </button>
-              <button
-                type="button"
-                class="min-w-0 flex-1 text-left"
-                @click="selectDesktopTask(task.id)"
-              >
-                <p
-                  class="line-clamp-1 text-sm font-semibold"
-                  :class="task.completed
-                    ? 'text-sber-gray line-through'
-                    : desktopSelectedTaskId === task.id
-                      ? 'text-sber-green'
-                      : 'text-sber-black'"
+                <button
+                  type="button"
+                  class="flex h-5 w-5 shrink-0 items-center justify-center rounded border"
+                  :style="{
+                    borderColor: priorityColor(task.priority),
+                    backgroundColor: task.completed ? priorityColor(task.priority) : 'transparent',
+                  }"
+                  @click.stop="toggleDesktopTaskCheck(task.id)"
                 >
-                  {{ task.title }}
-                </p>
-              </button>
-            </div>
-
-            <div v-if="activeDesktopTasks.length === 0" class="rounded-2xl border border-dashed border-sber-gray-mid py-10 text-center text-sm text-sber-gray">
+                  <Check v-if="task.completed" class="h-3 w-3 text-white" />
+                </button>
+                <button
+                  type="button"
+                  class="min-w-0 flex-1 overflow-hidden text-left"
+                  @click="selectDesktopTask(task.id)"
+                >
+                  <p
+                    class="truncate text-sm font-semibold leading-5"
+                    :class="task.completed
+                      ? 'text-sber-gray line-through'
+                      : desktopSelectedTaskId === task.id
+                        ? 'text-sber-green'
+                        : 'text-sber-black'"
+                  >
+                    {{ task.title }}
+                  </p>
+                </button>
+              </div>
+            </template>
+            <div
+              v-else
+              class="flex-none rounded-2xl border border-dashed border-sber-gray-mid px-3 py-8 text-center text-sm text-sber-gray"
+            >
               В этом разделе пока нет задач
             </div>
           </div>
@@ -257,77 +254,69 @@
 
               <div>
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Приоритет</label>
-                <div class="flex flex-wrap gap-2">
-                  <button
-                    v-for="opt in priorityOptions"
-                    :key="opt.value"
-                    type="button"
-                    class="rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
-                    :class="editorForm.priority === opt.value
-                      ? 'border-sber-green bg-sber-green text-white'
-                      : isDarkTheme
-                        ? 'border-[#2a303a] bg-[#10141b] text-slate-300'
-                        : 'border-sber-gray-mid bg-white text-sber-black'"
-                    @click="editorForm.priority = opt.value"
-                  >
-                    {{ opt.label }}
-                  </button>
-                </div>
+                <UiAppSelect v-model="editorForm.priority" :options="prioritySelectOptions" />
               </div>
 
               <div>
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Уведомление</label>
-                <select v-model="editorForm.notification" class="input-field appearance-none py-3">
-                  <option value="">Без уведомления</option>
-                  <option value="0">В момент срока</option>
-                  <option value="5">За 5 минут</option>
-                  <option value="15">За 15 минут</option>
-                  <option value="30">За 30 минут</option>
-                  <option value="60">За 1 час</option>
-                  <option value="1440">За 1 день</option>
-                </select>
+                <UiAppSelect v-model="editorForm.notification" :options="notificationSelectOptions" />
+                <div v-if="editorForm.notification === 'custom'" class="mt-2 flex items-center gap-2">
+                  <input
+                    v-model.number="customNotifyMinutes"
+                    type="number"
+                    min="0"
+                    max="10080"
+                    class="input-field w-28 py-2 text-sm"
+                  >
+                  <span class="text-xs text-sber-gray">минут до срока</span>
+                </div>
               </div>
 
               <div class="md:col-span-2">
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Повтор</label>
-                <select v-model="editorForm.repeat" class="input-field appearance-none py-3">
-                  <option value="none">Не повторять</option>
-                  <option value="daily">Каждый день</option>
-                  <option value="weekly">Каждую неделю</option>
-                  <option value="monthly">Каждый месяц</option>
-                  <option value="yearly">Каждый год</option>
-                  <option value="custom">Настроить повторение</option>
-                </select>
+                <UiAppSelect v-model="editorForm.repeat" :options="repeatSelectOptions" />
               </div>
 
               <div v-if="editorForm.repeat === 'custom'" class="md:col-span-2 rounded-2xl border border-sber-green/30 bg-sber-green-light/30 p-4">
                 <p class="text-xs font-semibold uppercase tracking-wide text-sber-gray">Настроить повторение</p>
 
-                <div class="mt-3 flex flex-wrap items-center gap-2">
-                  <span class="text-sm text-sber-gray">Каждые</span>
-                  <input
-                    v-model.number="desktopCustomRepeat.interval"
-                    type="number"
-                    min="1"
-                    max="31"
-                    class="w-20 rounded-xl border border-sber-gray-mid bg-white px-3 py-2 text-sm font-semibold text-sber-black"
+                <div class="mt-3">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-sm text-sber-gray">Каждые</span>
+                    <input
+                      v-model.number="desktopCustomRepeat.interval"
+                      type="number"
+                      min="1"
+                      max="31"
+                      class="w-20 rounded-xl border bg-white px-3 py-2 text-sm font-semibold text-sber-black"
+                      :class="desktopRepeatErrors.interval
+                        ? 'border-red-400 bg-red-50'
+                        : 'border-sber-gray-mid'"
+                      @input="desktopRepeatErrors.interval = ''"
+                    >
+                    <button
+                      type="button"
+                      class="rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
+                      :class="desktopCustomRepeat.unit === 'week' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white text-sber-black'"
+                      @click="desktopCustomRepeat.unit = 'week'; clearDesktopRepeatErrors()"
+                    >
+                      Недели
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
+                      :class="desktopCustomRepeat.unit === 'month' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white text-sber-black'"
+                      @click="desktopCustomRepeat.unit = 'month'; clearDesktopRepeatErrors()"
+                    >
+                      Месяца
+                    </button>
+                  </div>
+                  <p
+                    v-if="desktopRepeatErrors.interval"
+                    class="mt-1.5 text-xs font-medium text-red-500"
                   >
-                  <button
-                    type="button"
-                    class="rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
-                    :class="desktopCustomRepeat.unit === 'week' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white text-sber-black'"
-                    @click="desktopCustomRepeat.unit = 'week'"
-                  >
-                    Недели
-                  </button>
-                  <button
-                    type="button"
-                    class="rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
-                    :class="desktopCustomRepeat.unit === 'month' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white text-sber-black'"
-                    @click="desktopCustomRepeat.unit = 'month'"
-                  >
-                    Месяца
-                  </button>
+                    {{ desktopRepeatErrors.interval }}
+                  </p>
                 </div>
 
                 <div v-if="desktopCustomRepeat.unit === 'week'" class="mt-3">
@@ -340,41 +329,101 @@
                       class="rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors"
                       :class="desktopCustomRepeat.weekdays.includes(day.value)
                         ? 'border-sber-green bg-sber-green text-white'
-                        : 'border-sber-gray-mid bg-white text-sber-gray'"
+                        : desktopRepeatErrors.weekdays
+                          ? 'border-red-400 bg-red-50 text-sber-gray'
+                          : 'border-sber-gray-mid bg-white text-sber-gray'"
                       @click="toggleDesktopCustomWeekday(day.value)"
                     >
                       {{ day.label }}
                     </button>
                   </div>
+                  <p
+                    v-if="desktopRepeatErrors.weekdays"
+                    class="mt-1.5 text-xs font-medium text-red-500"
+                  >
+                    {{ desktopRepeatErrors.weekdays }}
+                  </p>
                 </div>
 
                 <div v-else class="mt-3">
                   <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-sber-gray">День месяца</p>
-                  <input
-                    v-model.number="desktopCustomRepeat.monthDay"
-                    type="number"
-                    min="1"
-                    max="31"
-                    class="w-28 rounded-xl border border-sber-gray-mid bg-white px-3 py-2 text-sm font-semibold text-sber-black"
+                  <div class="flex flex-wrap items-center gap-2">
+                    <input
+                      v-model.number="desktopCustomRepeat.monthDay"
+                      type="number"
+                      min="1"
+                      max="31"
+                      class="w-28 rounded-xl border bg-white px-3 py-2 text-sm font-semibold text-sber-black"
+                      :class="desktopRepeatErrors.monthDay
+                        ? 'border-red-400 bg-red-50'
+                        : 'border-sber-gray-mid'"
+                      @input="desktopRepeatErrors.monthDay = ''"
+                    >
+                    <p v-if="desktopRepeatErrors.monthDay" class="text-xs font-medium text-red-500">
+                      {{ desktopRepeatErrors.monthDay }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="mb-1 block text-xs font-semibold text-sber-gray">Матрица Эйзенхауэра</label>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button
+                    v-for="block in matrixBlocks"
+                    :key="block.id"
+                    type="button"
+                    class="flex flex-col gap-0.5 rounded-xl border-2 px-2 py-2 text-left transition-all"
+                    :class="editorForm.matrixBlock === block.id ? 'border-current' : 'border-sber-gray-light'"
+                    :style="editorForm.matrixBlock === block.id
+                      ? { borderColor: block.color, backgroundColor: block.color + '15' }
+                      : {}"
+                    @click="editorForm.matrixBlock = block.id"
                   >
+                    <div class="h-3 w-3 rounded-full" :style="{ backgroundColor: block.color }" />
+                    <span class="text-[10px] font-medium leading-tight text-sber-black">{{ block.title }}</span>
+                  </button>
                 </div>
               </div>
 
               <div class="md:col-span-2">
                 <input ref="attachmentInputRef" type="file" class="hidden" @change="handleAttachmentChange">
-                <button
-                  type="button"
-                  class="inline-flex items-center gap-2 rounded-xl border border-sber-green/40 bg-sber-green-light px-3 py-2 text-sm font-semibold text-sber-green transition-colors hover:bg-sber-green/20"
-                  @click="attachmentInputRef?.click()"
-                >
-                  <Paperclip class="h-4 w-4" />
-                  Добавить изображение или файл
-                </button>
-                <div v-if="attachmentName" class="mt-2 flex items-center gap-2 rounded-xl border border-sber-gray-light px-3 py-2">
-                  <p class="min-w-0 flex-1 truncate text-sm text-sber-black">{{ attachmentName }}</p>
-                  <button type="button" class="text-sber-gray hover:text-red-500" @click="clearAttachment">
-                    <X class="h-4 w-4" />
+                <div class="flex flex-col items-start gap-2">
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-xl border border-sber-green/40 bg-sber-green-light px-3 py-2 text-sm font-semibold text-sber-green transition-colors hover:bg-sber-green/20"
+                    @click="attachmentInputRef?.click()"
+                  >
+                    <Paperclip class="h-4 w-4" />
+                    Добавить изображение или файл
                   </button>
+                  <div
+                    v-if="attachmentName"
+                    class="w-fit max-w-full rounded-xl border border-sber-gray-light p-2"
+                  >
+                    <div class="flex min-w-0 items-center gap-2">
+                      <a
+                        v-if="attachmentDataUrl"
+                        :href="attachmentDataUrl"
+                        target="_blank"
+                        rel="noopener"
+                        class="min-w-0 truncate text-sm font-medium text-sber-green hover:underline"
+                      >{{ attachmentName }}</a>
+                      <p v-else class="min-w-0 truncate text-sm text-sber-black">{{ attachmentName }}</p>
+                      <button type="button" class="shrink-0 text-sber-gray hover:text-red-500" @click="clearAttachment">
+                        <X class="h-4 w-4" />
+                      </button>
+                    </div>
+                    <a
+                      v-if="attachmentIsImage"
+                      :href="attachmentDataUrl"
+                      target="_blank"
+                      rel="noopener"
+                      class="mt-2 block"
+                    >
+                      <img :src="attachmentDataUrl" alt="Вложение" class="max-h-40 rounded-lg object-contain">
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -397,7 +446,7 @@
             </div>
           </div>
 
-          <div v-else class="flex h-full items-center justify-center rounded-3xl border border-dashed border-sber-gray-mid text-sm text-sber-gray">
+          <div v-else class="flex h-full items-center justify-center rounded-3xl border border-dashed border-sber-gray-mid px-4 py-6 text-center text-sm text-sber-gray sm:px-6">
             Выберите задачу слева, чтобы открыть редактирование
           </div>
         </section>
@@ -412,7 +461,7 @@
           <h3 class="mb-2 text-lg font-bold text-sber-black">Сохранить изменения?</h3>
           <p class="mb-5 text-sm text-sber-gray">Есть несохранённые правки в задаче.</p>
           <button class="btn-primary mb-2" type="button" @click="saveAndContinue">Сохранить</button>
-          <button class="btn-secondary mb-2" type="button" @click="discardAndContinue">Нет</button>
+          <button class="btn-secondary mb-2" type="button" @click="discardAndContinue">Не сохранять</button>
           <button class="w-full rounded-2xl py-4 text-sm font-semibold text-sber-gray" type="button" @click="unsavedModal = false">Отмена</button>
         </div>
       </Transition>
@@ -424,8 +473,13 @@
       <Transition name="modal">
         <div v-if="deleteModal" class="app-modal px-5 py-5" @click.stop>
           <h3 class="mb-2 text-lg font-bold text-sber-black">Удалить повторяющуюся задачу?</h3>
-          <button class="btn-primary mb-2" type="button" @click="deleteTaskOccurrence">Только эту</button>
-          <button class="btn-secondary mb-2" type="button" @click="deleteAllOccurrences">Все повторения</button>
+          <p class="mb-4 text-sm text-sber-gray">Выберите, что именно удалить.</p>
+          <button class="btn-primary mb-2" type="button" @click="deleteTaskOccurrence">
+            Только это повторение
+          </button>
+          <button class="btn-secondary mb-2" type="button" @click="deleteAllOccurrences">
+            Все повторения
+          </button>
           <button class="w-full rounded-2xl py-4 text-sm font-semibold text-sber-gray" type="button" @click="deleteModal = false">Отмена</button>
         </div>
       </Transition>
@@ -434,12 +488,13 @@
 </template>
 
 <script setup lang="ts">
-import { Search, X, AlertCircle, Sun, Sunset, Moon, Star, Clock, CheckCircle2, Calendar, HelpCircle, FileText, Paperclip, Check } from 'lucide-vue-next'
+import { Search, X, AlertCircle, Sun, Sunset, Moon, Star, Clock, CheckCircle2, Calendar, Paperclip, Check } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
-import { validateDurationFields } from '~/utils/time'
+import { validateDurationFields, validateRepeatInterval } from '~/utils/time'
 import { priorityColor } from '~/utils/priority-colors'
+import { resolveMediaUrl } from '~/utils/media'
 
 definePageMeta({ layout: 'app' })
 
@@ -449,18 +504,52 @@ const tasksStore = useTasksStore()
 const settingsStore = useSettingsStore()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
-const priorityOptions = [
-  { value: 'high', label: 'Высокий' },
-  { value: 'medium', label: 'Средний' },
-  { value: 'low', label: 'Низкий' },
-  { value: 'none', label: 'Без приоритета' },
-] as const
+const prioritySelectOptions = [
+  { value: 'high', label: 'Высокий', color: '#FF3B30' },
+  { value: 'medium', label: 'Средний', color: '#FF9500' },
+  { value: 'low', label: 'Низкий', color: '#34C759' },
+  { value: 'none', label: 'Без приоритета', color: '#8E8E93' },
+]
+
+const notificationSelectOptions = [
+  { value: '', label: 'Без уведомления' },
+  { value: '0', label: 'В момент срока' },
+  { value: '5', label: 'За 5 минут' },
+  { value: '15', label: 'За 15 минут' },
+  { value: '30', label: 'За 30 минут' },
+  { value: '60', label: 'За 1 час' },
+  { value: '1440', label: 'За 1 день' },
+  { value: 'custom', label: 'Своё время…' },
+]
+
+const repeatSelectOptions = [
+  { value: 'none', label: 'Не повторять' },
+  { value: 'daily', label: 'Каждый день' },
+  { value: 'weekly', label: 'Каждую неделю' },
+  { value: 'monthly', label: 'Каждый месяц' },
+  { value: 'yearly', label: 'Каждый год' },
+  { value: 'custom', label: 'Настроить повторение' },
+]
+
+const matrixBlocks = [
+  { id: 'urgent-important' as const, title: 'Срочно и важно', color: '#FF3B30' },
+  { id: 'not-urgent-important' as const, title: 'Не срочно, но важно', color: '#007AFF' },
+  { id: 'urgent-not-important' as const, title: 'Срочно, не важно', color: '#FF9500' },
+  { id: 'not-urgent-not-important' as const, title: 'Не срочно, не важно', color: '#8E8E93' },
+]
 
 const attachmentInputRef = ref<HTMLInputElement | null>(null)
 const attachmentName = ref('')
 const attachmentMimeType = ref('')
 const attachmentDataUrl = ref('')
 const attachmentRemoved = ref(false)
+const attachmentIsImage = computed(() =>
+  !!attachmentDataUrl.value
+  && (attachmentMimeType.value.startsWith('image/')
+    || /\.(png|jpe?g|gif|webp|svg|bmp|avif)(\?|$)/i.test(attachmentDataUrl.value)),
+)
+const customNotifyMinutes = ref(10)
+const PRESET_NOTIFY = new Set(['', '0', '5', '15', '30', '60', '1440', 'custom'])
 
 const showSearch = ref(false)
 const searchQuery = ref('')
@@ -471,18 +560,23 @@ const desktopSplitRef = ref<HTMLElement | null>(null)
 const leftPaneWidth = ref(52)
 let removeResizeListeners: (() => void) | null = null
 
-const hour = dayjs().hour()
+// Recomputed on the client so the greeting matches the user's local time
+// (a plain dayjs() in a computed would freeze to the SSR/server timezone).
+const nowHour = ref(dayjs().hour())
+let greetingTimer: ReturnType<typeof setInterval> | null = null
+
 const greeting = computed(() => {
-  if (hour < 16) return 'Доброй ночи 🌙'
-  if (hour < 12) return 'Доброе утро ☀️'
-  if (hour < 18) return 'Добрый день 🌤'
-  return 'Добрый вечер 🌙'
+  const hour = nowHour.value
+  if (hour >= 5 && hour < 12) return 'Доброе утро ☀️'
+  if (hour >= 12 && hour < 18) return 'Добрый день 🌤'
+  if (hour >= 18 && hour < 23) return 'Добрый вечер 🌙'
+  return 'Доброй ночи 🌙'
 })
 
 const stats = computed(() => [
   { label: 'Просрочено', count: tasksStore.overdueTasks.length, color: '#FF3B30' },
   { label: 'Сегодня', count: tasksStore.todayTasks.length, color: '#FF9500' },
-  { label: 'Выполнено', count: tasksStore.completedTasks.length, color: '#21A038' },
+  { label: 'Завтра', count: tasksStore.tomorrowTasks.length, color: '#007AFF' },
 ])
 
 const allGroups = computed(() => [
@@ -537,16 +631,16 @@ const visibleGroups = computed(() =>
 const allTasksList = computed(() => [...tasksStore.tasks])
 
 const desktopGroups = computed(() => ([
+  { id: 'all', title: 'Все задачи', color: '#5856D6', tasks: allTasksList.value },
   { id: 'overdue', title: 'Просрочено', color: '#FF3B30', tasks: tasksStore.overdueTasks },
   { id: 'today', title: 'Сегодня', color: '#FF9500', tasks: tasksStore.todayTasks },
   { id: 'tomorrow', title: 'Завтра', color: '#007AFF', tasks: tasksStore.tomorrowTasks },
   { id: 'later', title: 'Позже', color: '#AF52DE', tasks: tasksStore.laterTasks },
   { id: 'nodate', title: 'Без срока', color: '#8E8E93', tasks: tasksStore.noDateTasks },
   { id: 'completed', title: 'Готово', color: '#21A038', tasks: tasksStore.completedTasks },
-  { id: 'all', title: 'Все задачи', color: '#5856D6', tasks: allTasksList.value },
 ]))
 
-const activeDesktopGroupId = ref('overdue')
+const activeDesktopGroupId = ref('all')
 const activeDesktopGroup = computed(() =>
   desktopGroups.value.find(group => group.id === activeDesktopGroupId.value) || desktopGroups.value[0]
 )
@@ -575,6 +669,21 @@ watch(searchQuery, (query) => {
 })
 
 const desktopEditorError = ref('')
+const desktopRepeatErrors = reactive({
+  interval: '',
+  weekdays: '',
+  monthDay: '',
+})
+
+function clearDesktopRepeatErrors() {
+  desktopRepeatErrors.interval = ''
+  desktopRepeatErrors.weekdays = ''
+  desktopRepeatErrors.monthDay = ''
+}
+
+function hasDesktopRepeatErrors() {
+  return !!(desktopRepeatErrors.interval || desktopRepeatErrors.weekdays || desktopRepeatErrors.monthDay)
+}
 
 const editorForm = reactive({
   title: '',
@@ -586,6 +695,7 @@ const editorForm = reactive({
   priority: 'none' as Priority,
   notification: '',
   repeat: 'none' as RepeatType,
+  matrixBlock: 'not-urgent-not-important' as NonNullable<Task['matrixBlock']>,
 })
 
 const desktopCustomRepeat = reactive({
@@ -595,7 +705,7 @@ const desktopCustomRepeat = reactive({
   monthDay: dayjs().date(),
 })
 
-useTaskTimeSync(editorForm)
+const { pauseSync: pauseEditorTimeSync, resumeSync: resumeEditorTimeSync } = useTaskTimeSync(editorForm)
 
 const editorSnapshot = ref('')
 const unsavedModal = ref(false)
@@ -617,6 +727,7 @@ function captureEditorSnapshot() {
   editorSnapshot.value = JSON.stringify({
     ...editorForm,
     customRepeat: { ...desktopCustomRepeat },
+    customNotifyMinutes: customNotifyMinutes.value,
     attachment: attachmentDataUrl.value,
     attachmentRemoved: attachmentRemoved.value,
   })
@@ -627,6 +738,7 @@ const editorDirty = computed(() => {
   const current = JSON.stringify({
     ...editorForm,
     customRepeat: { ...desktopCustomRepeat },
+    customNotifyMinutes: customNotifyMinutes.value,
     attachment: attachmentDataUrl.value,
     attachmentRemoved: attachmentRemoved.value,
   })
@@ -658,9 +770,11 @@ function selectDesktopTask(id: string) {
 
 async function saveAndContinue() {
   await saveDesktopTask()
+  if (desktopEditorError.value || hasDesktopRepeatErrors()) return
   unsavedModal.value = false
-  pendingUnsavedAction?.()
+  const action = pendingUnsavedAction
   pendingUnsavedAction = null
+  action?.()
 }
 
 function discardAndContinue() {
@@ -668,16 +782,67 @@ function discardAndContinue() {
   const task = desktopSelectedTask.value
   syncEditorForm(task)
   captureEditorSnapshot()
-  pendingUnsavedAction?.()
+  const action = pendingUnsavedAction
   pendingUnsavedAction = null
+  action?.()
 }
 
+onBeforeRouteLeave((to) => {
+  if (!editorDirty.value) return true
+  if (unsavedModal.value) return false
+  pendingUnsavedAction = () => {
+    // Re-trigger the same navigation once the edit state is resolved.
+    void navigateTo(to.fullPath)
+  }
+  unsavedModal.value = true
+  return false
+})
+
 function openTask(id: string) {
+  const fromSearch = searchResults.value.find(t => t.id === id)
+  const fromStore = tasksStore.tasks.find(t => t.id === id)
+
   if (isDesktop.value) {
-    selectDesktopTask(id)
+    // Search payload can be fresher than the grouped list cache — merge it in
+    // so the task appears in the correct left-pane group.
+    if (fromSearch) {
+      tasksStore.upsertTaskInState(fromSearch)
+    }
+
+    const task = tasksStore.tasks.find(t => t.id === id) || fromSearch || fromStore
+    const groupId = findDesktopGroupIdForTask(id)
+      || (task ? resolveTaskGroupId(task) : 'all')
+
+    runWithUnsavedGuard(() => {
+      activeDesktopGroupId.value = groupId
+      desktopSelectedTaskId.value = id
+    })
+    showSearch.value = false
+    searchQuery.value = ''
     return
   }
   navigateTo({ path: '/app/new-task', query: { id, returnTo: '/app' } })
+}
+
+/** Prefer the group that actually contains the task in the left list. */
+function findDesktopGroupIdForTask(taskId: string): string | null {
+  for (const group of desktopGroups.value) {
+    if (group.id === 'all') continue
+    if (group.tasks.some(t => t.id === taskId)) return group.id
+  }
+  return null
+}
+
+function resolveTaskGroupId(task: Task): string {
+  if (task.completed) return 'completed'
+  const d = task.dueDate ? dayjs(task.dueDate).format('YYYY-MM-DD') : ''
+  if (!d) return 'nodate'
+  const today = dayjs().format('YYYY-MM-DD')
+  const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD')
+  if (dayjs(d).isBefore(today, 'day')) return 'overdue'
+  if (d === today) return 'today'
+  if (d === tomorrow) return 'tomorrow'
+  return 'later'
 }
 
 async function toggleSearch() {
@@ -697,6 +862,8 @@ function handlePageClick() {
 
 function syncEditorForm(task: Task | null) {
   desktopEditorError.value = ''
+  clearDesktopRepeatErrors()
+  pauseEditorTimeSync()
   editorForm.title = task?.title || ''
   editorForm.description = task?.description || ''
   editorForm.dueDate = task?.dueDate || ''
@@ -704,8 +871,15 @@ function syncEditorForm(task: Task | null) {
   editorForm.durationStart = task?.duration?.start || ''
   editorForm.durationEnd = task?.duration?.end || ''
   editorForm.priority = task?.priority || 'none'
-  editorForm.notification = task?.notification || ''
+  const notify = task?.notification || ''
+  if (notify && !PRESET_NOTIFY.has(notify)) {
+    editorForm.notification = 'custom'
+    customNotifyMinutes.value = Number(notify) || 10
+  } else {
+    editorForm.notification = notify
+  }
   editorForm.repeat = task?.repeat || 'none'
+  editorForm.matrixBlock = task?.matrixBlock || 'not-urgent-not-important'
 
   desktopCustomRepeat.interval = task?.repeatCustom?.interval || 1
   desktopCustomRepeat.unit = task?.repeatCustom?.unit || (task?.repeatDays?.length ? 'week' : 'week')
@@ -717,14 +891,22 @@ function syncEditorForm(task: Task | null) {
   desktopCustomRepeat.monthDay = task?.repeatCustom?.monthDay || dayjs().date()
 
   attachmentRemoved.value = false
-  if (task?.attachment) {
+  if (task?.attachment?.dataUrl) {
     attachmentName.value = task.attachment.name
     attachmentMimeType.value = task.attachment.mimeType
-    attachmentDataUrl.value = task.attachment.dataUrl
+    attachmentDataUrl.value = resolveMediaUrl(task.attachment.dataUrl) || task.attachment.dataUrl
+  } else if (task?.imageUrl) {
+    attachmentName.value = 'attachment'
+    attachmentMimeType.value = 'image/*'
+    attachmentDataUrl.value = resolveMediaUrl(task.imageUrl) || task.imageUrl
   } else {
     clearAttachment()
+    attachmentRemoved.value = false
   }
-  nextTick(() => captureEditorSnapshot())
+  nextTick(() => {
+    resumeEditorTimeSync()
+    captureEditorSnapshot()
+  })
 }
 
 function handleAttachmentChange(event: Event) {
@@ -756,6 +938,7 @@ async function saveDesktopTask() {
   if (!task) return
 
   desktopEditorError.value = ''
+  clearDesktopRepeatErrors()
   const durationError = validateDurationFields(editorForm.durationStart, editorForm.durationEnd)
   if (durationError) {
     desktopEditorError.value = durationError
@@ -770,13 +953,23 @@ async function saveDesktopTask() {
     priority: editorForm.priority,
     notification: editorForm.notification || undefined,
     repeat: editorForm.repeat,
+    matrixBlock: editorForm.matrixBlock,
   }
 
   if (editorForm.repeat === 'custom') {
-    const interval = Math.max(1, Number(desktopCustomRepeat.interval) || 1)
+    const intervalError = validateRepeatInterval(Number(desktopCustomRepeat.interval))
+    if (intervalError) {
+      desktopRepeatErrors.interval = intervalError
+      return
+    }
+    const interval = Math.min(31, Math.max(1, Number(desktopCustomRepeat.interval) || 1))
     const monthDay = Number(desktopCustomRepeat.monthDay) || 1
     if (desktopCustomRepeat.unit === 'month' && (monthDay < 1 || monthDay > 31)) {
-      desktopEditorError.value = 'День месяца должен быть от 1 до 31'
+      desktopRepeatErrors.monthDay = 'День месяца должен быть от 1 до 31'
+      return
+    }
+    if (desktopCustomRepeat.unit === 'week' && desktopCustomRepeat.weekdays.length === 0) {
+      desktopRepeatErrors.weekdays = 'Выберите хотя бы один день недели'
       return
     }
     const clampedMonthDay = Math.min(31, Math.max(1, monthDay))
@@ -794,13 +987,19 @@ async function saveDesktopTask() {
     updates.repeatDays = undefined
   }
 
+  if (editorForm.notification === 'custom') {
+    updates.notification = String(Math.max(0, customNotifyMinutes.value || 0))
+  } else {
+    updates.notification = editorForm.notification || undefined
+  }
+
   if (editorForm.durationStart && editorForm.durationEnd) {
     updates.duration = { start: editorForm.durationStart, end: editorForm.durationEnd }
   } else {
     updates.duration = undefined
   }
 
-  if (attachmentDataUrl.value) {
+  if (attachmentDataUrl.value?.startsWith('data:')) {
     updates.attachment = {
       name: attachmentName.value,
       mimeType: attachmentMimeType.value || 'application/octet-stream',
@@ -833,12 +1032,18 @@ function toggleDesktopTaskComplete() {
 function confirmDeleteDesktopTask() {
   const task = desktopSelectedTask.value
   if (!task) return
-  if (task.repeat && task.repeat !== 'none') {
-    pendingDeleteTaskId = task.id
+  requestDeleteTask(task.id)
+}
+
+function requestDeleteTask(id: string) {
+  const task = tasksStore.tasks.find(t => t.id === id)
+    || (desktopSelectedTask.value?.id === id ? desktopSelectedTask.value : null)
+  if (task && tasksStore.isRecurringTask(task)) {
+    pendingDeleteTaskId = id
     deleteModal.value = true
     return
   }
-  deleteDesktopTask(task.id)
+  deleteDesktopTask(id)
 }
 
 function deleteDesktopTask(id: string) {
@@ -853,8 +1058,10 @@ async function deleteTaskOccurrence() {
   const id = pendingDeleteTaskId
   deleteModal.value = false
   pendingDeleteTaskId = null
-  await tasksStore.updateTask(id, { repeat: 'none', repeatCustom: undefined, repeatDays: undefined })
-  deleteDesktopTask(id)
+  await tasksStore.deleteOccurrence(id)
+  if (desktopSelectedTaskId.value === id) {
+    desktopSelectedTaskId.value = null
+  }
 }
 
 function deleteAllOccurrences() {
@@ -862,7 +1069,10 @@ function deleteAllOccurrences() {
   const id = pendingDeleteTaskId
   deleteModal.value = false
   pendingDeleteTaskId = null
-  deleteDesktopTask(id)
+  tasksStore.deleteSeries(id)
+  if (desktopSelectedTaskId.value === id) {
+    desktopSelectedTaskId.value = null
+  }
 }
 
 function clearDesktopSelection() {
@@ -870,6 +1080,7 @@ function clearDesktopSelection() {
 }
 
 function toggleDesktopCustomWeekday(day: number) {
+  desktopRepeatErrors.weekdays = ''
   if (desktopCustomRepeat.weekdays.includes(day)) {
     desktopCustomRepeat.weekdays = desktopCustomRepeat.weekdays.filter(v => v !== day)
     if (desktopCustomRepeat.weekdays.length === 0) {
@@ -952,14 +1163,46 @@ watch(() => editorForm.dueDate, (newDate) => {
 
 watch(activeDesktopTasks, (tasks) => {
   if (!desktopSelectedTaskId.value) return
-  if (!tasks.some(task => task.id === desktopSelectedTaskId.value)) {
-    desktopSelectedTaskId.value = null
+  if (tasks.some(task => task.id === desktopSelectedTaskId.value)) return
+
+  const id = desktopSelectedTaskId.value
+  // Switch to the group that actually holds the task instead of dropping selection.
+  const groupId = findDesktopGroupIdForTask(id)
+  if (groupId && groupId !== activeDesktopGroupId.value) {
+    activeDesktopGroupId.value = groupId
+    return
+  }
+  if (tasksStore.tasks.some(t => t.id === id)) {
+    if (activeDesktopGroupId.value !== 'all') {
+      activeDesktopGroupId.value = 'all'
+      return
+    }
+  }
+  desktopSelectedTaskId.value = null
+})
+
+// Keep the left list on the group that actually contains the selected task
+// (e.g. after opening a task from search). The "Все задачи" view is left alone.
+watch(desktopSelectedTaskId, (id) => {
+  if (!id || activeDesktopGroupId.value === 'all') return
+  const contained = findDesktopGroupIdForTask(id)
+  if (contained) {
+    if (contained !== activeDesktopGroupId.value) {
+      activeDesktopGroupId.value = contained
+    }
+    return
+  }
+  const task = tasksStore.tasks.find(t => t.id === id)
+  if (!task) return
+  const groupId = resolveTaskGroupId(task)
+  if (activeDesktopGroupId.value !== groupId) {
+    activeDesktopGroupId.value = groupId
   }
 })
 
 watch(desktopGroups, (groups) => {
   if (groups.some(group => group.id === activeDesktopGroupId.value)) return
-  activeDesktopGroupId.value = groups[0]?.id || 'overdue'
+  activeDesktopGroupId.value = groups[0]?.id || 'all'
 }, { immediate: true })
 
 watch(
@@ -975,6 +1218,8 @@ watch(
 onMounted(() => {
   updateDesktopFlag()
   window.addEventListener('resize', updateDesktopFlag)
+  nowHour.value = dayjs().hour()
+  greetingTimer = setInterval(() => { nowHour.value = dayjs().hour() }, 60_000)
   if (!tasksStore.initialized) {
     void tasksStore.fetchGrouped()
   }
@@ -983,5 +1228,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDesktopFlag)
   removeResizeListeners?.()
+  if (greetingTimer) clearInterval(greetingTimer)
 })
 </script>

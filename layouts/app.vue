@@ -7,30 +7,102 @@
       >
         <div class="mb-2">
           <BrandLogo size="md" show-name-from="md" :text-class="isDarkTheme ? 'text-white' : 'text-sber-black'" />
-          <!-- <h2 class="mt-2 text-3xl font-bold text-sber-black">Рабочее пространство</h2>
-          <p class="mt-2 text-sm leading-relaxed text-sber-gray">
-            Все основные разделы всегда под рукой и удобно выглядят на широком экране.
-          </p> -->
         </div>
 
+        <NuxtLink
+          to="/app/profile"
+          class="mb-3 flex items-center gap-3 rounded-2xl p-3 transition-colors"
+          :class="[
+            route.path.startsWith('/app/profile')
+              ? 'bg-sber-green-light'
+              : isDarkTheme ? 'bg-[#10141b] border border-[#222833] hover:bg-[#20242d]' : 'bg-sber-gray-light hover:bg-sber-gray-light/70',
+          ]"
+        >
+          <div class="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-sber-green"
+               :class="premiumStore.isPremium ? 'ring-2 ring-yellow-400 ring-offset-1' : ''">
+            <div v-if="!authStore.user?.avatar" class="flex h-full w-full items-center justify-center text-base font-bold text-white">
+              {{ authStore.user?.name?.[0]?.toUpperCase() || 'A' }}
+            </div>
+            <img v-else :src="authStore.user.avatar" class="h-full w-full object-cover" alt="">
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex min-w-0 items-center gap-1.5">
+              <p class="truncate text-sm font-semibold" :class="isDarkTheme ? 'text-white' : 'text-sber-black'">
+                {{ authStore.user?.name || 'Профиль' }}
+              </p>
+              <span
+                v-if="premiumStore.isPremium"
+                class="shrink-0 text-[13px] leading-none"
+                title="Премиум"
+                aria-label="Премиум"
+              >⭐</span>
+            </div>
+            <p class="truncate text-xs" :class="isDarkTheme ? 'text-slate-400' : 'text-sber-gray'">
+              {{ authStore.user?.email || 'Профиль' }}
+            </p>
+          </div>
+          <ChevronRight class="h-4 w-4 shrink-0" :class="isDarkTheme ? 'text-slate-400' : 'text-sber-gray-mid'" />
+        </NuxtLink>
+
         <nav
-          class="flex flex-1 flex-col gap-2 rounded-[28px] p-2"
+          class="flex min-h-0 flex-1 flex-col justify-start gap-1 overflow-y-auto rounded-[28px] p-1"
           :class="isDarkTheme ? 'bg-[#10141b] border border-[#222833]' : 'bg-transparent'"
         >
-          <NuxtLink
-            v-for="item in sidebarNavItems"
-            :key="item.id"
-            :to="item.to"
-            class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors"
-            :class="isActive(item)
-              ? 'bg-sber-green text-white shadow-sm'
-              : isDarkTheme
-                ? 'text-slate-300 hover:bg-[#20242d] hover:text-white'
-                : 'text-sber-gray hover:bg-sber-gray-light hover:text-sber-black'"
+          <div
+            v-if="sidebarEnabled.tasks"
+            class="h-auto w-full shrink-0 grow-0 basis-auto"
+            :style="{ order: sidebarOrder.tasks ?? 0 }"
           >
-            <component :is="item.icon" class="h-5 w-5" />
-            <span>{{ item.label }}</span>
-          </NuxtLink>
+            <NavItemTasks
+              mode="sidebar"
+              :active="activeNavId === 'tasks'"
+              :is-dark-theme="isDarkTheme"
+            />
+          </div>
+          <div
+            v-if="sidebarEnabled.calendar"
+            class="h-auto w-full shrink-0 grow-0 basis-auto"
+            :style="{ order: sidebarOrder.calendar ?? 1 }"
+          >
+            <NavItemCalendar
+              mode="sidebar"
+              :active="activeNavId === 'calendar'"
+              :is-dark-theme="isDarkTheme"
+            />
+          </div>
+          <div
+            v-if="sidebarEnabled.matrix"
+            class="h-auto w-full shrink-0 grow-0 basis-auto"
+            :style="{ order: sidebarOrder.matrix ?? 2 }"
+          >
+            <NavItemMatrix
+              mode="sidebar"
+              :active="activeNavId === 'matrix'"
+              :is-dark-theme="isDarkTheme"
+            />
+          </div>
+          <div
+            v-if="sidebarEnabled.pomodoro"
+            class="h-auto w-full shrink-0 grow-0 basis-auto"
+            :style="{ order: sidebarOrder.pomodoro ?? 3 }"
+          >
+            <NavItemPomodoro
+              mode="sidebar"
+              :active="activeNavId === 'pomodoro'"
+              :is-dark-theme="isDarkTheme"
+            />
+          </div>
+          <div
+            v-if="sidebarEnabled.settings"
+            class="h-auto w-full shrink-0 grow-0 basis-auto"
+            :style="{ order: sidebarOrder.settings ?? 4 }"
+          >
+            <NavItemSettings
+              mode="sidebar"
+              :active="activeNavId === 'settings'"
+              :is-dark-theme="isDarkTheme"
+            />
+          </div>
         </nav>
 
         <div
@@ -90,38 +162,56 @@
 </template>
 
 <script setup lang="ts">
-import { Calendar, CheckSquare, Grid2x2, HelpCircle, Plus, Settings, Share2, Timer } from 'lucide-vue-next'
+import { ChevronRight, HelpCircle, Plus, Share2 } from 'lucide-vue-next'
 import { BRAND_NAME } from '~/utils/site-info'
+import {
+  orderNavItems,
+  buildNavOrderMap,
+  resolveActiveNavId,
+  type AppNavItemId,
+} from '~/utils/nav-items'
 
 const route = useRoute()
 const settingsStore = useSettingsStore()
+const authStore = useAuthStore()
+const premiumStore = usePremiumStore()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
-/** Desktop sidebar — doim bir xil; mobil pastki menyu (bottomNavItems) ga bog‘lanmaydi */
-const sidebarNavItems = [
-  { id: 'tasks', to: '/app', icon: CheckSquare, label: 'Задачи' },
-  { id: 'calendar', to: '/app/calendar', icon: Calendar, label: 'Календарь' },
-  { id: 'matrix', to: '/app/matrix', icon: Grid2x2, label: 'Матрица' },
-  { id: 'pomodoro', to: '/app/pomodoro', icon: Timer, label: 'Помодоро' },
-  { id: 'settings', to: '/app/settings', icon: Settings, label: 'Настройки' },
-] as const
+/** Active tab from route.path only — never from list index. */
+const activeNavId = ref<AppNavItemId | null>(null)
 
-type SidebarNavItem = (typeof sidebarNavItems)[number]
+watch(
+  () => route.path,
+  (path) => {
+    activeNavId.value = resolveActiveNavId(path)
+  },
+  { immediate: true },
+)
+
+/** Sidebar: fixed components + CSS order (no DOM reorder → icons stay intact). */
+const sidebarOrderedIds = computed(() =>
+  orderNavItems(settingsStore.appSettings.bottomNavItems || [], { includeProfile: false })
+    .filter(item => item.id !== 'profile')
+    .map(item => item.id),
+)
+
+const sidebarOrder = computed(() => buildNavOrderMap(sidebarOrderedIds.value))
+
+const sidebarEnabled = computed(() => {
+  const set = new Set(sidebarOrderedIds.value)
+  return {
+    tasks: set.has('tasks'),
+    calendar: set.has('calendar'),
+    matrix: set.has('matrix'),
+    pomodoro: set.has('pomodoro'),
+    settings: set.has('settings'),
+  }
+})
 
 function shareApp() {
   if (navigator.share) {
     void navigator.share({ title: `${BRAND_NAME} - Планировщик`, url: window.location.origin })
   }
-}
-
-function isActive(item: SidebarNavItem) {
-  if (item.id === 'settings') {
-    return route.path.startsWith('/app/settings')
-  }
-  if (item.to === '/app') {
-    return route.path === '/app'
-  }
-  return route.path.startsWith(item.to)
 }
 
 function openNewTask() {

@@ -30,6 +30,10 @@ export const DURATION_END_AFTER_START_MESSAGE =
 
 const DURATION_BOTH_REQUIRED_MESSAGE = 'Укажите и начало, и конец длительности'
 
+export const REPEAT_INTERVAL_MAX = 31
+export const REPEAT_INTERVAL_MAX_MESSAGE =
+  'Интервал повторения не может превышать 31.'
+
 /** Длительность: оба поля и конец строго позже начала (как на бэкенде). */
 export function validateDurationFields(start: string, end: string): string | null {
   const hasStart = !!start?.trim()
@@ -43,6 +47,17 @@ export function validateDurationFields(start: string, end: string): string | nul
     return DURATION_END_AFTER_START_MESSAGE
   }
 
+  return null
+}
+
+/** Custom repeat interval must be 1…31 (weeks or months). */
+export function validateRepeatInterval(interval: number): string | null {
+  if (!Number.isFinite(interval) || interval < 1) {
+    return 'Интервал повторения должен быть не меньше 1'
+  }
+  if (interval > REPEAT_INTERVAL_MAX) {
+    return REPEAT_INTERVAL_MAX_MESSAGE
+  }
   return null
 }
 

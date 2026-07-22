@@ -29,9 +29,10 @@
         <TasksTaskItem
           v-for="task in tasks"
           :key="task.id"
+          class="!h-auto"
           :task="task"
           @complete="tasksStore.completeTask($event)"
-          @delete="tasksStore.deleteTask($event)"
+          @delete="$emit('deleteTask', $event)"
           @open="$emit('openTask', $event)"
         />
 
@@ -55,7 +56,7 @@ defineProps<{
   icon: Component
 }>()
 
-defineEmits<{ openTask: [id: string] }>()
+defineEmits<{ openTask: [id: string], deleteTask: [id: string] }>()
 
 const tasksStore = useTasksStore()
 const isOpen = ref(false)

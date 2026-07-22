@@ -6,6 +6,7 @@ import type {
   ApiTariff,
 } from '~/types/mobile-api'
 import { apiGet, apiPost, getApiErrorMessage } from '~/utils/api'
+import { normalizeTariffsForDisplay } from '~/utils/premium-tariffs'
 import { PREMIUM_SUBSCRIPTION } from '~/utils/site-info'
 
 function syncPremiumFlags(subscription: ApiSubscription) {
@@ -66,7 +67,7 @@ export const usePremiumStore = defineStore('premium', () => {
     tariffsError.value = ''
     try {
       const list = await apiGet<ApiTariff[]>('premium/tariffs/')
-      tariffs.value = [...list].sort((a, b) => a.sort_order - b.sort_order)
+      tariffs.value = normalizeTariffsForDisplay(list)
       if (!tariffs.value.some(t => t.code === selectedTariffCode.value)) {
         selectedTariffCode.value = tariffs.value[0]?.code || 'monthly'
       }

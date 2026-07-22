@@ -41,10 +41,10 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   app: {
     head: {
-      title: 'ОТТЕР - Планировщик задач',
+      title: 'Оттер - Планировщик задач',
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1' },
-        { name: 'description', content: 'ОТТЕР - умный планировщик задач' },
+        { name: 'description', content: 'Оттер - умный планировщик задач' },
         { name: 'theme-color', content: '#21A038' },
       ],
       link: [
@@ -60,6 +60,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://admin.ottertime.ru/api/v1/',
+      desktopDownloadUrl: process.env.NUXT_PUBLIC_DESKTOP_DOWNLOAD_URL || '',
       firebase: {
         apiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4',
         /**

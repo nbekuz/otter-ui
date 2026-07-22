@@ -6,8 +6,6 @@ export type CalendarViewType = 'day' | 'week' | 'month' | 'year'
 export const useCalendarStore = defineStore('calendar', () => {
   const currentDate = ref(dayjs().format('YYYY-MM-DD'))
   const viewType = ref<CalendarViewType>('day')
-  const collapsedEarlyHours = ref(true)  // 00:00–06:00 collapsed
-  const collapsedLateHours = ref(true)   // 21:00–00:00 collapsed
 
   const displayLabel = computed(() => {
     const d = dayjs(currentDate.value)
@@ -61,26 +59,14 @@ export const useCalendarStore = defineStore('calendar', () => {
     viewType.value = view
   }
 
-  function toggleEarlyHours() {
-    collapsedEarlyHours.value = !collapsedEarlyHours.value
-  }
-
-  function toggleLateHours() {
-    collapsedLateHours.value = !collapsedLateHours.value
-  }
-
   return {
     currentDate,
     viewType,
     displayLabel,
-    collapsedEarlyHours,
-    collapsedLateHours,
     goNext,
     goPrev,
     goToday,
     setDate,
     setView,
-    toggleEarlyHours,
-    toggleLateHours,
   }
 })

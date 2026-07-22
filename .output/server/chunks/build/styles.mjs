@@ -1,16 +1,16 @@
 const interopDefault = r => r.default || r || [];
 const styles = {
-  "node_modules/nuxt/dist/app/entry.js": () => import('./entry-styles.C520I8Ya.mjs').then(interopDefault),
+  "node_modules/nuxt/dist/app/entry.js": () => import('./entry-styles.CZFeQy_E.mjs').then(interopDefault),
   "pages/login.vue": () => import('./login-styles.ygWH6N7a.mjs').then(interopDefault),
   "pages/register.vue": () => import('./register-styles.D36VnFKT.mjs').then(interopDefault),
   "pages/app/pomodoro.vue": () => import('./pomodoro-styles.BcPwdva3.mjs').then(interopDefault),
+  "pages/app/settings.vue": () => import('./settings-styles.BAlDUu0h.mjs').then(interopDefault),
   "pages/profile-fill.vue": () => import('./profile-fill-styles.BVbz4V-L.mjs').then(interopDefault),
   "pages/login.vue?vue&type=style&index=0&scoped=060cbb5e&lang.css": () => import('./login-styles.ygWH6N7a.mjs').then(interopDefault),
   "pages/register.vue?vue&type=style&index=0&scoped=345bf847&lang.css": () => import('./register-styles.D36VnFKT.mjs').then(interopDefault),
-  "pages/profile-fill.vue?vue&type=style&index=0&scoped=a751b2ce&lang.css": () => import('./profile-fill-styles.BVbz4V-L.mjs').then(interopDefault),
   "pages/app/pomodoro.vue?vue&type=style&index=0&scoped=d4710e3c&lang.css": () => import('./pomodoro-styles.BcPwdva3.mjs').then(interopDefault),
-  "pages/app/settings.vue": () => import('./settings-styles.CHo302A4.mjs').then(interopDefault),
-  "pages/app/settings.vue?vue&type=style&index=0&scoped=a0b6d047&lang.css": () => import('./settings-styles.CHo302A4.mjs').then(interopDefault),
+  "pages/app/settings.vue?vue&type=style&index=0&scoped=2d24fbcd&lang.css": () => import('./settings-styles.BAlDUu0h.mjs').then(interopDefault),
+  "pages/profile-fill.vue?vue&type=style&index=0&scoped=a751b2ce&lang.css": () => import('./profile-fill-styles.BVbz4V-L.mjs').then(interopDefault),
   "components/AppGlobalToast.vue": () => import('./AppGlobalToast-styles.CaLXLXAb.mjs').then(interopDefault),
   "components/AppGlobalToast.vue?vue&type=style&index=0&scoped=ee22b97d&lang.css": () => import('./AppGlobalToast-styles.CaLXLXAb.mjs').then(interopDefault)
 };

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
 import type { User } from '~/data/mockData'
-import { apiGet, apiPost, apiPut } from '~/utils/api'
+import { apiDelete, apiGet, apiPost, apiPut } from '~/utils/api'
 import {
   clearAuthSession,
   getAccessToken,
@@ -197,6 +197,12 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
+  /** DELETE `profile/` — permanently removes the account. */
+  async function deleteAccount() {
+    await apiDelete('profile/')
+    logout()
+  }
+
   function logout() {
     const tasksStore = useTasksStore()
     const premiumStore = usePremiumStore()
@@ -264,6 +270,7 @@ export const useAuthStore = defineStore('auth', () => {
     forgotPasswordVerify,
     forgotPasswordConfirm,
     changePassword,
+    deleteAccount,
     logout,
     updateAvatar,
     updateName,

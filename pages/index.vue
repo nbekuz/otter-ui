@@ -76,6 +76,14 @@
                   Войти
                 </button>
               </div>
+              <button
+                class="flex !w-auto max-w-full items-center justify-center gap-2 rounded-2xl border border-sber-gray-mid bg-white px-4 py-3.5 text-sm font-semibold text-sber-black transition-colors hover:bg-sber-gray-light sm:px-5"
+                type="button"
+                @click="onDesktopDownloadClick"
+              >
+                <Download class="h-4 w-4 text-sber-green" />
+                {{ DESKTOP_APP.label }}
+              </button>
               <div class="flex w-full flex-col items-center gap-2">
                 <p v-if="googleError" class="w-full text-center text-xs text-red-500">{{ googleError }}</p>
                 <button
@@ -108,10 +116,17 @@
 </template>
 
 <script setup lang="ts">
+import { Download } from 'lucide-vue-next'
 import logoUrl from '~/assets/img/logo.svg'
-import { BRAND_NAME } from '~/utils/site-info'
+import { BRAND_NAME, DESKTOP_APP } from '~/utils/site-info'
 
 const authStore = useAuthStore()
+const { showToast } = useAppToast()
+
+function onDesktopDownloadClick() {
+  showToast(DESKTOP_APP.unavailableMessage, 'error', 4500)
+}
+
 const googleLoading = ref(false)
 const googleError = ref('')
 

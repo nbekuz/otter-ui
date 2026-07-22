@@ -645,6 +645,7 @@ const _inlineRuntimeConfig = {
   },
   "public": {
     "apiBaseUrl": "https://admin.ottertime.ru/api/v1/",
+    "desktopDownloadUrl": "",
     "firebase": {
       "apiKey": "AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4",
       "authDomain": "otter-6bdac.firebaseapp.com",
@@ -2023,7 +2024,7 @@ async function errorHandler(error, event) {
 
 const rootDir = "/Users/nodirbek/Desktop/otter/otter-app";
 
-const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1, maximum-scale=1"},{"name":"description","content":"ОТТЕР - умный планировщик задач"},{"name":"theme-color","content":"#21A038"}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"},{"rel":"icon","type":"image/svg+xml","href":"/favicon.svg"}],"style":[],"script":[],"noscript":[],"title":"ОТТЕР - Планировщик задач"};
+const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1, maximum-scale=1"},{"name":"description","content":"Оттер - умный планировщик задач"},{"name":"theme-color","content":"#21A038"}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"},{"rel":"icon","type":"image/svg+xml","href":"/favicon.svg"}],"style":[],"script":[],"noscript":[],"title":"Оттер - Планировщик задач"};
 
 const appRootTag = "div";
 

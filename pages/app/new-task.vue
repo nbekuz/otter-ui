@@ -78,14 +78,27 @@
 
           <div v-if="attachmentName" class="mt-2 rounded-xl border border-sber-gray-light bg-sber-gray-light/60 p-2 lg:mt-3 lg:rounded-2xl lg:p-3">
             <div class="flex items-start gap-2 lg:gap-3">
-              <img
+              <a
                 v-if="attachmentPreviewUrl"
-                :src="attachmentPreviewUrl"
-                alt="Предпросмотр вложения"
-                class="h-12 w-12 rounded-lg object-cover lg:h-16 lg:w-16 lg:rounded-xl"
+                :href="attachmentDataUrl"
+                target="_blank"
+                rel="noopener"
               >
+                <img
+                  :src="attachmentPreviewUrl"
+                  alt="Предпросмотр вложения"
+                  class="h-12 w-12 rounded-lg object-cover lg:h-16 lg:w-16 lg:rounded-xl"
+                >
+              </a>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-xs font-medium text-sber-black lg:text-sm">{{ attachmentName }}</p>
+                <a
+                  v-if="attachmentDataUrl"
+                  :href="attachmentDataUrl"
+                  target="_blank"
+                  rel="noopener"
+                  class="truncate text-xs font-medium text-sber-green hover:underline lg:text-sm"
+                >{{ attachmentName }}</a>
+                <p v-else class="truncate text-xs font-medium text-sber-black lg:text-sm">{{ attachmentName }}</p>
                 <p class="mt-0.5 text-[10px] text-sber-gray lg:mt-1 lg:text-xs">
                   {{ attachmentPreviewUrl ? 'Изображение прикреплено' : 'Файл прикреплен' }}
                 </p>
@@ -217,6 +230,16 @@
               <span class="text-xs lg:text-sm" :class="form.notification === n.value ? 'font-medium text-sber-green' : 'text-sber-black'">{{ n.label }}</span>
               <Check v-if="form.notification === n.value" class="ml-auto h-4 w-4 text-sber-green" />
             </button>
+            <div v-if="form.notification === 'custom'" class="mt-2 flex items-center gap-2 px-1">
+              <input
+                v-model.number="customNotifyMinutes"
+                type="number"
+                min="0"
+                max="10080"
+                class="w-28 rounded-xl border border-sber-gray-mid bg-white px-3 py-2 text-sm font-semibold"
+              >
+              <span class="text-xs text-sber-gray">минут до срока</span>
+            </div>
           </div>
         </div>
 
@@ -239,31 +262,43 @@
           <div v-if="form.repeat === 'custom'" class="mt-2 rounded-xl border border-sber-green/30 bg-sber-green-light/30 p-3 lg:mt-3 lg:rounded-2xl lg:p-4">
             <p class="text-xs font-semibold uppercase tracking-wide text-sber-gray">Настроить повторение</p>
 
-            <div class="mt-3 flex flex-wrap items-center gap-2">
-              <span class="text-sm text-sber-gray">Каждые</span>
-              <input
-                v-model.number="customRepeat.interval"
-                type="number"
-                min="1"
-                max="31"
-                class="w-20 rounded-xl border border-sber-gray-mid bg-white px-3 py-2 text-sm font-semibold text-sber-black"
-              />
-              <button
-                type="button"
-                class="rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
-                :class="customRepeat.unit === 'week' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white text-sber-black'"
-                @click="customRepeat.unit = 'week'"
+            <div class="mt-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm text-sber-gray">Каждые</span>
+                <input
+                  v-model.number="customRepeat.interval"
+                  type="number"
+                  min="1"
+                  max="31"
+                  class="w-20 rounded-xl border bg-white px-3 py-2 text-sm font-semibold text-sber-black"
+                  :class="errors.repeatInterval
+                    ? 'border-red-400 bg-red-50'
+                    : 'border-sber-gray-mid'"
+                  @input="errors.repeatInterval = ''"
+                >
+                <button
+                  type="button"
+                  class="rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
+                  :class="customRepeat.unit === 'week' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white text-sber-black'"
+                  @click="customRepeat.unit = 'week'; clearRepeatErrors()"
+                >
+                  Недели
+                </button>
+                <button
+                  type="button"
+                  class="rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
+                  :class="customRepeat.unit === 'month' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white text-sber-black'"
+                  @click="customRepeat.unit = 'month'; clearRepeatErrors()"
+                >
+                  Месяца
+                </button>
+              </div>
+              <p
+                v-if="errors.repeatInterval"
+                class="mt-1.5 text-xs font-medium text-red-500"
               >
-                Недели
-              </button>
-              <button
-                type="button"
-                class="rounded-xl border px-3 py-2 text-sm font-medium transition-colors"
-                :class="customRepeat.unit === 'month' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white text-sber-black'"
-                @click="customRepeat.unit = 'month'"
-              >
-                Месяца
-              </button>
+                {{ errors.repeatInterval }}
+              </p>
             </div>
 
             <div v-if="customRepeat.unit === 'week'" class="mt-3">
@@ -276,26 +311,41 @@
                   class="rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors"
                   :class="customRepeat.weekdays.includes(day.value)
                     ? 'border-sber-green bg-sber-green text-white'
-                    : 'border-sber-gray-mid bg-white text-sber-gray'"
+                    : errors.repeatWeekdays
+                      ? 'border-red-400 bg-red-50 text-sber-gray'
+                      : 'border-sber-gray-mid bg-white text-sber-gray'"
                   @click="toggleCustomWeekday(day.value)"
                 >
                   {{ day.label }}
                 </button>
               </div>
+              <p
+                v-if="errors.repeatWeekdays"
+                class="mt-1.5 text-xs font-medium text-red-500"
+              >
+                {{ errors.repeatWeekdays }}
+              </p>
             </div>
 
             <div v-else class="mt-3">
               <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-sber-gray">День месяца</p>
-              <input
-                v-model.number="customRepeat.monthDay"
-                type="number"
-                min="1"
-                max="31"
-                class="w-28 rounded-xl border border-sber-gray-mid bg-white px-3 py-2 text-sm font-semibold text-sber-black"
-              />
+              <div class="flex flex-wrap items-center gap-2">
+                <input
+                  v-model.number="customRepeat.monthDay"
+                  type="number"
+                  min="1"
+                  max="31"
+                  class="w-28 rounded-xl border bg-white px-3 py-2 text-sm font-semibold text-sber-black"
+                  :class="errors.repeatMonthDay
+                    ? 'border-red-400 bg-red-50'
+                    : 'border-sber-gray-mid'"
+                  @input="errors.repeatMonthDay = ''"
+                >
+                <p v-if="errors.repeatMonthDay" class="text-xs font-medium text-red-500">
+                  {{ errors.repeatMonthDay }}
+                </p>
+              </div>
             </div>
-
-            <p v-if="errors.repeat" class="mt-2 text-xs font-medium text-red-500">{{ errors.repeat }}</p>
           </div>
         </div>
 
@@ -418,9 +468,23 @@
       <Transition name="modal">
         <div v-if="deleteModal" class="app-modal px-5 py-5" @click.stop>
           <h3 class="mb-2 text-lg font-bold text-sber-black">Удалить повторяющуюся задачу?</h3>
-          <button class="btn-primary mb-2" type="button" @click="deleteTaskOccurrence">Только эту</button>
+          <p class="mb-4 text-sm text-sber-gray">Выберите, что именно удалить.</p>
+          <button class="btn-primary mb-2" type="button" @click="deleteTaskOccurrence">Только это повторение</button>
           <button class="btn-secondary mb-2" type="button" @click="deleteAllOccurrences">Все повторения</button>
           <button class="w-full rounded-2xl py-4 text-sm font-semibold text-sber-gray" type="button" @click="deleteModal = false">Отмена</button>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <Teleport to="body">
+      <Transition name="overlay"><div v-if="unsavedModal" class="overlay" @click="unsavedModal = false" /></Transition>
+      <Transition name="modal">
+        <div v-if="unsavedModal" class="app-modal px-5 py-5" @click.stop>
+          <h3 class="mb-2 text-lg font-bold text-sber-black">Сохранить изменения?</h3>
+          <p class="mb-5 text-sm text-sber-gray">Есть несохранённые правки в задаче.</p>
+          <button class="btn-primary mb-2" type="button" @click="saveUnsavedAndLeave">Сохранить</button>
+          <button class="btn-secondary mb-2" type="button" @click="discardUnsavedAndLeave">Не сохранять</button>
+          <button class="w-full rounded-2xl py-4 text-sm font-semibold text-sber-gray" type="button" @click="unsavedModal = false">Отмена</button>
         </div>
       </Transition>
     </Teleport>
@@ -432,7 +496,8 @@ import { Check, Bell, RefreshCw, Calendar, Flag, Grid2x2, ChevronLeft, Paperclip
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { matrixBlockDefaults } from '~/data/mockData'
-import { addMinutesToTime, validateDurationFields } from '~/utils/time'
+import { addMinutesToTime, validateDurationFields, validateRepeatInterval } from '~/utils/time'
+import { resolveMediaUrl } from '~/utils/media'
 import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
 
 definePageMeta({ layout: 'app' })
@@ -441,6 +506,24 @@ const route = useRoute()
 const tasksStore = useTasksStore()
 
 const deleteModal = ref(false)
+const pendingLeavePath = ref<string | null>(null)
+const bypassLeaveGuard = ref(false)
+
+function performLeave(defaultPath?: string) {
+  const target = pendingLeavePath.value || defaultPath || resolveReturnPath()
+  pendingLeavePath.value = null
+  bypassLeaveGuard.value = true
+  navigateTo(target)
+}
+
+onBeforeRouteLeave((to) => {
+  if (bypassLeaveGuard.value) return true
+  if (!isFormDirty()) return true
+  if (unsavedModal.value) return false
+  pendingLeavePath.value = to.fullPath
+  unsavedModal.value = true
+  return false
+})
 
 const editTaskId = computed(() => {
   const raw = route.query.id
@@ -477,6 +560,10 @@ const form = reactive({
 })
 
 const attachmentRemoved = ref(false)
+const customNotifyMinutes = ref(10)
+const unsavedModal = ref(false)
+const formSnapshot = ref('')
+const PRESET_NOTIFY = new Set(['', '0', '5', '15', '30', '60', '1440', 'custom'])
 /** «Без срока» как осознанный выбор: скрывает поля даты. Пустая дата без флага — ничего не выбрано, можно ввести любую дату. */
 const explicitNoDeadline = ref(false)
 /** Создание задачи: описание по умолчанию свёрнуто на телефоне, чтобы влезала вкладка «Дата». */
@@ -493,8 +580,20 @@ const attachmentDataUrl = ref('')
 const errors = reactive({
   title: '',
   duration: '',
-  repeat: '',
+  repeatInterval: '',
+  repeatWeekdays: '',
+  repeatMonthDay: '',
 })
+
+function clearRepeatErrors() {
+  errors.repeatInterval = ''
+  errors.repeatWeekdays = ''
+  errors.repeatMonthDay = ''
+}
+
+function hasRepeatErrors() {
+  return !!(errors.repeatInterval || errors.repeatWeekdays || errors.repeatMonthDay)
+}
 
 const activeTab = ref('date')
 
@@ -533,6 +632,7 @@ const notifyOptions = [
   { label: 'За 30 минут', value: '30' },
   { label: 'За 1 час', value: '60' },
   { label: 'За 1 день', value: '1440' },
+  { label: 'Своё время…', value: 'custom' },
   { label: 'Без уведомления', value: '' },
 ]
 
@@ -562,7 +662,7 @@ const customRepeat = reactive({
   monthDay: dayjs().date(),
 })
 
-useTaskTimeSync(form)
+const { pauseSync, resumeSync } = useTaskTimeSync(form)
 
 const matrixBlocks = [
   { id: 'urgent-important', title: 'Срочно и важно', color: '#FF3B30' },
@@ -665,7 +765,7 @@ const submitError = ref('')
 async function submit() {
   errors.title = ''
   errors.duration = ''
-  errors.repeat = ''
+  clearRepeatErrors()
   submitError.value = ''
 
   if (!form.title.trim()) {
@@ -678,18 +778,19 @@ async function submit() {
   }
 
   if (form.repeat === 'custom') {
-    if (customRepeat.interval < 1) {
-      errors.repeat = 'Интервал повторения должен быть не меньше 1'
+    const intervalError = validateRepeatInterval(customRepeat.interval)
+    if (intervalError) {
+      errors.repeatInterval = intervalError
     }
     if (customRepeat.unit === 'week' && customRepeat.weekdays.length === 0) {
-      errors.repeat = 'Выберите хотя бы один день недели'
+      errors.repeatWeekdays = 'Выберите хотя бы один день недели'
     }
     if (customRepeat.unit === 'month' && (customRepeat.monthDay < 1 || customRepeat.monthDay > 31)) {
-      errors.repeat = 'День месяца должен быть от 1 до 31'
+      errors.repeatMonthDay = 'День месяца должен быть от 1 до 31'
     }
   }
 
-  if (errors.title || errors.duration || errors.repeat) return
+  if (errors.title || errors.duration || hasRepeatErrors()) return
 
   submitting.value = true
   try {
@@ -702,11 +803,13 @@ async function submit() {
     const updates: Partial<Task> = {
       title: form.title.trim(),
       description,
-      dueDate: form.dueDate || undefined,
+      dueDate: form.dueDate || (form.repeat !== 'none' ? dayjs().format('YYYY-MM-DD') : undefined),
       dueTime: form.dueTime || undefined,
       duration,
       priority: form.priority,
-      notification: form.notification || undefined,
+      notification: form.notification === 'custom'
+        ? String(Math.max(0, customNotifyMinutes.value || 0))
+        : (form.notification || undefined),
       repeat: form.repeat,
       matrixBlock: form.matrixBlock as Task['matrixBlock'],
     }
@@ -724,7 +827,7 @@ async function submit() {
       updates.repeatDays = undefined
     }
 
-    if (attachmentDataUrl.value) {
+    if (attachmentDataUrl.value?.startsWith('data:')) {
       updates.attachment = {
         name: attachmentName.value,
         mimeType: attachmentMimeType.value || 'application/octet-stream',
@@ -735,18 +838,20 @@ async function submit() {
     }
 
     await tasksStore.updateTask(editTaskId.value, updates)
-    navigateTo(resolveReturnPath())
+    performLeave()
     return
   }
 
   await tasksStore.addTask({
     title: form.title.trim(),
     description,
-    dueDate: form.dueDate || undefined,
+    dueDate: form.dueDate || (form.repeat !== 'none' ? dayjs().format('YYYY-MM-DD') : undefined),
     dueTime: form.dueTime || undefined,
     duration,
     priority: form.priority,
-    notification: form.notification || undefined,
+    notification: form.notification === 'custom'
+      ? String(Math.max(0, customNotifyMinutes.value || 0))
+      : (form.notification || undefined),
     repeat: form.repeat,
     repeatDays: form.repeat === 'custom' && customRepeat.unit === 'week'
       ? [...customRepeat.weekdays]
@@ -759,7 +864,7 @@ async function submit() {
           monthDay: customRepeat.unit === 'month' ? customRepeat.monthDay : undefined,
         }
       : undefined,
-    attachment: attachmentDataUrl.value
+    attachment: attachmentDataUrl.value?.startsWith('data:')
       ? {
           name: attachmentName.value,
           mimeType: attachmentMimeType.value || 'application/octet-stream',
@@ -769,7 +874,7 @@ async function submit() {
     matrixBlock: form.matrixBlock as Task['matrixBlock'],
   })
 
-  navigateTo(resolveReturnPath())
+  performLeave()
   }
   catch (err: unknown) {
     const endAtError = getApiFieldError(err, 'end_at')
@@ -816,10 +921,11 @@ function toggleQuickDate(quick: QuickDatePreset) {
 
 function selectRepeatOption(value: RepeatType) {
   form.repeat = value
-  errors.repeat = ''
+  clearRepeatErrors()
 }
 
 function toggleCustomWeekday(day: number) {
+  errors.repeatWeekdays = ''
   if (customRepeat.weekdays.includes(day)) {
     customRepeat.weekdays = customRepeat.weekdays.filter(v => v !== day)
     return
@@ -866,7 +972,45 @@ function resolveReturnPath() {
 }
 
 function goBackToSource() {
-  navigateTo(resolveReturnPath())
+  if (isFormDirty()) {
+    unsavedModal.value = true
+    return
+  }
+  performLeave()
+}
+
+function isFormDirty() {
+  if (!isEditMode.value) {
+    return !!(form.title.trim() || form.description.trim() || attachmentDataUrl.value)
+  }
+  const current = JSON.stringify({
+    ...form,
+    customRepeat: { ...customRepeat },
+    customNotifyMinutes: customNotifyMinutes.value,
+    attachment: attachmentDataUrl.value,
+    attachmentRemoved: attachmentRemoved.value,
+  })
+  return current !== formSnapshot.value
+}
+
+function captureFormSnapshot() {
+  formSnapshot.value = JSON.stringify({
+    ...form,
+    customRepeat: { ...customRepeat },
+    customNotifyMinutes: customNotifyMinutes.value,
+    attachment: attachmentDataUrl.value,
+    attachmentRemoved: attachmentRemoved.value,
+  })
+}
+
+function discardUnsavedAndLeave() {
+  unsavedModal.value = false
+  performLeave()
+}
+
+async function saveUnsavedAndLeave() {
+  unsavedModal.value = false
+  await submit()
 }
 
 function readTimeQuery(key: string): string | undefined {
@@ -940,6 +1084,7 @@ function applyPrefillFromQuery() {
 }
 
 function hydrateFromTask(task: Task) {
+  pauseSync()
   form.title = task.title
   form.description = task.description || ''
   form.dueDate = task.dueDate || ''
@@ -947,7 +1092,13 @@ function hydrateFromTask(task: Task) {
   form.durationStart = task.duration?.start || ''
   form.durationEnd = task.duration?.end || ''
   form.priority = task.priority || 'none'
-  form.notification = task.notification || ''
+  const notify = task.notification || ''
+  if (notify && !PRESET_NOTIFY.has(notify)) {
+    form.notification = 'custom'
+    customNotifyMinutes.value = Number(notify) || 10
+  } else {
+    form.notification = notify || ''
+  }
   form.repeat = task.repeat || 'none'
   form.matrixBlock = task.matrixBlock || 'not-urgent-not-important'
 
@@ -961,15 +1112,23 @@ function hydrateFromTask(task: Task) {
   customRepeat.monthDay = task.repeatCustom?.monthDay || dayjs().date()
 
   attachmentRemoved.value = false
-  if (task.attachment) {
+  if (task.attachment?.dataUrl) {
     attachmentName.value = task.attachment.name
     attachmentMimeType.value = task.attachment.mimeType
-    attachmentDataUrl.value = task.attachment.dataUrl
+    attachmentDataUrl.value = resolveMediaUrl(task.attachment.dataUrl) || task.attachment.dataUrl
+  } else if (task.imageUrl) {
+    attachmentName.value = 'attachment'
+    attachmentMimeType.value = 'image/*'
+    attachmentDataUrl.value = resolveMediaUrl(task.imageUrl) || task.imageUrl
   } else {
     resetAttachmentFields()
   }
 
   explicitNoDeadline.value = !task.dueDate
+  nextTick(() => {
+    resumeSync()
+    captureFormSnapshot()
+  })
 }
 
 async function loadEditTaskFromRoute() {
@@ -985,6 +1144,22 @@ async function loadEditTaskFromRoute() {
     }
   }
   hydrateFromTask(task)
+
+  // List endpoints may omit the attachment; pull it from the detail endpoint.
+  if (!task.attachment && !task.imageUrl) {
+    try {
+      const detail = await tasksStore.fetchTask(editTaskId.value)
+      const url = detail.attachment?.dataUrl || detail.imageUrl
+      if (url && !attachmentDataUrl.value && !attachmentRemoved.value) {
+        attachmentName.value = detail.attachment?.name || 'attachment'
+        attachmentMimeType.value = detail.attachment?.mimeType || 'image/*'
+        attachmentDataUrl.value = resolveMediaUrl(url) || url
+      }
+    }
+    catch {
+      /* keep whatever the list gave us */
+    }
+  }
 }
 
 async function toggleEditComplete() {
@@ -994,26 +1169,25 @@ async function toggleEditComplete() {
 
 async function deleteEditingTask() {
   if (!editTaskId.value || !editingTask.value) return
-  if (editingTask.value.repeat && editingTask.value.repeat !== 'none') {
+  if (tasksStore.isRecurringTask(editingTask.value)) {
     deleteModal.value = true
     return
   }
   await tasksStore.deleteTask(editTaskId.value)
-  navigateTo(resolveReturnPath())
+  performLeave()
 }
 
 async function deleteTaskOccurrence() {
   if (!editTaskId.value) return
   deleteModal.value = false
-  await tasksStore.updateTask(editTaskId.value, { repeat: 'none', repeatCustom: undefined, repeatDays: undefined })
-  await tasksStore.deleteTask(editTaskId.value)
-  navigateTo(resolveReturnPath())
+  await tasksStore.deleteOccurrence(editTaskId.value)
+  performLeave()
 }
 
 async function deleteAllOccurrences() {
   if (!editTaskId.value) return
   deleteModal.value = false
-  await tasksStore.deleteTask(editTaskId.value)
-  navigateTo(resolveReturnPath())
+  await tasksStore.deleteSeries(editTaskId.value)
+  performLeave()
 }
 </script>

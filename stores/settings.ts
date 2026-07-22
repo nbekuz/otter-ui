@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
 import {
   defaultAppSettings,
+  faqData,
   matrixBlockDefaults,
   type AppSettings,
 } from '~/data/mockData'
@@ -22,8 +23,17 @@ export interface HelpFaqItem {
 }
 
 function normalizeBottomNavItems(items: string[]) {
-  const withoutSettings = items.filter(id => id !== 'settings')
-  return [...withoutSettings, 'settings']
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const id of items) {
+    // Profile lives in the sidebar card only — never in bottom/side nav tabs.
+    if (!id || id === 'profile' || seen.has(id)) continue
+    seen.add(id)
+    result.push(id)
+  }
+  // Settings stays always enabled, but may sit at any position in the order.
+  if (!seen.has('settings')) result.push('settings')
+  return result
 }
 
 function apiToAppSettings(data: ApiAppSettings): AppSettings {
@@ -46,6 +56,7 @@ function apiToAppSettings(data: ApiAppSettings): AppSettings {
     bottomNavItems: data.bottom_tabs?.length
       ? normalizeBottomNavItems([...data.bottom_tabs])
       : [...defaultAppSettings.bottomNavItems],
+    timezone: data.timezone || undefined,
   }
 }
 
@@ -53,6 +64,7 @@ function appSettingsToApiPatch(updates: Partial<AppSettings>): Partial<ApiAppSet
   const patch: Partial<ApiAppSettings> = {}
 
   if (updates.language !== undefined) patch.language = updates.language
+  if (updates.timezone !== undefined) patch.timezone = updates.timezone
   if (updates.vibration !== undefined) patch.vibration_enabled = updates.vibration
   if (updates.notificationSound !== undefined) patch.notification_sound = updates.notificationSound
   if (updates.completionSound !== undefined) patch.completion_sound = updates.completionSound
@@ -83,10 +95,13 @@ function apiMatrixToBlocks(settings: ApiMatrixSetting[]) {
     blocks[uiId] = {
       ...blocks[uiId],
       title: item.title || blocks[uiId].title,
-      dateFilter: item.date_filter ? item.date_filter.split(',').filter(Boolean) : blocks[uiId].dateFilter,
-      priorityFilter: item.allowed_priorities?.length
-        ? item.allowed_priorities.map(p => (p === 'critical' ? 'high' : p))
-        : blocks[uiId].priorityFilter,
+      // Empty date_filter / allowed_priorities means "any" — do not fall back to defaults.
+      dateFilter: item.date_filter == null
+        ? blocks[uiId].dateFilter
+        : item.date_filter.split(',').map(s => s.trim()).filter(Boolean),
+      priorityFilter: item.allowed_priorities == null
+        ? blocks[uiId].priorityFilter
+        : item.allowed_priorities.map(p => (p === 'critical' ? 'high' : p)),
     }
   }
   return blocks
@@ -126,20 +141,39 @@ export const useSettingsStore = defineStore('settings', () => {
     helpFaqError.value = ''
     try {
       const items = await apiGet<ApiHelpItem[]>('help/')
-      helpFaq.value = items.map((item, index) => ({
-        id: `faq-${index}`,
-        question: item.question,
-        answer: item.answer,
-        open: false,
-      }))
+      if (items.length) {
+        helpFaq.value = items.map((item, index) => ({
+          id: `faq-${index}`,
+          question: item.question,
+          answer: item.answer,
+          open: false,
+        }))
+      }
+      else {
+        helpFaq.value = localFaqFallback()
+      }
     }
     catch (err) {
-      helpFaqError.value = getApiErrorMessage(err, 'Не удалось загрузить FAQ')
-      throw err
+      helpFaq.value = localFaqFallback()
+      helpFaqError.value = ''
+      // Keep local FAQ visible; only surface error if fallback is empty
+      if (!helpFaq.value.length) {
+        helpFaqError.value = getApiErrorMessage(err, 'Не удалось загрузить FAQ')
+        throw err
+      }
     }
     finally {
       helpFaqLoading.value = false
     }
+  }
+
+  function localFaqFallback() {
+    return faqData.map(item => ({
+      id: item.id,
+      question: item.question,
+      answer: item.answer,
+      open: false,
+    }))
   }
 
   async function sendHelpMessage(message: string, screenshot?: File) {
@@ -199,6 +233,24 @@ export const useSettingsStore = defineStore('settings', () => {
       premiumActivatedAt.value = settings.premium_until
         || settings.premium_activated_at
       syncPremiumToAuth(settings)
+
+      // Keep reminders / today / overdue aligned with the browser timezone.
+      if (import.meta.client) {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+        if (tz && settings.timezone !== tz) {
+          try {
+            const patched = await apiPatch<ApiAppSettings>('settings/', { timezone: tz })
+            appSettings.value = {
+              ...appSettings.value,
+              ...apiToAppSettings(patched),
+              timezone: tz,
+            }
+          }
+          catch {
+            // Non-fatal: local UI still works without timezone sync.
+          }
+        }
+      }
     }
     catch (err) {
       error.value = getApiErrorMessage(err)
@@ -217,9 +269,15 @@ export const useSettingsStore = defineStore('settings', () => {
     if (Object.keys(patch).length === 0) return
 
     const updated = await apiPatch<ApiAppSettings>('settings/', patch)
+    const fromApi = apiToAppSettings(updated)
+    // Keep the just-chosen bottom-menu order locally: some backends don't echo
+    // `bottom_tabs` back, which would otherwise reset the drag-reorder to defaults.
+    if (updates.bottomNavItems !== undefined) {
+      fromApi.bottomNavItems = next.bottomNavItems
+    }
     appSettings.value = {
       ...next,
-      ...apiToAppSettings(updated),
+      ...fromApi,
     }
     isPremium.value = updated.is_premium
     premiumActivatedAt.value = updated.premium_activated_at
@@ -250,10 +308,14 @@ export const useSettingsStore = defineStore('settings', () => {
     await apiPatch<ApiMatrixSetting>('matrix/settings/', {
       block: apiBlock,
       title: updates.title ?? block.title,
-      allowed_priorities: updates.priorityFilter || block.priorityFilter,
-      date_filter: Array.isArray(updates.dateFilter)
-        ? updates.dateFilter.join(',')
-        : (updates.dateFilter as string | undefined) ?? block.dateFilter?.join(','),
+      allowed_priorities: updates.priorityFilter !== undefined
+        ? updates.priorityFilter
+        : block.priorityFilter,
+      date_filter: updates.dateFilter !== undefined
+        ? (Array.isArray(updates.dateFilter)
+            ? updates.dateFilter.join(',')
+            : String(updates.dateFilter || ''))
+        : (block.dateFilter?.join(',') ?? ''),
     })
   }
 

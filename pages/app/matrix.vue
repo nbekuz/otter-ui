@@ -72,13 +72,13 @@
           <div
             v-for="task in getBlockTasks(block.id)"
             :key="task.id"
-            class="rounded-xl px-3 py-2 mb-1.5 cursor-pointer active:opacity-70 border"
+            class="mb-1.5 min-w-0 max-w-full cursor-pointer rounded-xl border px-3 py-2 active:opacity-70"
             :class="isDarkTheme ? 'bg-[#171a21] border-[#2a303a]' : 'bg-white border-transparent'"
             draggable="true"
             @dragstart="onDragStart($event, task.id)"
             @click="selectedTaskId = task.id"
           >
-            <div class="flex items-start gap-2">
+            <div class="flex min-w-0 items-start gap-2">
               <button
                 class="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border"
                 :style="{ borderColor: block.color, backgroundColor: task.completed ? block.color : 'transparent' }"
@@ -86,9 +86,9 @@
               >
                 <Check v-if="task.completed" class="w-2.5 h-2.5 text-white" />
               </button>
-              <div class="min-w-0 flex-1">
+              <div class="min-w-0 flex-1 overflow-hidden">
                 <p
-                  class="break-words text-xs font-medium leading-snug text-sber-black"
+                  class="truncate text-xs font-medium leading-snug text-sber-black"
                   :class="task.completed ? 'line-through text-sber-gray' : ''"
                 >
                   {{ task.title }}
@@ -115,6 +115,10 @@
       <Transition name="modal">
         <div v-if="settingsOpen" class="app-modal px-5 py-5" style="max-height: 85dvh; overflow-y: auto;" @click.stop>
           <h3 class="text-lg font-bold text-sber-black mb-4">Настройки блоков</h3>
+          <p class="mb-4 text-xs leading-5 text-sber-gray">
+            В каждом блоке выбранные условия работают как множественный фильтр (ИЛИ):
+            задача попадает в блок, если подходит хотя бы одно из них — по дате или по приоритету.
+          </p>
 
           <div v-for="block in blocks" :key="block.id" class="mb-5">
             <div class="flex items-center gap-2 mb-3">
@@ -204,7 +208,10 @@ let draggedTaskId: string | null = null
 const blocks = computed(() => Object.values(settingsStore.matrixBlocks))
 
 onMounted(() => {
-  void tasksStore.fetchMatrix()
+  void Promise.all([
+    tasksStore.fetchGrouped(),
+    tasksStore.fetchMatrix(),
+  ])
 })
 
 function getBlockTasks(blockId: string) {
@@ -284,7 +291,10 @@ function toggleDateFilter(blockId: string, filter: string) {
 }
 
 function onTaskDetailSaved() {
-  void tasksStore.fetchMatrix()
+  void Promise.all([
+    tasksStore.fetchGrouped(),
+    tasksStore.fetchMatrix(),
+  ])
 }
 
 function openNewTaskForBlock(blockId: string) {

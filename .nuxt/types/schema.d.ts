@@ -18,6 +18,8 @@ import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
   interface SharedPublicRuntimeConfig {
    apiBaseUrl: string,
 
+   desktopDownloadUrl: string,
+
    firebase: {
       apiKey: string,
 

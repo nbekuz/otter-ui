@@ -39,6 +39,27 @@ const REPEAT_TO_API: Record<RepeatType, ApiRepeatUnit> = {
   custom: 'week',
 }
 
+function resolveRepeatApi(task: Partial<Task>): { unit: ApiRepeatUnit; interval: number } {
+  const repeat = task.repeat || 'none'
+  if (repeat === 'custom' && task.repeatCustom) {
+    const unit: ApiRepeatUnit = task.repeatCustom.unit === 'month' ? 'month' : 'week'
+    return {
+      unit,
+      interval: Math.max(1, Math.min(31, task.repeatCustom.interval || 1)),
+    }
+  }
+  if (repeat !== 'none' && task.repeatCustom?.interval) {
+    return {
+      unit: REPEAT_TO_API[repeat],
+      interval: Math.max(1, Math.min(31, task.repeatCustom.interval)),
+    }
+  }
+  return {
+    unit: REPEAT_TO_API[repeat],
+    interval: 1,
+  }
+}
+
 function apiPriorityToUi(priority: ApiPriority): Priority {
   if (priority === 'critical') return 'high'
   if (priority === 'low' || priority === 'medium' || priority === 'high') return priority
@@ -102,6 +123,10 @@ export function apiTaskToUi(task: ApiTask): Task {
   const startFields = task.start_at ? parseApiWallClock(task.start_at) : null
   const endFields = task.end_at ? parseApiWallClock(task.end_at) : null
   const scheduleDay = startFields ?? dueFields
+  const repeat = REPEAT_TO_UI[task.repeat_unit] || 'none'
+  const hasCustomInterval = task.repeat_unit !== 'none' && task.repeat_interval > 1
+  const customUnit: 'week' | 'month' =
+    task.repeat_unit === 'month' ? 'month' : 'week'
 
   return {
     id: String(task.id),
@@ -117,12 +142,21 @@ export function apiTaskToUi(task: ApiTask): Task {
     completedAt: task.completed_at
       ? dayjs(task.completed_at).format('YYYY-MM-DD')
       : undefined,
-    notification: reminderMinutes(task.due_at, task.reminder_at),
-    repeat: REPEAT_TO_UI[task.repeat_unit] || 'none',
-    repeatCustom: task.repeat_unit !== 'none' && task.repeat_interval > 1
-      ? { interval: task.repeat_interval, unit: 'week' }
+    notification: task.reminder_offset_minutes != null
+      ? String(task.reminder_offset_minutes)
+      : reminderMinutes(task.due_at, task.reminder_at),
+    repeat: hasCustomInterval ? 'custom' : repeat,
+    repeatCustom: hasCustomInterval
+      ? { interval: task.repeat_interval, unit: customUnit }
       : undefined,
     imageUrl: task.image || undefined,
+    attachment: task.image
+      ? {
+          name: 'attachment',
+          mimeType: 'image/*',
+          dataUrl: task.image,
+        }
+      : undefined,
     matrixBlock: MATRIX_TO_UI[task.matrix_block],
     createdAt: task.created_at,
   }
@@ -131,6 +165,7 @@ export function apiTaskToUi(task: ApiTask): Task {
 export function uiTaskToApiPayload(task: Partial<Task>): Record<string, unknown> {
   const due_at = buildDueAt(task.dueDate, task.dueTime)
   const { start_at, end_at } = buildStartEnd(task.dueDate, task.duration)
+  const { unit: repeat_unit, interval: repeat_interval } = resolveRepeatApi(task)
 
   const payload: Record<string, unknown> = {
     title: task.title,
@@ -138,11 +173,24 @@ export function uiTaskToApiPayload(task: Partial<Task>): Record<string, unknown>
     due_at,
     start_at,
     end_at,
-    reminder_at: buildReminderAt(due_at, task.notification),
-    repeat_unit: REPEAT_TO_API[task.repeat || 'none'],
-    repeat_interval: task.repeatCustom?.interval ?? 1,
+    repeat_unit,
+    repeat_interval,
     priority: uiPriorityToApi(task.priority || 'none'),
     matrix_block: MATRIX_TO_API[task.matrixBlock || 'not-urgent-not-important'],
+  }
+
+  // Backend requires due_at or start_at when reminder_offset_minutes is set.
+  const hasSchedule = Boolean(due_at || start_at)
+  if (!hasSchedule || task.notification === undefined || task.notification === '') {
+    payload.reminder_at = null
+    payload.reminder_offset_minutes = null
+  } else {
+    const offset = Number(task.notification)
+    if (Number.isFinite(offset) && offset >= 0) {
+      payload.reminder_offset_minutes = offset
+    } else {
+      payload.reminder_at = buildReminderAt(due_at || start_at, task.notification)
+    }
   }
 
   if (task.completed !== undefined) {
@@ -150,6 +198,22 @@ export function uiTaskToApiPayload(task: Partial<Task>): Record<string, unknown>
   }
 
   return payload
+}
+
+export async function dataUrlToFile(
+  dataUrl: string,
+  name: string,
+  mimeType: string,
+): Promise<File | null> {
+  if (!dataUrl.startsWith('data:')) return null
+  try {
+    const res = await fetch(dataUrl)
+    const blob = await res.blob()
+    return new File([blob], name || 'attachment', { type: mimeType || blob.type || 'application/octet-stream' })
+  }
+  catch {
+    return null
+  }
 }
 
 export function uiTaskToFormData(task: Partial<Task>, imageFile?: File): FormData {

@@ -1,5 +1,5 @@
 <template>
-  <div class="relative mb-2 h-full overflow-hidden rounded-2xl">
+  <div class="relative mb-2 overflow-hidden rounded-2xl">
     <!-- Swipe background: complete (right) -->
     <div class="swipe-complete" :style="{ width: swipeOffset > 0 ? `${Math.min(swipeOffset, 100)}px` : '0' }">
       <CheckCircle class="w-5 h-5" />

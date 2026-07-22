@@ -39,10 +39,12 @@
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2">
             <p class="truncate text-base font-bold text-sber-black">{{ authStore.user?.name }}</p>
-            <span v-if="premiumStore.isPremium"
-                  class="shrink-0 text-[10px] font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">
-              ⭐ ПРЕМИУМ
-            </span>
+            <span
+              v-if="premiumStore.isPremium"
+              class="shrink-0 text-base leading-none"
+              title="Премиум"
+              aria-label="Премиум"
+            >⭐</span>
           </div>
           <p class="truncate text-sm text-sber-gray">{{ authStore.user?.email }}</p>
           <p v-if="premiumStore.isPremium && premiumExpiresLabel" class="mt-1 text-xs font-medium text-yellow-700">
@@ -93,32 +95,156 @@
       </SettingsRow>
     </div>
 
-    <!-- Bottom menu customization -->
+    <!-- Bottom menu customization: fixed rows + CSS order (icons never remount on reorder) -->
     <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
       <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Нижнее меню</p>
       <p class="px-4 pb-2 text-xs text-sber-gray">Включайте вкладки и меняйте порядок перетаскиванием.</p>
-      <div
-        v-for="item in orderedBottomMenuItems"
-        :key="item.id"
-        class="flex items-center gap-3 px-4 py-3 border-b border-sber-gray-light last:border-0"
-        draggable="true"
-        @dragstart="onBottomMenuDragStart(item.id)"
-        @dragover.prevent
-        @drop="onBottomMenuDrop(item.id)"
-      >
-        <GripVertical class="w-4 h-4 text-sber-gray cursor-grab" />
-        <component :is="item.icon" class="w-5 h-5 text-sber-gray" />
-        <span class="text-sm font-medium text-sber-black flex-1">{{ item.label }}</span>
-        <span v-if="item.id === 'settings'" class="text-xs font-medium text-sber-gray">Всегда</span>
-        <button
-          v-else
-          class="w-12 h-6 rounded-full transition-colors relative"
-          :class="isBottomMenuEnabled(item.id) ? 'bg-sber-green' : 'bg-sber-gray-mid'"
-          @click="toggleBottomMenuItem(item.id)"
+      <div class="grid grid-cols-1">
+        <div
+          class="flex items-center gap-3 border-b border-sber-gray-light px-4 py-3"
+          :class="draggedBottomMenuId === 'tasks' ? 'opacity-60' : ''"
+          :style="{ order: bottomMenuOrder.tasks ?? 0 }"
+          @dragover.prevent="onBottomMenuDragOver('tasks')"
+          @drop.prevent="onBottomMenuDrop('tasks')"
         >
-          <div class="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform"
-               :class="isBottomMenuEnabled(item.id) ? 'translate-x-7' : 'translate-x-1'" />
-        </button>
+          <button
+            type="button"
+            class="flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-sber-gray active:cursor-grabbing"
+            draggable="true"
+            aria-label="Переместить"
+            @dragstart="onBottomMenuDragStart($event, 'tasks')"
+            @dragend="onBottomMenuDragEnd"
+          >
+            <GripVertical class="pointer-events-none h-4 w-4" />
+          </button>
+          <NavItemTasks mode="settings" class="pointer-events-none text-sber-gray" />
+          <span class="pointer-events-none flex-1 text-sm font-medium text-sber-black">Задачи</span>
+          <button
+            class="relative h-6 w-12 rounded-full transition-colors"
+            :class="isBottomMenuEnabled('tasks') ? 'bg-sber-green' : 'bg-sber-gray-mid'"
+            @click="toggleBottomMenuItem('tasks')"
+          >
+            <div
+              class="absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform"
+              :class="isBottomMenuEnabled('tasks') ? 'translate-x-7' : 'translate-x-1'"
+            />
+          </button>
+        </div>
+
+        <div
+          class="flex items-center gap-3 border-b border-sber-gray-light px-4 py-3"
+          :class="draggedBottomMenuId === 'calendar' ? 'opacity-60' : ''"
+          :style="{ order: bottomMenuOrder.calendar ?? 1 }"
+          @dragover.prevent="onBottomMenuDragOver('calendar')"
+          @drop.prevent="onBottomMenuDrop('calendar')"
+        >
+          <button
+            type="button"
+            class="flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-sber-gray active:cursor-grabbing"
+            draggable="true"
+            aria-label="Переместить"
+            @dragstart="onBottomMenuDragStart($event, 'calendar')"
+            @dragend="onBottomMenuDragEnd"
+          >
+            <GripVertical class="pointer-events-none h-4 w-4" />
+          </button>
+          <NavItemCalendar mode="settings" class="pointer-events-none text-sber-gray" />
+          <span class="pointer-events-none flex-1 text-sm font-medium text-sber-black">Календарь</span>
+          <button
+            class="relative h-6 w-12 rounded-full transition-colors"
+            :class="isBottomMenuEnabled('calendar') ? 'bg-sber-green' : 'bg-sber-gray-mid'"
+            @click="toggleBottomMenuItem('calendar')"
+          >
+            <div
+              class="absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform"
+              :class="isBottomMenuEnabled('calendar') ? 'translate-x-7' : 'translate-x-1'"
+            />
+          </button>
+        </div>
+
+        <div
+          class="flex items-center gap-3 border-b border-sber-gray-light px-4 py-3"
+          :class="draggedBottomMenuId === 'matrix' ? 'opacity-60' : ''"
+          :style="{ order: bottomMenuOrder.matrix ?? 2 }"
+          @dragover.prevent="onBottomMenuDragOver('matrix')"
+          @drop.prevent="onBottomMenuDrop('matrix')"
+        >
+          <button
+            type="button"
+            class="flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-sber-gray active:cursor-grabbing"
+            draggable="true"
+            aria-label="Переместить"
+            @dragstart="onBottomMenuDragStart($event, 'matrix')"
+            @dragend="onBottomMenuDragEnd"
+          >
+            <GripVertical class="pointer-events-none h-4 w-4" />
+          </button>
+          <NavItemMatrix mode="settings" class="pointer-events-none text-sber-gray" />
+          <span class="pointer-events-none flex-1 text-sm font-medium text-sber-black">Матрица</span>
+          <button
+            class="relative h-6 w-12 rounded-full transition-colors"
+            :class="isBottomMenuEnabled('matrix') ? 'bg-sber-green' : 'bg-sber-gray-mid'"
+            @click="toggleBottomMenuItem('matrix')"
+          >
+            <div
+              class="absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform"
+              :class="isBottomMenuEnabled('matrix') ? 'translate-x-7' : 'translate-x-1'"
+            />
+          </button>
+        </div>
+
+        <div
+          class="flex items-center gap-3 border-b border-sber-gray-light px-4 py-3"
+          :class="draggedBottomMenuId === 'pomodoro' ? 'opacity-60' : ''"
+          :style="{ order: bottomMenuOrder.pomodoro ?? 3 }"
+          @dragover.prevent="onBottomMenuDragOver('pomodoro')"
+          @drop.prevent="onBottomMenuDrop('pomodoro')"
+        >
+          <button
+            type="button"
+            class="flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-sber-gray active:cursor-grabbing"
+            draggable="true"
+            aria-label="Переместить"
+            @dragstart="onBottomMenuDragStart($event, 'pomodoro')"
+            @dragend="onBottomMenuDragEnd"
+          >
+            <GripVertical class="pointer-events-none h-4 w-4" />
+          </button>
+          <NavItemPomodoro mode="settings" class="pointer-events-none text-sber-gray" />
+          <span class="pointer-events-none flex-1 text-sm font-medium text-sber-black">Помодоро</span>
+          <button
+            class="relative h-6 w-12 rounded-full transition-colors"
+            :class="isBottomMenuEnabled('pomodoro') ? 'bg-sber-green' : 'bg-sber-gray-mid'"
+            @click="toggleBottomMenuItem('pomodoro')"
+          >
+            <div
+              class="absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform"
+              :class="isBottomMenuEnabled('pomodoro') ? 'translate-x-7' : 'translate-x-1'"
+            />
+          </button>
+        </div>
+
+        <div
+          class="flex items-center gap-3 px-4 py-3"
+          :class="draggedBottomMenuId === 'settings' ? 'opacity-60' : ''"
+          :style="{ order: bottomMenuOrder.settings ?? 4 }"
+          @dragover.prevent="onBottomMenuDragOver('settings')"
+          @drop.prevent="onBottomMenuDrop('settings')"
+        >
+          <button
+            type="button"
+            class="flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-sber-gray active:cursor-grabbing"
+            draggable="true"
+            aria-label="Переместить"
+            @dragstart="onBottomMenuDragStart($event, 'settings')"
+            @dragend="onBottomMenuDragEnd"
+          >
+            <GripVertical class="pointer-events-none h-4 w-4" />
+          </button>
+          <NavItemSettings mode="settings" class="pointer-events-none text-sber-gray" />
+          <span class="pointer-events-none flex-1 text-sm font-medium text-sber-black">Настройки</span>
+          <span class="text-xs font-medium text-sber-gray">Всегда</span>
+        </div>
       </div>
     </div>
 
@@ -271,6 +397,16 @@
       <SettingsRow label="О приложении" @click="aboutModal = true">
         <template #icon><Info class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
+    </div>
+
+    <div class="mx-4 mt-6 mb-2">
+      <button
+        type="button"
+        class="w-full rounded-2xl border border-red-200 bg-red-50 py-4 text-sm font-semibold text-red-600"
+        @click="showDeleteAccount = true"
+      >
+        Удалить аккаунт
+      </button>
     </div>
 
     <div class="h-8" />
@@ -495,6 +631,29 @@
       </Transition>
     </Teleport>
 
+    <!-- Delete account confirm -->
+    <Teleport to="body">
+      <Transition name="overlay"><div v-if="showDeleteAccount" class="overlay" @click="showDeleteAccount = false" /></Transition>
+      <Transition name="modal">
+        <div v-if="showDeleteAccount" class="app-modal px-5 py-5" @click.stop>
+          <h3 class="text-lg font-bold text-center mb-2">Удалить аккаунт?</h3>
+          <p class="text-sm text-sber-gray text-center mb-6">
+            Аккаунт и связанные данные будут удалены безвозвратно.
+          </p>
+          <p v-if="deleteAccountError" class="mb-3 text-center text-sm text-red-500">{{ deleteAccountError }}</p>
+          <button
+            class="mb-3 w-full rounded-2xl bg-red-500 py-4 font-semibold text-white disabled:opacity-60"
+            type="button"
+            :disabled="deleteAccountLoading"
+            @click="confirmDeleteAccount"
+          >
+            {{ deleteAccountLoading ? 'Удаление…' : 'Удалить' }}
+          </button>
+          <button class="btn-secondary" type="button" @click="showDeleteAccount = false">Отмена</button>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Coming soon toast -->
     <Teleport to="body">
       <Transition name="fade-notification">
@@ -540,13 +699,13 @@ import {
   Bell, Vibrate, Volume2, CheckCircle, Camera, Image, Globe,
   HelpCircle, Info, Star, Check, ChevronDown, ChevronRight, User, Lock, FileText,
   Paintbrush, Clock, Download, Share2, Smartphone, Crown, GripVertical, MessageSquareText,
-  CheckSquare, Calendar, Grid2x2, Timer, Settings
 } from 'lucide-vue-next'
 import { Moon, Sun } from 'lucide-vue-next'
 import { soundOptions } from '~/data/mockData'
 import { BRAND_NAME } from '~/utils/site-info'
 import { getApiErrorMessage } from '~/utils/api'
 import { validateNewPassword } from '~/utils/password-policy'
+import { buildNavOrderMap } from '~/utils/nav-items'
 
 definePageMeta({ layout: 'app' })
 
@@ -571,6 +730,9 @@ const avatarInputRef = ref<HTMLInputElement | null>(null)
 const avatarGalleryInputRef = ref<HTMLInputElement | null>(null)
 const contactScreenshotInputRef = ref<HTMLInputElement | null>(null)
 const showLogout = ref(false)
+const showDeleteAccount = ref(false)
+const deleteAccountLoading = ref(false)
+const deleteAccountError = ref('')
 const comingSoonVisible = ref(false)
 const editFirstName = ref('')
 const editLastName = ref('')
@@ -594,11 +756,11 @@ const languages = [
 ]
 
 const bottomMenuCatalog = [
-  { id: 'tasks', label: 'Задачи', icon: CheckSquare },
-  { id: 'calendar', label: 'Календарь', icon: Calendar },
-  { id: 'matrix', label: 'Матрица', icon: Grid2x2 },
-  { id: 'pomodoro', label: 'Помодоро', icon: Timer },
-  { id: 'settings', label: 'Настройки', icon: Settings },
+  { id: 'tasks', label: 'Задачи' },
+  { id: 'calendar', label: 'Календарь' },
+  { id: 'matrix', label: 'Матрица' },
+  { id: 'pomodoro', label: 'Помодоро' },
+  { id: 'settings', label: 'Настройки' },
 ]
 
 const orderedBottomMenuItems = computed(() => {
@@ -608,6 +770,11 @@ const orderedBottomMenuItems = computed(() => {
   const rest = bottomMenuCatalog.filter(item => !enabled.includes(item.id))
   return [...ordered, ...rest] as typeof bottomMenuCatalog
 })
+
+/** Visual order only — DOM stays fixed so Lucide SVGs never remount/corrupt. */
+const bottomMenuOrder = computed(() =>
+  buildNavOrderMap(orderedBottomMenuItems.value.map(item => item.id)),
+)
 
 const selectedLanguageLabel = computed(() =>
   languages.find(l => l.id === selectedLanguage.value)?.label || 'Русский'
@@ -716,6 +883,21 @@ function shareApp() {
     navigator.share({ title: `${BRAND_NAME} - Планировщик`, url: window.location.origin })
   } else {
     showComingSoon()
+  }
+}
+
+async function confirmDeleteAccount() {
+  deleteAccountError.value = ''
+  deleteAccountLoading.value = true
+  try {
+    await authStore.deleteAccount()
+    showDeleteAccount.value = false
+  }
+  catch (err) {
+    deleteAccountError.value = getApiErrorMessage(err, 'Не удалось удалить аккаунт')
+  }
+  finally {
+    deleteAccountLoading.value = false
   }
 }
 
@@ -954,17 +1136,40 @@ function toggleBottomMenuItem(itemId: string) {
   settingsStore.reorderNavItems(current)
 }
 
-function onBottomMenuDragStart(itemId: string) {
+function onBottomMenuDragStart(event: DragEvent, itemId: string) {
   draggedBottomMenuId.value = itemId
+  event.dataTransfer?.setData('text/plain', itemId)
+  event.dataTransfer!.effectAllowed = 'move'
+  // Avoid cloning Lucide SVGs into the drag ghost — browsers can leave broken SVG trees behind.
+  const ghost = document.createElement('div')
+  ghost.textContent = '⋮⋮'
+  ghost.style.cssText = 'position:fixed;top:-1000px;left:-1000px;padding:8px 12px;border-radius:12px;background:#21A038;color:#fff;font:600 14px/1 sans-serif;'
+  document.body.appendChild(ghost)
+  event.dataTransfer?.setDragImage(ghost, 16, 16)
+  requestAnimationFrame(() => ghost.remove())
+}
+
+function onBottomMenuDragOver(_itemId: string) {
+  /* allow drop */
+}
+
+function onBottomMenuDragEnd() {
+  draggedBottomMenuId.value = null
 }
 
 function onBottomMenuDrop(targetItemId: string) {
-  if (!draggedBottomMenuId.value || draggedBottomMenuId.value === targetItemId) return
+  if (!draggedBottomMenuId.value || draggedBottomMenuId.value === targetItemId) {
+    draggedBottomMenuId.value = null
+    return
+  }
 
   const current = [...settingsStore.appSettings.bottomNavItems]
   const fromIndex = current.indexOf(draggedBottomMenuId.value)
   const toIndex = current.indexOf(targetItemId)
-  if (fromIndex === -1 || toIndex === -1) return
+  if (fromIndex === -1 || toIndex === -1) {
+    draggedBottomMenuId.value = null
+    return
+  }
 
   const [moved] = current.splice(fromIndex, 1)
   current.splice(toIndex, 0, moved)

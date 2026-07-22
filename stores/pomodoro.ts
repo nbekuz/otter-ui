@@ -131,36 +131,61 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
     await startSession(selectedTaskId.value)
   }
 
-  async function start() {
-    if (state.value === 'idle' || state.value === 'paused') {
-      try {
-        await ensureSession()
-      }
-      catch {
+  function clearTicker() {
+    if (intervalId) {
+      clearInterval(intervalId)
+      intervalId = null
+    }
+  }
+
+  function onPhaseComplete() {
+    playCompletionSound()
+    if (!isBreak.value) {
+      // Work → auto-start break
+      sessionCount.value++
+      void syncSessionState('completed')
+      activeSessionId.value = null
+      isBreak.value = true
+      const useLong = sessionCount.value > 0
+        && sessionCount.value % settings.value.sessionsUntilLong === 0
+      secondsLeft.value = (useLong ? settings.value.longBreak : settings.value.shortBreak) * 60
+      state.value = 'running'
+      syncBackgroundAudio()
+      return
+    }
+    // Break → idle work duration
+    isBreak.value = false
+    state.value = 'idle'
+    secondsLeft.value = settings.value.duration * 60
+    clearTicker()
+  }
+
+  function startTicker() {
+    clearTicker()
+    intervalId = setInterval(() => {
+      if (secondsLeft.value > 0) {
+        secondsLeft.value--
         return
       }
+      onPhaseComplete()
+    }, 1000)
+  }
+
+  async function start() {
+    if (state.value === 'idle' || state.value === 'paused') {
+      if (!isBreak.value) {
+        try {
+          await ensureSession()
+        }
+        catch {
+          return
+        }
+        void syncSessionState('running')
+      }
       state.value = 'running'
-      void syncSessionState('running')
       stopEffectAudio()
       syncBackgroundAudio()
-      if (intervalId) {
-        clearInterval(intervalId)
-        intervalId = null
-      }
-      intervalId = setInterval(() => {
-        if (secondsLeft.value > 0) {
-          secondsLeft.value--
-        }
-        else {
-          pause()
-          sessionCount.value++
-          playCompletionSound()
-          state.value = 'idle'
-          secondsLeft.value = settings.value.duration * 60
-          void syncSessionState('completed')
-          activeSessionId.value = null
-        }
-      }, 1000)
+      startTicker()
     }
   }
 
@@ -168,11 +193,8 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
     if (state.value === 'running') {
       state.value = 'paused'
       pauseBackgroundAudio()
-      void syncSessionState('paused')
-      if (intervalId) {
-        clearInterval(intervalId)
-        intervalId = null
-      }
+      if (!isBreak.value) void syncSessionState('paused')
+      clearTicker()
     }
   }
 
@@ -180,11 +202,8 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
     state.value = 'idle'
     isBreak.value = false
     stopBackgroundAudio()
-    void syncSessionState('stopped')
-    if (intervalId) {
-      clearInterval(intervalId)
-      intervalId = null
-    }
+    if (activeSessionId.value) void syncSessionState('stopped')
+    clearTicker()
     secondsLeft.value = settings.value.duration * 60
     activeSessionId.value = null
   }

@@ -7,9 +7,18 @@ export function useTaskTimeSync(form: {
   durationEnd: string
 }) {
   let syncing = false
+  let paused = false
+
+  function pauseSync() {
+    paused = true
+  }
+
+  function resumeSync() {
+    paused = false
+  }
 
   watch(() => form.dueTime, (val) => {
-    if (syncing || !val) return
+    if (paused || syncing || !val) return
     syncing = true
     form.durationStart = val
     form.durationEnd = addMinutesToTime(val, 60)
@@ -17,14 +26,15 @@ export function useTaskTimeSync(form: {
   })
 
   watch(() => form.durationStart, (val) => {
-    if (syncing) return
+    if (paused || syncing) return
     syncing = true
     if (val) {
       form.dueTime = val
-      if (!form.durationEnd || form.durationEnd === form.dueTime) {
-        form.durationEnd = addMinutesToTime(val, 60)
-      }
+      // Always default End to Start + 1 hour.
+      form.durationEnd = addMinutesToTime(val, 60)
     }
     syncing = false
   })
+
+  return { pauseSync, resumeSync }
 }

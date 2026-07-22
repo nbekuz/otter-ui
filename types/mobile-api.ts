@@ -14,6 +14,7 @@ export interface ApiTask {
   start_at: string | null
   end_at: string | null
   reminder_at: string | null
+  reminder_offset_minutes?: number | null
   repeat_unit: ApiRepeatUnit
   repeat_interval: number
   priority: ApiPriority
@@ -85,6 +86,7 @@ export interface ApiPomodoroSettings {
 
 export interface ApiAppSettings {
   language: string
+  timezone?: string | null
   show_overdue: boolean
   show_today: boolean
   show_tomorrow: boolean

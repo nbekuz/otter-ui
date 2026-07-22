@@ -37,6 +37,13 @@
               </NuxtLink>
             </li>
           </ul>
+          <button
+            class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-sber-green hover:underline"
+            type="button"
+            @click="onDesktopDownloadClick"
+          >
+            {{ DESKTOP_APP.label }}
+          </button>
         </div>
       </div>
 
@@ -48,9 +55,14 @@
 </template>
 
 <script setup lang="ts">
-import { BRAND_NAME, SITE_LEGAL_INFO } from '~/utils/site-info'
+import { BRAND_NAME, DESKTOP_APP, SITE_LEGAL_INFO } from '~/utils/site-info'
 import { STATIC_LEGAL_DOCUMENTS } from '~/utils/legal-static'
 
 const currentYear = 2026
 const legalDocuments = STATIC_LEGAL_DOCUMENTS
+const { showToast } = useAppToast()
+
+function onDesktopDownloadClick() {
+  showToast(DESKTOP_APP.unavailableMessage, 'error', 4500)
+}
 </script>

@@ -3,7 +3,8 @@ import dayjs from 'dayjs'
 import type { Task } from '~/data/mockData'
 import type { ApiMatrixBlock, ApiTask, ApiTaskGroup } from '~/types/mobile-api'
 import { apiDelete, apiGet, apiPatch, apiPost, getApiErrorMessage } from '~/utils/api'
-import { apiMatrixBlockToUi, apiTaskToUi, groupKeyToUi, uiTaskToApiPayload } from '~/utils/task-mapper'
+import { apiMatrixBlockToUi, apiTaskToUi, dataUrlToFile, groupKeyToUi, uiTaskToApiPayload, uiTaskToFormData } from '~/utils/task-mapper'
+import { expandTasksForDate, expandTasksForRange, computeNextOccurrenceDate, isRecurringTask } from '~/utils/recurrence'
 
 type GroupKey = 'overdue' | 'today' | 'tomorrow' | 'later' | 'nodate' | 'completed'
 
@@ -81,6 +82,20 @@ export const useTasksStore = defineStore('tasks', () => {
   const noDateTasks = computed(() => groupedFromApi.value.nodate)
   const completedTasks = computed(() => groupedFromApi.value.completed)
 
+  /** List endpoints may omit the image; keep a previously known attachment. */
+  function preserveImages(incoming: Task[]) {
+    const prevById = new Map(tasks.value.map(t => [t.id, t]))
+    for (const task of incoming) {
+      if (task.imageUrl || task.attachment) continue
+      const prev = prevById.get(task.id)
+      if (prev?.imageUrl || prev?.attachment) {
+        task.imageUrl = prev.imageUrl
+        task.attachment = prev.attachment
+      }
+    }
+    return incoming
+  }
+
   function applyGrouped(groups: ApiTaskGroup[]) {
     const next: Record<GroupKey, Task[]> = {
       overdue: [],
@@ -96,13 +111,16 @@ export const useTasksStore = defineStore('tasks', () => {
         next[uiKey] = group.tasks.map(apiTaskToUi)
       }
     }
-    tasks.value = flattenGroups(groups)
+    tasks.value = preserveImages(flattenGroups(groups))
     groupedFromApi.value = groupTasksByKey(tasks.value)
   }
 
   function findTaskById(id: string) {
-    return tasks.value.find(t => t.id === id)
-      ?? calendarTasks.value.find(t => t.id === id)
+    const realId = id.includes('__') && /^\d{4}-\d{2}-\d{2}$/.test(id.split('__').pop() || '')
+      ? id.slice(0, id.lastIndexOf('__'))
+      : id
+    return tasks.value.find(t => t.id === realId)
+      ?? calendarTasks.value.find(t => t.id === realId)
   }
 
   function taskScheduleKey(task: Task) {
@@ -321,50 +339,114 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   function getTasksForDate(date: string) {
-    const cache = parseCalendarCacheKey()
-    if (cache?.view === 'day' && cache.date === date) {
-      return calendarTasks.value.slice()
+    const pool = new Map<string, Task>()
+    for (const t of tasks.value) pool.set(t.id, t)
+    for (const t of calendarTasks.value) {
+      if (!pool.has(t.id)) pool.set(t.id, t)
     }
-
-    return tasks.value.filter(t => taskScheduleDate(t) === date)
+    return expandTasksForDate(Array.from(pool.values()), date)
   }
 
   function getTasksForWeek(startDate: string, endDate: string) {
-    const cache = parseCalendarCacheKey()
-    if (cache?.view === 'week') {
-      const weekStart = dayjs(cache.date).startOf('week').format('YYYY-MM-DD')
-      const weekEnd = dayjs(cache.date).endOf('week').format('YYYY-MM-DD')
-      if (!dayjs(startDate).isAfter(weekEnd, 'day') && !dayjs(endDate).isBefore(weekStart, 'day')) {
-        return calendarTasks.value.filter((t) => {
-          const d = taskScheduleDate(t)
-          return !!d
-            && !dayjs(d).isBefore(startDate, 'day')
-            && !dayjs(d).isAfter(endDate, 'day')
-        })
-      }
+    const pool = new Map<string, Task>()
+    for (const t of tasks.value) pool.set(t.id, t)
+    for (const t of calendarTasks.value) {
+      if (!pool.has(t.id)) pool.set(t.id, t)
     }
-
-    return tasks.value.filter(t =>
-      taskScheduleDate(t)
-      && !dayjs(taskScheduleDate(t)).isBefore(startDate, 'day')
-      && !dayjs(taskScheduleDate(t)).isAfter(endDate, 'day'),
-    )
+    return expandTasksForRange(Array.from(pool.values()), startDate, endDate)
   }
 
   function getTasksForMatrix(blockId: string) {
+    const settingsStore = useSettingsStore()
+    const block = settingsStore.matrixBlocks[blockId as keyof typeof settingsStore.matrixBlocks]
+    const dateFilters = block?.dateFilter || []
+    const priorityFilters = block?.priorityFilter || []
+
+    const groups = groupTasksByKey(tasks.value)
+    const incomplete = tasks.value.filter(t => !t.completed)
+
+    const hasDateFilters = dateFilters.length > 0
+    const hasPriorityFilters = priorityFilters.length > 0
+
+    // Multiple filters are OR: task matches if it fits any selected date rule
+    // OR any selected priority (each chip is an independent condition).
+    if (hasDateFilters || hasPriorityFilters) {
+      const dateMatchedIds = new Set<string>()
+      if (hasDateFilters) {
+        for (const key of dateFilters) {
+          const list = groups[key as GroupKey]
+          if (list) {
+            for (const t of list) dateMatchedIds.add(t.id)
+          }
+        }
+      }
+
+      const matched = incomplete.filter((t) => {
+        const byDate = hasDateFilters && dateMatchedIds.has(t.id)
+        const byPriority = hasPriorityFilters && priorityFilters.includes(t.priority)
+        if (hasDateFilters && hasPriorityFilters) return byDate || byPriority
+        if (hasDateFilters) return byDate
+        return byPriority
+      })
+
+      const assigned = incomplete.filter(t => t.matrixBlock === blockId)
+      const byId = new Map<string, Task>()
+      for (const t of [...matched, ...assigned]) byId.set(t.id, t)
+      return Array.from(byId.values())
+    }
+
     if (matrixTasksByBlock.value[blockId]?.length) {
       return matrixTasksByBlock.value[blockId]
     }
-    return tasks.value.filter(t => !t.completed && t.matrixBlock === blockId)
+    return incomplete.filter(t => t.matrixBlock === blockId)
+  }
+
+  async function resolveAttachmentFile(taskData: Partial<Task>): Promise<File | undefined> {
+    const att = taskData.attachment
+    if (!att?.dataUrl?.startsWith('data:')) return undefined
+    const file = await dataUrlToFile(att.dataUrl, att.name, att.mimeType)
+    return file || undefined
   }
 
   async function addTask(taskData: Partial<Task>) {
-    const payload = uiTaskToApiPayload(taskData)
-    const created = await apiPost<ApiTask>('tasks/', payload)
+    const imageFile = await resolveAttachmentFile(taskData)
+    const created = imageFile
+      ? await apiPost<ApiTask>('tasks/', uiTaskToFormData(taskData, imageFile))
+      : await apiPost<ApiTask>('tasks/', uiTaskToApiPayload(taskData))
     const task = apiTaskToUi(created)
     upsertTaskInState(task)
     await refreshTaskLists()
     return task
+  }
+
+  /** Create the next occurrence of a recurring task (used on complete / delete-this). */
+  async function spawnNextOccurrence(task: Task) {
+    if (!isRecurringTask(task)) return null
+    const nextDate = computeNextOccurrenceDate(task)
+    if (!nextDate) return null
+
+    const alreadyExists = tasks.value.some(t =>
+      t.id !== task.id
+      && !t.completed
+      && t.title === task.title
+      && (t.repeat || 'none') === task.repeat
+      && normalizeDueDate(t.dueDate) === nextDate,
+    )
+    if (alreadyExists) return null
+
+    return addTask({
+      title: task.title,
+      description: task.description,
+      dueDate: nextDate,
+      dueTime: task.dueTime,
+      duration: task.duration ? { ...task.duration } : undefined,
+      priority: task.priority,
+      notification: task.notification,
+      repeat: task.repeat,
+      repeatDays: task.repeatDays ? [...task.repeatDays] : undefined,
+      repeatCustom: task.repeatCustom ? { ...task.repeatCustom } : undefined,
+      matrixBlock: task.matrixBlock,
+    })
   }
 
   type RefreshOptions = { grouped?: boolean, calendar?: boolean, matrix?: boolean }
@@ -379,8 +461,10 @@ export const useTasksStore = defineStore('tasks', () => {
     upsertTaskInState(optimistic)
 
     const merged = { ...existing, ...updates, id } as Partial<Task>
-    const payload = uiTaskToApiPayload(merged)
-    const updated = await apiPatch<ApiTask>(`tasks/${id}/`, payload)
+    const imageFile = await resolveAttachmentFile(updates)
+    const updated = imageFile
+      ? await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToFormData(merged, imageFile))
+      : await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToApiPayload(merged))
     const task = mergeTaskFromApi(existing, updates, apiTaskToUi(updated))
     upsertTaskInState(task)
     await refreshTaskLists(refresh)
@@ -393,14 +477,35 @@ export const useTasksStore = defineStore('tasks', () => {
     await refreshTaskLists(refresh)
   }
 
+  /** Delete only this occurrence; keep the series by spawning the next one first. */
+  async function deleteOccurrence(id: string, refresh: RefreshOptions = {}) {
+    const task = findTaskById(id)
+    if (task && isRecurringTask(task)) {
+      try {
+        await spawnNextOccurrence(task)
+      }
+      catch {
+        /* still delete this occurrence even if the next one couldn't be created */
+      }
+    }
+    await deleteTask(id, refresh)
+  }
+
+  /** Delete the whole series: remove this task and do not spawn further occurrences. */
+  async function deleteSeries(id: string, refresh: RefreshOptions = {}) {
+    await deleteTask(id, refresh)
+  }
+
   async function completeTask(id: string, refresh: RefreshOptions = {}) {
     const existing = findTaskById(id)
     if (!existing) return
 
+    const willComplete = !existing.completed
+
     upsertTaskInState({
       ...existing,
-      completed: !existing.completed,
-      completedAt: !existing.completed
+      completed: willComplete,
+      completedAt: willComplete
         ? dayjs().format('YYYY-MM-DD')
         : undefined,
     })
@@ -409,6 +514,17 @@ export const useTasksStore = defineStore('tasks', () => {
     const updated = await apiPost<ApiTask>(`tasks/${id}/${endpoint}/`)
     const task = apiTaskToUi(updated)
     upsertTaskInState(task)
+
+    // Completing a repeating task keeps it in "Готово" and spawns the next occurrence.
+    if (willComplete && isRecurringTask(existing)) {
+      try {
+        await spawnNextOccurrence(existing)
+      }
+      catch {
+        /* keep the completion even if creating the next one fails */
+      }
+    }
+
     await refreshTaskLists(refresh)
     return task
   }
@@ -484,10 +600,16 @@ export const useTasksStore = defineStore('tasks', () => {
     addTask,
     updateTask,
     deleteTask,
+    deleteOccurrence,
+    deleteSeries,
     completeTask,
+    spawnNextOccurrence,
+    computeNextOccurrenceDate,
+    isRecurringTask,
     moveToMatrix,
     fetchTask,
     searchTasks,
+    upsertTaskInState,
     reset,
   }
 })

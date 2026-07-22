@@ -8,13 +8,12 @@
         <div class="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5"
              :style="{ backgroundColor: priorityColor(form.priority) + '20' }">
           <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: priorityColor(form.priority) }" />
-          <select v-model="form.priority" class="bg-transparent text-xs font-medium outline-none"
-                  :style="{ color: priorityColor(form.priority) }">
-            <option value="high">Высокий</option>
-            <option value="medium">Средний</option>
-            <option value="low">Низкий</option>
-            <option value="none">Без приоритета</option>
-          </select>
+          <UiAppSelect
+            v-model="form.priority"
+            variant="inline"
+            :options="prioritySelectOptions"
+            :trigger-class="'!w-auto'"
+          />
         </div>
 
         <div class="space-y-3">
@@ -44,6 +43,86 @@
               <TimeFieldRu v-model="form.durationEnd" field-class="py-3" />
             </div>
           </div>
+
+          <div>
+            <label class="mb-1 block text-xs font-semibold text-sber-gray">Уведомление</label>
+            <UiAppSelect v-model="form.notification" :options="notificationSelectOptions" />
+            <div v-if="form.notification === 'custom' || isCustomNotification" class="mt-2 flex items-center gap-2">
+              <input
+                v-model.number="customNotifyMinutes"
+                type="number"
+                min="0"
+                max="10080"
+                class="input-field w-28 py-2 text-sm"
+                placeholder="мин"
+              >
+              <span class="text-xs text-sber-gray">минут до срока</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-xs font-semibold text-sber-gray">Повтор</label>
+            <UiAppSelect v-model="form.repeat" :options="repeatSelectOptions" />
+            <div v-if="form.repeat === 'custom'" class="mt-2 rounded-2xl border border-sber-green/30 bg-sber-green-light/30 p-3">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-sm text-sber-gray">Каждые</span>
+                  <input
+                    v-model.number="customRepeat.interval"
+                    type="number"
+                    min="1"
+                    max="31"
+                    class="w-20 rounded-xl border bg-white px-3 py-2 text-sm font-semibold"
+                    :class="repeatIntervalError
+                      ? 'border-red-400 bg-red-50'
+                      : 'border-sber-gray-mid'"
+                    @input="repeatIntervalError = ''"
+                  >
+                  <button
+                    type="button"
+                    class="rounded-xl border px-3 py-2 text-sm font-medium"
+                    :class="customRepeat.unit === 'week' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white'"
+                    @click="customRepeat.unit = 'week'; repeatIntervalError = ''"
+                  >
+                    Недели
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-xl border px-3 py-2 text-sm font-medium"
+                    :class="customRepeat.unit === 'month' ? 'border-sber-green bg-sber-green text-white' : 'border-sber-gray-mid bg-white'"
+                    @click="customRepeat.unit = 'month'; repeatIntervalError = ''"
+                  >
+                    Месяца
+                  </button>
+                </div>
+                <p
+                  v-if="repeatIntervalError"
+                  class="mt-1.5 text-xs font-medium text-red-500"
+                >
+                  {{ repeatIntervalError }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-xs font-semibold text-sber-gray">Матрица Эйзенхауэра</label>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button
+                v-for="block in matrixBlocks"
+                :key="block.id"
+                type="button"
+                class="flex flex-col gap-0.5 rounded-xl border-2 px-2 py-2 text-left transition-all"
+                :class="form.matrixBlock === block.id ? 'border-current' : 'border-sber-gray-light'"
+                :style="form.matrixBlock === block.id ? { borderColor: block.color, backgroundColor: block.color + '15' } : {}"
+                @click="form.matrixBlock = block.id"
+              >
+                <div class="h-3 w-3 rounded-full" :style="{ backgroundColor: block.color }" />
+                <span class="text-[10px] font-medium leading-tight text-sber-black">{{ block.title }}</span>
+              </button>
+            </div>
+          </div>
+
           <p v-if="saveError" class="text-sm text-red-500">{{ saveError }}</p>
         </div>
 
@@ -66,29 +145,88 @@
             v-else
             class="col-span-1 rounded-2xl bg-red-50 px-3 py-3 text-sm font-semibold text-red-500"
             type="button"
-            @click="deleteTask"
+            @click="requestDelete"
           >
             Удалить
           </button>
         </div>
       </div>
     </Transition>
+
+    <Transition name="overlay">
+      <div v-if="unsavedModal" class="overlay z-[60]" @click="unsavedModal = false" />
+    </Transition>
+    <Transition name="modal">
+      <div v-if="unsavedModal" class="app-modal z-[70] px-5 py-5" @click.stop>
+        <h3 class="mb-2 text-lg font-bold text-sber-black">Сохранить изменения?</h3>
+        <p class="mb-5 text-sm text-sber-gray">Есть несохранённые правки в задаче.</p>
+        <button class="btn-primary mb-2" type="button" @click="saveAndClose">Сохранить</button>
+        <button class="btn-secondary mb-2" type="button" @click="discardAndClose">Не сохранять</button>
+        <button class="w-full rounded-2xl py-4 text-sm font-semibold text-sber-gray" type="button" @click="unsavedModal = false">Отмена</button>
+      </div>
+    </Transition>
+
+    <Transition name="overlay">
+      <div v-if="deleteModal" class="overlay z-[60]" @click="deleteModal = false" />
+    </Transition>
+    <Transition name="modal">
+      <div v-if="deleteModal" class="app-modal z-[70] px-5 py-5" @click.stop>
+        <h3 class="mb-2 text-lg font-bold text-sber-black">Удалить повторяющуюся задачу?</h3>
+        <p class="mb-4 text-sm text-sber-gray">Выберите, что именно удалить.</p>
+        <button class="btn-primary mb-2" type="button" @click="deleteOccurrence">Только это повторение</button>
+        <button class="btn-secondary mb-2" type="button" @click="deleteSeries">Все повторения</button>
+        <button class="w-full rounded-2xl py-4 text-sm font-semibold text-sber-gray" type="button" @click="deleteModal = false">Отмена</button>
+      </div>
+    </Transition>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import type { Priority, Task } from '~/data/mockData'
+import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { priorityColor } from '~/utils/priority-colors'
-import { validateDurationFields } from '~/utils/time'
+import { validateDurationFields, validateRepeatInterval } from '~/utils/time'
 import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
 
 const props = defineProps<{ taskId: string }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
 const tasksStore = useTasksStore()
 
-const task = computed(() => tasksStore.tasks.find(t => t.id === props.taskId))
+const task = computed(() =>
+  tasksStore.tasks.find(t => t.id === props.taskId)
+  || tasksStore.calendarTasks.find(t => t.id === props.taskId),
+)
 const saving = ref(false)
 const saveError = ref('')
+const repeatIntervalError = ref('')
+const customNotifyMinutes = ref(10)
+const PRESET_NOTIFY = new Set(['', '0', '5', '15', '30', '60', '1440'])
+
+const prioritySelectOptions = [
+  { value: 'high', label: 'Высокий', color: '#FF3B30' },
+  { value: 'medium', label: 'Средний', color: '#FF9500' },
+  { value: 'low', label: 'Низкий', color: '#34C759' },
+  { value: 'none', label: 'Без приоритета', color: '#8E8E93' },
+]
+
+const notificationSelectOptions = [
+  { value: '', label: 'Без уведомления' },
+  { value: '0', label: 'В момент срока' },
+  { value: '5', label: 'За 5 минут' },
+  { value: '15', label: 'За 15 минут' },
+  { value: '30', label: 'За 30 минут' },
+  { value: '60', label: 'За 1 час' },
+  { value: '1440', label: 'За 1 день' },
+  { value: 'custom', label: 'Своё время…' },
+]
+
+const repeatSelectOptions = [
+  { value: 'none', label: 'Не повторять' },
+  { value: 'daily', label: 'Каждый день' },
+  { value: 'weekly', label: 'Каждую неделю' },
+  { value: 'monthly', label: 'Каждый месяц' },
+  { value: 'yearly', label: 'Каждый год' },
+  { value: 'custom', label: 'Настроить повторение' },
+]
 
 const form = reactive({
   title: '',
@@ -98,12 +236,33 @@ const form = reactive({
   durationStart: '',
   durationEnd: '',
   priority: 'none' as Priority,
+  notification: '' as string,
+  repeat: 'none' as RepeatType,
+  matrixBlock: 'not-urgent-not-important' as NonNullable<Task['matrixBlock']>,
 })
 
-useTaskTimeSync(form)
+const customRepeat = reactive({
+  interval: 1,
+  unit: 'week' as 'week' | 'month',
+})
+
+const matrixBlocks = [
+  { id: 'urgent-important' as const, title: 'Срочно и важно', color: '#FF3B30' },
+  { id: 'not-urgent-important' as const, title: 'Не срочно, но важно', color: '#007AFF' },
+  { id: 'urgent-not-important' as const, title: 'Срочно, не важно', color: '#FF9500' },
+  { id: 'not-urgent-not-important' as const, title: 'Не срочно, не важно', color: '#8E8E93' },
+]
+
+const isCustomNotification = computed(() => {
+  const n = form.notification
+  return n !== '' && n !== 'custom' && !PRESET_NOTIFY.has(n)
+})
+
+const { pauseSync, resumeSync } = useTaskTimeSync(form)
 
 function syncFormFromTask(t: Task | undefined) {
   if (!t) return
+  pauseSync()
   form.title = t.title
   form.description = t.description || ''
   form.dueDate = t.dueDate || ''
@@ -111,38 +270,114 @@ function syncFormFromTask(t: Task | undefined) {
   form.durationStart = t.duration?.start || ''
   form.durationEnd = t.duration?.end || ''
   form.priority = t.priority || 'none'
+  const notify = t.notification ?? ''
+  if (notify && !PRESET_NOTIFY.has(notify)) {
+    form.notification = 'custom'
+    customNotifyMinutes.value = Number(notify) || 10
+  } else {
+    form.notification = notify
+  }
+  form.repeat = t.repeat || 'none'
+  form.matrixBlock = t.matrixBlock || 'not-urgent-not-important'
+  customRepeat.interval = t.repeatCustom?.interval || 1
+  customRepeat.unit = t.repeatCustom?.unit || 'week'
+  nextTick(() => resumeSync())
 }
 
 watch(task, syncFormFromTask, { immediate: true })
 
+const formSnapshot = ref('')
+const unsavedModal = ref(false)
+const deleteModal = ref(false)
+
+function captureSnapshot() {
+  formSnapshot.value = JSON.stringify({
+    ...form,
+    customRepeat: { ...customRepeat },
+    customNotifyMinutes: customNotifyMinutes.value,
+  })
+}
+
+watch(task, () => nextTick(captureSnapshot), { immediate: true })
+
+const isDirty = computed(() => {
+  const current = JSON.stringify({
+    ...form,
+    customRepeat: { ...customRepeat },
+    customNotifyMinutes: customNotifyMinutes.value,
+  })
+  return current !== formSnapshot.value
+})
+
 function onCancel() {
+  if (isDirty.value) {
+    unsavedModal.value = true
+    return
+  }
   emit('close')
+}
+
+function discardAndClose() {
+  unsavedModal.value = false
+  emit('close')
+}
+
+async function saveAndClose() {
+  await saveTask()
 }
 
 async function saveTask() {
   if (!task.value) return
   saveError.value = ''
+  repeatIntervalError.value = ''
   const durationError = validateDurationFields(form.durationStart, form.durationEnd)
   if (durationError) {
     saveError.value = durationError
     return
   }
+  if (form.repeat === 'custom') {
+    const intervalError = validateRepeatInterval(customRepeat.interval)
+    if (intervalError) {
+      repeatIntervalError.value = intervalError
+      return
+    }
+  }
 
   saving.value = true
   try {
+    let notification: string | undefined
+    if (form.notification === 'custom') {
+      notification = String(Math.max(0, customNotifyMinutes.value || 0))
+    } else if (form.notification) {
+      notification = form.notification
+    }
+
     const updates: Partial<Task> = {
       title: form.title.trim() || task.value.title,
       description: form.description.trim() || undefined,
       dueDate: form.dueDate || undefined,
       dueTime: form.dueTime || undefined,
       priority: form.priority,
+      notification,
+      repeat: form.repeat,
+      matrixBlock: form.matrixBlock,
     }
     if (form.durationStart && form.durationEnd) {
       updates.duration = { start: form.durationStart, end: form.durationEnd }
     } else {
       updates.duration = undefined
     }
+    if (form.repeat === 'custom') {
+      updates.repeatCustom = {
+        interval: customRepeat.interval,
+        unit: customRepeat.unit,
+      }
+    } else {
+      updates.repeatCustom = undefined
+      updates.repeatDays = undefined
+    }
     await tasksStore.updateTask(task.value.id, updates)
+    unsavedModal.value = false
     emit('saved')
     emit('close')
   }
@@ -154,9 +389,27 @@ async function saveTask() {
   }
 }
 
-async function deleteTask() {
+async function requestDelete() {
   if (!task.value) return
+  if (tasksStore.isRecurringTask(task.value)) {
+    deleteModal.value = true
+    return
+  }
   await tasksStore.deleteTask(task.value.id)
+  emit('close')
+}
+
+async function deleteOccurrence() {
+  if (!task.value) return
+  deleteModal.value = false
+  await tasksStore.deleteOccurrence(task.value.id)
+  emit('close')
+}
+
+async function deleteSeries() {
+  if (!task.value) return
+  deleteModal.value = false
+  await tasksStore.deleteSeries(task.value.id)
   emit('close')
 }
 
