@@ -40,7 +40,11 @@
             </div>
             <div>
               <label class="mb-1 block text-xs font-semibold text-sber-gray">Конец</label>
-              <TimeFieldRu v-model="form.durationEnd" field-class="py-3" />
+              <TimeFieldRu
+                v-model="form.durationEnd"
+                field-class="py-3"
+                @update:model-value="onDurationEndInput"
+              />
             </div>
           </div>
 
@@ -184,7 +188,7 @@
 <script setup lang="ts">
 import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { priorityColor } from '~/utils/priority-colors'
-import { validateDurationFields, validateRepeatInterval } from '~/utils/time'
+import { defaultDurationEnd, validateDurationFields, validateRepeatInterval } from '~/utils/time'
 import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
 
 const props = defineProps<{ taskId: string }>()
@@ -258,7 +262,12 @@ const isCustomNotification = computed(() => {
   return n !== '' && n !== 'custom' && !PRESET_NOTIFY.has(n)
 })
 
-const { pauseSync, resumeSync } = useTaskTimeSync(form)
+const { pauseSync, resumeSync, markEndEdited, resetEndEdited, adoptLoadedDuration } = useTaskTimeSync(form)
+
+function onDurationEndInput(val: string) {
+  if (!val?.trim()) resetEndEdited()
+  else markEndEdited()
+}
 
 function syncFormFromTask(t: Task | undefined) {
   if (!t) return
@@ -269,6 +278,10 @@ function syncFormFromTask(t: Task | undefined) {
   form.dueTime = t.dueTime || ''
   form.durationStart = t.duration?.start || ''
   form.durationEnd = t.duration?.end || ''
+  if (form.durationStart && !form.durationEnd) {
+    form.durationEnd = defaultDurationEnd(form.durationStart)
+  }
+  adoptLoadedDuration(form.durationStart, form.durationEnd)
   form.priority = t.priority || 'none'
   const notify = t.notification ?? ''
   if (notify && !PRESET_NOTIFY.has(notify)) {

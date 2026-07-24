@@ -15,14 +15,21 @@ export function parseTimeToMinutes(time: string): number {
 }
 
 export function formatMinutesToTime(totalMinutes: number): string {
+  // Never roll into the next day — clamp to 23:59.
   const clamped = Math.max(0, Math.min(23 * 60 + 59, totalMinutes))
   const hours = Math.floor(clamped / 60)
   const minutes = clamped % 60
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
+/** Add minutes to HH:mm; results past 23:59 are clamped to 23:59 (no day rollover). */
 export function addMinutesToTime(time: string, deltaMinutes: number): string {
   return formatMinutesToTime(parseTimeToMinutes(time) + deltaMinutes)
+}
+
+/** Default duration end = start + 1 hour (clamped to 23:59). */
+export function defaultDurationEnd(start: string): string {
+  return addMinutesToTime(start, 60)
 }
 
 export const DURATION_END_AFTER_START_MESSAGE =

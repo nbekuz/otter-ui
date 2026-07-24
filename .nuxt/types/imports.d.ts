@@ -8,6 +8,7 @@ declare global {
   const DESKTOP_APP: typeof import('../../utils/site-info').DESKTOP_APP
   const DURATION_END_AFTER_START_MESSAGE: typeof import('../../utils/time').DURATION_END_AFTER_START_MESSAGE
   const FIREBASE_ID_TOKEN_STORAGE_KEY: typeof import('../../utils/auth-session').FIREBASE_ID_TOKEN_STORAGE_KEY
+  const OTTER_TASKS_EXPORT_VERSION: typeof import('../../utils/task-export').OTTER_TASKS_EXPORT_VERSION
   const PASSWORD_MAX_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MAX_LENGTH
   const PASSWORD_MIN_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MIN_LENGTH
   const PREMIUM_LANDING: typeof import('../../utils/site-info').PREMIUM_LANDING
@@ -35,7 +36,10 @@ declare global {
   const assignTimelineOverlapLayout: typeof import('../../utils/overlap-layout').assignTimelineOverlapLayout
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
+  const buildMonthCells: typeof import('../../utils/calendar-grid').buildMonthCells
   const buildNavOrderMap: typeof import('../../utils/nav-items').buildNavOrderMap
+  const buildYearMonthCells: typeof import('../../utils/calendar-grid').buildYearMonthCells
+  const buildYearMonths: typeof import('../../utils/calendar-grid').buildYearMonths
   const callOnce: typeof import('../../node_modules/nuxt/dist/app/composables/once').callOnce
   const cancelIdleCallback: typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback').cancelIdleCallback
   const clearAuthSession: typeof import('../../utils/auth-session').clearAuthSession
@@ -64,6 +68,7 @@ declare global {
   const dataUrlToFile: typeof import('../../utils/task-mapper').dataUrlToFile
   const debouncedRef: typeof import('@vueuse/core').debouncedRef
   const debouncedWatch: typeof import('@vueuse/core').debouncedWatch
+  const defaultDurationEnd: typeof import('../../utils/time').defaultDurationEnd
   const defineAppConfig: typeof import('../../node_modules/nuxt/dist/app/nuxt').defineAppConfig
   const defineAsyncComponent: typeof import('vue').defineAsyncComponent
   const defineComponent: typeof import('vue').defineComponent
@@ -77,6 +82,7 @@ declare global {
   const definePayloadReducer: typeof import('../../node_modules/nuxt/dist/app/composables/payload').definePayloadReducer
   const definePayloadReviver: typeof import('../../node_modules/nuxt/dist/app/composables/payload').definePayloadReviver
   const defineStore: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').defineStore
+  const downloadTasksExportJson: typeof import('../../utils/task-export').downloadTasksExportJson
   const eagerComputed: typeof import('@vueuse/core').eagerComputed
   const effect: typeof import('vue').effect
   const effectScope: typeof import('vue').effectScope
@@ -104,6 +110,7 @@ declare global {
   const injectHead: typeof import('../../node_modules/nuxt/dist/app/composables/head').injectHead
   const injectLocal: typeof import('@vueuse/core').injectLocal
   const intervalsOverlapHalfOpen: typeof import('../../utils/overlap-layout').intervalsOverlapHalfOpen
+  const isDefaultDurationEnd: typeof import('../../composables/useTaskTimeSync').isDefaultDurationEnd
   const isDefined: typeof import('@vueuse/core').isDefined
   const isNavItemActive: typeof import('../../utils/nav-items').isNavItemActive
   const isNuxtError: typeof import('../../node_modules/nuxt/dist/app/composables/error').isNuxtError
@@ -150,6 +157,7 @@ declare global {
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
   const orderNavItems: typeof import('../../utils/nav-items').orderNavItems
   const parseApiWallClock: typeof import('../../utils/time').parseApiWallClock
+  const parseTasksExport: typeof import('../../utils/task-export').parseTasksExport
   const parseTimeToMinutes: typeof import('../../utils/time').parseTimeToMinutes
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
   const pauseBackgroundAudio: typeof import('../../utils/pomodoro-audio').pauseBackgroundAudio
@@ -180,6 +188,7 @@ declare global {
   const refWithControl: typeof import('@vueuse/core').refWithControl
   const refreshCookie: typeof import('../../node_modules/nuxt/dist/app/composables/cookie').refreshCookie
   const refreshNuxtData: typeof import('../../node_modules/nuxt/dist/app/composables/asyncData').refreshNuxtData
+  const registerWebFcmDevice: typeof import('../../utils/fcm-devices').registerWebFcmDevice
   const reloadNuxtApp: typeof import('../../node_modules/nuxt/dist/app/composables/chunk').reloadNuxtApp
   const requestIdleCallback: typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback').requestIdleCallback
   const resolveActiveNavId: typeof import('../../utils/nav-items').resolveActiveNavId
@@ -203,6 +212,7 @@ declare global {
   const syncRef: typeof import('@vueuse/core').syncRef
   const syncRefs: typeof import('@vueuse/core').syncRefs
   const taskOccursOnDate: typeof import('../../utils/recurrence').taskOccursOnDate
+  const tasksToExportPayload: typeof import('../../utils/task-export').tasksToExportPayload
   const templateRef: typeof import('@vueuse/core').templateRef
   const throttledRef: typeof import('@vueuse/core').throttledRef
   const throttledWatch: typeof import('@vueuse/core').throttledWatch
@@ -223,6 +233,7 @@ declare global {
   const uiTaskToFormData: typeof import('../../utils/task-mapper').uiTaskToFormData
   const unref: typeof import('vue').unref
   const unrefElement: typeof import('@vueuse/core').unrefElement
+  const unregisterWebFcmDevice: typeof import('../../utils/fcm-devices').unregisterWebFcmDevice
   const until: typeof import('@vueuse/core').until
   const updateAppConfig: typeof import('../../node_modules/nuxt/dist/app/config').updateAppConfig
   const useActiveElement: typeof import('@vueuse/core').useActiveElement
@@ -331,6 +342,7 @@ declare global {
   const useMutationObserver: typeof import('@vueuse/core').useMutationObserver
   const useNavigatorLanguage: typeof import('@vueuse/core').useNavigatorLanguage
   const useNetwork: typeof import('@vueuse/core').useNetwork
+  const useNotificationsStore: typeof import('../../stores/notifications').useNotificationsStore
   const useNow: typeof import('@vueuse/core').useNow
   const useNuxtApp: typeof import('../../node_modules/nuxt/dist/app/nuxt').useNuxtApp
   const useNuxtData: typeof import('../../node_modules/nuxt/dist/app/composables/asyncData').useNuxtData
@@ -458,6 +470,7 @@ declare global {
   const useWindowScroll: typeof import('@vueuse/core').useWindowScroll
   const useWindowSize: typeof import('@vueuse/core').useWindowSize
   const validateDurationFields: typeof import('../../utils/time').validateDurationFields
+  const validateEmail: typeof import('../../utils/email-policy').validateEmail
   const validateNewPassword: typeof import('../../utils/password-policy').validateNewPassword
   const validateRepeatInterval: typeof import('../../utils/time').validateRepeatInterval
   const watch: typeof import('vue').watch
@@ -496,11 +509,17 @@ declare global {
   export type { AuthTokens } from '../../utils/auth-session'
   import('../../utils/auth-session')
   // @ts-ignore
+  export type { CalendarMonthCell, CalendarYearDayCell, CalendarYearMonth } from '../../utils/calendar-grid'
+  import('../../utils/calendar-grid')
+  // @ts-ignore
   export type { LegalSlug, StaticLegalDocument } from '../../utils/legal-static'
   import('../../utils/legal-static')
   // @ts-ignore
   export type { AppNavItemId, AppNavItem } from '../../utils/nav-items'
   import('../../utils/nav-items')
+  // @ts-ignore
+  export type { OtterTasksExportPayload, OtterExportedTask } from '../../utils/task-export'
+  import('../../utils/task-export')
   // @ts-ignore
   export type { CalendarViewType } from '../../stores/calendar'
   import('../../stores/calendar')
@@ -519,6 +538,7 @@ declare module 'vue' {
     readonly DESKTOP_APP: UnwrapRef<typeof import('../../utils/site-info')['DESKTOP_APP']>
     readonly DURATION_END_AFTER_START_MESSAGE: UnwrapRef<typeof import('../../utils/time')['DURATION_END_AFTER_START_MESSAGE']>
     readonly FIREBASE_ID_TOKEN_STORAGE_KEY: UnwrapRef<typeof import('../../utils/auth-session')['FIREBASE_ID_TOKEN_STORAGE_KEY']>
+    readonly OTTER_TASKS_EXPORT_VERSION: UnwrapRef<typeof import('../../utils/task-export')['OTTER_TASKS_EXPORT_VERSION']>
     readonly PASSWORD_MAX_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MAX_LENGTH']>
     readonly PASSWORD_MIN_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MIN_LENGTH']>
     readonly PREMIUM_LANDING: UnwrapRef<typeof import('../../utils/site-info')['PREMIUM_LANDING']>
@@ -546,7 +566,10 @@ declare module 'vue' {
     readonly assignTimelineOverlapLayout: UnwrapRef<typeof import('../../utils/overlap-layout')['assignTimelineOverlapLayout']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
+    readonly buildMonthCells: UnwrapRef<typeof import('../../utils/calendar-grid')['buildMonthCells']>
     readonly buildNavOrderMap: UnwrapRef<typeof import('../../utils/nav-items')['buildNavOrderMap']>
+    readonly buildYearMonthCells: UnwrapRef<typeof import('../../utils/calendar-grid')['buildYearMonthCells']>
+    readonly buildYearMonths: UnwrapRef<typeof import('../../utils/calendar-grid')['buildYearMonths']>
     readonly callOnce: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/once')['callOnce']>
     readonly cancelIdleCallback: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback')['cancelIdleCallback']>
     readonly clearAuthSession: UnwrapRef<typeof import('../../utils/auth-session')['clearAuthSession']>
@@ -575,6 +598,7 @@ declare module 'vue' {
     readonly dataUrlToFile: UnwrapRef<typeof import('../../utils/task-mapper')['dataUrlToFile']>
     readonly debouncedRef: UnwrapRef<typeof import('@vueuse/core')['debouncedRef']>
     readonly debouncedWatch: UnwrapRef<typeof import('@vueuse/core')['debouncedWatch']>
+    readonly defaultDurationEnd: UnwrapRef<typeof import('../../utils/time')['defaultDurationEnd']>
     readonly defineAppConfig: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/nuxt')['defineAppConfig']>
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
@@ -588,6 +612,7 @@ declare module 'vue' {
     readonly definePayloadReducer: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['definePayloadReducer']>
     readonly definePayloadReviver: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['definePayloadReviver']>
     readonly defineStore: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['defineStore']>
+    readonly downloadTasksExportJson: UnwrapRef<typeof import('../../utils/task-export')['downloadTasksExportJson']>
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effect: UnwrapRef<typeof import('vue')['effect']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
@@ -615,6 +640,7 @@ declare module 'vue' {
     readonly injectHead: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/head')['injectHead']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
     readonly intervalsOverlapHalfOpen: UnwrapRef<typeof import('../../utils/overlap-layout')['intervalsOverlapHalfOpen']>
+    readonly isDefaultDurationEnd: UnwrapRef<typeof import('../../composables/useTaskTimeSync')['isDefaultDurationEnd']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isNavItemActive: UnwrapRef<typeof import('../../utils/nav-items')['isNavItemActive']>
     readonly isNuxtError: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/error')['isNuxtError']>
@@ -661,6 +687,7 @@ declare module 'vue' {
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
     readonly orderNavItems: UnwrapRef<typeof import('../../utils/nav-items')['orderNavItems']>
     readonly parseApiWallClock: UnwrapRef<typeof import('../../utils/time')['parseApiWallClock']>
+    readonly parseTasksExport: UnwrapRef<typeof import('../../utils/task-export')['parseTasksExport']>
     readonly parseTimeToMinutes: UnwrapRef<typeof import('../../utils/time')['parseTimeToMinutes']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
     readonly pauseBackgroundAudio: UnwrapRef<typeof import('../../utils/pomodoro-audio')['pauseBackgroundAudio']>
@@ -691,6 +718,7 @@ declare module 'vue' {
     readonly refWithControl: UnwrapRef<typeof import('@vueuse/core')['refWithControl']>
     readonly refreshCookie: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/cookie')['refreshCookie']>
     readonly refreshNuxtData: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/asyncData')['refreshNuxtData']>
+    readonly registerWebFcmDevice: UnwrapRef<typeof import('../../utils/fcm-devices')['registerWebFcmDevice']>
     readonly reloadNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/chunk')['reloadNuxtApp']>
     readonly requestIdleCallback: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback')['requestIdleCallback']>
     readonly resolveActiveNavId: UnwrapRef<typeof import('../../utils/nav-items')['resolveActiveNavId']>
@@ -714,6 +742,7 @@ declare module 'vue' {
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
     readonly taskOccursOnDate: UnwrapRef<typeof import('../../utils/recurrence')['taskOccursOnDate']>
+    readonly tasksToExportPayload: UnwrapRef<typeof import('../../utils/task-export')['tasksToExportPayload']>
     readonly templateRef: UnwrapRef<typeof import('@vueuse/core')['templateRef']>
     readonly throttledRef: UnwrapRef<typeof import('@vueuse/core')['throttledRef']>
     readonly throttledWatch: UnwrapRef<typeof import('@vueuse/core')['throttledWatch']>
@@ -734,6 +763,7 @@ declare module 'vue' {
     readonly uiTaskToFormData: UnwrapRef<typeof import('../../utils/task-mapper')['uiTaskToFormData']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly unrefElement: UnwrapRef<typeof import('@vueuse/core')['unrefElement']>
+    readonly unregisterWebFcmDevice: UnwrapRef<typeof import('../../utils/fcm-devices')['unregisterWebFcmDevice']>
     readonly until: UnwrapRef<typeof import('@vueuse/core')['until']>
     readonly updateAppConfig: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/config')['updateAppConfig']>
     readonly useActiveElement: UnwrapRef<typeof import('@vueuse/core')['useActiveElement']>
@@ -842,6 +872,7 @@ declare module 'vue' {
     readonly useMutationObserver: UnwrapRef<typeof import('@vueuse/core')['useMutationObserver']>
     readonly useNavigatorLanguage: UnwrapRef<typeof import('@vueuse/core')['useNavigatorLanguage']>
     readonly useNetwork: UnwrapRef<typeof import('@vueuse/core')['useNetwork']>
+    readonly useNotificationsStore: UnwrapRef<typeof import('../../stores/notifications')['useNotificationsStore']>
     readonly useNow: UnwrapRef<typeof import('@vueuse/core')['useNow']>
     readonly useNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/nuxt')['useNuxtApp']>
     readonly useNuxtData: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/asyncData')['useNuxtData']>
@@ -969,6 +1000,7 @@ declare module 'vue' {
     readonly useWindowScroll: UnwrapRef<typeof import('@vueuse/core')['useWindowScroll']>
     readonly useWindowSize: UnwrapRef<typeof import('@vueuse/core')['useWindowSize']>
     readonly validateDurationFields: UnwrapRef<typeof import('../../utils/time')['validateDurationFields']>
+    readonly validateEmail: UnwrapRef<typeof import('../../utils/email-policy')['validateEmail']>
     readonly validateNewPassword: UnwrapRef<typeof import('../../utils/password-policy')['validateNewPassword']>
     readonly validateRepeatInterval: UnwrapRef<typeof import('../../utils/time')['validateRepeatInterval']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>

@@ -1,7 +1,10 @@
 import dayjs from 'dayjs'
 import { BRAND_NAME } from '~/utils/site-info'
+import { apiGet, apiPost } from '~/utils/api'
+import { getAccessToken } from '~/utils/auth-session'
 
 const firedKeys = new Set<string>()
+const ackedDueIds = new Set<string>()
 
 function taskReminderKey(taskId: string, dueAt: string) {
   return `${taskId}:${dueAt}`
@@ -22,6 +25,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   const tasksStore = useTasksStore()
   const settingsStore = useSettingsStore()
+  const authStore = useAuthStore()
 
   async function ensurePermission() {
     if (!('Notification' in window)) return false
@@ -40,6 +44,27 @@ export default defineNuxtPlugin((nuxtApp) => {
     return Array.from(byId.values())
   }
 
+  function showBrowserNotification(title: string, body: string, tag: string, taskId?: string) {
+    try {
+      const n = new Notification(title, {
+        body,
+        icon: '/favicon.ico',
+        tag,
+        silent: true,
+      })
+      void useSoundsStore().playFeedbackSound('notification')
+      if (taskId) {
+        n.onclick = () => {
+          window.focus()
+          void navigateTo({ path: '/app/new-task', query: { id: taskId, returnTo: '/app' } })
+        }
+      }
+    }
+    catch {
+      /* ignore */
+    }
+  }
+
   function checkDueNotifications() {
     if (!settingsStore.appSettings.notifications) return
     if (!('Notification' in window) || Notification.permission !== 'granted') return
@@ -55,32 +80,77 @@ export default defineNuxtPlugin((nuxtApp) => {
       const dueKey = taskReminderKey(task.id, notifyAt.format())
       if (firedKeys.has(dueKey)) continue
 
-      // Fire within a 5-minute window after the reminder time
       if (now.isBefore(notifyAt) || now.diff(notifyAt, 'minute') > 5) continue
 
       firedKeys.add(dueKey)
-      try {
-        new Notification(`${BRAND_NAME} — напоминание`, {
-          body: task.title,
-          icon: '/favicon.ico',
-          tag: dueKey,
-        })
+      showBrowserNotification(`${BRAND_NAME} — напоминание`, task.title, dueKey, task.id)
+    }
+  }
+
+  async function pollServerDueReminders() {
+    if (!getAccessToken()) return
+    if (!settingsStore.appSettings.notifications) return
+    if (!('Notification' in window) || Notification.permission !== 'granted') return
+
+    try {
+      const due = await apiGet<Array<{ id?: number; task_id?: number; title?: string; task?: number }>>('reminders/due/')
+      for (const item of due || []) {
+        const taskId = String(item.task_id ?? item.task ?? item.id ?? '')
+        if (!taskId || ackedDueIds.has(taskId)) continue
+        ackedDueIds.add(taskId)
+        showBrowserNotification(
+          `${BRAND_NAME} — напоминание`,
+          item.title || 'Напоминание о задаче',
+          `due-${taskId}`,
+          taskId,
+        )
+        try {
+          await apiPost(`reminders/${taskId}/ack/`, {})
+        }
+        catch {
+          /* ignore */
+        }
       }
-      catch {
-        /* ignore */
-      }
+    }
+    catch {
+      /* polling is a fallback */
+    }
+  }
+
+  async function syncPushIfLoggedIn() {
+    if (!authStore.isLoggedIn) return
+    try {
+      const { getFirebaseApp } = await import('~/lib/firebase')
+      const { registerWebFcmDevice } = await import('~/utils/fcm-devices')
+      const runtime = useRuntimeConfig()
+      const fb = runtime.public.firebase as { vapidKey?: string } & Record<string, string>
+      const app = getFirebaseApp(fb as never)
+      await registerWebFcmDevice(app, fb.vapidKey)
+    }
+    catch {
+      /* optional */
     }
   }
 
   void ensurePermission()
+  void syncPushIfLoggedIn()
+  void useSoundsStore().ensureFeedbackLoaded().catch(() => undefined)
 
-  const timer = window.setInterval(checkDueNotifications, 15_000)
+  const localTimer = window.setInterval(checkDueNotifications, 15_000)
+  const dueTimer = window.setInterval(() => { void pollServerDueReminders() }, 45_000)
   watch(() => tasksStore.tasks.length, checkDueNotifications)
   watch(() => settingsStore.appSettings.notifications, (enabled) => {
     if (enabled) void ensurePermission().then(() => checkDueNotifications())
   })
+  watch(() => authStore.isLoggedIn, (loggedIn) => {
+    if (loggedIn) {
+      void syncPushIfLoggedIn()
+      void pollServerDueReminders()
+    }
+  })
 
   nuxtApp.hook('app:unmounted', () => {
-    window.clearInterval(timer)
+    window.clearInterval(localTimer)
+    window.clearInterval(dueTimer)
   })
 })

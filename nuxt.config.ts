@@ -74,6 +74,9 @@ export default defineNuxtConfig({
         messagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '911773858551',
         appId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || '1:911773858551:web:dd939daa464da5af74f1f2',
         measurementId: process.env.NUXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-D48K735BKD',
+        /** Web Push VAPID (Firebase Console → Project settings → Cloud Messaging) */
+        vapidKey: process.env.NUXT_PUBLIC_FIREBASE_VAPID_KEY
+          || 'BBUplNc_uDIgZqfd7xE07f1lsniR9-CNoEwUVxx78dNQkp5UunpNpbBnN1AyY7D9oC35hhPwRZU0zt-tw-jxbvw',
       },
     },
   },

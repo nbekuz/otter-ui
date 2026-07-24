@@ -57,6 +57,26 @@ function apiToAppSettings(data: ApiAppSettings): AppSettings {
       ? normalizeBottomNavItems([...data.bottom_tabs])
       : [...defaultAppSettings.bottomNavItems],
     timezone: data.timezone || undefined,
+    calendarDefaultView: defaultAppSettings.calendarDefaultView,
+    calendarCollapseEarlyHours: defaultAppSettings.calendarCollapseEarlyHours,
+    calendarCollapseLateHours: defaultAppSettings.calendarCollapseLateHours,
+  }
+}
+
+/** Fields that live only in localStorage (not PATCH'd to API). */
+function preserveLocalSettings(prev: AppSettings, next: AppSettings): AppSettings {
+  return {
+    ...next,
+    theme: prev.theme || next.theme,
+    notifications: prev.notifications,
+    calendarDefaultView: prev.calendarDefaultView ?? next.calendarDefaultView
+      ?? defaultAppSettings.calendarDefaultView,
+    calendarCollapseEarlyHours: prev.calendarCollapseEarlyHours
+      ?? next.calendarCollapseEarlyHours
+      ?? defaultAppSettings.calendarCollapseEarlyHours,
+    calendarCollapseLateHours: prev.calendarCollapseLateHours
+      ?? next.calendarCollapseLateHours
+      ?? defaultAppSettings.calendarCollapseLateHours,
   }
 }
 
@@ -92,13 +112,17 @@ function apiMatrixToBlocks(settings: ApiMatrixSetting[]) {
       .replace('not_urgent_not_important', 'not-urgent-not-important') as keyof typeof blocks
 
     if (!blocks[uiId]) continue
+    const fromArray = Array.isArray(item.date_filters)
+      ? item.date_filters.map(s => String(s).trim()).filter(Boolean)
+      : null
+    const fromString = item.date_filter == null
+      ? null
+      : item.date_filter.split(',').map(s => s.trim()).filter(Boolean)
+
     blocks[uiId] = {
       ...blocks[uiId],
       title: item.title || blocks[uiId].title,
-      // Empty date_filter / allowed_priorities means "any" — do not fall back to defaults.
-      dateFilter: item.date_filter == null
-        ? blocks[uiId].dateFilter
-        : item.date_filter.split(',').map(s => s.trim()).filter(Boolean),
+      dateFilter: fromArray ?? fromString ?? blocks[uiId].dateFilter,
       priorityFilter: item.allowed_priorities == null
         ? blocks[uiId].priorityFilter
         : item.allowed_priorities.map(p => (p === 'critical' ? 'high' : p)),
@@ -136,11 +160,13 @@ export const useSettingsStore = defineStore('settings', () => {
   const legalDocumentsLoading = ref(false)
   const legalDocumentsError = ref('')
 
-  async function fetchHelpFaq() {
+  async function fetchHelpFaq(search?: string) {
     helpFaqLoading.value = true
     helpFaqError.value = ''
     try {
-      const items = await apiGet<ApiHelpItem[]>('help/')
+      const items = await apiGet<ApiHelpItem[]>('help/', {
+        params: search?.trim() ? { search: search.trim() } : undefined,
+      })
       if (items.length) {
         helpFaq.value = items.map((item, index) => ({
           id: `faq-${index}`,
@@ -150,13 +176,12 @@ export const useSettingsStore = defineStore('settings', () => {
         }))
       }
       else {
-        helpFaq.value = localFaqFallback()
+        helpFaq.value = search?.trim() ? [] : localFaqFallback()
       }
     }
     catch (err) {
-      helpFaq.value = localFaqFallback()
+      helpFaq.value = search?.trim() ? [] : localFaqFallback()
       helpFaqError.value = ''
-      // Keep local FAQ visible; only surface error if fallback is empty
       if (!helpFaq.value.length) {
         helpFaqError.value = getApiErrorMessage(err, 'Не удалось загрузить FAQ')
         throw err
@@ -224,10 +249,13 @@ export const useSettingsStore = defineStore('settings', () => {
         apiGet<ApiAppSettings>('settings/'),
         apiGet<ApiMatrixSetting[]>('matrix/settings/'),
       ])
-      appSettings.value = {
-        ...appSettings.value,
-        ...apiToAppSettings(settings),
-      }
+      appSettings.value = preserveLocalSettings(
+        appSettings.value,
+        {
+          ...appSettings.value,
+          ...apiToAppSettings(settings),
+        },
+      )
       matrixBlocks.value = apiMatrixToBlocks(matrixSettings)
       isPremium.value = settings.is_premium
       premiumActivatedAt.value = settings.premium_until
@@ -240,11 +268,14 @@ export const useSettingsStore = defineStore('settings', () => {
         if (tz && settings.timezone !== tz) {
           try {
             const patched = await apiPatch<ApiAppSettings>('settings/', { timezone: tz })
-            appSettings.value = {
-              ...appSettings.value,
-              ...apiToAppSettings(patched),
-              timezone: tz,
-            }
+            appSettings.value = preserveLocalSettings(
+              appSettings.value,
+              {
+                ...appSettings.value,
+                ...apiToAppSettings(patched),
+                timezone: tz,
+              },
+            )
           }
           catch {
             // Non-fatal: local UI still works without timezone sync.
@@ -275,10 +306,10 @@ export const useSettingsStore = defineStore('settings', () => {
     if (updates.bottomNavItems !== undefined) {
       fromApi.bottomNavItems = next.bottomNavItems
     }
-    appSettings.value = {
+    appSettings.value = preserveLocalSettings(next, {
       ...next,
       ...fromApi,
-    }
+    })
     isPremium.value = updated.is_premium
     premiumActivatedAt.value = updated.premium_activated_at
     syncPremiumToAuth(updated)
@@ -305,17 +336,16 @@ export const useSettingsStore = defineStore('settings', () => {
     Object.assign(block, updates)
 
     const apiBlock = blockId.replace(/-/g, '_')
+    const dateFilters = updates.dateFilter !== undefined
+      ? (Array.isArray(updates.dateFilter) ? updates.dateFilter : [String(updates.dateFilter || '')].filter(Boolean))
+      : (block.dateFilter || [])
     await apiPatch<ApiMatrixSetting>('matrix/settings/', {
       block: apiBlock,
       title: updates.title ?? block.title,
       allowed_priorities: updates.priorityFilter !== undefined
         ? updates.priorityFilter
         : block.priorityFilter,
-      date_filter: updates.dateFilter !== undefined
-        ? (Array.isArray(updates.dateFilter)
-            ? updates.dateFilter.join(',')
-            : String(updates.dateFilter || ''))
-        : (block.dateFilter?.join(',') ?? ''),
+      date_filters: dateFilters,
     })
   }
 

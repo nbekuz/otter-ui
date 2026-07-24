@@ -37,7 +37,7 @@
 
       <div class="min-h-dvh bg-white lg:min-h-0">
         <div class="page-header-top flex items-center px-4 pb-4 sm:px-6 lg:px-8 lg:pt-8">
-          <button class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light" type="button" @click="$router.back()">
+          <button class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light" type="button" @click="navigateTo('/')">
             <ChevronLeft class="h-5 w-5 text-sber-black" />
           </button>
           <h1 class="ml-3 text-xl font-bold text-sber-black">Войти</h1>
@@ -271,6 +271,7 @@ import { ChevronLeft, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-vue-ne
 import { BRAND_NAME } from '~/utils/site-info'
 import logoUrl from '~/assets/img/logo.svg'
 import { validateNewPassword } from '~/utils/password-policy'
+import { validateEmail } from '~/utils/email-policy'
 import { clearRememberedLogin, readRememberedLogin, writeRememberedLogin } from '~/utils/auth-session'
 
 const authStore = useAuthStore()
@@ -365,13 +366,12 @@ function validate() {
   errors.email = ''
   errors.password = ''
 
-  if (!form.email.trim() || !form.email.includes('@')) {
-    errors.email = 'Введите корректный email'
-  }
+  const emailRule = validateEmail(form.email)
+  if (emailRule)
+    errors.email = emailRule
 
-  if (!form.password.trim()) {
+  if (!form.password.trim())
     errors.password = 'Введите пароль'
-  }
 
   return !errors.email && !errors.password
 }
@@ -399,7 +399,12 @@ async function handleLogin() {
       clearRememberedLogin()
   }
   catch (err: any) {
-    errors.password = normalizeErrorDetail(err?.response?.data?.detail, "Login xatoligi. Qayta urinib ko'ring.")
+    const msg = normalizeErrorDetail(
+      err?.response?.data?.detail,
+      'Неверный email или пароль',
+    )
+    errors.email = msg
+    errors.password = msg
   }
 }
 

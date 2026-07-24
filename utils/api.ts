@@ -127,7 +127,13 @@ export function getApiErrorMessage(error: unknown, fallback = 'Ошибка за
   const err = error as { response?: { data?: Record<string, unknown> }; message?: string }
   const data = err?.response?.data
   if (!data) return err?.message || fallback
-  if (typeof data.detail === 'string') return data.detail
+  if (typeof data.detail === 'string' && data.detail.trim())
+    return data.detail
+  if (Array.isArray(data.detail)) {
+    const parts = data.detail.filter((item): item is string => typeof item === 'string')
+    if (parts.length)
+      return parts.join(' ')
+  }
   const firstKey = Object.keys(data)[0]
   const firstVal = firstKey ? data[firstKey] : null
   if (Array.isArray(firstVal) && typeof firstVal[0] === 'string') return firstVal[0]

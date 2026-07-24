@@ -4,6 +4,7 @@
     <button
       class="task-group-header w-full shadow-sm mb-0"
       :class="isOpen ? 'rounded-b-none rounded-t-2xl shadow-none border-b border-sber-gray-light' : 'rounded-2xl'"
+      :style="headerStyle"
       @click="toggle"
     >
       <div class="flex items-center gap-3">
@@ -49,17 +50,27 @@ import { ChevronDown } from 'lucide-vue-next'
 import type { Task } from '~/data/mockData'
 import type { Component } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   title: string
   tasks: Task[]
   color: string
   icon: Component
+  /** Soft pastel header tint (light theme); omit to keep default white */
+  surface?: string
 }>()
 
 defineEmits<{ openTask: [id: string], deleteTask: [id: string] }>()
 
 const tasksStore = useTasksStore()
+const settingsStore = useSettingsStore()
 const isOpen = ref(false)
+const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
+
+const headerStyle = computed(() => {
+  if (isDarkTheme.value || !props.surface)
+    return undefined
+  return { backgroundColor: props.surface }
+})
 
 function toggle() {
   isOpen.value = !isOpen.value

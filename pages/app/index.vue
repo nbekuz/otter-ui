@@ -112,6 +112,7 @@
           :title="group.title"
           :tasks="group.tasks"
           :color="group.color"
+          :surface="group.surface"
           :icon="group.icon"
           @open-task="openTask"
           @delete-task="requestDeleteTask"
@@ -243,7 +244,7 @@
                   <TimeFieldRu
                     v-model="editorForm.durationEnd"
                     field-class="py-3"
-                    @update:model-value="desktopEditorError = ''"
+                    @update:model-value="onEditorDurationEndInput"
                   />
                 </div>
               </div>
@@ -492,7 +493,7 @@ import { Search, X, AlertCircle, Sun, Sunset, Moon, Star, Clock, CheckCircle2, C
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
-import { validateDurationFields, validateRepeatInterval } from '~/utils/time'
+import { defaultDurationEnd, validateDurationFields, validateRepeatInterval } from '~/utils/time'
 import { priorityColor } from '~/utils/priority-colors'
 import { resolveMediaUrl } from '~/utils/media'
 
@@ -585,6 +586,7 @@ const allGroups = computed(() => [
     title: 'Просрочено',
     tasks: tasksStore.overdueTasks,
     color: '#FF3B30',
+    surface: '#FDEAEA',
     icon: AlertCircle,
   },
   {
@@ -592,6 +594,7 @@ const allGroups = computed(() => [
     title: 'Сегодня',
     tasks: tasksStore.todayTasks,
     color: '#FF9500',
+    surface: '#FFF7E0',
     icon: Sun,
   },
   {
@@ -599,6 +602,7 @@ const allGroups = computed(() => [
     title: 'Завтра',
     tasks: tasksStore.tomorrowTasks,
     color: '#007AFF',
+    surface: '#EEF4FF',
     icon: Sunset,
   },
   {
@@ -606,6 +610,7 @@ const allGroups = computed(() => [
     title: 'Позже',
     tasks: tasksStore.laterTasks,
     color: '#AF52DE',
+    surface: '#F6EEFF',
     icon: Calendar,
   },
   {
@@ -613,6 +618,7 @@ const allGroups = computed(() => [
     title: 'Без срока',
     tasks: tasksStore.noDateTasks,
     color: '#8E8E93',
+    surface: '#FFF8E6',
     icon: Clock,
   },
   {
@@ -620,6 +626,7 @@ const allGroups = computed(() => [
     title: 'Выполнено',
     tasks: tasksStore.completedTasks,
     color: '#21A038',
+    surface: '#ECF8EF',
     icon: CheckCircle2,
   },
 ])
@@ -705,7 +712,13 @@ const desktopCustomRepeat = reactive({
   monthDay: dayjs().date(),
 })
 
-const { pauseSync: pauseEditorTimeSync, resumeSync: resumeEditorTimeSync } = useTaskTimeSync(editorForm)
+const {
+  pauseSync: pauseEditorTimeSync,
+  resumeSync: resumeEditorTimeSync,
+  markEndEdited: markEditorEndEdited,
+  resetEndEdited: resetEditorEndEdited,
+  adoptLoadedDuration: adoptEditorLoadedDuration,
+} = useTaskTimeSync(editorForm)
 
 const editorSnapshot = ref('')
 const unsavedModal = ref(false)
@@ -834,6 +847,9 @@ function findDesktopGroupIdForTask(taskId: string): string | null {
 }
 
 function resolveTaskGroupId(task: Task): string {
+  if (task.listKey) {
+    return task.listKey === 'no_deadline' ? 'nodate' : task.listKey
+  }
   if (task.completed) return 'completed'
   const d = task.dueDate ? dayjs(task.dueDate).format('YYYY-MM-DD') : ''
   if (!d) return 'nodate'
@@ -870,6 +886,10 @@ function syncEditorForm(task: Task | null) {
   editorForm.dueTime = task?.dueTime || ''
   editorForm.durationStart = task?.duration?.start || ''
   editorForm.durationEnd = task?.duration?.end || ''
+  if (editorForm.durationStart && !editorForm.durationEnd) {
+    editorForm.durationEnd = defaultDurationEnd(editorForm.durationStart)
+  }
+  adoptEditorLoadedDuration(editorForm.durationStart, editorForm.durationEnd)
   editorForm.priority = task?.priority || 'none'
   const notify = task?.notification || ''
   if (notify && !PRESET_NOTIFY.has(notify)) {
@@ -1159,7 +1179,14 @@ watch(() => editorForm.dueDate, (newDate) => {
   editorForm.dueTime = ''
   editorForm.durationStart = ''
   editorForm.durationEnd = ''
+  resetEditorEndEdited()
 })
+
+function onEditorDurationEndInput(val: string) {
+  desktopEditorError.value = ''
+  if (!val?.trim()) resetEditorEndEdited()
+  else markEditorEndEdited()
+}
 
 watch(activeDesktopTasks, (tasks) => {
   if (!desktopSelectedTaskId.value) return

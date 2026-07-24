@@ -34,6 +34,8 @@ import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
       appId: string,
 
       measurementId: string,
+
+      vapidKey: string,
    },
   }
 declare module '@nuxt/schema' {

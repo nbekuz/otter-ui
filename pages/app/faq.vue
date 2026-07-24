@@ -95,6 +95,7 @@ definePageMeta({ layout: 'app' })
 const settingsStore = useSettingsStore()
 const authStore = useAuthStore()
 const faqSearch = ref('')
+let faqSearchTimer: ReturnType<typeof setTimeout> | null = null
 
 function goContact() {
   if (authStore.isLoggedIn) {
@@ -107,19 +108,18 @@ function goContact() {
 
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
-const filteredFaq = computed(() => {
-  const items = settingsStore.helpFaq
-  if (!faqSearch.value.trim()) return items
-  const q = faqSearch.value.trim().toLowerCase()
-  return items.filter(f =>
-    f.question.toLowerCase().includes(q)
-    || f.answer.toLowerCase().includes(q),
-  )
-})
+const filteredFaq = computed(() => settingsStore.helpFaq)
 
-async function loadHelpFaq() {
-  await settingsStore.fetchHelpFaq()
+async function loadHelpFaq(search?: string) {
+  await settingsStore.fetchHelpFaq(search)
 }
+
+watch(faqSearch, (q) => {
+  if (faqSearchTimer) clearTimeout(faqSearchTimer)
+  faqSearchTimer = setTimeout(() => {
+    void loadHelpFaq(q)
+  }, 300)
+})
 
 onMounted(() => {
   if (!settingsStore.helpFaq.length && !settingsStore.helpFaqLoading) {

@@ -127,6 +127,8 @@ export function apiTaskToUi(task: ApiTask): Task {
   const hasCustomInterval = task.repeat_unit !== 'none' && task.repeat_interval > 1
   const customUnit: 'week' | 'month' =
     task.repeat_unit === 'month' ? 'month' : 'week'
+  const firstAttachment = task.attachments?.[0]
+  const imageUrl = task.image_url || task.image || firstAttachment?.file_url || undefined
 
   return {
     id: String(task.id),
@@ -149,12 +151,21 @@ export function apiTaskToUi(task: ApiTask): Task {
     repeatCustom: hasCustomInterval
       ? { interval: task.repeat_interval, unit: customUnit }
       : undefined,
-    imageUrl: task.image || undefined,
-    attachment: task.image
+    imageUrl,
+    isAllDay: Boolean(task.is_all_day),
+    listKey: task.list_key ? groupKeyToUi(task.list_key) as Task['listKey'] : undefined,
+    attachments: (task.attachments || []).map(a => ({
+      id: a.id,
+      fileUrl: a.file_url,
+      originalName: a.original_name,
+      contentType: a.content_type,
+      size: a.size,
+    })),
+    attachment: imageUrl
       ? {
-          name: 'attachment',
-          mimeType: 'image/*',
-          dataUrl: task.image,
+          name: firstAttachment?.original_name || 'attachment',
+          mimeType: firstAttachment?.content_type || 'image/*',
+          dataUrl: imageUrl,
         }
       : undefined,
     matrixBlock: MATRIX_TO_UI[task.matrix_block],

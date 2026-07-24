@@ -118,23 +118,104 @@
         </div>
 
         <div class="min-h-0 flex-1 overflow-y-auto">
-          <div ref="dayTimelineRef" class="relative" @click="openNewTaskFromDayTimeline">
+          <!-- Early hours toggle -->
+          <div
+            class="flex cursor-pointer items-center bg-sber-gray-light px-3 py-2"
+            @click="calendarStore.toggleEarlyHours()"
+          >
+            <div class="w-14 pr-3 text-right text-xs text-sber-gray">00–06</div>
+            <div class="h-px flex-1 bg-sber-gray-mid" />
+            <component
+              :is="calendarStore.collapsedEarlyHours ? ChevronDown : ChevronUp"
+              class="ml-2 h-4 w-4 text-sber-gray"
+            />
+          </div>
+
+          <Transition name="slide-down">
+            <div v-if="!calendarStore.collapsedEarlyHours" ref="earlyTimelineRef" class="relative">
+              <div v-for="h in earlyHours" :key="h" class="flex min-h-[60px]">
+                <div class="w-14 flex-shrink-0 border-t border-sber-gray-mid pr-3 pt-1 text-right text-xs text-sber-gray">
+                  {{ String(h).padStart(2, '0') }}:00
+                </div>
+                <div
+                  class="flex-1 cursor-pointer border-t border-sber-gray-mid"
+                  @click="openNewTaskFromCalendar(h)"
+                  @dragenter.prevent
+                  @dragover.prevent
+                  @drop.prevent.stop="handleDayHourDrop($event, h)"
+                />
+              </div>
+              <div class="pointer-events-none absolute bottom-0 left-14 right-0 top-0">
+                <div
+                  v-for="task in earlyTimelineTasks"
+                  :key="task.id"
+                  class="pointer-events-auto absolute min-w-0 cursor-grab touch-none select-none overflow-hidden rounded-xl px-2 py-1"
+                  :class="task.completed ? 'opacity-45' : ''"
+                  :style="{
+                    ...dayTimelineTaskHorizontalStyle(task.layoutCols, task.layoutCol),
+                    top: `${task.topPx}px`,
+                    height: `${task.heightPx}px`,
+                    zIndex: (dragPreview?.taskId === task.id ? 35 : 1) + task.layoutCol,
+                    backgroundColor: getPriorityColor(task.priority) + '20',
+                    borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
+                  }"
+                  @pointerdown.stop.prevent="startTaskMove($event, task)"
+                  @click.stop.prevent="handleTaskCardClick(task.id)"
+                >
+                  <button
+                    type="button"
+                    class="absolute left-1/2 top-0 z-40 flex h-6 w-full max-w-[5.5rem] -translate-x-1/2 cursor-ns-resize items-start justify-center pt-0.5"
+                    aria-label="Изменить начало"
+                    @pointerdown.stop.prevent="startTaskResize($event, task, 'start')"
+                  >
+                    <span class="pointer-events-none h-1.5 w-8 shrink-0 rounded-full bg-sber-gray/50" />
+                  </button>
+                  <div class="flex min-w-0 items-start gap-1">
+                    <button
+                      type="button"
+                      class="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border"
+                      :style="{ borderColor: getPriorityColor(task.priority), backgroundColor: task.completed ? getPriorityColor(task.priority) : 'transparent' }"
+                      @click.stop="toggleTaskComplete(task.id)"
+                      @pointerdown.stop
+                    >
+                      <Check v-if="task.completed" class="h-2 w-2 text-white" />
+                    </button>
+                    <div class="min-w-0 flex-1 overflow-hidden">
+                      <p class="truncate text-sm font-medium leading-snug text-sber-black">{{ task.title }}</p>
+                      <p v-if="task.continuesAfter" class="text-[10px] text-sber-gray">продолжается ↓</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="absolute bottom-0 left-1/2 z-40 flex h-6 w-full max-w-[5.5rem] -translate-x-1/2 cursor-ns-resize items-end justify-center pb-0.5"
+                    aria-label="Изменить конец"
+                    @pointerdown.stop.prevent="startTaskResize($event, task, 'end')"
+                  >
+                    <span class="pointer-events-none h-1.5 w-8 shrink-0 rounded-full bg-sber-gray/50" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Transition>
+
+          <!-- Main hours (06:00–21:00) -->
+          <div ref="mainTimelineRef" class="relative" @click="openNewTaskFromMainTimeline">
             <div
-              v-if="calendarStore.currentDate === todayStr"
-              class="pointer-events-none absolute top-0 left-0 right-0 z-20 flex items-center"
-              :style="{ transform: `translateY(${currentDayTimePx}px)` }"
+              v-if="calendarStore.currentDate === todayStr && isCurrentTimeInMainRange"
+              class="pointer-events-none absolute left-0 right-0 top-0 z-20 flex items-center"
+              :style="{ transform: `translateY(${currentMainTimePx}px)` }"
             >
               <div class="w-14 flex-shrink-0" />
               <div class="relative flex-1">
                 <div class="absolute left-0 right-0 flex items-center">
-                  <div class="w-2 h-2 rounded-full bg-red-500 -ml-1" />
-                  <div class="flex-1 h-0.5 bg-red-500" />
+                  <div class="-ml-1 h-2 w-2 rounded-full bg-red-500" />
+                  <div class="h-0.5 flex-1 bg-red-500" />
                 </div>
               </div>
             </div>
 
-            <div v-for="h in allHours" :key="h" class="flex min-h-[60px]">
-              <div class="w-14 flex-shrink-0 border-t border-sber-gray-mid text-xs text-sber-gray text-right pr-3 pt-1">
+            <div v-for="h in mainHours" :key="h" class="flex min-h-[60px]">
+              <div class="w-14 flex-shrink-0 border-t border-sber-gray-mid pr-3 pt-1 text-right text-xs text-sber-gray">
                 {{ String(h).padStart(2, '0') }}:00
               </div>
               <div
@@ -144,9 +225,8 @@
                 @drop.prevent.stop="handleDayHourDrop($event, h)"
               />
             </div>
-            <div class="border-t border-sber-gray-mid" />
 
-            <div class="pointer-events-none absolute top-0 right-0 bottom-0 left-14">
+            <div class="pointer-events-none absolute bottom-0 left-14 right-0 top-0">
               <div
                 v-for="task in dayTimelineTasks"
                 :key="task.id"
@@ -164,6 +244,7 @@
                 @click.stop.prevent="handleTaskCardClick(task.id)"
               >
                 <button
+                  v-if="!task.isContinuation"
                   type="button"
                   class="absolute left-1/2 top-0 z-40 flex h-8 w-full max-w-[5.5rem] -translate-x-1/2 cursor-ns-resize items-start justify-center pt-1"
                   aria-label="Изменить начало"
@@ -171,7 +252,12 @@
                 >
                   <span class="pointer-events-none h-2 w-10 shrink-0 rounded-full bg-sber-gray/50" />
                 </button>
-                <div class="pointer-events-none relative z-10 flex items-start gap-1">
+                <div
+                  v-if="task.isContinuation"
+                  class="pointer-events-none absolute inset-x-0 top-0 h-1 rounded-t-xl opacity-60"
+                  :style="{ backgroundColor: getPriorityColor(task.priority) }"
+                />
+                <div v-if="!task.isContinuation" class="pointer-events-none relative z-10 flex items-start gap-1">
                   <button
                     type="button"
                     class="pointer-events-auto mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border"
@@ -199,6 +285,89 @@
               </div>
             </div>
           </div>
+
+          <!-- Late hours toggle -->
+          <div
+            class="flex cursor-pointer items-center bg-sber-gray-light px-3 py-2"
+            @click="calendarStore.toggleLateHours()"
+          >
+            <div class="w-14 pr-3 text-right text-xs text-sber-gray">22–00</div>
+            <div class="h-px flex-1 bg-sber-gray-mid" />
+            <component
+              :is="calendarStore.collapsedLateHours ? ChevronDown : ChevronUp"
+              class="ml-2 h-4 w-4 text-sber-gray"
+            />
+          </div>
+
+          <Transition name="slide-down">
+            <div v-if="!calendarStore.collapsedLateHours" ref="lateTimelineRef" class="relative">
+              <div v-for="h in lateHours" :key="h" class="flex min-h-[60px]">
+                <div class="w-14 flex-shrink-0 border-t border-sber-gray-mid pr-3 pt-1 text-right text-xs text-sber-gray">
+                  {{ String(h).padStart(2, '0') }}:00
+                </div>
+                <div
+                  class="flex-1 cursor-pointer border-t border-sber-gray-mid px-1"
+                  @click="openNewTaskFromCalendar(h)"
+                  @dragenter.prevent
+                  @dragover.prevent
+                  @drop.prevent.stop="handleDayHourDrop($event, h)"
+                />
+              </div>
+              <div class="border-t border-sber-gray-mid" />
+              <div class="pointer-events-none absolute bottom-0 left-14 right-0 top-0">
+                <div
+                  v-for="task in lateTimelineTasks"
+                  :key="task.id"
+                  class="pointer-events-auto absolute min-w-0 cursor-grab touch-none select-none overflow-hidden rounded-xl px-2 py-1"
+                  :class="task.completed ? 'opacity-45' : ''"
+                  :style="{
+                    ...dayTimelineTaskHorizontalStyle(task.layoutCols, task.layoutCol),
+                    top: `${task.topPx}px`,
+                    height: `${task.heightPx}px`,
+                    zIndex: (dragPreview?.taskId === task.id ? 35 : 1) + task.layoutCol,
+                    backgroundColor: getPriorityColor(task.priority) + '20',
+                    borderLeft: `3px solid ${getPriorityColor(task.priority)}`,
+                  }"
+                  @pointerdown.stop.prevent="startTaskMove($event, task)"
+                  @click.stop.prevent="handleTaskCardClick(task.id)"
+                >
+                  <button
+                    type="button"
+                    class="absolute left-1/2 top-0 z-40 flex h-6 w-full max-w-[5.5rem] -translate-x-1/2 cursor-ns-resize items-start justify-center pt-0.5"
+                    aria-label="Изменить начало"
+                    @pointerdown.stop.prevent="startTaskResize($event, task, 'start')"
+                  >
+                    <span class="pointer-events-none h-1.5 w-8 shrink-0 rounded-full bg-sber-gray/50" />
+                  </button>
+                  <div class="flex min-w-0 items-start gap-1">
+                    <button
+                      type="button"
+                      class="mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border"
+                      :style="{ borderColor: getPriorityColor(task.priority), backgroundColor: task.completed ? getPriorityColor(task.priority) : 'transparent' }"
+                      @click.stop="toggleTaskComplete(task.id)"
+                      @pointerdown.stop
+                    >
+                      <Check v-if="task.completed" class="h-2 w-2 text-white" />
+                    </button>
+                    <div class="min-w-0 flex-1 overflow-hidden">
+                      <p class="truncate text-sm font-semibold leading-snug" :style="{ color: getPriorityColor(task.priority) }">
+                        {{ formatTaskScheduleLabel(task) }}
+                      </p>
+                      <p class="truncate text-sm font-medium leading-snug text-sber-black">{{ task.title }}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="absolute bottom-0 left-1/2 z-40 flex h-6 w-full max-w-[5.5rem] -translate-x-1/2 cursor-ns-resize items-end justify-center pb-0.5"
+                    aria-label="Изменить конец"
+                    @pointerdown.stop.prevent="startTaskResize($event, task, 'end')"
+                  >
+                    <span class="pointer-events-none h-1.5 w-8 shrink-0 rounded-full bg-sber-gray/50" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Transition>
         </div>
       </div>
 
@@ -276,13 +445,25 @@
           </template>
         </div>
 
-        <!-- Hours 00:00–23:00: only this area scrolls -->
+        <!-- Hours with collapsible early/late sections -->
         <div class="min-h-0 flex-1 overflow-y-auto">
           <div class="overflow-hidden rounded-2xl border border-[#c8cfdb] bg-white/45">
+            <div
+              class="flex cursor-pointer items-center bg-sber-gray-light px-2 py-1.5"
+              @click="calendarStore.toggleEarlyHours()"
+            >
+              <div class="w-12 flex-shrink-0 pr-2 text-right text-[10px] text-sber-gray">00–06</div>
+              <div class="h-px flex-1 bg-sber-gray-mid" />
+              <component
+                :is="calendarStore.collapsedEarlyHours ? ChevronDown : ChevronUp"
+                class="ml-2 h-4 w-4 text-sber-gray"
+              />
+            </div>
+
             <div class="flex">
               <div class="sticky left-0 z-10 w-14 flex-shrink-0 bg-white/90">
                 <div
-                  v-for="h in allHours"
+                  v-for="h in visibleWeekHours"
                   :key="`w-${h}`"
                   class="border-t border-[#c8cfdb] pr-2 pt-1 text-right text-xs text-sber-gray first:border-t-0"
                   :style="{ height: `${weekHourHeightPx}px` }"
@@ -294,10 +475,10 @@
                 v-for="day in weekViewDays"
                 :key="`w-day-${day.date}`"
                 class="relative min-w-0 flex-1 overflow-hidden border-l border-[#c8cfdb]"
-                :style="{ height: `${allHours.length * weekHourHeightPx}px` }"
+                :style="{ height: `${weekTotalPx}px` }"
               >
                 <div
-                  v-for="h in allHours"
+                  v-for="h in visibleWeekHours"
                   :key="h"
                   class="cursor-pointer border-t border-[#c8cfdb] first:border-t-0"
                   :style="{ height: `${weekHourHeightPx}px` }"
@@ -308,12 +489,12 @@
                 />
                 <div class="pointer-events-none absolute inset-0">
                   <div
-                    v-for="task in weekTimelineByDate[day.date] || []"
+                    v-for="task in getWeekDayTimelineTasks(day.date)"
                     :key="`w-task-${task.id}`"
                     class="pointer-events-auto absolute min-w-0 cursor-grab touch-none select-none overflow-hidden rounded border border-[#c8cfdb] px-1 py-0.5"
                     :class="task.completed ? 'opacity-45' : ''"
                     :style="{
-                      ...dayTimelineTaskHorizontalStyle(task.layoutCols, task.layoutCol),
+                      ...dayTimelineTaskHorizontalStyle(task.layoutCols, task.layoutCol, 2, 2),
                       top: `${task.topPx}px`,
                       height: `${task.heightPx}px`,
                       zIndex: (dragPreview?.taskId === task.id ? 35 : 1) + task.layoutCol,
@@ -358,12 +539,24 @@
                 </div>
               </div>
             </div>
+
+            <div
+              class="flex cursor-pointer items-center bg-sber-gray-light px-2 py-1.5"
+              @click="calendarStore.toggleLateHours()"
+            >
+              <div class="w-12 flex-shrink-0 pr-2 text-right text-[10px] text-sber-gray">22–00</div>
+              <div class="h-px flex-1 bg-sber-gray-mid" />
+              <component
+                :is="calendarStore.collapsedLateHours ? ChevronDown : ChevronUp"
+                class="ml-2 h-4 w-4 text-sber-gray"
+              />
+            </div>
           </div>
         </div>
       </div>
 
       <!-- MONTH VIEW -->
-      <div v-else-if="calendarStore.viewType === 'month'" class="p-2">
+      <div v-else-if="calendarStore.viewType === 'month'" class="min-h-0 flex-1 overflow-y-auto p-2">
         <!-- Weekday headers -->
         <div class="mb-1 grid grid-cols-7 gap-1">
           <div v-for="d in ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']" :key="d"
@@ -375,7 +568,7 @@
         <div class="grid grid-cols-7 gap-1">
           <div
             v-for="cell in monthCells"
-            :key="cell.date || cell.empty"
+            :key="cell.date"
             class="relative min-w-0 aspect-square overflow-hidden rounded-xl border border-[#c8cfdb] p-1 transition-colors"
             :class="[
               !cell.isCurrentMonth ? 'opacity-35' : '',
@@ -384,15 +577,15 @@
             ]"
             @dragenter.prevent
             @dragover.prevent
-            @drop.prevent.stop="cell.date && handleMonthCellDrop($event, cell.date)"
-            @click="cell.date && handleMonthCellClick(cell.date, $event)"
+            @drop.prevent.stop="handleMonthCellDrop($event, cell.date)"
+            @click="handleMonthCellClick(cell.date, $event)"
           >
             <div class="flex items-center justify-between">
               <span
                 data-month-day
                 class="inline-flex h-5 min-w-[1.25rem] cursor-pointer items-center justify-center rounded-full px-1 text-[10px] font-bold"
                 :class="cell.isToday ? 'bg-sber-green text-white' : 'text-sber-black'"
-                @click.stop="cell.date && goToWeekView(cell.date)"
+                @click.stop="goToWeekView(cell.date)"
               >
                 {{ cell.day }}
               </span>
@@ -409,7 +602,7 @@
                 draggable="true"
                 @dragstart.stop="startWeekTaskDrag($event, task.id)"
                 @dragend="endWeekTaskDrag"
-                @click.stop="selectedTaskId = task.id"
+                @click.stop="handleTaskCardClick(resolveRealTaskId(task.id))"
               >
                 <button
                   type="button"
@@ -427,23 +620,46 @@
       </div>
 
       <!-- YEAR VIEW -->
-      <div v-else-if="calendarStore.viewType === 'year'" class="p-2">
-      <div class="grid grid-cols-3 gap-3">
-        <div v-for="month in yearMonths" :key="month.index"
-             class="bg-white rounded-2xl p-3 cursor-pointer active:bg-sber-gray-light"
-             @click="goToMonth(month.index)">
-          <p class="text-xs font-bold text-sber-black mb-2">{{ month.name }}</p>
-          <div class="grid grid-cols-7 gap-px">
-            <div v-for="cell in month.cells.slice(0, 35)" :key="cell.day"
-                 class="aspect-square flex items-center justify-center">
-              <span v-if="cell.day" class="text-[9px]"
-                    :class="cell.isToday ? 'w-4 h-4 rounded-full bg-sber-green text-white flex items-center justify-center' : 'text-sber-gray'">
-                {{ cell.day }}
-              </span>
+      <div v-else-if="calendarStore.viewType === 'year'" class="min-h-0 flex-1 overflow-y-auto p-2">
+        <div class="grid grid-cols-3 gap-3">
+          <div
+            v-for="month in yearMonths"
+            :key="month.index"
+            class="cursor-pointer rounded-2xl bg-white p-3 active:bg-sber-gray-light"
+            @click="goToMonth(month.index)"
+          >
+            <p class="mb-2 text-xs font-bold text-sber-black">{{ month.name }}</p>
+            <div class="grid grid-cols-7 gap-px">
+              <div
+                v-for="(cell, cellIdx) in month.cells"
+                :key="`${month.index}-${cellIdx}`"
+                class="flex aspect-square flex-col items-center justify-center"
+                @click.stop="cell.date && goToDayView(cell.date)"
+              >
+                <span
+                  v-if="cell.day"
+                  class="flex h-4 w-4 items-center justify-center text-[9px]"
+                  :class="cell.isToday
+                    ? 'rounded-full bg-sber-green font-semibold text-white'
+                    : 'text-sber-gray'"
+                >
+                  {{ cell.day }}
+                </span>
+                <div
+                  v-if="cell.date"
+                  class="mt-px flex h-1 items-center justify-center gap-px"
+                >
+                  <span
+                    v-for="(dot, di) in getDateDots(cell.date)"
+                    :key="di"
+                    class="h-1 w-1 rounded-full"
+                    :style="{ backgroundColor: dot }"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
 
@@ -459,13 +675,13 @@
 
 <script setup lang="ts">
 import {
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
   LayoutGrid, CalendarDays, Calendar, CalendarRange, Columns, Check,
 } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import type { Task } from '~/data/mockData'
 import {
-  addMinutesToTime,
+  defaultDurationEnd,
   formatMinutesToTime,
   getTaskDurationMinutes,
   getTaskScheduleStart,
@@ -476,9 +692,11 @@ import {
   timelineTaskHorizontalStyle,
 } from '~/utils/overlap-layout'
 import { resolveRealTaskId } from '~/utils/recurrence'
+import { buildMonthCells, buildYearMonths } from '~/utils/calendar-grid'
 
 definePageMeta({ layout: 'app' })
 
+const route = useRoute()
 const calendarStore = useCalendarStore()
 const tasksStore = useTasksStore()
 
@@ -491,9 +709,28 @@ onClickOutside(viewMenuRef, () => {
   viewMenuOpen.value = false
 })
 
-const dayTimelineRef = ref<HTMLElement | null>(null)
+const mainTimelineRef = ref<HTMLElement | null>(null)
+
+function hydrateCalendarFromQuery() {
+  const date = route.query.date
+  const view = route.query.view
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    calendarStore.setDate(date)
+  }
+  if (
+    typeof view === 'string' &&
+    (view === 'day' || view === 'week' || view === 'month' || view === 'year')
+  ) {
+    calendarStore.setView(view)
+  }
+}
 
 onMounted(() => {
+  // Query wins; otherwise use Settings → Вид defaults.
+  if (!route.query.view) {
+    calendarStore.applyViewDefaultsFromSettings()
+  }
+  hydrateCalendarFromQuery()
   if (!tasksStore.initialized) {
     void tasksStore.fetchGrouped()
   }
@@ -511,18 +748,59 @@ function setView(v: string) {
   viewMenuOpen.value = false
 }
 
-const allHours = Array.from({ length: 24 }, (_, i) => i)
+const earlyHours = [0, 1, 2, 3, 4, 5]
+const mainHours = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+const lateHours = [22, 23]
 const weekHourHeightPx = 60
 const weekMinuteHeightPx = weekHourHeightPx / 60
-const dayStartMinutes = 0
-const dayEndMinutes = 24 * 60
+
+const visibleWeekHours = computed(() => [
+  ...(calendarStore.collapsedEarlyHours ? [] : earlyHours),
+  ...mainHours,
+  ...(calendarStore.collapsedLateHours ? [] : lateHours),
+])
+const weekFirstVisibleMin = computed(() => visibleWeekHours.value[0] * 60)
+const weekLastVisibleMin = computed(
+  () => (visibleWeekHours.value[visibleWeekHours.value.length - 1] + 1) * 60,
+)
+const weekTotalPx = computed(() => visibleWeekHours.value.length * weekHourHeightPx)
+const weekHourIndex = computed(() => {
+  const map = new Map<number, number>()
+  visibleWeekHours.value.forEach((h, i) => map.set(h, i))
+  return map
+})
+
+function weekMinutesToPx(min: number): number {
+  if (min <= weekFirstVisibleMin.value) return 0
+  if (min >= weekLastVisibleMin.value) return weekTotalPx.value
+  const hour = Math.floor(min / 60)
+  const idx = weekHourIndex.value.get(hour)
+  if (idx == null) {
+    return hour < mainHours[0] ? 0 : weekTotalPx.value
+  }
+  return idx * weekHourHeightPx + (min - hour * 60) * weekMinuteHeightPx
+}
+
+const earlyStartMinutes = 0
+const earlyEndMinutes = earlyHours.length * 60
+const lateStartMinutes = lateHours[0] * 60
+const lateEndMinutes = 24 * 60
+const mainStartMinutes = mainHours[0] * 60
+const mainEndMinutes = (mainHours[mainHours.length - 1] + 1) * 60
 const minuteHeightPx = 1
+const earlyLateMinuteHeightPx = weekHourHeightPx / 60
 const minDurationMinutes = 10
 const draggingWeekTaskId = ref<string | null>(null)
 
-const currentDayTimePx = computed(() => {
+const isCurrentTimeInMainRange = computed(() => {
   const now = dayjs()
-  return (now.hour() * 60 + now.minute()) * minuteHeightPx
+  const nowMinutes = now.hour() * 60 + now.minute()
+  return nowMinutes >= mainStartMinutes && nowMinutes <= mainEndMinutes
+})
+const currentMainTimePx = computed(() => {
+  const now = dayjs()
+  const nowMinutes = now.hour() * 60 + now.minute()
+  return Math.max(0, nowMinutes - mainStartMinutes) * minuteHeightPx
 })
 
 type DragMode = 'move' | 'resize-start' | 'resize-end'
@@ -611,11 +889,12 @@ const dayTimelineTasks = computed(() => {
       const durationMinutes = preview ? (preview.end - preview.start) : getTaskDurationMinutes(task)
       const fullEndMinutes = startMinutes + durationMinutes
 
-      if (fullEndMinutes <= dayStartMinutes || startMinutes >= dayEndMinutes) return null
+      if (fullEndMinutes <= mainStartMinutes || startMinutes >= mainEndMinutes) return null
 
-      const clippedEnd = Math.min(fullEndMinutes, dayEndMinutes)
-      const clippedStart = Math.max(startMinutes, dayStartMinutes)
+      const clippedEnd = Math.min(fullEndMinutes, mainEndMinutes)
+      const clippedStart = Math.max(startMinutes, mainStartMinutes)
       const clippedDuration = Math.max(clippedEnd - clippedStart, 15)
+      const isContinuation = startMinutes < mainStartMinutes
 
       const labelTime = preview
         ? `${formatMinutesToTime(preview.start)} – ${formatMinutesToTime(preview.end)}`
@@ -628,7 +907,8 @@ const dayTimelineTasks = computed(() => {
         rawStart: startMinutes,
         rawEnd: fullEndMinutes,
         labelTime,
-        topPx: (clippedStart - dayStartMinutes) * minuteHeightPx,
+        isContinuation,
+        topPx: (clippedStart - mainStartMinutes) * minuteHeightPx,
         heightPx: clippedDuration * minuteHeightPx,
       }
     })
@@ -648,48 +928,41 @@ const dayTimelineTasks = computed(() => {
   })
 })
 
-function getDateHourTasks(date: string, hour: number) {
-  return tasksStore.getTasksForDate(date).filter(t => {
-    const start = getTaskScheduleStart(t)
-    if (!start) return false
-    const h = parseInt(start.split(':')[0])
-    return h === hour
-  })
-}
-
-function getWeekSectionTasks(date: string, rangeStart: number, rangeEnd: number) {
-  const base = tasksStore.getTasksForDate(date)
+function buildSectionTimelineTasks(
+  rangeStart: number,
+  rangeEnd: number,
+  pxPerMinute: number,
+  hourFilter: (hour: number) => boolean,
+) {
+  const base = tasksStore.getTasksForDate(calendarStore.currentDate)
     .filter(t => !!getTaskScheduleStart(t))
     .map((task) => {
       const preview = dragPreview.value?.taskId === task.id ? dragPreview.value : null
       const scheduleStart = getTaskScheduleStart(task) || '00:00'
       const startMinutes = preview ? preview.start : parseTimeToMinutes(scheduleStart)
-      const durationMinutes = preview
-        ? (preview.end - preview.start)
-        : getTaskDurationMinutes(task)
-      const endMinutes = startMinutes + durationMinutes
+      const startHour = Math.floor(startMinutes / 60)
+      if (!hourFilter(startHour)) return null
 
+      const durationMinutes = preview ? (preview.end - preview.start) : getTaskDurationMinutes(task)
+      const endMinutes = startMinutes + durationMinutes
       if (endMinutes <= rangeStart || startMinutes >= rangeEnd) return null
 
       const clippedStart = Math.max(startMinutes, rangeStart)
       const clippedEnd = Math.min(endMinutes, rangeEnd)
-      const topPx = (clippedStart - rangeStart) * weekMinuteHeightPx
-      const heightPx = Math.max(
-        (clippedEnd - clippedStart) * weekMinuteHeightPx,
-        weekHourHeightPx * 0.35,
-      )
+      const clippedDuration = Math.max(clippedEnd - clippedStart, 15)
+      const continuesAfter = endMinutes > rangeEnd
 
       return {
         ...task,
         rawStart: startMinutes,
         rawEnd: endMinutes,
-        topPx,
-        heightPx,
+        continuesAfter,
+        topPx: (clippedStart - rangeStart) * pxPerMinute,
+        heightPx: clippedDuration * pxPerMinute,
       }
     })
-    .filter((t): t is Task & { rawStart: number; rawEnd: number; topPx: number; heightPx: number } => !!t)
+    .filter((task): task is Task & { rawStart: number; rawEnd: number; continuesAfter: boolean; topPx: number; heightPx: number } => !!task)
 
-  // Same Google-Calendar-style columns as Day view when intervals overlap.
   const layout = assignTimelineOverlapLayout(
     base.map(t => ({ id: t.id, rawStart: t.rawStart, rawEnd: t.rawEnd })),
   )
@@ -704,18 +977,66 @@ function getWeekSectionTasks(date: string, rangeStart: number, rangeEnd: number)
   })
 }
 
-/** Per-day week timelines (reactive to tasks + drag preview). */
-const weekTimelineByDate = computed(() => {
-  const map: Record<string, ReturnType<typeof getWeekSectionTasks>> = {}
-  for (const day of weekViewDays.value) {
-    map[day.date] = getWeekSectionTasks(day.date, dayStartMinutes, dayEndMinutes)
-  }
-  // Depend on drag preview so columns update while resizing/moving.
-  void dragPreview.value
-  void tasksStore.tasks
-  void tasksStore.calendarTasks
-  return map
-})
+const earlyTimelineTasks = computed(() =>
+  buildSectionTimelineTasks(earlyStartMinutes, earlyEndMinutes, earlyLateMinuteHeightPx, h => h < 6),
+)
+
+const lateTimelineTasks = computed(() =>
+  buildSectionTimelineTasks(lateStartMinutes, lateEndMinutes, earlyLateMinuteHeightPx, h => h >= 22),
+)
+
+function getDateHourTasks(date: string, hour: number) {
+  return tasksStore.getTasksForDate(date).filter(t => {
+    const start = getTaskScheduleStart(t)
+    if (!start) return false
+    const h = parseInt(start.split(':')[0])
+    return h === hour
+  })
+}
+
+function getWeekDayTimelineTasks(date: string) {
+  const base = tasksStore.getTasksForDate(date)
+    .filter(t => !!getTaskScheduleStart(t))
+    .map((task) => {
+      const preview = dragPreview.value?.taskId === task.id ? dragPreview.value : null
+      const scheduleStart = getTaskScheduleStart(task) || '00:00'
+      const startMinutes = preview ? preview.start : parseTimeToMinutes(scheduleStart)
+      const durationMinutes = preview
+        ? (preview.end - preview.start)
+        : getTaskDurationMinutes(task)
+      const endMinutes = startMinutes + durationMinutes
+
+      if (endMinutes <= weekFirstVisibleMin.value || startMinutes >= weekLastVisibleMin.value) {
+        return null
+      }
+
+      const topPx = weekMinutesToPx(startMinutes)
+      const bottomPx = weekMinutesToPx(endMinutes)
+      const heightPx = Math.max(bottomPx - topPx, weekHourHeightPx * 0.35)
+
+      return {
+        ...task,
+        rawStart: startMinutes,
+        rawEnd: endMinutes,
+        topPx,
+        heightPx,
+      }
+    })
+    .filter((t): t is Task & { rawStart: number; rawEnd: number; topPx: number; heightPx: number } => !!t)
+
+  const layout = assignTimelineOverlapLayout(
+    base.map(t => ({ id: t.id, rawStart: t.rawStart, rawEnd: t.rawEnd })),
+  )
+
+  return base.map((task) => {
+    const slot = layout.get(task.id) ?? { col: 0, cols: 1 }
+    return {
+      ...task,
+      layoutCol: slot.col,
+      layoutCols: slot.cols,
+    }
+  })
+}
 
 const untimedRowPx = 36
 const untimedMinPx = 40
@@ -750,7 +1071,9 @@ function handleUntimedResizeEnd() {
 }
 
 function getUntimedTasksForDate(date: string) {
-  return tasksStore.getTasksForDate(date).filter(t => !getTaskScheduleStart(t) && !!t.dueDate)
+  return tasksStore.getTasksForDate(date).filter(t =>
+    t.isAllDay || (!getTaskScheduleStart(t) && !!t.dueDate),
+  )
 }
 
 const dayUntimedTasks = computed(() => getUntimedTasksForDate(calendarStore.currentDate))
@@ -810,8 +1133,10 @@ function startTaskResize(event: PointerEvent, task: Task & { rawStart: number; r
   initDrag(event, task, edge === 'start' ? 'resize-start' : 'resize-end')
 }
 
-function resolveDragPxPerMinute(_startMinutes: number) {
-  return weekHourHeightPx / 60
+function resolveDragPxPerMinute(startMinutes: number) {
+  if (startMinutes < mainStartMinutes) return earlyLateMinuteHeightPx
+  if (startMinutes >= lateStartMinutes) return earlyLateMinuteHeightPx
+  return minuteHeightPx
 }
 
 function initDrag(event: PointerEvent, task: Task & { rawStart: number; rawEnd: number }, mode: DragMode) {
@@ -971,7 +1296,7 @@ function openNewTaskFromMonthCell(date: string) {
 function openNewTaskFromWeekCell(date: string, hour: number) {
   const slotStart = `${String(hour).padStart(2, '0')}:00`
   const returnTo = encodeURIComponent(`/app/calendar?view=week&date=${date}`)
-  const slotEnd = addMinutesToTime(slotStart, 60)
+  const slotEnd = defaultDurationEnd(slotStart)
   navigateTo(`/app/new-task?returnTo=${returnTo}&dueDate=${date}&dueTime=${slotStart}&durationStart=${slotStart}&durationEnd=${slotEnd}`)
 }
 
@@ -980,33 +1305,31 @@ function handleDayHourDrop(event: DragEvent, hour: number) {
 }
 
 // Month cells
-const monthCells = computed(() => {
-  const d = dayjs(calendarStore.currentDate)
-  const startOfMonth = d.startOf('month')
-  const endOfMonth = d.endOf('month')
-  const startDow = (startOfMonth.day() + 6) % 7  // Mon = 0
+const monthCells = computed(() =>
+  buildMonthCells(calendarStore.currentDate, todayStr),
+)
 
-  const cells = []
-  for (let i = 0; i < startDow; i++) {
-    const day = startOfMonth.subtract(startDow - i, 'day')
-    cells.push({ date: day.format('YYYY-MM-DD'), day: day.date(), isCurrentMonth: false, isToday: false })
+/** Priority-colored dots for year mini-calendars (max 3). */
+const yearDotsByDate = computed(() => {
+  if (calendarStore.viewType !== 'year') return new Map<string, string[]>()
+  const year = parseInt(calendarStore.currentDate.substring(0, 4), 10)
+  if (!Number.isFinite(year)) return new Map<string, string[]>()
+  const start = `${year}-01-01`
+  const end = `${year}-12-31`
+  const map = new Map<string, string[]>()
+  for (const t of tasksStore.getTasksForWeek(start, end)) {
+    if (!t.dueDate) continue
+    const list = map.get(t.dueDate) || []
+    if (list.length >= 3) continue
+    list.push(getPriorityColor(t.priority))
+    map.set(t.dueDate, list)
   }
-  for (let i = 1; i <= endOfMonth.date(); i++) {
-    const day = d.date(i)
-    cells.push({
-      date: day.format('YYYY-MM-DD'),
-      day: i,
-      isCurrentMonth: true,
-      isToday: day.format('YYYY-MM-DD') === todayStr,
-    })
-  }
-  return cells
+  return map
 })
 
-function getDateDots(date?: string) {
+function getDateDots(date?: string | null) {
   if (!date) return []
-  const tasks = tasksStore.getTasksForDate(date)
-  return tasks.slice(0, 3).map(t => getPriorityColor(t.priority))
+  return yearDotsByDate.value.get(date) || []
 }
 
 function getMonthCellTasks(date?: string) {
@@ -1016,29 +1339,20 @@ function getMonthCellTasks(date?: string) {
 
 // Year months
 const yearMonths = computed(() => {
-  const year = parseInt(calendarStore.currentDate.substring(0, 4))
-  const monthNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']
-  return Array.from({ length: 12 }, (_, i) => {
-    const m = dayjs().year(year).month(i)
-    const startDow = (m.startOf('month').day() + 6) % 7
-    const cells = []
-    for (let j = 0; j < startDow; j++) cells.push({ day: null, isToday: false })
-    for (let j = 1; j <= m.daysInMonth(); j++) {
-      const d = m.date(j)
-      cells.push({ day: j, isToday: d.format('YYYY-MM-DD') === todayStr })
-    }
-    return { index: i, name: monthNames[i], cells }
-  })
+  const year = parseInt(calendarStore.currentDate.substring(0, 4), 10)
+  return buildYearMonths(year, todayStr)
 })
 
 function goToMonth(monthIndex: number) {
-  const year = parseInt(calendarStore.currentDate.substring(0, 4))
-  calendarStore.setDate(dayjs().year(year).month(monthIndex).date(1).format('YYYY-MM-DD'))
+  const year = parseInt(calendarStore.currentDate.substring(0, 4), 10)
+  calendarStore.setDate(
+    dayjs().year(year).month(monthIndex).date(1).format('YYYY-MM-DD'),
+  )
   calendarStore.setView('month')
 }
 
 function buildNewTaskFromCalendarQuery(slotStart: string) {
-  const slotEnd = addMinutesToTime(slotStart, 60)
+  const slotEnd = defaultDurationEnd(slotStart)
   const returnTo = encodeURIComponent(`/app/calendar?view=${calendarStore.viewType}&date=${calendarStore.currentDate}`)
   return `/app/new-task?returnTo=${returnTo}&dueDate=${calendarStore.currentDate}&dueTime=${slotStart}&durationStart=${slotStart}&durationEnd=${slotEnd}`
 }
@@ -1048,14 +1362,14 @@ function openNewTaskFromCalendar(hour: number) {
   navigateTo(buildNewTaskFromCalendarQuery(slotStart))
 }
 
-function openNewTaskFromDayTimeline(event: MouseEvent) {
-  const container = dayTimelineRef.value
+function openNewTaskFromMainTimeline(event: MouseEvent) {
+  const container = mainTimelineRef.value
   if (!container) return
 
   const rect = container.getBoundingClientRect()
   const offsetY = event.clientY - rect.top
-  const rawMinutes = dayStartMinutes + Math.floor(offsetY / minuteHeightPx)
-  const snappedMinutes = Math.max(dayStartMinutes, Math.min(dayEndMinutes - 1, roundToStep(rawMinutes, 5)))
+  const rawMinutes = mainStartMinutes + Math.floor(offsetY / minuteHeightPx)
+  const snappedMinutes = Math.max(mainStartMinutes, Math.min(mainEndMinutes - 1, roundToStep(rawMinutes, 5)))
   navigateTo(buildNewTaskFromCalendarQuery(formatMinutesToTime(snappedMinutes)))
 }
 
@@ -1121,5 +1435,35 @@ watch(
     void tasksStore.fetchCalendar(view, date)
   },
   { immediate: true },
+)
+
+watch(
+  () => tasksStore.calendarTasks,
+  (tasks) => {
+    if (calendarStore.viewType !== 'day' && calendarStore.viewType !== 'week') return
+
+    const hasLate = tasks.some((task) => {
+      const start = getTaskScheduleStart(task)
+      if (!start) return false
+      const hour = parseInt(start.split(':')[0], 10)
+      const endHour = task.duration?.end
+        ? parseInt(task.duration.end.split(':')[0], 10)
+        : hour
+      return hour >= 21 || endHour >= 21
+    })
+    if (hasLate) {
+      calendarStore.collapsedLateHours = false
+    }
+
+    const hasEarly = tasks.some((task) => {
+      const start = getTaskScheduleStart(task)
+      if (!start) return false
+      return parseInt(start.split(':')[0], 10) < 6
+    })
+    if (hasEarly) {
+      calendarStore.collapsedEarlyHours = false
+    }
+  },
+  { deep: true },
 )
 </script>

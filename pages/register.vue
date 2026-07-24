@@ -4,7 +4,7 @@
     <div class="w-full max-w-full overflow-hidden lg:grid lg:max-w-5xl lg:grid-cols-[0.95fr_1.05fr] lg:rounded-[32px] lg:bg-white lg:shadow-xl">
       <div class="min-h-dvh bg-white lg:order-2 lg:min-h-0">
         <div class="page-header-top flex items-center px-4 pb-4 sm:px-6 lg:px-8 lg:pt-8">
-          <button class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light" type="button" @click="$router.back()">
+          <button class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light" type="button" @click="navigateTo('/')">
             <ChevronLeft class="h-5 w-5 text-sber-black" />
           </button>
           <h1 class="ml-3 text-xl font-bold text-sber-black">Создать аккаунт</h1>
@@ -37,7 +37,7 @@
                 <input
                   v-model="form.password"
                   :type="showPassword ? 'text' : 'password'"
-                  placeholder="Введите пароль"
+                  placeholder="8–20 символов, A-z, цифра, спецсимвол"
                   autocomplete="new-password"
                   required
                   class="input-field pl-12 pr-12"
@@ -164,6 +164,7 @@ import { ChevronLeft, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-vue-ne
 import { BRAND_NAME } from '~/utils/site-info'
 import logoUrl from '~/assets/img/logo.svg'
 import { validateNewPassword } from '~/utils/password-policy'
+import { validateEmail } from '~/utils/email-policy'
 import { clearRememberedLogin, readRememberedLogin, writeRememberedLogin } from '~/utils/auth-session'
 
 const authStore = useAuthStore()
@@ -189,8 +190,9 @@ function validate() {
   errors.terms = ''
 
   let valid = true
-  if (!form.email.trim() || !form.email.includes('@')) {
-    errors.email = 'Введите корректный email'
+  const emailRule = validateEmail(form.email)
+  if (emailRule) {
+    errors.email = emailRule
     valid = false
   }
   const pwRule = validateNewPassword(form.password)
@@ -225,6 +227,19 @@ function onTermsToggle(accepted: boolean) {
     errors.terms = ''
 }
 
+function normalizeErrorDetail(detail: unknown, fallback: string): string {
+  if (typeof detail === 'string')
+    return detail
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map(item => (typeof item === 'string' ? item : ''))
+      .filter(Boolean)
+    if (parts.length)
+      return parts.join(' ')
+  }
+  return fallback
+}
+
 onMounted(() => {
   const saved = readRememberedLogin()
   if (saved) {
@@ -257,22 +272,18 @@ async function handleRegister() {
     const payload = err?.response?.data
     const passwordErrors = Array.isArray(payload?.password) ? payload.password : []
     const emailErrors = Array.isArray(payload?.email) ? payload.email : []
-    const detailError = typeof payload?.detail === 'string' ? payload.detail : ''
+    const detailError = normalizeErrorDetail(payload?.detail, '')
 
-    if (passwordErrors.length > 0) {
+    if (passwordErrors.length > 0)
       errors.password = passwordErrors.join(' ')
-    }
-    if (emailErrors.length > 0) {
+    if (emailErrors.length > 0)
       errors.email = emailErrors.join(' ')
+
+    if (!errors.email && !errors.password) {
+      const msg = detailError || err?.message || 'Не удалось зарегистрироваться. Попробуйте снова.'
+      errors.email = msg
+      errors.password = msg
     }
-
-    const apiMessage = [
-      ...passwordErrors,
-      ...emailErrors,
-      detailError,
-    ].filter(Boolean).join(' ')
-
-    showToast('error', apiMessage || err?.message || 'Не удалось зарегистрироваться. Попробуйте снова.')
   }
   finally {
     isSubmitting.value = false

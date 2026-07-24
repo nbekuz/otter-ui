@@ -303,10 +303,25 @@ export const useTasksStore = defineStore('tasks', () => {
 
   async function fetchCalendar(view: 'day' | 'week' | 'month' | 'year', date: string) {
     const response = await apiGet<{
-      tasks: ApiTask[]
+      tasks?: ApiTask[]
+      all_day_tasks?: ApiTask[]
+      timed_tasks?: ApiTask[]
     }>('calendar/', { params: { view, date } })
 
-    const incoming = response.tasks.map(apiTaskToUi)
+    const allDay = (response.all_day_tasks || []).map(t => ({
+      ...apiTaskToUi(t),
+      isAllDay: true,
+    }))
+    const timed = (response.timed_tasks || []).map(apiTaskToUi)
+    const flat = (response.tasks || []).map(apiTaskToUi)
+    const preferSplit = allDay.length > 0 || timed.length > 0
+    const merged = preferSplit ? [...allDay, ...timed] : flat
+    const seen = new Set<string>()
+    const incoming = merged.filter((t) => {
+      if (seen.has(t.id)) return false
+      seen.add(t.id)
+      return true
+    })
     calendarCacheKey.value = `${view}:${date}`
 
     if (calendarTasks.value.length === 0) {
@@ -408,12 +423,32 @@ export const useTasksStore = defineStore('tasks', () => {
     return file || undefined
   }
 
+  async function uploadAttachment(taskId: string, file: File) {
+    const form = new FormData()
+    form.append('file', file)
+    return apiPost(`tasks/${taskId}/attachments/`, form)
+  }
+
+  async function deleteAttachment(taskId: string, attachmentId: number) {
+    await apiDelete(`tasks/${taskId}/attachments/${attachmentId}/`)
+  }
+
   async function addTask(taskData: Partial<Task>) {
     const imageFile = await resolveAttachmentFile(taskData)
     const created = imageFile
       ? await apiPost<ApiTask>('tasks/', uiTaskToFormData(taskData, imageFile))
       : await apiPost<ApiTask>('tasks/', uiTaskToApiPayload(taskData))
-    const task = apiTaskToUi(created)
+    let task = apiTaskToUi(created)
+    if (imageFile) {
+      try {
+        await uploadAttachment(task.id, imageFile)
+        const refreshed = await apiGet<ApiTask>(`tasks/${task.id}/`)
+        task = apiTaskToUi(refreshed)
+      }
+      catch {
+        /* legacy image field may already hold the file */
+      }
+    }
     upsertTaskInState(task)
     await refreshTaskLists()
     return task
@@ -462,38 +497,43 @@ export const useTasksStore = defineStore('tasks', () => {
 
     const merged = { ...existing, ...updates, id } as Partial<Task>
     const imageFile = await resolveAttachmentFile(updates)
-    const updated = imageFile
+    let updated = imageFile
       ? await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToFormData(merged, imageFile))
       : await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToApiPayload(merged))
+    if (imageFile) {
+      try {
+        await uploadAttachment(id, imageFile)
+        updated = await apiGet<ApiTask>(`tasks/${id}/`)
+      }
+      catch {
+        /* keep patched response */
+      }
+    }
     const task = mergeTaskFromApi(existing, updates, apiTaskToUi(updated))
     upsertTaskInState(task)
     await refreshTaskLists(refresh)
     return task
   }
 
-  async function deleteTask(id: string, refresh: RefreshOptions = {}) {
+  async function deleteTask(
+    id: string,
+    refresh: RefreshOptions = {},
+    scope?: 'this' | 'series',
+  ) {
     removeTaskFromState(id)
-    await apiDelete(`tasks/${id}/`)
+    const url = scope ? `tasks/${id}/?scope=${scope}` : `tasks/${id}/`
+    await apiDelete(url)
     await refreshTaskLists(refresh)
   }
 
-  /** Delete only this occurrence; keep the series by spawning the next one first. */
+  /** Delete only this occurrence. */
   async function deleteOccurrence(id: string, refresh: RefreshOptions = {}) {
-    const task = findTaskById(id)
-    if (task && isRecurringTask(task)) {
-      try {
-        await spawnNextOccurrence(task)
-      }
-      catch {
-        /* still delete this occurrence even if the next one couldn't be created */
-      }
-    }
-    await deleteTask(id, refresh)
+    await deleteTask(id, refresh, 'this')
   }
 
-  /** Delete the whole series: remove this task and do not spawn further occurrences. */
+  /** Delete the whole series. */
   async function deleteSeries(id: string, refresh: RefreshOptions = {}) {
-    await deleteTask(id, refresh)
+    await deleteTask(id, refresh, 'series')
   }
 
   async function completeTask(id: string, refresh: RefreshOptions = {}) {
@@ -515,13 +555,18 @@ export const useTasksStore = defineStore('tasks', () => {
     const task = apiTaskToUi(updated)
     upsertTaskInState(task)
 
-    // Completing a repeating task keeps it in "Готово" and spawns the next occurrence.
-    if (willComplete && isRecurringTask(existing)) {
-      try {
-        await spawnNextOccurrence(existing)
+    if (willComplete) {
+      void useSoundsStore().playFeedbackSound('completion')
+      if (updated.next_task) {
+        upsertTaskInState(apiTaskToUi(updated.next_task))
       }
-      catch {
-        /* keep the completion even if creating the next one fails */
+      else if (isRecurringTask(existing)) {
+        try {
+          await spawnNextOccurrence(existing)
+        }
+        catch {
+          /* keep the completion even if creating the next one fails */
+        }
       }
     }
 
@@ -609,6 +654,8 @@ export const useTasksStore = defineStore('tasks', () => {
     moveToMatrix,
     fetchTask,
     searchTasks,
+    uploadAttachment,
+    deleteAttachment,
     upsertTaskInState,
     reset,
   }

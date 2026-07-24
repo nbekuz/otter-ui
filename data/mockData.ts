@@ -28,6 +28,15 @@ export interface Task {
     dataUrl: string
   }
   imageUrl?: string
+  attachments?: Array<{
+    id: number
+    fileUrl: string
+    originalName: string
+    contentType: string
+    size: number
+  }>
+  isAllDay?: boolean
+  listKey?: 'overdue' | 'today' | 'tomorrow' | 'later' | 'nodate' | 'completed'
   listId?: string
   matrixBlock?: 'urgent-important' | 'not-urgent-important' | 'urgent-not-important' | 'not-urgent-not-important'
   createdAt: string
@@ -52,6 +61,8 @@ export interface PomodoroSettings {
   showOnLockScreen: boolean
 }
 
+export type CalendarDefaultView = 'day' | 'week' | 'month' | 'year'
+
 export interface AppSettings {
   language: string
   theme: string
@@ -62,6 +73,12 @@ export interface AppSettings {
   completionSound: string
   bottomNavItems: string[]
   timezone?: string
+  /** Local-only: initial calendar view when opening Календарь. */
+  calendarDefaultView?: CalendarDefaultView
+  /** Local-only: collapse 00:00–06:00 by default in day/week views. */
+  calendarCollapseEarlyHours?: boolean
+  /** Local-only: collapse 22:00–00:00 by default in day/week views. */
+  calendarCollapseLateHours?: boolean
 }
 
 // ─── Mock User ───────────────────────────────────────────────────────────────
@@ -300,6 +317,9 @@ export const defaultAppSettings: AppSettings = {
   notificationSound: 'chime',
   completionSound: 'success',
   bottomNavItems: ['tasks', 'calendar', 'matrix', 'pomodoro', 'settings'],
+  calendarDefaultView: 'day',
+  calendarCollapseEarlyHours: true,
+  calendarCollapseLateHours: true,
 }
 
 // ─── Eisenhower Matrix Defaults ───────────────────────────────────────────────

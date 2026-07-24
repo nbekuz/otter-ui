@@ -186,7 +186,7 @@
                   v-model="form.durationEnd"
                   field-class="border-2 border-sber-green/50 py-2 text-xs !px-2 max-lg:py-1.5 lg:py-2.5 lg:!px-4 lg:text-base"
                   @keydown="onDurationEndKeydown"
-                  @update:model-value="errors.duration = ''"
+                  @update:model-value="onDurationEndInput"
                 />
               </div>
             </div>
@@ -496,7 +496,7 @@ import { Check, Bell, RefreshCw, Calendar, Flag, Grid2x2, ChevronLeft, Paperclip
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { matrixBlockDefaults } from '~/data/mockData'
-import { addMinutesToTime, validateDurationFields, validateRepeatInterval } from '~/utils/time'
+import { defaultDurationEnd, validateDurationFields, validateRepeatInterval } from '~/utils/time'
 import { resolveMediaUrl } from '~/utils/media'
 import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
 
@@ -554,7 +554,7 @@ const form = reactive({
   durationStart: '',
   durationEnd: '',
   priority: 'none' as Priority,
-  notification: '0',
+  notification: '0', // «В момент срока» — default for new tasks (matches product)
   repeat: 'none' as RepeatType,
   matrixBlock: 'not-urgent-not-important',
 })
@@ -662,7 +662,7 @@ const customRepeat = reactive({
   monthDay: dayjs().date(),
 })
 
-const { pauseSync, resumeSync } = useTaskTimeSync(form)
+const { pauseSync, resumeSync, markEndEdited, resetEndEdited, adoptLoadedDuration } = useTaskTimeSync(form)
 
 const matrixBlocks = [
   { id: 'urgent-important', title: 'Срочно и важно', color: '#FF3B30' },
@@ -683,6 +683,7 @@ watch(() => form.dueDate, (newDate) => {
   form.dueTime = ''
   form.durationStart = ''
   form.durationEnd = ''
+  resetEndEdited()
 })
 
 onMounted(async () => {
@@ -746,6 +747,12 @@ function onDurationEndKeydown(e: KeyboardEvent) {
   if (e.key !== 'Enter') return
   e.preventDefault()
   focusSubmitButton()
+}
+
+function onDurationEndInput(val: string) {
+  errors.duration = ''
+  if (!val?.trim()) resetEndEdited()
+  else markEndEdited()
 }
 
 async function focusSubmitButton() {
@@ -905,6 +912,7 @@ function toggleQuickDate(quick: QuickDatePreset) {
       form.dueTime = ''
       form.durationStart = ''
       form.durationEnd = ''
+      resetEndEdited()
     }
     return
   }
@@ -913,6 +921,7 @@ function toggleQuickDate(quick: QuickDatePreset) {
     form.dueTime = ''
     form.durationStart = ''
     form.durationEnd = ''
+    resetEndEdited()
     return
   }
   explicitNoDeadline.value = false
@@ -1064,22 +1073,25 @@ function applyPrefillFromQuery() {
 
   if (durationStartParam) {
     form.durationStart = durationStartParam
-    form.durationEnd = durationEndParam ?? addMinutesToTime(durationStartParam, 60)
+    form.durationEnd = durationEndParam ?? defaultDurationEnd(durationStartParam)
     if (dueTimeParam) form.dueTime = dueTimeParam
+    adoptLoadedDuration(form.durationStart, form.durationEnd)
     return
   }
 
   if (dueTimeParam && form.dueDate) {
     form.dueTime = dueTimeParam
     form.durationStart = dueTimeParam
-    form.durationEnd = addMinutesToTime(dueTimeParam, 60)
+    form.durationEnd = defaultDurationEnd(dueTimeParam)
+    resetEndEdited()
     return
   }
 
   if (dueTimeParam) {
     form.dueTime = dueTimeParam
     form.durationStart = dueTimeParam
-    form.durationEnd = addMinutesToTime(dueTimeParam, 60)
+    form.durationEnd = defaultDurationEnd(dueTimeParam)
+    resetEndEdited()
   }
 }
 
@@ -1091,6 +1103,10 @@ function hydrateFromTask(task: Task) {
   form.dueTime = task.dueTime || ''
   form.durationStart = task.duration?.start || ''
   form.durationEnd = task.duration?.end || ''
+  if (form.durationStart && !form.durationEnd) {
+    form.durationEnd = defaultDurationEnd(form.durationStart)
+  }
+  adoptLoadedDuration(form.durationStart, form.durationEnd)
   form.priority = task.priority || 'none'
   const notify = task.notification || ''
   if (notify && !PRESET_NOTIFY.has(notify)) {

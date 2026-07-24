@@ -5,6 +5,23 @@ export type ApiMatrixBlock =
   | 'urgent_not_important'
   | 'not_urgent_not_important'
 export type ApiRepeatUnit = 'none' | 'day' | 'week' | 'month' | 'year'
+export type ApiListKey =
+  | 'overdue'
+  | 'today'
+  | 'tomorrow'
+  | 'later'
+  | 'no_deadline'
+  | 'completed'
+export type ApiPlatform = 'android' | 'ios' | 'web'
+
+export interface ApiAttachment {
+  id: number
+  file_url: string
+  original_name: string
+  content_type: string
+  size: number
+  created_at: string
+}
 
 export interface ApiTask {
   id: number
@@ -13,17 +30,57 @@ export interface ApiTask {
   due_at: string | null
   start_at: string | null
   end_at: string | null
+  is_all_day?: boolean
   reminder_at: string | null
   reminder_offset_minutes?: number | null
+  reminder_delivered_at?: string | null
   repeat_unit: ApiRepeatUnit
   repeat_interval: number
+  repeat_until?: string | null
+  series_id?: string | null
+  parent_task?: number | null
   priority: ApiPriority
   matrix_block: ApiMatrixBlock
   image: string | null
+  image_url?: string | null
+  attachments?: ApiAttachment[]
   is_completed: boolean
   completed_at: string | null
+  list_key?: ApiListKey
+  next_task?: ApiTask | null
   created_at: string
   updated_at: string
+}
+
+export interface ApiFcmDevice {
+  id: number
+  device_id: string
+  name: string
+  platform: ApiPlatform
+  app_version: string
+  is_active: boolean
+  last_seen_at: string
+  created_at: string
+}
+
+export interface ApiNotificationItem {
+  id: number
+  type: string
+  title: string
+  body: string
+  data: Record<string, string>
+  task: number | null
+  is_read: boolean
+  read_at: string | null
+  created_at: string
+}
+
+export interface ApiNotificationsResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  unread_count?: number
+  results: ApiNotificationItem[]
 }
 
 export interface ApiTaskGroup {
@@ -45,6 +102,9 @@ export interface ApiCalendarResponse {
   date: string
   range_start: string
   range_end: string
+  timezone?: string
+  all_day_tasks?: ApiTask[]
+  timed_tasks?: ApiTask[]
   tasks: ApiTask[]
 }
 
@@ -52,7 +112,8 @@ export interface ApiMatrixBlock {
   block: ApiMatrixBlock
   title: string
   allowed_priorities: ApiPriority[]
-  date_filter: string
+  date_filter?: string
+  date_filters?: string[]
   count: number
   tasks: ApiTask[]
 }
@@ -62,7 +123,8 @@ export interface ApiMatrixSetting {
   block: ApiMatrixBlock
   title: string
   allowed_priorities: ApiPriority[]
-  date_filter: string
+  date_filter?: string
+  date_filters?: string[]
 }
 
 export interface ApiSound {

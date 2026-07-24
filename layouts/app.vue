@@ -110,6 +110,24 @@
           :class="isDarkTheme ? 'bg-[#10141b] border border-[#222833]' : 'bg-sber-gray-light'"
         >
           <NuxtLink
+            to="/app/notifications"
+            class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+            :class="route.path === '/app/notifications'
+              ? 'bg-sber-green text-white'
+              : isDarkTheme
+                ? 'text-slate-300 hover:bg-[#20242d]'
+                : 'text-sber-gray hover:bg-white'"
+          >
+            <Bell class="h-4 w-4" />
+            <span class="flex-1">Уведомления</span>
+            <span
+              v-if="notificationsStore.unreadCount > 0"
+              class="min-w-[1.25rem] rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-bold leading-none text-white"
+            >
+              {{ notificationsStore.unreadCount > 99 ? '99+' : notificationsStore.unreadCount }}
+            </span>
+          </NuxtLink>
+          <NuxtLink
             to="/app/faq"
             class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
             :class="route.path === '/app/faq'
@@ -162,7 +180,7 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronRight, HelpCircle, Plus, Share2 } from 'lucide-vue-next'
+import { Bell, ChevronRight, HelpCircle, Plus, Share2 } from 'lucide-vue-next'
 import { BRAND_NAME } from '~/utils/site-info'
 import {
   orderNavItems,
@@ -175,7 +193,17 @@ const route = useRoute()
 const settingsStore = useSettingsStore()
 const authStore = useAuthStore()
 const premiumStore = usePremiumStore()
+const notificationsStore = useNotificationsStore()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
+
+watch(
+  () => authStore.isLoggedIn,
+  (loggedIn) => {
+    if (loggedIn) void notificationsStore.fetchUnreadCount()
+    else notificationsStore.reset()
+  },
+  { immediate: true },
+)
 
 /** Active tab from route.path only — never from list index. */
 const activeNavId = ref<AppNavItemId | null>(null)

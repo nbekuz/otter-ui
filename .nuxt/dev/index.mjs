@@ -653,7 +653,8 @@ const _inlineRuntimeConfig = {
       "storageBucket": "otter-6bdac.firebasestorage.app",
       "messagingSenderId": "911773858551",
       "appId": "1:911773858551:web:dd939daa464da5af74f1f2",
-      "measurementId": "G-D48K735BKD"
+      "measurementId": "G-D48K735BKD",
+      "vapidKey": "BBUplNc_uDIgZqfd7xE07f1lsniR9-CNoEwUVxx78dNQkp5UunpNpbBnN1AyY7D9oC35hhPwRZU0zt-tw-jxbvw"
     }
   }
 };

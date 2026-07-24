@@ -33,9 +33,12 @@ export { definePageMeta } from '../node_modules/nuxt/dist/pages/runtime/composab
 export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
 export { useAppToast, AppToastType } from '../composables/useAppToast';
 export { useFirebaseAuth } from '../composables/useFirebaseAuth.client';
-export { useTaskTimeSync } from '../composables/useTaskTimeSync';
+export { isDefaultDurationEnd, useTaskTimeSync } from '../composables/useTaskTimeSync';
 export { api, getApiFieldError, getApiErrorMessage, apiGet, apiPost, apiPut, apiPatch, apiDelete } from '../utils/api';
 export { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, FIREBASE_ID_TOKEN_STORAGE_KEY, onAuthTokensChanged, migrateLegacyTokens, getAccessToken, getRefreshToken, setAuthTokens, clearAuthSession, readRememberedLogin, writeRememberedLogin, clearRememberedLogin, AuthTokens } from '../utils/auth-session';
+export { buildMonthCells, buildYearMonthCells, buildYearMonths, CalendarMonthCell, CalendarYearDayCell, CalendarYearMonth } from '../utils/calendar-grid';
+export { validateEmail } from '../utils/email-policy';
+export { registerWebFcmDevice, unregisterWebFcmDevice } from '../utils/fcm-devices';
 export { STATIC_LEGAL_DOCUMENTS, getStaticLegalDocument, formatLegalUpdatedAt, LegalSlug, StaticLegalDocument } from '../utils/legal-static';
 export { resolveMediaUrl } from '../utils/media';
 export { APP_NAV_CATALOG, SIDEBAR_NAV_IDS, BOTTOM_NAV_IDS, resolveActiveNavId, isNavItemActive, buildNavOrderMap, orderNavItems, AppNavItemId, AppNavItem } from '../utils/nav-items';
@@ -46,11 +49,13 @@ export { PREMIUM_TARIFF_DISPLAY, isPurchaseableTariff, sanitizeTariffDescription
 export { PRIORITY_COLORS, priorityColor } from '../utils/priority-colors';
 export { taskOccursOnDate, computeNextOccurrenceDate, isRecurringTask, expandTasksForDate, expandTasksForRange, resolveRealTaskId } from '../utils/recurrence';
 export { BRAND_NAME, SITE_LEGAL_INFO, DESKTOP_APP, PREMIUM_LANDING, PREMIUM_SUBSCRIPTION } from '../utils/site-info';
+export { OTTER_TASKS_EXPORT_VERSION, tasksToExportPayload, parseTasksExport, downloadTasksExportJson, OtterTasksExportPayload, OtterExportedTask } from '../utils/task-export';
 export { apiTaskToUi, uiTaskToApiPayload, dataUrlToFile, uiTaskToFormData, groupKeyToUi, apiMatrixBlockToUi } from '../utils/task-mapper';
-export { parseApiWallClock, parseTimeToMinutes, formatMinutesToTime, addMinutesToTime, DURATION_END_AFTER_START_MESSAGE, REPEAT_INTERVAL_MAX, REPEAT_INTERVAL_MAX_MESSAGE, validateDurationFields, validateRepeatInterval, getTaskScheduleStart, getTaskDurationMinutes } from '../utils/time';
+export { parseApiWallClock, parseTimeToMinutes, formatMinutesToTime, addMinutesToTime, defaultDurationEnd, DURATION_END_AFTER_START_MESSAGE, REPEAT_INTERVAL_MAX, REPEAT_INTERVAL_MAX_MESSAGE, validateDurationFields, validateRepeatInterval, getTaskScheduleStart, getTaskDurationMinutes } from '../utils/time';
 export { useAuthStore } from '../stores/auth';
 export { useCalendarStore, CalendarViewType } from '../stores/calendar';
 export { useMobileApiStore } from '../stores/mobile-api';
+export { useNotificationsStore } from '../stores/notifications';
 export { usePomodoroStore } from '../stores/pomodoro';
 export { usePremiumStore } from '../stores/premium';
 export { useSettingsStore, HelpFaqItem } from '../stores/settings';

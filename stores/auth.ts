@@ -9,6 +9,9 @@ import {
   setAuthTokens,
 } from '~/utils/auth-session'
 import { resolveMediaUrl } from '~/utils/media'
+import { registerWebFcmDevice, unregisterWebFcmDevice } from '~/utils/fcm-devices'
+import { getFirebaseApp } from '~/lib/firebase'
+import type { FirebaseOptions } from 'firebase/app'
 
 interface BackendUser {
   id: number
@@ -78,6 +81,19 @@ export const useAuthStore = defineStore('auth', () => {
     syncTokensFromStorage()
   }
 
+  async function syncPushDevice() {
+    if (!import.meta.client) return
+    try {
+      const runtime = useRuntimeConfig()
+      const firebaseConfig = runtime.public.firebase as FirebaseOptions & { vapidKey?: string }
+      const app = getFirebaseApp(firebaseConfig)
+      await registerWebFcmDevice(app, firebaseConfig.vapidKey)
+    }
+    catch {
+      /* optional */
+    }
+  }
+
   function setSession(nextUser: BackendUser, tokens: LoginResponse['tokens']) {
     applyTokens(tokens)
     profileFirstName.value = nextUser.first_name || ''
@@ -127,6 +143,7 @@ export const useAuthStore = defineStore('auth', () => {
     })
     applyTokens(response.tokens)
     await fetchMyProfile()
+    void syncPushDevice()
     navigateTo('/app')
   }
 
@@ -145,6 +162,7 @@ export const useAuthStore = defineStore('auth', () => {
       last_name,
     })
     setSession(response.user, response.tokens)
+    void syncPushDevice()
     if (navigateOnSuccess) {
       navigateTo('/app')
     }
@@ -168,6 +186,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     setSession(response.user, response.tokens)
     await fetchMyProfile()
+    void syncPushDevice()
     console.log('[otter:google] navigateTo(/app)')
     navigateTo('/app')
   }
@@ -203,12 +222,20 @@ export const useAuthStore = defineStore('auth', () => {
     logout()
   }
 
-  function logout() {
+  async function logout() {
+    try {
+      await unregisterWebFcmDevice()
+    }
+    catch {
+      /* ignore */
+    }
     const tasksStore = useTasksStore()
     const premiumStore = usePremiumStore()
     const settingsStore = useSettingsStore()
+    const notificationsStore = useNotificationsStore()
     tasksStore.reset()
     premiumStore.reset()
+    notificationsStore.reset()
     settingsStore.isPremium = false
     settingsStore.premiumActivatedAt = null
     clearAuthSession()

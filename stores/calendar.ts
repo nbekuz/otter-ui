@@ -1,11 +1,37 @@
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
+import type { CalendarDefaultView } from '~/data/mockData'
 
-export type CalendarViewType = 'day' | 'week' | 'month' | 'year'
+export type CalendarViewType = CalendarDefaultView
+
+function resolveDefaultView(value: string | undefined): CalendarViewType {
+  if (value === 'day' || value === 'week' || value === 'month' || value === 'year') {
+    return value
+  }
+  return 'day'
+}
 
 export const useCalendarStore = defineStore('calendar', () => {
+  const settingsStore = useSettingsStore()
   const currentDate = ref(dayjs().format('YYYY-MM-DD'))
-  const viewType = ref<CalendarViewType>('day')
+  const viewType = ref<CalendarViewType>(
+    resolveDefaultView(settingsStore.appSettings.calendarDefaultView),
+  )
+  /** 00:00–06:00 collapsed by default; auto-expands when early tasks exist. */
+  const collapsedEarlyHours = ref(
+    settingsStore.appSettings.calendarCollapseEarlyHours !== false,
+  )
+  /** 22:00–00:00 collapsed by default; auto-expands when late tasks exist. */
+  const collapsedLateHours = ref(
+    settingsStore.appSettings.calendarCollapseLateHours !== false,
+  )
+
+  /** Apply appearance defaults from Settings → Вид (without forcing mid-session). */
+  function applyViewDefaultsFromSettings() {
+    viewType.value = resolveDefaultView(settingsStore.appSettings.calendarDefaultView)
+    collapsedEarlyHours.value = settingsStore.appSettings.calendarCollapseEarlyHours !== false
+    collapsedLateHours.value = settingsStore.appSettings.calendarCollapseLateHours !== false
+  }
 
   const displayLabel = computed(() => {
     const d = dayjs(currentDate.value)
@@ -59,14 +85,27 @@ export const useCalendarStore = defineStore('calendar', () => {
     viewType.value = view
   }
 
+  function toggleEarlyHours() {
+    collapsedEarlyHours.value = !collapsedEarlyHours.value
+  }
+
+  function toggleLateHours() {
+    collapsedLateHours.value = !collapsedLateHours.value
+  }
+
   return {
     currentDate,
     viewType,
     displayLabel,
+    collapsedEarlyHours,
+    collapsedLateHours,
+    applyViewDefaultsFromSettings,
     goNext,
     goPrev,
     goToday,
     setDate,
     setView,
+    toggleEarlyHours,
+    toggleLateHours,
   }
 })

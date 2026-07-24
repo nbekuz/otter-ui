@@ -308,13 +308,21 @@
         </div>
       </div>
 
-      <SettingsRow label="Вид" @click="runStubAction">
+      <SettingsRow
+        label="Вид"
+        :value="calendarViewLabel"
+        @click="viewModal = true"
+      >
         <template #icon><Paintbrush class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
-      <SettingsRow label="Дата и время" @click="runStubAction">
+      <SettingsRow
+        label="Дата и время"
+        :value="timezoneLabel"
+        @click="dateTimeModal = true"
+      >
         <template #icon><Clock class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
-      <SettingsRow label="Интеграции и импорт" @click="runStubAction">
+      <SettingsRow label="Интеграции и импорт" @click="integrationsModal = true">
         <template #icon><Download class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
     </div>
@@ -347,10 +355,18 @@
         </button>
       </div>
 
-      <SettingsRow label="Звук уведомления" :value="getSound(settingsStore.appSettings.notificationSound)" @click="soundModal = 'notification'">
+      <SettingsRow
+        label="Звук уведомления"
+        :value="soundsStore.soundLabel(settingsStore.appSettings.notificationSound, 'notification')"
+        @click="openSoundModal('notification')"
+      >
         <template #icon><Volume2 class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
-      <SettingsRow label="Звук подтверждения" :value="getSound(settingsStore.appSettings.completionSound)" @click="soundModal = 'completion'">
+      <SettingsRow
+        label="Звук подтверждения"
+        :value="soundsStore.soundLabel(settingsStore.appSettings.completionSound, 'completion')"
+        @click="openSoundModal('completion')"
+      >
         <template #icon><CheckCircle class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
     </div>
@@ -517,22 +533,28 @@
     <Teleport to="body">
       <Transition name="overlay"><div v-if="soundModal" class="overlay" @click="soundModal = null" /></Transition>
       <Transition name="modal">
-        <div v-if="soundModal" class="app-modal px-5 py-5" @click.stop>
+        <div v-if="soundModal" class="app-modal px-5 py-5" style="max-height: 85dvh; overflow-y: auto;" @click.stop>
           <h3 class="text-lg font-bold mb-4">
             {{ soundModal === 'notification' ? 'Звук уведомления' : 'Звук подтверждения' }}
           </h3>
+          <p v-if="soundPickerLoading" class="mb-3 text-sm text-sber-gray">Загрузка…</p>
           <div class="flex flex-col gap-2">
-            <button v-for="s in soundOptions" :key="s.id"
-                    class="flex items-center gap-3 px-4 py-3 rounded-2xl border transition-colors"
-                    :class="getCurrentSound(soundModal) === s.id
-                      ? 'border-sber-green bg-sber-green-light'
-                      : 'border-sber-gray-light'"
-                    @click="setSound(soundModal, s.id)">
-              <span class="text-xl">{{ s.icon }}</span>
-              <span class="text-sm font-medium text-sber-black">{{ s.name }}</span>
-              <Check v-if="getCurrentSound(soundModal) === s.id" class="w-4 h-4 text-sber-green ml-auto" />
+            <button
+              v-for="s in soundPickerOptions"
+              :key="s.key"
+              type="button"
+              class="flex items-center gap-3 px-4 py-3 rounded-2xl border transition-colors"
+              :class="getCurrentSound(soundModal) === s.key
+                ? 'border-sber-green bg-sber-green-light'
+                : 'border-sber-gray-light'"
+              @click="setSound(soundModal, s)"
+            >
+              <span class="text-xl">{{ s.emoji }}</span>
+              <span class="text-sm font-medium text-sber-black">{{ s.title }}</span>
+              <Check v-if="getCurrentSound(soundModal) === s.key" class="w-4 h-4 text-sber-green ml-auto" />
             </button>
           </div>
+          <button class="btn-secondary mt-4 w-full" type="button" @click="soundModal = null">Закрыть</button>
         </div>
       </Transition>
     </Teleport>
@@ -554,6 +576,148 @@
             <Check v-if="selectedLanguage === lang.id" class="w-4 h-4 text-sber-green" />
           </button>
           <button class="btn-secondary mt-3" @click="languageModal = false">Закрыть</button>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- View (Вид) modal -->
+    <Teleport to="body">
+      <Transition name="overlay"><div v-if="viewModal" class="overlay" @click="viewModal = false" /></Transition>
+      <Transition name="modal">
+        <div v-if="viewModal" class="app-modal px-5 py-5" style="max-height: 85dvh; overflow-y: auto;" @click.stop>
+          <h3 class="text-lg font-bold mb-1">Вид</h3>
+          <p class="mb-4 text-sm text-sber-gray">Как открывается календарь и какие часы свёрнуты по умолчанию.</p>
+
+          <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-sber-gray">Календарь по умолчанию</p>
+          <div class="mb-4 grid grid-cols-2 gap-2">
+            <button
+              v-for="opt in calendarViewOptions"
+              :key="opt.id"
+              type="button"
+              class="rounded-2xl border px-3 py-3 text-sm font-medium transition-colors"
+              :class="(settingsStore.appSettings.calendarDefaultView || 'day') === opt.id
+                ? 'border-sber-green bg-sber-green-light text-sber-green'
+                : 'border-sber-gray-light text-sber-black'"
+              @click="setCalendarDefaultView(opt.id)"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
+
+          <div class="mb-3 flex items-center gap-3 rounded-2xl border border-sber-gray-light px-4 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-sber-black">Скрывать ранние часы</p>
+              <p class="text-xs text-sber-gray">00:00–06:00 в видах День и Неделя</p>
+            </div>
+            <button
+              type="button"
+              class="relative h-6 w-12 rounded-full transition-colors"
+              :class="settingsStore.appSettings.calendarCollapseEarlyHours !== false ? 'bg-sber-green' : 'bg-sber-gray-mid'"
+              @click="toggleCalendarCollapse('early')"
+            >
+              <div
+                class="absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform"
+                :class="settingsStore.appSettings.calendarCollapseEarlyHours !== false ? 'translate-x-7' : 'translate-x-1'"
+              />
+            </button>
+          </div>
+
+          <div class="mb-4 flex items-center gap-3 rounded-2xl border border-sber-gray-light px-4 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-sber-black">Скрывать поздние часы</p>
+              <p class="text-xs text-sber-gray">22:00–00:00 в видах День и Неделя</p>
+            </div>
+            <button
+              type="button"
+              class="relative h-6 w-12 rounded-full transition-colors"
+              :class="settingsStore.appSettings.calendarCollapseLateHours !== false ? 'bg-sber-green' : 'bg-sber-gray-mid'"
+              @click="toggleCalendarCollapse('late')"
+            >
+              <div
+                class="absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform"
+                :class="settingsStore.appSettings.calendarCollapseLateHours !== false ? 'translate-x-7' : 'translate-x-1'"
+              />
+            </button>
+          </div>
+
+          <button class="btn-secondary w-full" type="button" @click="viewModal = false">Закрыть</button>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Date & time modal -->
+    <Teleport to="body">
+      <Transition name="overlay"><div v-if="dateTimeModal" class="overlay" @click="dateTimeModal = false" /></Transition>
+      <Transition name="modal">
+        <div v-if="dateTimeModal" class="app-modal px-5 py-5" @click.stop>
+          <h3 class="text-lg font-bold mb-1">Дата и время</h3>
+          <p class="mb-4 text-sm text-sber-gray">
+            Часовой пояс используется для напоминаний и группировки «Сегодня» / «Просрочено».
+          </p>
+
+          <div class="mb-3 rounded-2xl border border-sber-gray-light px-4 py-3">
+            <p class="text-xs font-semibold uppercase tracking-wide text-sber-gray">Часовой пояс</p>
+            <p class="mt-1 text-sm font-semibold text-sber-black">{{ timezoneLabel }}</p>
+            <p class="mt-1 text-xs text-sber-gray">Сейчас: {{ deviceNowLabel }}</p>
+          </div>
+
+          <button
+            class="btn-primary mb-3 w-full"
+            type="button"
+            :disabled="timezoneSyncing"
+            @click="syncTimezoneFromDevice"
+          >
+            {{ timezoneSyncing ? 'Синхронизация…' : 'Синхронизировать с устройством' }}
+          </button>
+          <button class="btn-secondary w-full" type="button" @click="dateTimeModal = false">Закрыть</button>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Integrations & import modal -->
+    <Teleport to="body">
+      <Transition name="overlay"><div v-if="integrationsModal" class="overlay" @click="integrationsModal = false" /></Transition>
+      <Transition name="modal">
+        <div v-if="integrationsModal" class="app-modal px-5 py-5" @click.stop>
+          <h3 class="text-lg font-bold mb-1">Интеграции и импорт</h3>
+          <p class="mb-4 text-sm text-sber-gray">
+            Экспортируйте задачи в JSON или импортируйте их из файла Otter.
+          </p>
+
+          <button
+            class="mb-2 flex w-full items-center gap-3 rounded-2xl border border-sber-gray-light px-4 py-4 text-left transition-colors hover:bg-sber-gray-light"
+            type="button"
+            :disabled="exportingTasks"
+            @click="exportTasksFile"
+          >
+            <Download class="h-5 w-5 text-sber-gray" />
+            <span class="min-w-0 flex-1">
+              <span class="block text-sm font-medium text-sber-black">Экспорт задач</span>
+              <span class="block text-xs text-sber-gray">Скачать JSON со всеми задачами</span>
+            </span>
+          </button>
+
+          <button
+            class="mb-4 flex w-full items-center gap-3 rounded-2xl border border-sber-gray-light px-4 py-4 text-left transition-colors hover:bg-sber-gray-light"
+            type="button"
+            :disabled="importingTasks"
+            @click="importTasksInputRef?.click()"
+          >
+            <Upload class="h-5 w-5 text-sber-gray" />
+            <span class="min-w-0 flex-1">
+              <span class="block text-sm font-medium text-sber-black">Импорт задач</span>
+              <span class="block text-xs text-sber-gray">Загрузить JSON-файл Otter</span>
+            </span>
+          </button>
+          <input
+            ref="importTasksInputRef"
+            type="file"
+            accept="application/json,.json"
+            class="hidden"
+            @change="onImportTasksFile"
+          >
+
+          <button class="btn-secondary w-full" type="button" @click="integrationsModal = false">Закрыть</button>
         </div>
       </Transition>
     </Teleport>
@@ -698,27 +862,36 @@
 import {
   Bell, Vibrate, Volume2, CheckCircle, Camera, Image, Globe,
   HelpCircle, Info, Star, Check, ChevronDown, ChevronRight, User, Lock, FileText,
-  Paintbrush, Clock, Download, Share2, Smartphone, Crown, GripVertical, MessageSquareText,
+  Paintbrush, Clock, Download, Upload, Share2, Smartphone, Crown, GripVertical, MessageSquareText,
 } from 'lucide-vue-next'
 import { Moon, Sun } from 'lucide-vue-next'
-import { soundOptions } from '~/data/mockData'
+import type { CalendarDefaultView } from '~/data/mockData'
+import type { ApiSound } from '~/types/mobile-api'
 import { BRAND_NAME } from '~/utils/site-info'
 import { getApiErrorMessage } from '~/utils/api'
 import { validateNewPassword } from '~/utils/password-policy'
 import { buildNavOrderMap } from '~/utils/nav-items'
+import { downloadTasksExportJson, parseTasksExport } from '~/utils/task-export'
 
 definePageMeta({ layout: 'app' })
 
 const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
 const premiumStore = usePremiumStore()
+const tasksStore = useTasksStore()
+const calendarStore = useCalendarStore()
+const soundsStore = useSoundsStore()
 const { showToast } = useAppToast()
 
 const nameModal = ref(false)
 const passwordModal = ref(false)
 const premiumModal = ref(false)
-const soundModal = ref<string | null>(null)
+const soundModal = ref<'notification' | 'completion' | null>(null)
+const soundPickerLoading = ref(false)
 const languageModal = ref(false)
+const viewModal = ref(false)
+const dateTimeModal = ref(false)
+const integrationsModal = ref(false)
 const contactModal = ref(false)
 const aboutModal = ref(false)
 const premiumRefreshLoading = ref(false)
@@ -729,11 +902,16 @@ const avatarSettingsError = ref('')
 const avatarInputRef = ref<HTMLInputElement | null>(null)
 const avatarGalleryInputRef = ref<HTMLInputElement | null>(null)
 const contactScreenshotInputRef = ref<HTMLInputElement | null>(null)
+const importTasksInputRef = ref<HTMLInputElement | null>(null)
 const showLogout = ref(false)
 const showDeleteAccount = ref(false)
 const deleteAccountLoading = ref(false)
 const deleteAccountError = ref('')
 const comingSoonVisible = ref(false)
+const timezoneSyncing = ref(false)
+const exportingTasks = ref(false)
+const importingTasks = ref(false)
+const deviceNowTick = ref(0)
 const editFirstName = ref('')
 const editLastName = ref('')
 const nameErrors = reactive({ first: '', last: '' })
@@ -779,6 +957,54 @@ const bottomMenuOrder = computed(() =>
 const selectedLanguageLabel = computed(() =>
   languages.find(l => l.id === selectedLanguage.value)?.label || 'Русский'
 )
+
+const calendarViewOptions: { id: CalendarDefaultView; label: string }[] = [
+  { id: 'day', label: 'День' },
+  { id: 'week', label: 'Неделя' },
+  { id: 'month', label: 'Месяц' },
+  { id: 'year', label: 'Год' },
+]
+
+const calendarViewLabel = computed(() => {
+  const id = settingsStore.appSettings.calendarDefaultView || 'day'
+  return calendarViewOptions.find(o => o.id === id)?.label || 'День'
+})
+
+const timezoneLabel = computed(() =>
+  settingsStore.appSettings.timezone
+  || (import.meta.client ? Intl.DateTimeFormat().resolvedOptions().timeZone : '')
+  || '—'
+)
+
+const deviceNowLabel = computed(() => {
+  void deviceNowTick.value
+  if (!import.meta.client) return '—'
+  return new Intl.DateTimeFormat('ru-RU', {
+    dateStyle: 'medium',
+    timeStyle: 'medium',
+    timeZone: timezoneLabel.value !== '—' ? timezoneLabel.value : undefined,
+  }).format(new Date())
+})
+
+let deviceNowTimer: ReturnType<typeof setInterval> | null = null
+watch(dateTimeModal, (open) => {
+  if (open) {
+    deviceNowTick.value++
+    deviceNowTimer = setInterval(() => { deviceNowTick.value++ }, 1000)
+    return
+  }
+  if (deviceNowTimer) {
+    clearInterval(deviceNowTimer)
+    deviceNowTimer = null
+  }
+})
+
+onUnmounted(() => {
+  if (deviceNowTimer) {
+    clearInterval(deviceNowTimer)
+    deviceNowTimer = null
+  }
+})
 
 const route = useRoute()
 
@@ -1036,6 +1262,109 @@ async function runStubAction() {
   }
 }
 
+async function setCalendarDefaultView(view: CalendarDefaultView) {
+  await settingsStore.updateSettings({ calendarDefaultView: view })
+  calendarStore.applyViewDefaultsFromSettings()
+}
+
+async function toggleCalendarCollapse(which: 'early' | 'late') {
+  if (which === 'early') {
+    const next = settingsStore.appSettings.calendarCollapseEarlyHours === false
+    await settingsStore.updateSettings({ calendarCollapseEarlyHours: next })
+  }
+  else {
+    const next = settingsStore.appSettings.calendarCollapseLateHours === false
+    await settingsStore.updateSettings({ calendarCollapseLateHours: next })
+  }
+  calendarStore.applyViewDefaultsFromSettings()
+}
+
+async function syncTimezoneFromDevice() {
+  if (!import.meta.client || timezoneSyncing.value) return
+  timezoneSyncing.value = true
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    if (!tz) {
+      showToast('Не удалось определить часовой пояс устройства', 'error')
+      return
+    }
+    await settingsStore.updateSettings({ timezone: tz })
+    showToast('Часовой пояс обновлён', 'success')
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err, 'Не удалось синхронизировать часовой пояс'), 'error')
+  }
+  finally {
+    timezoneSyncing.value = false
+  }
+}
+
+async function exportTasksFile() {
+  if (exportingTasks.value) return
+  exportingTasks.value = true
+  try {
+    if (!tasksStore.initialized) {
+      await tasksStore.fetchGrouped()
+    }
+    const tasks = tasksStore.tasks || []
+    if (!tasks.length) {
+      showToast('Нет задач для экспорта', 'error')
+      return
+    }
+    downloadTasksExportJson(tasks)
+    showToast(`Экспортировано задач: ${tasks.length}`, 'success')
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err, 'Не удалось экспортировать задачи'), 'error')
+  }
+  finally {
+    exportingTasks.value = false
+  }
+}
+
+async function onImportTasksFile(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file || importingTasks.value) return
+
+  importingTasks.value = true
+  try {
+    const text = await file.text()
+    const parsed = parseTasksExport(JSON.parse(text))
+    let created = 0
+    for (const item of parsed) {
+      await tasksStore.addTask({
+        title: item.title,
+        description: item.description,
+        dueDate: item.dueDate,
+        dueTime: item.dueTime,
+        duration: item.duration,
+        priority: item.priority || 'none',
+        completed: false,
+        notification: item.notification,
+        repeat: item.repeat || 'none',
+        repeatDays: item.repeatDays,
+        repeatCustom: item.repeatCustom,
+        isAllDay: item.isAllDay,
+        matrixBlock: item.matrixBlock,
+      })
+      created++
+    }
+    showToast(`Импортировано задач: ${created}`, 'success')
+    integrationsModal.value = false
+  }
+  catch (err) {
+    const message = err instanceof Error && err.message
+      ? err.message
+      : getApiErrorMessage(err, 'Не удалось импортировать задачи')
+    showToast(message, 'error')
+  }
+  finally {
+    importingTasks.value = false
+  }
+}
+
 async function onPremiumTrial(payload: { tariff: string; recurringConsent: boolean }) {
   try {
     await premiumStore.startTrial(payload.tariff, payload.recurringConsent)
@@ -1093,20 +1422,36 @@ async function cancelPremiumSubscription() {
   }
 }
 
-function getSound(soundId: string) {
-  return soundOptions.find(s => s.id === soundId)?.name || ''
-}
-
 function getCurrentSound(modal: string | null) {
   if (modal === 'notification') return settingsStore.appSettings.notificationSound
   return settingsStore.appSettings.completionSound
 }
 
-function setSound(modal: string | null, soundId: string) {
+const soundPickerOptions = computed(() => {
+  if (soundModal.value === 'completion') return soundsStore.completion
+  if (soundModal.value === 'notification') return soundsStore.notification
+  return []
+})
+
+async function openSoundModal(kind: 'notification' | 'completion') {
+  soundModal.value = kind
+  soundPickerLoading.value = true
+  try {
+    await soundsStore.ensureFeedbackLoaded()
+  }
+  finally {
+    soundPickerLoading.value = false
+  }
+}
+
+async function setSound(modal: string | null, sound: ApiSound) {
+  if (!modal) return
+  soundsStore.previewSound(sound)
   if (modal === 'notification') {
-    settingsStore.updateSettings({ notificationSound: soundId })
-  } else {
-    settingsStore.updateSettings({ completionSound: soundId })
+    await settingsStore.updateSettings({ notificationSound: sound.key })
+  }
+  else {
+    await settingsStore.updateSettings({ completionSound: sound.key })
   }
   soundModal.value = null
 }
