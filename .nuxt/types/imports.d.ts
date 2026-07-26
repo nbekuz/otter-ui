@@ -86,6 +86,7 @@ declare global {
   const eagerComputed: typeof import('@vueuse/core').eagerComputed
   const effect: typeof import('vue').effect
   const effectScope: typeof import('vue').effectScope
+  const enableWebPushNotifications: typeof import('../../utils/fcm-devices').enableWebPushNotifications
   const expandTasksForDate: typeof import('../../utils/recurrence').expandTasksForDate
   const expandTasksForRange: typeof import('../../utils/recurrence').expandTasksForRange
   const extendRef: typeof import('@vueuse/core').extendRef
@@ -512,6 +513,9 @@ declare global {
   export type { CalendarMonthCell, CalendarYearDayCell, CalendarYearMonth } from '../../utils/calendar-grid'
   import('../../utils/calendar-grid')
   // @ts-ignore
+  export type { WebPushRegisterResult } from '../../utils/fcm-devices'
+  import('../../utils/fcm-devices')
+  // @ts-ignore
   export type { LegalSlug, StaticLegalDocument } from '../../utils/legal-static'
   import('../../utils/legal-static')
   // @ts-ignore
@@ -616,6 +620,7 @@ declare module 'vue' {
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effect: UnwrapRef<typeof import('vue')['effect']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
+    readonly enableWebPushNotifications: UnwrapRef<typeof import('../../utils/fcm-devices')['enableWebPushNotifications']>
     readonly expandTasksForDate: UnwrapRef<typeof import('../../utils/recurrence')['expandTasksForDate']>
     readonly expandTasksForRange: UnwrapRef<typeof import('../../utils/recurrence')['expandTasksForRange']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>

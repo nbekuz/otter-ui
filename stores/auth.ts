@@ -87,10 +87,15 @@ export const useAuthStore = defineStore('auth', () => {
       const runtime = useRuntimeConfig()
       const firebaseConfig = runtime.public.firebase as FirebaseOptions & { vapidKey?: string }
       const app = getFirebaseApp(firebaseConfig)
-      await registerWebFcmDevice(app, firebaseConfig.vapidKey)
+      const result = await registerWebFcmDevice(app, firebaseConfig.vapidKey, {
+        requestPermission: false,
+      })
+      if (!result.ok) {
+        console.warn('[otter:fcm] login register:', result.reason, result.message)
+      }
     }
-    catch {
-      /* optional */
+    catch (err) {
+      console.warn('[otter:fcm] syncPushDevice error', err)
     }
   }
 

@@ -38,7 +38,7 @@ export { api, getApiFieldError, getApiErrorMessage, apiGet, apiPost, apiPut, api
 export { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, FIREBASE_ID_TOKEN_STORAGE_KEY, onAuthTokensChanged, migrateLegacyTokens, getAccessToken, getRefreshToken, setAuthTokens, clearAuthSession, readRememberedLogin, writeRememberedLogin, clearRememberedLogin, AuthTokens } from '../utils/auth-session';
 export { buildMonthCells, buildYearMonthCells, buildYearMonths, CalendarMonthCell, CalendarYearDayCell, CalendarYearMonth } from '../utils/calendar-grid';
 export { validateEmail } from '../utils/email-policy';
-export { registerWebFcmDevice, unregisterWebFcmDevice } from '../utils/fcm-devices';
+export { registerWebFcmDevice, enableWebPushNotifications, unregisterWebFcmDevice, WebPushRegisterResult } from '../utils/fcm-devices';
 export { STATIC_LEGAL_DOCUMENTS, getStaticLegalDocument, formatLegalUpdatedAt, LegalSlug, StaticLegalDocument } from '../utils/legal-static';
 export { resolveMediaUrl } from '../utils/media';
 export { APP_NAV_CATALOG, SIDEBAR_NAV_IDS, BOTTOM_NAV_IDS, resolveActiveNavId, isNavItemActive, buildNavOrderMap, orderNavItems, AppNavItemId, AppNavItem } from '../utils/nav-items';

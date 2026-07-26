@@ -343,6 +343,26 @@
         </button>
       </div>
 
+      <div class="border-b border-sber-gray-light px-4 py-3">
+        <div class="flex items-start gap-3">
+          <Bell class="mt-0.5 h-5 w-5 shrink-0 text-sber-gray" />
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium text-sber-black">Браузерные push</p>
+            <p class="mt-0.5 text-xs text-sber-gray">
+              {{ pushPermissionLabel }}
+            </p>
+            <button
+              type="button"
+              class="mt-2 rounded-xl bg-sber-green px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
+              :disabled="pushEnabling"
+              @click="enableBrowserPush"
+            >
+              {{ pushEnabling ? 'Подключение…' : 'Разрешить уведомления' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Vibration toggle -->
       <div class="flex items-center px-4 py-3.5 border-b border-sber-gray-light">
         <Vibrate class="w-5 h-5 text-sber-gray mr-3" />
@@ -872,6 +892,7 @@ import { getApiErrorMessage } from '~/utils/api'
 import { validateNewPassword } from '~/utils/password-policy'
 import { buildNavOrderMap } from '~/utils/nav-items'
 import { downloadTasksExportJson, parseTasksExport } from '~/utils/task-export'
+import { enableWebPushNotifications } from '~/utils/fcm-devices'
 
 definePageMeta({ layout: 'app' })
 
@@ -882,6 +903,47 @@ const tasksStore = useTasksStore()
 const calendarStore = useCalendarStore()
 const soundsStore = useSoundsStore()
 const { showToast } = useAppToast()
+
+const pushEnabling = ref(false)
+const pushPermissionTick = ref(0)
+
+const pushPermissionLabel = computed(() => {
+  pushPermissionTick.value
+  if (!import.meta.client || !('Notification' in window)) {
+    return 'Браузер не поддерживает уведомления'
+  }
+  const p = Notification.permission
+  if (p === 'granted') return 'Разрешено — устройство можно зарегистрировать для push'
+  if (p === 'denied') return 'Заблокировано в браузере. Разрешите уведомления в настройках сайта'
+  return 'Не разрешено — нажмите кнопку ниже'
+})
+
+async function enableBrowserPush() {
+  if (pushEnabling.value) return
+  pushEnabling.value = true
+  try {
+    if (!settingsStore.appSettings.notifications) {
+      await settingsStore.updateSettings({ notifications: true })
+    }
+    const result = await enableWebPushNotifications()
+    pushPermissionTick.value += 1
+    if (result.ok) {
+      showToast('Браузерные уведомления включены', 'success')
+    }
+    else if (result.reason === 'permission-denied') {
+      showToast(result.message, 'error')
+    }
+    else {
+      showToast(result.message || 'Не удалось включить push', 'error')
+    }
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err, 'Не удалось включить уведомления'), 'error')
+  }
+  finally {
+    pushEnabling.value = false
+  }
+}
 
 const nameModal = ref(false)
 const passwordModal = ref(false)

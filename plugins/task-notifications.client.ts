@@ -27,14 +27,6 @@ export default defineNuxtPlugin((nuxtApp) => {
   const settingsStore = useSettingsStore()
   const authStore = useAuthStore()
 
-  async function ensurePermission() {
-    if (!('Notification' in window)) return false
-    if (Notification.permission === 'granted') return true
-    if (Notification.permission === 'denied') return false
-    const result = await Notification.requestPermission()
-    return result === 'granted'
-  }
-
   function collectTasks() {
     const byId = new Map<string, (typeof tasksStore.tasks)[number]>()
     for (const task of tasksStore.tasks) byId.set(task.id, task)
@@ -125,14 +117,20 @@ export default defineNuxtPlugin((nuxtApp) => {
       const runtime = useRuntimeConfig()
       const fb = runtime.public.firebase as { vapidKey?: string } & Record<string, string>
       const app = getFirebaseApp(fb as never)
-      await registerWebFcmDevice(app, fb.vapidKey)
+      // Do not auto-prompt: only register if permission already granted.
+      const result = await registerWebFcmDevice(app, fb.vapidKey, {
+        requestPermission: false,
+      })
+      if (!result.ok) {
+        console.warn('[otter:fcm] auto-register skipped/failed:', result.reason, result.message)
+      }
     }
-    catch {
-      /* optional */
+    catch (err) {
+      console.warn('[otter:fcm] syncPushIfLoggedIn error', err)
     }
   }
 
-  void ensurePermission()
+  // Permission prompt only from Settings (user gesture). Auto-register if already granted.
   void syncPushIfLoggedIn()
   void useSoundsStore().ensureFeedbackLoaded().catch(() => undefined)
 
@@ -140,7 +138,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const dueTimer = window.setInterval(() => { void pollServerDueReminders() }, 45_000)
   watch(() => tasksStore.tasks.length, checkDueNotifications)
   watch(() => settingsStore.appSettings.notifications, (enabled) => {
-    if (enabled) void ensurePermission().then(() => checkDueNotifications())
+    if (enabled) void checkDueNotifications()
   })
   watch(() => authStore.isLoggedIn, (loggedIn) => {
     if (loggedIn) {

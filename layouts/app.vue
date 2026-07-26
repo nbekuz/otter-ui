@@ -111,20 +111,19 @@
         >
           <button
             type="button"
-            class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+            class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all"
             :class="isDarkTheme
-              ? 'text-yellow-400 hover:bg-[#20242d]'
-              : 'text-yellow-700 hover:bg-white'"
+              ? 'bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-300 ring-1 ring-amber-400/30 hover:from-amber-500/30 hover:ring-amber-400/50'
+              : 'bg-gradient-to-r from-amber-100 via-yellow-50 to-white text-amber-800 ring-1 ring-amber-200/80 hover:from-amber-200 hover:ring-amber-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]'"
             @click="openPremiumModal"
           >
-            <Crown class="h-4 w-4 text-yellow-500" />
-            <span class="flex-1 text-left">Премиум</span>
             <span
-              v-if="premiumStore.isPremium"
-              class="rounded-full bg-yellow-400/20 px-1.5 py-0.5 text-[10px] font-bold leading-none text-yellow-700"
+              class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+              :class="isDarkTheme ? 'bg-amber-400/15' : 'bg-amber-200/60'"
             >
-              ON
+              <Crown class="h-4 w-4 text-amber-500" />
             </span>
+            <span class="flex-1 text-left tracking-wide">Премиум</span>
           </button>
           <NuxtLink
             to="/app/notifications"
