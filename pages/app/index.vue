@@ -476,10 +476,10 @@
           <h3 class="mb-2 text-lg font-bold text-sber-black">Удалить повторяющуюся задачу?</h3>
           <p class="mb-4 text-sm text-sber-gray">Выберите, что именно удалить.</p>
           <button class="btn-primary mb-2" type="button" @click="deleteTaskOccurrence">
-            Только это повторение
+            Удалить только этот повтор
           </button>
           <button class="btn-secondary mb-2" type="button" @click="deleteAllOccurrences">
-            Все повторения
+            Удалить все повторения
           </button>
           <button class="w-full rounded-2xl py-4 text-sm font-semibold text-sber-gray" type="button" @click="deleteModal = false">Отмена</button>
         </div>
@@ -561,17 +561,30 @@ const desktopSplitRef = ref<HTMLElement | null>(null)
 const leftPaneWidth = ref(52)
 let removeResizeListeners: (() => void) | null = null
 
-// Recomputed on the client so the greeting matches the user's local time
-// (a plain dayjs() in a computed would freeze to the SSR/server timezone).
-const nowHour = ref(dayjs().hour())
+// Only set on the client — SSR would use the server timezone and can show
+// e.g. "Доброй ночи" while the user is in the afternoon locally.
+const nowHour = ref<number | null>(null)
 let greetingTimer: ReturnType<typeof setInterval> | null = null
 
-const greeting = computed(() => {
-  const hour = nowHour.value
+function localHour(): number {
+  return new Date().getHours()
+}
+
+function greetingForHour(hour: number): string {
+  // 05:00–11:59 утро · 12:00–16:59 день · 17:00–22:59 вечер · 23:00–04:59 ночь
   if (hour >= 5 && hour < 12) return 'Доброе утро ☀️'
-  if (hour >= 12 && hour < 18) return 'Добрый день 🌤'
-  if (hour >= 18 && hour < 23) return 'Добрый вечер 🌙'
+  if (hour >= 12 && hour < 17) return 'Добрый день 🌤'
+  if (hour >= 17 && hour < 23) return 'Добрый вечер 🌙'
   return 'Доброй ночи 🌙'
+}
+
+if (import.meta.client) {
+  nowHour.value = localHour()
+}
+
+const greeting = computed(() => {
+  if (nowHour.value === null) return ''
+  return greetingForHour(nowHour.value)
 })
 
 const stats = computed(() => [
@@ -1245,8 +1258,10 @@ watch(
 onMounted(() => {
   updateDesktopFlag()
   window.addEventListener('resize', updateDesktopFlag)
-  nowHour.value = dayjs().hour()
-  greetingTimer = setInterval(() => { nowHour.value = dayjs().hour() }, 60_000)
+  nowHour.value = localHour()
+  greetingTimer = setInterval(() => {
+    nowHour.value = localHour()
+  }, 60_000)
   if (!tasksStore.initialized) {
     void tasksStore.fetchGrouped()
   }

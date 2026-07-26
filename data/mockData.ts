@@ -39,6 +39,10 @@ export interface Task {
   listKey?: 'overdue' | 'today' | 'tomorrow' | 'later' | 'nodate' | 'completed'
   listId?: string
   matrixBlock?: 'urgent-important' | 'not-urgent-important' | 'urgent-not-important' | 'not-urgent-not-important'
+  /** Shared id for all occurrences in a recurring series (from API). */
+  seriesId?: string | null
+  /** Parent / template task id when API uses a series hierarchy. */
+  parentTaskId?: string | null
   createdAt: string
 }
 

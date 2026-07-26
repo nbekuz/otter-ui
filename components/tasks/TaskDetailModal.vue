@@ -177,8 +177,8 @@
       <div v-if="deleteModal" class="app-modal z-[70] px-5 py-5" @click.stop>
         <h3 class="mb-2 text-lg font-bold text-sber-black">Удалить повторяющуюся задачу?</h3>
         <p class="mb-4 text-sm text-sber-gray">Выберите, что именно удалить.</p>
-        <button class="btn-primary mb-2" type="button" @click="deleteOccurrence">Только это повторение</button>
-        <button class="btn-secondary mb-2" type="button" @click="deleteSeries">Все повторения</button>
+        <button class="btn-primary mb-2" type="button" @click="deleteOccurrence">Удалить только этот повтор</button>
+        <button class="btn-secondary mb-2" type="button" @click="deleteSeries">Удалить все повторения</button>
         <button class="w-full rounded-2xl py-4 text-sm font-semibold text-sber-gray" type="button" @click="deleteModal = false">Отмена</button>
       </div>
     </Transition>

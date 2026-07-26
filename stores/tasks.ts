@@ -454,34 +454,84 @@ export const useTasksStore = defineStore('tasks', () => {
     return task
   }
 
+  /** All known tasks across list + calendar pools (for spawn dedupe). */
+  function allKnownTasks(): Task[] {
+    const byId = new Map<string, Task>()
+    for (const t of tasks.value) byId.set(t.id, t)
+    for (const list of Object.values(groupedFromApi.value)) {
+      for (const t of list) byId.set(t.id, t)
+    }
+    for (const t of calendarTasks.value) byId.set(t.id, t)
+    return Array.from(byId.values())
+  }
+
+  function hasActiveOccurrenceDuplicate(source: Task, nextDate: string, excludeId?: string): boolean {
+    return allKnownTasks().some((t) => {
+      if (t.completed) return false
+      if (excludeId && t.id === excludeId) return false
+      if (t.id === source.id) return false
+      if (normalizeDueDate(t.dueDate) !== nextDate) return false
+      if (source.seriesId && t.seriesId && source.seriesId === t.seriesId) return true
+      if (source.parentTaskId && t.parentTaskId && source.parentTaskId === t.parentTaskId) return true
+      return t.title === source.title && (t.repeat || 'none') === (source.repeat || 'none')
+    })
+  }
+
+  const spawnInFlight = new Set<string>()
+  const completeInFlight = new Set<string>()
+
   /** Create the next occurrence of a recurring task (used on complete / delete-this). */
   async function spawnNextOccurrence(task: Task) {
     if (!isRecurringTask(task)) return null
     const nextDate = computeNextOccurrenceDate(task)
     if (!nextDate) return null
 
-    const alreadyExists = tasks.value.some(t =>
-      t.id !== task.id
-      && !t.completed
-      && t.title === task.title
-      && (t.repeat || 'none') === task.repeat
-      && normalizeDueDate(t.dueDate) === nextDate,
-    )
-    if (alreadyExists) return null
+    const lockKey = `${task.seriesId || task.id}:${nextDate}`
+    if (spawnInFlight.has(lockKey)) return null
+    if (hasActiveOccurrenceDuplicate(task, nextDate)) return null
 
-    return addTask({
-      title: task.title,
-      description: task.description,
-      dueDate: nextDate,
-      dueTime: task.dueTime,
-      duration: task.duration ? { ...task.duration } : undefined,
-      priority: task.priority,
-      notification: task.notification,
-      repeat: task.repeat,
-      repeatDays: task.repeatDays ? [...task.repeatDays] : undefined,
-      repeatCustom: task.repeatCustom ? { ...task.repeatCustom } : undefined,
-      matrixBlock: task.matrixBlock,
-    })
+    spawnInFlight.add(lockKey)
+    try {
+      // Soft refresh so we notice a backend-created next before POSTing again.
+      try {
+        await fetchGrouped()
+      }
+      catch {
+        /* continue with local pool */
+      }
+      if (hasActiveOccurrenceDuplicate(task, nextDate)) return null
+
+      return await addTask({
+        title: task.title,
+        description: task.description,
+        dueDate: nextDate,
+        dueTime: task.dueTime,
+        duration: task.duration ? { ...task.duration } : undefined,
+        priority: task.priority,
+        notification: task.notification,
+        repeat: task.repeat,
+        repeatDays: task.repeatDays ? [...task.repeatDays] : undefined,
+        repeatCustom: task.repeatCustom
+          ? {
+              ...task.repeatCustom,
+              weekdays: task.repeatCustom.weekdays
+                ? [...task.repeatCustom.weekdays]
+                : undefined,
+            }
+          : undefined,
+        matrixBlock: task.matrixBlock,
+        // Attachments: API create does not copy existing attachment ids;
+        // imageUrl alone is not uploaded — skip unless we have a local dataUrl.
+        attachment: task.attachment?.dataUrl?.startsWith('data:')
+          ? { ...task.attachment }
+          : undefined,
+        seriesId: task.seriesId,
+        parentTaskId: task.parentTaskId,
+      })
+    }
+    finally {
+      spawnInFlight.delete(lockKey)
+    }
   }
 
   type RefreshOptions = { grouped?: boolean, calendar?: boolean, matrix?: boolean }
@@ -526,52 +576,85 @@ export const useTasksStore = defineStore('tasks', () => {
     await refreshTaskLists(refresh)
   }
 
-  /** Delete only this occurrence. */
+  /**
+   * Delete only this occurrence, then ensure the series continues with exactly
+   * one next active instance (backend may already create it).
+   */
   async function deleteOccurrence(id: string, refresh: RefreshOptions = {}) {
-    await deleteTask(id, refresh, 'this')
-  }
-
-  /** Delete the whole series. */
-  async function deleteSeries(id: string, refresh: RefreshOptions = {}) {
-    await deleteTask(id, refresh, 'series')
-  }
-
-  async function completeTask(id: string, refresh: RefreshOptions = {}) {
     const existing = findTaskById(id)
-    if (!existing) return
+    const snapshot = existing ? { ...existing } : null
+    await deleteTask(id, { grouped: false, calendar: false, matrix: false }, 'this')
 
-    const willComplete = !existing.completed
-
-    upsertTaskInState({
-      ...existing,
-      completed: willComplete,
-      completedAt: willComplete
-        ? dayjs().format('YYYY-MM-DD')
-        : undefined,
-    })
-
-    const endpoint = existing.completed ? 'uncomplete' : 'complete'
-    const updated = await apiPost<ApiTask>(`tasks/${id}/${endpoint}/`)
-    const task = apiTaskToUi(updated)
-    upsertTaskInState(task)
-
-    if (willComplete) {
-      void useSoundsStore().playFeedbackSound('completion')
-      if (updated.next_task) {
-        upsertTaskInState(apiTaskToUi(updated.next_task))
+    if (snapshot && isRecurringTask(snapshot)) {
+      try {
+        await fetchGrouped()
       }
-      else if (isRecurringTask(existing)) {
+      catch {
+        /* ignore */
+      }
+      const nextDate = computeNextOccurrenceDate(snapshot)
+      if (nextDate && !hasActiveOccurrenceDuplicate(snapshot, nextDate, id)) {
         try {
-          await spawnNextOccurrence(existing)
+          await spawnNextOccurrence(snapshot)
         }
         catch {
-          /* keep the completion even if creating the next one fails */
+          /* deletion succeeded; next occurrence can be retried later */
         }
       }
     }
 
     await refreshTaskLists(refresh)
-    return task
+  }
+
+  /** Delete the whole series — do not spawn a next occurrence. */
+  async function deleteSeries(id: string, refresh: RefreshOptions = {}) {
+    await deleteTask(id, refresh, 'series')
+  }
+
+  async function completeTask(id: string, refresh: RefreshOptions = {}) {
+    if (completeInFlight.has(id)) return
+    completeInFlight.add(id)
+    try {
+      const existing = findTaskById(id)
+      if (!existing) return
+
+      const willComplete = !existing.completed
+      const snapshot = { ...existing }
+
+      upsertTaskInState({
+        ...existing,
+        completed: willComplete,
+        completedAt: willComplete
+          ? dayjs().format('YYYY-MM-DD')
+          : undefined,
+      })
+
+      const endpoint = existing.completed ? 'uncomplete' : 'complete'
+      const updated = await apiPost<ApiTask>(`tasks/${id}/${endpoint}/`)
+      const task = apiTaskToUi(updated)
+      upsertTaskInState(task)
+
+      if (willComplete) {
+        void useSoundsStore().playFeedbackSound('completion')
+        if (updated.next_task) {
+          upsertTaskInState(apiTaskToUi(updated.next_task))
+        }
+        else if (isRecurringTask(snapshot)) {
+          try {
+            await spawnNextOccurrence(snapshot)
+          }
+          catch {
+            /* keep the completion even if creating the next one fails */
+          }
+        }
+      }
+
+      await refreshTaskLists(refresh)
+      return task
+    }
+    finally {
+      completeInFlight.delete(id)
+    }
   }
 
   async function moveToMatrix(taskId: string, blockId: string) {

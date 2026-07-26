@@ -104,23 +104,16 @@ export function isRecurringTask(task: Pick<Task, 'repeat'> | null | undefined): 
   return !!(task?.repeat && task.repeat !== 'none')
 }
 
-/** Expand recurring tasks into per-date instances for calendar rendering. */
+/**
+ * Calendar/list helpers: show only real persisted instances on their dueDate.
+ * Recurring tasks are NOT virtually expanded onto future dates — the next
+ * occurrence is created on complete / delete-this instead.
+ */
 export function expandTasksForDate(tasks: Task[], dateStr: string): Task[] {
-  const result: Task[] = []
-  for (const task of tasks) {
-    if (!task.dueDate) continue
-    if (!taskOccursOnDate(task, dateStr)) continue
-    if (task.dueDate === dateStr) {
-      result.push(task)
-      continue
-    }
-    result.push({
-      ...task,
-      id: `${task.id}__${dateStr}`,
-      dueDate: dateStr,
-    })
-  }
-  return result
+  return tasks.filter((task) => {
+    if (!task.dueDate) return false
+    return task.dueDate === dateStr
+  })
 }
 
 export function expandTasksForRange(tasks: Task[], startDate: string, endDate: string): Task[] {
@@ -129,10 +122,15 @@ export function expandTasksForRange(tasks: Task[], startDate: string, endDate: s
   if (!start.isValid() || !end.isValid()) return []
 
   const result: Task[] = []
-  let cursor = start
-  while (!cursor.isAfter(end, 'day')) {
-    result.push(...expandTasksForDate(tasks, cursor.format('YYYY-MM-DD')))
-    cursor = cursor.add(1, 'day')
+  const seen = new Set<string>()
+  for (const task of tasks) {
+    if (!task.dueDate) continue
+    const due = dayjs(task.dueDate)
+    if (!due.isValid()) continue
+    if (due.isBefore(start, 'day') || due.isAfter(end, 'day')) continue
+    if (seen.has(task.id)) continue
+    seen.add(task.id)
+    result.push(task)
   }
   return result
 }

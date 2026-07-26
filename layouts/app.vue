@@ -109,6 +109,23 @@
           class="mt-4 space-y-1 rounded-[20px] p-2"
           :class="isDarkTheme ? 'bg-[#10141b] border border-[#222833]' : 'bg-sber-gray-light'"
         >
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+            :class="isDarkTheme
+              ? 'text-yellow-400 hover:bg-[#20242d]'
+              : 'text-yellow-700 hover:bg-white'"
+            @click="openPremiumModal"
+          >
+            <Crown class="h-4 w-4 text-yellow-500" />
+            <span class="flex-1 text-left">Премиум</span>
+            <span
+              v-if="premiumStore.isPremium"
+              class="rounded-full bg-yellow-400/20 px-1.5 py-0.5 text-[10px] font-bold leading-none text-yellow-700"
+            >
+              ON
+            </span>
+          </button>
           <NuxtLink
             to="/app/notifications"
             class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
@@ -176,12 +193,47 @@
         </button>
       </div>
     </div>
+
+    <Teleport to="body">
+      <Transition name="overlay">
+        <div v-if="premiumModal" class="overlay" @click="premiumModal = false" />
+      </Transition>
+      <Transition name="modal">
+        <div v-if="premiumModal" class="app-modal px-5 py-6" @click.stop>
+          <div class="mb-6 text-center">
+            <div class="mb-3 text-4xl">⭐</div>
+            <h3 class="text-xl font-bold text-sber-black">{{ BRAND_NAME }} Premium</h3>
+            <p class="mt-1 text-sm text-sber-gray">Больше функций в приложении</p>
+          </div>
+          <PremiumSubscriptionPanel
+            :features="premiumStore.features"
+            :features-loading="premiumStore.featuresLoading"
+            :tariffs="premiumStore.tariffs"
+            :tariffs-loading="premiumStore.tariffsLoading"
+            :selected-tariff-code="premiumStore.selectedTariffCode"
+            :subscription="premiumStore.subscription"
+            :subscription-loading="premiumStore.subscriptionLoading"
+            :is-premium="premiumStore.isPremium"
+            :expires-label="premiumExpiresLabel"
+            :action-loading="premiumStore.actionLoading"
+            :refresh-loading="premiumRefreshLoading"
+            @select-tariff="premiumStore.selectTariff"
+            @trial="onPremiumTrial"
+            @checkout="onPremiumCheckout"
+            @refresh="onPremiumRefresh"
+            @cancel="cancelPremiumSubscription"
+          />
+          <button class="btn-secondary mt-2 w-full" type="button" @click="premiumModal = false">Закрыть</button>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Bell, ChevronRight, HelpCircle, Plus, Share2 } from 'lucide-vue-next'
+import { Bell, ChevronRight, Crown, HelpCircle, Plus, Share2 } from 'lucide-vue-next'
 import { BRAND_NAME } from '~/utils/site-info'
+import { getApiErrorMessage } from '~/utils/api'
 import {
   orderNavItems,
   buildNavOrderMap,
@@ -194,7 +246,84 @@ const settingsStore = useSettingsStore()
 const authStore = useAuthStore()
 const premiumStore = usePremiumStore()
 const notificationsStore = useNotificationsStore()
+const { showToast } = useAppToast()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
+
+const premiumModal = ref(false)
+const premiumRefreshLoading = ref(false)
+
+const premiumExpiresLabel = computed(() => {
+  const expiresAt = premiumStore.expiresAt || authStore.user?.premiumExpiresAt
+  if (!expiresAt) return ''
+  const date = new Date(expiresAt)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+})
+
+function openPremiumModal() {
+  premiumModal.value = true
+}
+
+watch(premiumModal, (open) => {
+  if (open) void premiumStore.loadAll()
+})
+
+async function onPremiumTrial(payload: { tariff: string; recurringConsent: boolean }) {
+  try {
+    await premiumStore.startTrial(payload.tariff, payload.recurringConsent)
+    showToast('Пробный период Premium активирован', 'success')
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err), 'error')
+  }
+}
+
+async function onPremiumCheckout(payload: { tariff: string; recurringConsent: boolean }) {
+  try {
+    const { checkout_url } = await premiumStore.checkout(payload.tariff, {
+      recurringConsent: payload.recurringConsent,
+    })
+    window.open(checkout_url, '_blank', 'noopener,noreferrer')
+    showToast('Откройте вкладку оплаты Robokassa. После оплаты нажмите «обновить статус».', 'success', 6000)
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err), 'error')
+  }
+}
+
+async function onPremiumRefresh() {
+  premiumRefreshLoading.value = true
+  try {
+    const sub = await premiumStore.fetchSubscription()
+    if (sub.is_premium) {
+      const until = premiumExpiresLabel.value
+      const tariff = sub.tariff?.title
+      const parts = ['Premium активен']
+      if (tariff) parts.push(tariff)
+      if (until) parts.push(`до ${until}`)
+      showToast(parts.join(' · '), 'success')
+    }
+    else {
+      showToast('Оплата ещё не подтверждена. Подождите немного и обновите снова.', 'error')
+    }
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err), 'error')
+  }
+  finally {
+    premiumRefreshLoading.value = false
+  }
+}
+
+async function cancelPremiumSubscription() {
+  try {
+    await premiumStore.cancel()
+    showToast('Автопродление отключено. Доступ сохранится до конца периода.', 'success')
+  }
+  catch (err) {
+    showToast(getApiErrorMessage(err), 'error')
+  }
+}
 
 watch(
   () => authStore.isLoggedIn,

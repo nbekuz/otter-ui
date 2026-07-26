@@ -169,6 +169,8 @@ export function apiTaskToUi(task: ApiTask): Task {
         }
       : undefined,
     matrixBlock: MATRIX_TO_UI[task.matrix_block],
+    seriesId: task.series_id ?? null,
+    parentTaskId: task.parent_task != null ? String(task.parent_task) : null,
     createdAt: task.created_at,
   }
 }
