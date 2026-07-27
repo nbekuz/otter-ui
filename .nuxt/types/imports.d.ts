@@ -158,6 +158,7 @@ declare global {
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
   const orderNavItems: typeof import('../../utils/nav-items').orderNavItems
   const parseApiWallClock: typeof import('../../utils/time').parseApiWallClock
+  const parseNotificationsWsMessage: typeof import('../../utils/notifications-ws').parseNotificationsWsMessage
   const parseTasksExport: typeof import('../../utils/task-export').parseTasksExport
   const parseTimeToMinutes: typeof import('../../utils/time').parseTimeToMinutes
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
@@ -193,8 +194,10 @@ declare global {
   const reloadNuxtApp: typeof import('../../node_modules/nuxt/dist/app/composables/chunk').reloadNuxtApp
   const requestIdleCallback: typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback').requestIdleCallback
   const resolveActiveNavId: typeof import('../../utils/nav-items').resolveActiveNavId
+  const resolveApiBaseUrl: typeof import('../../utils/api').resolveApiBaseUrl
   const resolveComponent: typeof import('vue').resolveComponent
   const resolveMediaUrl: typeof import('../../utils/media').resolveMediaUrl
+  const resolveNotificationsWsUrl: typeof import('../../utils/notifications-ws').resolveNotificationsWsUrl
   const resolveRealTaskId: typeof import('../../utils/recurrence').resolveRealTaskId
   const resolveRef: typeof import('@vueuse/core').resolveRef
   const resolveUnref: typeof import('@vueuse/core').resolveUnref
@@ -522,6 +525,9 @@ declare global {
   export type { AppNavItemId, AppNavItem } from '../../utils/nav-items'
   import('../../utils/nav-items')
   // @ts-ignore
+  export type { NotificationsWsEvent } from '../../utils/notifications-ws'
+  import('../../utils/notifications-ws')
+  // @ts-ignore
   export type { OtterTasksExportPayload, OtterExportedTask } from '../../utils/task-export'
   import('../../utils/task-export')
   // @ts-ignore
@@ -692,6 +698,7 @@ declare module 'vue' {
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
     readonly orderNavItems: UnwrapRef<typeof import('../../utils/nav-items')['orderNavItems']>
     readonly parseApiWallClock: UnwrapRef<typeof import('../../utils/time')['parseApiWallClock']>
+    readonly parseNotificationsWsMessage: UnwrapRef<typeof import('../../utils/notifications-ws')['parseNotificationsWsMessage']>
     readonly parseTasksExport: UnwrapRef<typeof import('../../utils/task-export')['parseTasksExport']>
     readonly parseTimeToMinutes: UnwrapRef<typeof import('../../utils/time')['parseTimeToMinutes']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
@@ -727,8 +734,10 @@ declare module 'vue' {
     readonly reloadNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/chunk')['reloadNuxtApp']>
     readonly requestIdleCallback: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback')['requestIdleCallback']>
     readonly resolveActiveNavId: UnwrapRef<typeof import('../../utils/nav-items')['resolveActiveNavId']>
+    readonly resolveApiBaseUrl: UnwrapRef<typeof import('../../utils/api')['resolveApiBaseUrl']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resolveMediaUrl: UnwrapRef<typeof import('../../utils/media')['resolveMediaUrl']>
+    readonly resolveNotificationsWsUrl: UnwrapRef<typeof import('../../utils/notifications-ws')['resolveNotificationsWsUrl']>
     readonly resolveRealTaskId: UnwrapRef<typeof import('../../utils/recurrence')['resolveRealTaskId']>
     readonly resolveRef: UnwrapRef<typeof import('@vueuse/core')['resolveRef']>
     readonly resolveUnref: UnwrapRef<typeof import('@vueuse/core')['resolveUnref']>

@@ -13,6 +13,9 @@
           >
             <Search class="w-5 h-5 text-sber-gray" />
           </button>
+          <div @click.stop>
+            <NotificationsBell variant="icon" :is-dark-theme="isDarkTheme" />
+          </div>
           <NuxtLink
             to="/app/profile"
             class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-sber-green shadow-sm"

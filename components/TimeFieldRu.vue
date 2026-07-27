@@ -8,7 +8,8 @@
       ref="textRef"
       type="text"
       inputmode="numeric"
-      placeholder="ЧЧ:ММ"
+      autocomplete="off"
+      placeholder="чч:мм"
       maxlength="5"
       class="input-field w-full cursor-text pr-9 text-left tabular-nums"
       :class="fieldClass"
@@ -42,7 +43,6 @@
 
 <script setup lang="ts">
 import { Clock } from 'lucide-vue-next'
-import { formatMinutesToTime, parseTimeToMinutes } from '~/utils/time'
 
 const props = withDefaults(defineProps<{
   modelValue: string
@@ -60,30 +60,72 @@ const textRef = ref<HTMLInputElement | null>(null)
 const pickerRef = ref<HTMLInputElement | null>(null)
 const textValue = ref('')
 
-function formatHHMM(v: string): string {
-  if (!v?.trim()) return ''
-  const m = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(v.trim())
-  if (!m) return ''
-  const h = Math.min(23, Math.max(0, parseInt(m[1]!, 10)))
-  const min = Math.min(59, Math.max(0, parseInt(m[2]!, 10)))
-  return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`
+/**
+ * Keep only digits (max 4) and format as HH:MM.
+ * - hours clamped to 00–23 when 2 digits present
+ * - minute tens digit limited to 0–5
+ */
+function maskAsHHMM(raw: string): string {
+  let digits = raw.replace(/\D/g, '').slice(0, 4)
+  if (!digits) return ''
+
+  // If first hour digit is 3–9, treat as 0X (e.g. 9 → 09)
+  if (digits.length >= 1 && digits[0]! >= '3') {
+    digits = `0${digits}`.slice(0, 4)
+  }
+
+  let hh = digits.slice(0, Math.min(2, digits.length))
+  let mm = digits.length > 2 ? digits.slice(2) : ''
+
+  if (hh.length === 2) {
+    const n = Math.min(23, parseInt(hh, 10))
+    hh = String(n).padStart(2, '0')
+  }
+
+  if (mm.length >= 1 && mm[0]! >= '6') {
+    mm = `5${mm.slice(1)}`.slice(0, 2)
+  }
+  if (mm.length === 2) {
+    const n = Math.min(59, parseInt(mm, 10))
+    mm = String(n).padStart(2, '0')
+  }
+
+  return mm ? `${hh}:${mm}` : hh
+}
+
+function toStrictHHMM(raw: string): string {
+  const digits = raw.replace(/\D/g, '').slice(0, 4)
+  if (!digits) return ''
+
+  let normalized = digits
+  if (normalized[0]! >= '3') {
+    normalized = `0${normalized}`.slice(0, 4)
+  }
+
+  let h = normalized.slice(0, Math.min(2, normalized.length)).padStart(2, '0')
+  let min = (normalized.length > 2 ? normalized.slice(2) : '').padEnd(2, '0')
+  h = String(Math.min(23, parseInt(h, 10) || 0)).padStart(2, '0')
+  min = String(Math.min(59, parseInt(min, 10) || 0)).padStart(2, '0')
+  return `${h}:${min}`
 }
 
 watch(() => props.modelValue, (v) => {
-  textValue.value = formatHHMM(v)
+  if (!v?.trim()) {
+    textValue.value = ''
+    return
+  }
+  textValue.value = toStrictHHMM(v)
 }, { immediate: true })
 
 function onTextInput(e: Event) {
-  textValue.value = (e.target as HTMLInputElement).value
-}
+  const el = e.target as HTMLInputElement
+  const next = maskAsHHMM(el.value)
+  textValue.value = next
+  el.value = next
 
-function parseText(raw: string): string {
-  const trimmed = raw.trim()
-  if (!trimmed) return ''
-  const formatted = formatHHMM(trimmed)
-  if (!formatted) return ''
-  parseTimeToMinutes(formatted)
-  return formatted
+  if (/^\d{2}:\d{2}$/.test(next)) {
+    emit('update:modelValue', next)
+  }
 }
 
 function commitText() {
@@ -92,25 +134,36 @@ function commitText() {
     textValue.value = ''
     return
   }
-  const parsed = parseText(textValue.value)
-  if (parsed) {
-    emit('update:modelValue', parsed)
-    textValue.value = parsed
-  }
+  const parsed = toStrictHHMM(textValue.value)
+  emit('update:modelValue', parsed)
+  textValue.value = parsed
 }
 
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Backspace' || e.key === 'Delete') {
-    if (textValue.value === '') {
+  const nav = new Set([
+    'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+    'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+    'Home', 'End',
+  ])
+  if (nav.has(e.key) || e.ctrlKey || e.metaKey || e.altKey) {
+    if ((e.key === 'Backspace' || e.key === 'Delete') && textValue.value === '') {
       emit('update:modelValue', '')
     }
+    if (e.key === 'Enter') commitText()
+    emit('keydown', e)
+    return
+  }
+  if (!/^\d$/.test(e.key) && e.key !== ':') {
+    e.preventDefault()
   }
   emit('keydown', e)
 }
 
 function onPickerInput(e: Event) {
   const raw = (e.target as HTMLInputElement).value
-  emit('update:modelValue', raw ? formatHHMM(raw) : '')
+  const formatted = raw ? toStrictHHMM(raw) : ''
+  emit('update:modelValue', formatted)
+  textValue.value = formatted
 }
 
 function openPicker() {

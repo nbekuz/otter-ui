@@ -8,7 +8,7 @@ import {
 
 const DEFAULT_API_BASE_URL = 'https://admin.ottertime.ru/api/v1/'
 
-function resolveApiBaseUrl(): string {
+export function resolveApiBaseUrl(): string {
   if (import.meta.client) {
     try {
       const config = useRuntimeConfig()

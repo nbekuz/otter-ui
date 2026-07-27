@@ -17,20 +17,15 @@ export const useCalendarStore = defineStore('calendar', () => {
   const viewType = ref<CalendarViewType>(
     resolveDefaultView(settingsStore.appSettings.calendarDefaultView),
   )
-  /** 00:00–06:00 collapsed by default; auto-expands when early tasks exist. */
-  const collapsedEarlyHours = ref(
-    settingsStore.appSettings.calendarCollapseEarlyHours !== false,
-  )
-  /** 22:00–00:00 collapsed by default; auto-expands when late tasks exist. */
-  const collapsedLateHours = ref(
-    settingsStore.appSettings.calendarCollapseLateHours !== false,
-  )
+  /** Always show full 00:00–23:00 timeline (no early/late collapse). */
+  const collapsedEarlyHours = ref(false)
+  const collapsedLateHours = ref(false)
 
   /** Apply appearance defaults from Settings → Вид (without forcing mid-session). */
   function applyViewDefaultsFromSettings() {
     viewType.value = resolveDefaultView(settingsStore.appSettings.calendarDefaultView)
-    collapsedEarlyHours.value = settingsStore.appSettings.calendarCollapseEarlyHours !== false
-    collapsedLateHours.value = settingsStore.appSettings.calendarCollapseLateHours !== false
+    collapsedEarlyHours.value = false
+    collapsedLateHours.value = false
   }
 
   const displayLabel = computed(() => {
@@ -86,11 +81,11 @@ export const useCalendarStore = defineStore('calendar', () => {
   }
 
   function toggleEarlyHours() {
-    collapsedEarlyHours.value = !collapsedEarlyHours.value
+    /* no-op: full day timeline is always visible */
   }
 
   function toggleLateHours() {
-    collapsedLateHours.value = !collapsedLateHours.value
+    /* no-op: full day timeline is always visible */
   }
 
   return {

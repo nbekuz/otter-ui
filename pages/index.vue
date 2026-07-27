@@ -77,7 +77,7 @@
                 </button>
               </div>
               <button
-                class="flex !w-auto max-w-full items-center justify-center gap-2 rounded-2xl border border-sber-gray-mid bg-white px-4 py-3.5 text-sm font-semibold text-sber-black transition-colors hover:bg-sber-gray-light sm:px-5"
+                class="hidden !w-auto max-w-full items-center justify-center gap-2 rounded-2xl border border-sber-gray-mid bg-white px-4 py-3.5 text-sm font-semibold text-sber-black transition-colors hover:bg-sber-gray-light sm:flex sm:px-5"
                 type="button"
                 @click="onDesktopDownloadClick"
               >

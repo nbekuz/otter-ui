@@ -38,7 +38,7 @@
             </li>
           </ul>
           <button
-            class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-sber-green hover:underline"
+            class="mt-4 hidden items-center gap-2 text-sm font-semibold text-sber-green hover:underline sm:inline-flex"
             type="button"
             @click="onDesktopDownloadClick"
           >

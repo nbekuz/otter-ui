@@ -32,6 +32,8 @@ interface _GlobalComponents {
   NavItemProfile: typeof import("../../components/nav/NavItemProfile.vue")['default']
   NavItemSettings: typeof import("../../components/nav/NavItemSettings.vue")['default']
   NavItemTasks: typeof import("../../components/nav/NavItemTasks.vue")['default']
+  NotificationsBell: typeof import("../../components/notifications/Bell.vue")['default']
+  NotificationsPopover: typeof import("../../components/notifications/Popover.vue")['default']
   SettingsRow: typeof import("../../components/settings/Row.vue")['default']
   TasksTaskDetailModal: typeof import("../../components/tasks/TaskDetailModal.vue")['default']
   TasksTaskGroup: typeof import("../../components/tasks/TaskGroup.vue")['default']
@@ -78,6 +80,8 @@ interface _GlobalComponents {
   LazyNavItemProfile: LazyComponent<typeof import("../../components/nav/NavItemProfile.vue")['default']>
   LazyNavItemSettings: LazyComponent<typeof import("../../components/nav/NavItemSettings.vue")['default']>
   LazyNavItemTasks: LazyComponent<typeof import("../../components/nav/NavItemTasks.vue")['default']>
+  LazyNotificationsBell: LazyComponent<typeof import("../../components/notifications/Bell.vue")['default']>
+  LazyNotificationsPopover: LazyComponent<typeof import("../../components/notifications/Popover.vue")['default']>
   LazySettingsRow: LazyComponent<typeof import("../../components/settings/Row.vue")['default']>
   LazyTasksTaskDetailModal: LazyComponent<typeof import("../../components/tasks/TaskDetailModal.vue")['default']>
   LazyTasksTaskGroup: LazyComponent<typeof import("../../components/tasks/TaskGroup.vue")['default']>

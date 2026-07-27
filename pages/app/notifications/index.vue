@@ -74,6 +74,7 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import { ChevronLeft, Trash2 } from 'lucide-vue-next'
+import { useMediaQuery } from '@vueuse/core'
 import type { ApiNotificationItem } from '~/types/mobile-api'
 
 definePageMeta({ layout: 'app' })
@@ -81,24 +82,14 @@ definePageMeta({ layout: 'app' })
 const settingsStore = useSettingsStore()
 const store = useNotificationsStore()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
+const isDesktop = useMediaQuery('(min-width: 640px)')
 
 function formatDate(value: string) {
   return dayjs(value).format('DD.MM.YYYY HH:mm')
 }
 
 async function onOpen(item: ApiNotificationItem) {
-  if (!item.is_read) {
-    try {
-      await store.markRead(item.id)
-    }
-    catch {
-      /* continue navigation */
-    }
-  }
-  const taskId = item.data?.task_id || (item.task != null ? String(item.task) : '')
-  if (taskId) {
-    await navigateTo({ path: '/app/new-task', query: { id: taskId, returnTo: '/app/notifications' } })
-  }
+  await navigateTo(`/app/notifications/${item.id}`)
 }
 
 async function onReadAll() {
@@ -119,7 +110,15 @@ async function onDelete(id: number) {
   }
 }
 
+watch(
+  isDesktop,
+  (desktop) => {
+    if (desktop) void navigateTo('/app')
+  },
+  { immediate: true },
+)
+
 onMounted(() => {
-  void store.fetchList({ limit: 50 })
+  if (!isDesktop.value) void store.fetchList({ limit: 20 })
 })
 </script>

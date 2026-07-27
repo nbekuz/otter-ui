@@ -322,8 +322,8 @@ export const defaultAppSettings: AppSettings = {
   completionSound: 'success',
   bottomNavItems: ['tasks', 'calendar', 'matrix', 'pomodoro', 'settings'],
   calendarDefaultView: 'day',
-  calendarCollapseEarlyHours: true,
-  calendarCollapseLateHours: true,
+  calendarCollapseEarlyHours: false,
+  calendarCollapseLateHours: false,
 }
 
 // ─── Eisenhower Matrix Defaults ───────────────────────────────────────────────

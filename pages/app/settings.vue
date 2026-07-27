@@ -624,42 +624,6 @@
             </button>
           </div>
 
-          <div class="mb-3 flex items-center gap-3 rounded-2xl border border-sber-gray-light px-4 py-3">
-            <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-sber-black">Скрывать ранние часы</p>
-              <p class="text-xs text-sber-gray">00:00–06:00 в видах День и Неделя</p>
-            </div>
-            <button
-              type="button"
-              class="relative h-6 w-12 rounded-full transition-colors"
-              :class="settingsStore.appSettings.calendarCollapseEarlyHours !== false ? 'bg-sber-green' : 'bg-sber-gray-mid'"
-              @click="toggleCalendarCollapse('early')"
-            >
-              <div
-                class="absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform"
-                :class="settingsStore.appSettings.calendarCollapseEarlyHours !== false ? 'translate-x-7' : 'translate-x-1'"
-              />
-            </button>
-          </div>
-
-          <div class="mb-4 flex items-center gap-3 rounded-2xl border border-sber-gray-light px-4 py-3">
-            <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-sber-black">Скрывать поздние часы</p>
-              <p class="text-xs text-sber-gray">22:00–00:00 в видах День и Неделя</p>
-            </div>
-            <button
-              type="button"
-              class="relative h-6 w-12 rounded-full transition-colors"
-              :class="settingsStore.appSettings.calendarCollapseLateHours !== false ? 'bg-sber-green' : 'bg-sber-gray-mid'"
-              @click="toggleCalendarCollapse('late')"
-            >
-              <div
-                class="absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform"
-                :class="settingsStore.appSettings.calendarCollapseLateHours !== false ? 'translate-x-7' : 'translate-x-1'"
-              />
-            </button>
-          </div>
-
           <button class="btn-secondary w-full" type="button" @click="viewModal = false">Закрыть</button>
         </div>
       </Transition>
@@ -1326,18 +1290,6 @@ async function runStubAction() {
 
 async function setCalendarDefaultView(view: CalendarDefaultView) {
   await settingsStore.updateSettings({ calendarDefaultView: view })
-  calendarStore.applyViewDefaultsFromSettings()
-}
-
-async function toggleCalendarCollapse(which: 'early' | 'late') {
-  if (which === 'early') {
-    const next = settingsStore.appSettings.calendarCollapseEarlyHours === false
-    await settingsStore.updateSettings({ calendarCollapseEarlyHours: next })
-  }
-  else {
-    const next = settingsStore.appSettings.calendarCollapseLateHours === false
-    await settingsStore.updateSettings({ calendarCollapseLateHours: next })
-  }
   calendarStore.applyViewDefaultsFromSettings()
 }
 

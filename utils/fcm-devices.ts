@@ -203,6 +203,12 @@ async function resolveFcmToken(
             : undefined,
           data: payload.data as Record<string, string> | undefined,
         })
+        try {
+          void useNotificationsStore().fetchUnreadCount()
+        }
+        catch {
+          /* pinia may be unavailable outside nuxt */
+        }
       })
     }
 
