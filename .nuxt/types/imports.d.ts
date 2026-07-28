@@ -215,6 +215,7 @@ declare global {
   const storeToRefs: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').storeToRefs
   const syncRef: typeof import('@vueuse/core').syncRef
   const syncRefs: typeof import('@vueuse/core').syncRefs
+  const taskIdFromNotification: typeof import('../../utils/notifications-ws').taskIdFromNotification
   const taskOccursOnDate: typeof import('../../utils/recurrence').taskOccursOnDate
   const tasksToExportPayload: typeof import('../../utils/task-export').tasksToExportPayload
   const templateRef: typeof import('@vueuse/core').templateRef
@@ -439,6 +440,7 @@ declare global {
   const useStyleTag: typeof import('@vueuse/core').useStyleTag
   const useSupported: typeof import('@vueuse/core').useSupported
   const useSwipe: typeof import('@vueuse/core').useSwipe
+  const useTaskReminderToast: typeof import('../../composables/useTaskReminderToast').useTaskReminderToast
   const useTaskTimeSync: typeof import('../../composables/useTaskTimeSync').useTaskTimeSync
   const useTasksStore: typeof import('../../stores/tasks').useTasksStore
   const useTemplateRef: typeof import('vue').useTemplateRef
@@ -509,6 +511,9 @@ declare global {
   // @ts-ignore
   export type { AppToastType } from '../../composables/useAppToast'
   import('../../composables/useAppToast')
+  // @ts-ignore
+  export type { TaskReminderToastState } from '../../composables/useTaskReminderToast'
+  import('../../composables/useTaskReminderToast')
   // @ts-ignore
   export type { AuthTokens } from '../../utils/auth-session'
   import('../../utils/auth-session')
@@ -755,6 +760,7 @@ declare module 'vue' {
     readonly storeToRefs: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['storeToRefs']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
+    readonly taskIdFromNotification: UnwrapRef<typeof import('../../utils/notifications-ws')['taskIdFromNotification']>
     readonly taskOccursOnDate: UnwrapRef<typeof import('../../utils/recurrence')['taskOccursOnDate']>
     readonly tasksToExportPayload: UnwrapRef<typeof import('../../utils/task-export')['tasksToExportPayload']>
     readonly templateRef: UnwrapRef<typeof import('@vueuse/core')['templateRef']>
@@ -979,6 +985,7 @@ declare module 'vue' {
     readonly useStyleTag: UnwrapRef<typeof import('@vueuse/core')['useStyleTag']>
     readonly useSupported: UnwrapRef<typeof import('@vueuse/core')['useSupported']>
     readonly useSwipe: UnwrapRef<typeof import('@vueuse/core')['useSwipe']>
+    readonly useTaskReminderToast: UnwrapRef<typeof import('../../composables/useTaskReminderToast')['useTaskReminderToast']>
     readonly useTaskTimeSync: UnwrapRef<typeof import('../../composables/useTaskTimeSync')['useTaskTimeSync']>
     readonly useTasksStore: UnwrapRef<typeof import('../../stores/tasks')['useTasksStore']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>

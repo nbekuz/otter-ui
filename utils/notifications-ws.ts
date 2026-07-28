@@ -24,6 +24,11 @@ export type NotificationsWsEvent =
     event: 'notifications.read_all'
     unread_count: number
   }
+  | {
+    event: 'task.reminder'
+    notification: ApiNotificationItem
+    unread_count: number
+  }
 
 /** Derive `wss://host/ws/notifications/?token=<jwt>` from the REST API base URL. */
 export function resolveNotificationsWsUrl(accessToken: string): string {
@@ -50,4 +55,8 @@ export function parseNotificationsWsMessage(raw: string): NotificationsWsEvent |
   catch {
     return null
   }
+}
+
+export function taskIdFromNotification(item: ApiNotificationItem): string {
+  return item.data?.task_id || (item.task != null ? String(item.task) : '')
 }

@@ -24,6 +24,7 @@ export const LegalDocumentBody: typeof import("../components/LegalDocumentBody.v
 export const OtterCheckbox: typeof import("../components/OtterCheckbox.vue")['default']
 export const PremiumSubscriptionPanel: typeof import("../components/PremiumSubscriptionPanel.vue")['default']
 export const SiteFooter: typeof import("../components/SiteFooter.vue")['default']
+export const TaskReminderToast: typeof import("../components/TaskReminderToast.vue")['default']
 export const TimeFieldRu: typeof import("../components/TimeFieldRu.vue")['default']
 export const LayoutBottomNav: typeof import("../components/layout/BottomNav.vue")['default']
 export const NavItemCalendar: typeof import("../components/nav/NavItemCalendar.vue")['default']
@@ -72,6 +73,7 @@ export const LazyLegalDocumentBody: LazyComponent<typeof import("../components/L
 export const LazyOtterCheckbox: LazyComponent<typeof import("../components/OtterCheckbox.vue")['default']>
 export const LazyPremiumSubscriptionPanel: LazyComponent<typeof import("../components/PremiumSubscriptionPanel.vue")['default']>
 export const LazySiteFooter: LazyComponent<typeof import("../components/SiteFooter.vue")['default']>
+export const LazyTaskReminderToast: LazyComponent<typeof import("../components/TaskReminderToast.vue")['default']>
 export const LazyTimeFieldRu: LazyComponent<typeof import("../components/TimeFieldRu.vue")['default']>
 export const LazyLayoutBottomNav: LazyComponent<typeof import("../components/layout/BottomNav.vue")['default']>
 export const LazyNavItemCalendar: LazyComponent<typeof import("../components/nav/NavItemCalendar.vue")['default']>

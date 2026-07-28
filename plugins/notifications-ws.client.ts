@@ -4,6 +4,7 @@ import {
   type NotificationsWsEvent,
 } from '~/utils/notifications-ws'
 import { getAccessToken } from '~/utils/auth-session'
+import type { ApiNotificationItem } from '~/types/mobile-api'
 
 const PING_INTERVAL_MS = 25_000
 const RECONNECT_BASE_MS = 1_000
@@ -21,6 +22,8 @@ export default defineNuxtPlugin(() => {
 
   const authStore = useAuthStore()
   const notificationsStore = useNotificationsStore()
+  const settingsStore = useSettingsStore()
+  const { showReminder } = useTaskReminderToast()
 
   let socket: WebSocket | null = null
   let pingTimer: ReturnType<typeof setInterval> | null = null
@@ -43,6 +46,15 @@ export default defineNuxtPlugin(() => {
     }
   }
 
+  function presentTaskReminder(notification: ApiNotificationItem, unreadCount: number) {
+    notificationsStore.applyCreated(notification, unreadCount)
+    if (settingsStore.appSettings.notifications === false) return
+
+    // Compact in-app message only — no browser Notification popup on web.
+    showReminder(notification)
+    void useSoundsStore().playFeedbackSound('notification')
+  }
+
   function handleEvent(msg: NotificationsWsEvent) {
     switch (msg.event) {
       case 'pong':
@@ -61,6 +73,9 @@ export default defineNuxtPlugin(() => {
         break
       case 'notifications.read_all':
         notificationsStore.applyReadAll(msg.unread_count)
+        break
+      case 'task.reminder':
+        presentTaskReminder(msg.notification, msg.unread_count)
         break
       default:
         break
@@ -155,7 +170,6 @@ export default defineNuxtPlugin(() => {
     }
 
     ws.onclose = (event) => {
-      // 4401 = auth fail
       console.info(LOG_TAG, 'WS close', event.code, event.reason || '')
       clearPing()
       if (socket === ws) socket = null

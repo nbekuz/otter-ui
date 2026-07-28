@@ -24,6 +24,7 @@ interface _GlobalComponents {
   OtterCheckbox: typeof import("../../components/OtterCheckbox.vue")['default']
   PremiumSubscriptionPanel: typeof import("../../components/PremiumSubscriptionPanel.vue")['default']
   SiteFooter: typeof import("../../components/SiteFooter.vue")['default']
+  TaskReminderToast: typeof import("../../components/TaskReminderToast.vue")['default']
   TimeFieldRu: typeof import("../../components/TimeFieldRu.vue")['default']
   LayoutBottomNav: typeof import("../../components/layout/BottomNav.vue")['default']
   NavItemCalendar: typeof import("../../components/nav/NavItemCalendar.vue")['default']
@@ -72,6 +73,7 @@ interface _GlobalComponents {
   LazyOtterCheckbox: LazyComponent<typeof import("../../components/OtterCheckbox.vue")['default']>
   LazyPremiumSubscriptionPanel: LazyComponent<typeof import("../../components/PremiumSubscriptionPanel.vue")['default']>
   LazySiteFooter: LazyComponent<typeof import("../../components/SiteFooter.vue")['default']>
+  LazyTaskReminderToast: LazyComponent<typeof import("../../components/TaskReminderToast.vue")['default']>
   LazyTimeFieldRu: LazyComponent<typeof import("../../components/TimeFieldRu.vue")['default']>
   LazyLayoutBottomNav: LazyComponent<typeof import("../../components/layout/BottomNav.vue")['default']>
   LazyNavItemCalendar: LazyComponent<typeof import("../../components/nav/NavItemCalendar.vue")['default']>
