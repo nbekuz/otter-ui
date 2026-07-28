@@ -3,10 +3,13 @@
     <!-- Header -->
     <div class="page-header-top flex shrink-0 items-center justify-between px-4 pb-3 lg:px-6">
       <h1 class="text-xl font-bold text-sber-black">Помодоро</h1>
-      <button class="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm transition-colors active:bg-sber-gray-light"
-              @click="settingsOpen = true">
-        <Settings class="w-5 h-5 text-sber-black" />
-      </button>
+      <div class="flex items-center gap-2">
+        <NotificationsBell variant="icon" />
+        <button class="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm transition-colors active:bg-sber-gray-light"
+                @click="settingsOpen = true">
+          <Settings class="w-5 h-5 text-sber-black" />
+        </button>
+      </div>
     </div>
 
     <div class="flex min-h-0 flex-1 flex-col px-4 pb-4 lg:px-6">

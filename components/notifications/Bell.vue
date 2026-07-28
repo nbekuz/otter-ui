@@ -7,9 +7,11 @@ const props = withDefaults(defineProps<{
   /** Visual variant for sidebar vs compact header button. */
   variant?: 'sidebar' | 'icon'
   isDarkTheme?: boolean
+  triggerClass?: string
 }>(), {
   variant: 'icon',
   isDarkTheme: false,
+  triggerClass: '',
 })
 
 const route = useRoute()
@@ -93,7 +95,10 @@ async function onOpenItem(item: ApiNotificationItem) {
       ref="triggerRef"
       type="button"
       class="relative flex h-10 w-10 items-center justify-center rounded-full shadow-sm"
-      :class="isDarkTheme ? 'bg-[#171a21] text-white' : 'bg-white text-sber-gray'"
+      :class="[
+        isDarkTheme ? 'bg-[#171a21] text-white' : 'bg-white text-sber-gray',
+        triggerClass,
+      ]"
       aria-label="Уведомления"
       @click="onTriggerClick"
     >
@@ -101,7 +106,7 @@ async function onOpenItem(item: ApiNotificationItem) {
       <span
         v-if="store.unreadCount > 0"
         class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white"
-        :class="isDarkTheme ? 'ring-[#0f1115]' : 'ring-white'"
+        :class="isDarkTheme ? 'ring-[#171a21]' : 'ring-white'"
         aria-hidden="true"
       />
       <span class="sr-only" v-if="store.unreadCount > 0">

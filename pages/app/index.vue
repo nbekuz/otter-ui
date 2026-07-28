@@ -518,6 +518,7 @@ const prioritySelectOptions = [
 const notificationSelectOptions = [
   { value: '', label: 'Без уведомления' },
   { value: '0', label: 'В момент срока' },
+  { value: '1', label: 'За 1 минуту' },
   { value: '5', label: 'За 5 минут' },
   { value: '15', label: 'За 15 минут' },
   { value: '30', label: 'За 30 минут' },
@@ -553,7 +554,7 @@ const attachmentIsImage = computed(() =>
     || /\.(png|jpe?g|gif|webp|svg|bmp|avif)(\?|$)/i.test(attachmentDataUrl.value)),
 )
 const customNotifyMinutes = ref(10)
-const PRESET_NOTIFY = new Set(['', '0', '5', '15', '30', '60', '1440', 'custom'])
+const PRESET_NOTIFY = new Set(['', '0', '1', '5', '15', '30', '60', '1440', 'custom'])
 
 const showSearch = ref(false)
 const searchQuery = ref('')

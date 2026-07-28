@@ -203,7 +203,7 @@ const saving = ref(false)
 const saveError = ref('')
 const repeatIntervalError = ref('')
 const customNotifyMinutes = ref(10)
-const PRESET_NOTIFY = new Set(['', '0', '5', '15', '30', '60', '1440'])
+const PRESET_NOTIFY = new Set(['', '0', '1', '5', '15', '30', '60', '1440'])
 
 const prioritySelectOptions = [
   { value: 'high', label: 'Высокий', color: '#FF3B30' },
@@ -215,6 +215,7 @@ const prioritySelectOptions = [
 const notificationSelectOptions = [
   { value: '', label: 'Без уведомления' },
   { value: '0', label: 'В момент срока' },
+  { value: '1', label: 'За 1 минуту' },
   { value: '5', label: 'За 5 минут' },
   { value: '15', label: 'За 15 минут' },
   { value: '30', label: 'За 30 минут' },

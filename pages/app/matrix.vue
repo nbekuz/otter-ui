@@ -7,11 +7,14 @@
     <div class="page-header-top shrink-0 px-4 pb-4" :class="isDarkTheme ? 'bg-[#171a21] border-b border-[#2a303a]' : 'bg-white shadow-sm'">
       <div class="flex items-center justify-between">
         <h1 class="text-xl font-bold text-sber-black">Матрица Эйзенхауэра</h1>
-        <button class="w-9 h-9 rounded-xl flex items-center justify-center"
-                :class="isDarkTheme ? 'bg-[#20242d]' : 'bg-sber-gray-light'"
-                @click="settingsOpen = true">
-          <Settings class="w-5 h-5 text-sber-gray" />
-        </button>
+        <div class="flex items-center gap-2">
+          <NotificationsBell variant="icon" :is-dark-theme="isDarkTheme" />
+          <button class="w-9 h-9 rounded-xl flex items-center justify-center"
+                  :class="isDarkTheme ? 'bg-[#20242d]' : 'bg-sber-gray-light'"
+                  @click="settingsOpen = true">
+            <Settings class="w-5 h-5 text-sber-gray" />
+          </button>
+        </div>
       </div>
     </div>
 

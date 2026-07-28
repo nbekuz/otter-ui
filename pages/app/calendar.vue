@@ -3,24 +3,51 @@
     class="page-container flex min-h-0 flex-col overflow-hidden bg-sber-gray-light max-lg:h-dvh max-lg:max-h-dvh lg:h-full lg:min-h-0 lg:pb-0"
   >
     <!-- Header: вне прокрутки — на мобильных шапка не «уезжает» (раньше ломалось из‑за скролла родителя layout). -->
-    <div class="page-header-top relative z-40 shrink-0 bg-white shadow-sm px-4 pb-2">
-      <div class="mb-2 flex items-center justify-end gap-2">
-        <button class="rounded-xl bg-sber-green-light px-3 py-1.5 text-xs font-semibold text-sber-green"
-                @click="calendarStore.goToday()">
+    <div class="page-header-top relative z-40 shrink-0 bg-white px-3 pb-3 shadow-sm sm:px-4">
+      <!-- Actions: title left, controls right -->
+      <div class="mb-3 flex items-center gap-2">
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-[15px] font-bold leading-tight text-sber-black sm:text-base">
+            {{ headerTitle }}
+          </p>
+          <p
+            v-if="calendarStore.viewType === 'day'"
+            class="truncate text-[11px] font-medium text-sber-gray sm:text-xs"
+          >
+            {{ calendarStore.displayLabel }}
+          </p>
+        </div>
+        <NotificationsBell variant="icon" />
+        <button
+          type="button"
+          class="h-10 shrink-0 rounded-full bg-sber-green-light px-3.5 text-xs font-semibold text-sber-green transition-colors active:bg-sber-green/15 sm:px-4"
+          @click="calendarStore.goToday()"
+        >
           Сегодня
         </button>
-        <div ref="viewMenuRef" class="relative">
-          <button class="flex h-8 w-8 items-center justify-center" @click.stop="viewMenuOpen = !viewMenuOpen">
+        <div ref="viewMenuRef" class="relative shrink-0">
+          <button
+            type="button"
+            class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light transition-colors active:bg-sber-gray-mid/40"
+            aria-label="Вид календаря"
+            @click.stop="viewMenuOpen = !viewMenuOpen"
+          >
             <LayoutGrid class="h-5 w-5 text-sber-gray" />
           </button>
           <Transition name="slide-down">
-            <div v-if="viewMenuOpen"
-                 class="absolute right-0 top-full z-50 mt-1 min-w-[10rem] rounded-2xl bg-white p-2 shadow-modal">
-              <button v-for="v in viewTypes" :key="v.value"
-                      class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors"
-                      :class="calendarStore.viewType === v.value ? 'bg-sber-green-light text-sber-green' : 'text-sber-black'"
-                      @click="setView(v.value)">
-                <component :is="v.icon" class="h-4 w-4" />
+            <div
+              v-if="viewMenuOpen"
+              class="absolute right-0 top-full z-50 mt-1.5 min-w-[11rem] rounded-2xl bg-white p-2 shadow-modal"
+            >
+              <button
+                v-for="v in viewTypes"
+                :key="v.value"
+                type="button"
+                class="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors"
+                :class="calendarStore.viewType === v.value ? 'bg-sber-green-light text-sber-green' : 'text-sber-black hover:bg-sber-gray-light'"
+                @click="setView(v.value)"
+              >
+                <component :is="v.icon" class="h-4 w-4 shrink-0" />
                 {{ v.label }}
               </button>
             </div>
@@ -28,30 +55,53 @@
         </div>
       </div>
 
-      <div class="flex items-center justify-between">
-        <button class="flex h-9 w-9 items-center justify-center rounded-xl bg-sber-gray-light"
-                @click="calendarStore.goPrev()">
+      <!-- Date navigation -->
+      <div class="flex items-center gap-1 sm:gap-2">
+        <button
+          type="button"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sber-gray-light transition-colors active:bg-sber-gray-mid/40"
+          aria-label="Назад"
+          @click="calendarStore.goPrev()"
+        >
           <ChevronLeft class="h-5 w-5 text-sber-black" />
         </button>
 
-        <div v-if="calendarStore.viewType === 'day'" class="flex gap-1">
-          <button v-for="day in weekDays" :key="day.date"
-                  class="flex h-12 w-10 flex-col items-center justify-center gap-0.5 rounded-xl transition-all"
-                  :class="day.date === calendarStore.currentDate
-                    ? 'bg-sber-green text-white'
-                    : day.isToday ? 'bg-sber-green-light text-sber-green' : 'text-sber-gray'"
-                  @click="calendarStore.setDate(day.date)">
-            <span class="text-[10px] font-medium">{{ day.dayName }}</span>
-            <span class="text-sm font-bold">{{ day.dayNum }}</span>
+        <div
+          v-if="calendarStore.viewType === 'day'"
+          class="flex min-w-0 flex-1 gap-0.5 sm:gap-1"
+        >
+          <button
+            v-for="day in weekDays"
+            :key="day.date"
+            type="button"
+            class="flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 transition-all active:scale-[0.97]"
+            :class="day.date === calendarStore.currentDate
+              ? 'bg-sber-green text-white shadow-sm'
+              : day.isToday
+                ? 'bg-sber-green-light text-sber-green'
+                : 'text-sber-gray hover:bg-sber-gray-light'"
+            @click="calendarStore.setDate(day.date)"
+          >
+            <span class="text-[10px] font-semibold uppercase leading-none tracking-wide opacity-80 sm:text-[11px]">
+              {{ day.dayName }}
+            </span>
+            <span class="text-sm font-bold leading-none sm:text-[15px]">{{ day.dayNum }}</span>
           </button>
         </div>
 
-        <div v-else class="px-2 text-center text-lg font-bold text-sber-black">
+        <div
+          v-else
+          class="min-w-0 flex-1 px-2 text-center text-base font-bold text-sber-black sm:text-lg"
+        >
           {{ calendarStore.displayLabel }}
         </div>
 
-        <button class="flex h-9 w-9 items-center justify-center rounded-xl bg-sber-gray-light"
-                @click="calendarStore.goNext()">
+        <button
+          type="button"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sber-gray-light transition-colors active:bg-sber-gray-mid/40"
+          aria-label="Вперёд"
+          @click="calendarStore.goNext()"
+        >
           <ChevronRight class="h-5 w-5 text-sber-black" />
         </button>
       </div>
@@ -550,6 +600,21 @@ const viewTypes = [
   { value: 'month', label: 'Месяц', icon: Calendar },
   { value: 'year', label: 'Год', icon: Columns },
 ]
+
+const headerTitle = computed(() => {
+  switch (calendarStore.viewType) {
+    case 'day':
+      return 'Календарь'
+    case 'week':
+      return 'Неделя'
+    case 'month':
+      return 'Месяц'
+    case 'year':
+      return 'Год'
+    default:
+      return 'Календарь'
+  }
+})
 
 function setView(v: string) {
   calendarStore.setView(v as any)

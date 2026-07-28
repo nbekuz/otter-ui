@@ -2,17 +2,17 @@
   <div
     class="page-container flex flex-col bg-sber-gray-light max-lg:fixed max-lg:inset-x-0 max-lg:top-0 max-lg:z-[25] max-lg:mx-auto max-lg:h-[100dvh] max-lg:max-h-[100dvh] max-lg:w-full max-lg:max-w-[430px] max-lg:!min-h-0 max-lg:overflow-hidden max-lg:!pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:static lg:!h-auto lg:!max-h-none lg:!overflow-visible"
   >
-    <div class="shrink-0 bg-white px-4 pb-1.5 pt-[max(2.75rem,env(safe-area-inset-top,0px)+1.25rem)] shadow-sm lg:pb-4 lg:pt-14">
-      <div class="flex items-center gap-2 lg:gap-3">
+    <div class="page-header-top shrink-0 bg-white px-4 pb-4 shadow-sm lg:px-6">
+      <div class="flex items-center gap-3">
         <button
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sber-gray-light lg:h-10 lg:w-10"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sber-gray-light"
           type="button"
           @click="goBackToSource"
         >
           <ChevronLeft class="h-5 w-5 text-sber-black" />
         </button>
         <div class="min-w-0">
-          <h1 class="truncate text-lg font-bold text-sber-black lg:text-xl">
+          <h1 class="truncate text-xl font-bold text-sber-black">
             {{ isEditMode ? 'Редактирование задачи' : 'Новая задача' }}
           </h1>
         </div>
@@ -563,7 +563,7 @@ const attachmentRemoved = ref(false)
 const customNotifyMinutes = ref(10)
 const unsavedModal = ref(false)
 const formSnapshot = ref('')
-const PRESET_NOTIFY = new Set(['', '0', '5', '15', '30', '60', '1440', 'custom'])
+const PRESET_NOTIFY = new Set(['', '0', '1', '5', '15', '30', '60', '1440', 'custom'])
 /** «Без срока» как осознанный выбор: скрывает поля даты. Пустая дата без флага — ничего не выбрано, можно ввести любую дату. */
 const explicitNoDeadline = ref(false)
 /** Создание задачи: описание по умолчанию свёрнуто на телефоне, чтобы влезала вкладка «Дата». */
@@ -627,6 +627,7 @@ const priorities: Array<{ value: Priority; label: string; color: string }> = [
 
 const notifyOptions = [
   { label: 'В момент срока', value: '0' },
+  { label: 'За 1 минуту', value: '1' },
   { label: 'За 5 минут', value: '5' },
   { label: 'За 15 минут', value: '15' },
   { label: 'За 30 минут', value: '30' },

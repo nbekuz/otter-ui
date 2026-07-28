@@ -125,7 +125,6 @@
             </span>
             <span class="flex-1 text-left tracking-wide">Премиум</span>
           </button>
-          <NotificationsBell variant="sidebar" :is-dark-theme="isDarkTheme" />
           <NuxtLink
             to="/app/faq"
             class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"

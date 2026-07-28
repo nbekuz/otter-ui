@@ -80,9 +80,24 @@ function reminderMinutes(dueAt: string | null, reminderAt: string | null): strin
   return String(diff)
 }
 
+function formatLocalOffset(date: Date): string {
+  // getTimezoneOffset: UTC − local (minutes). ISO needs local − UTC.
+  const total = -date.getTimezoneOffset()
+  const sign = total >= 0 ? '+' : '-'
+  const abs = Math.abs(total)
+  const hours = String(Math.floor(abs / 60)).padStart(2, '0')
+  const minutes = String(abs % 60).padStart(2, '0')
+  return `${sign}${hours}:${minutes}`
+}
+
+/** Wall-clock date+time with the user's local timezone offset (e.g. +05:00). */
 function toApiDateTime(dueDate: string, time: string): string {
   const hhmm = time.length >= 5 ? time.slice(0, 5) : time
-  return `${dueDate}T${hhmm}:00.000`
+  const local = new Date(`${dueDate}T${hhmm}:00`)
+  const offset = Number.isNaN(local.getTime())
+    ? formatLocalOffset(new Date())
+    : formatLocalOffset(local)
+  return `${dueDate}T${hhmm}:00.000${offset}`
 }
 
 function buildDueAt(dueDate?: string, dueTime?: string): string | null {
@@ -97,7 +112,13 @@ function buildReminderAt(
   if (!dueAt || !notification) return null
   const minutes = Number(notification)
   if (!Number.isFinite(minutes) || minutes < 0) return null
-  return dayjs(dueAt).subtract(minutes, 'minute').format('YYYY-MM-DDTHH:mm:ss.SSS')
+  const at = dayjs(dueAt).subtract(minutes, 'minute')
+  if (!at.isValid()) return null
+  const offsetMatch = dueAt.match(/([+-]\d{2}:\d{2}|Z)$/i)
+  const offset = offsetMatch
+    ? (offsetMatch[1]!.toUpperCase() === 'Z' ? '+00:00' : offsetMatch[1]!)
+    : formatLocalOffset(at.toDate())
+  return `${at.format('YYYY-MM-DDTHH:mm:ss.SSS')}${offset}`
 }
 
 function buildStartEnd(
