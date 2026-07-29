@@ -45,11 +45,16 @@ const nameClassMap = {
 }
 
 const settingsStore = useSettingsStore()
+const route = useRoute()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
+/** Match app.vue: marketing pages stay light even if preference is dark. */
+const applyDark = computed(
+  () => isDarkTheme.value && route.path.startsWith('/app'),
+)
 const logoClass = computed(() => logoClassMap[props.size || 'md'])
 const textSizeClass = computed(() => textSizeClassMap[props.size || 'md'])
 const logoToneClass = computed(() => {
-  const needsLightLogo = props.textClass.includes('text-white') || isDarkTheme.value
+  const needsLightLogo = props.textClass.includes('text-white') || applyDark.value
   return needsLightLogo ? 'brightness-0 invert opacity-95' : 'brightness-0'
 })
 </script>

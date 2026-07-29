@@ -254,8 +254,22 @@
   color: #f3f4f6 !important;
 }
 
+.dark .text-sber-black\/70,
+.dark .text-sber-black\/60,
+.dark .text-sber-black\/50,
+.dark .text-sber-black\/40 {
+  color: rgba(243, 244, 246, 0.72) !important;
+}
+
 .dark .text-sber-gray {
   color: #9aa3af !important;
+}
+
+.dark .bg-white\/95,
+.dark .bg-white\/90,
+.dark .bg-white\/80 {
+  background-color: rgba(23, 26, 33, 0.95) !important;
+  color: #f3f4f6 !important;
 }
 
 .dark .border-sber-gray-light,

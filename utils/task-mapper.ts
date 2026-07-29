@@ -250,7 +250,11 @@ export async function dataUrlToFile(
   }
 }
 
-export function uiTaskToFormData(task: Partial<Task>, imageFile?: File): FormData {
+export function uiTaskToFormData(
+  task: Partial<Task>,
+  imageFile?: File,
+  options?: { clearImage?: boolean },
+): FormData {
   const formData = new FormData()
   const payload = uiTaskToApiPayload(task)
 
@@ -261,6 +265,10 @@ export function uiTaskToFormData(task: Partial<Task>, imageFile?: File): FormDat
 
   if (imageFile) {
     formData.append('image', imageFile)
+  }
+  else if (options?.clearImage) {
+    // Legacy single-image field — empty string clears it on the API.
+    formData.append('image', '')
   }
 
   return formData

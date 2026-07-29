@@ -605,26 +605,37 @@
       <Transition name="overlay"><div v-if="viewModal" class="overlay" @click="viewModal = false" /></Transition>
       <Transition name="modal">
         <div v-if="viewModal" class="app-modal px-5 py-5" style="max-height: 85dvh; overflow-y: auto;" @click.stop>
-          <h3 class="text-lg font-bold mb-1">Вид</h3>
-          <p class="mb-4 text-sm text-sber-gray">Как открывается календарь и какие часы свёрнуты по умолчанию.</p>
+          <h3 class="mb-1 text-lg font-extrabold tracking-tight text-sber-black">Вид</h3>
+          <p class="mb-5 text-sm leading-snug text-sber-gray">
+            Какой вид календаря открывать при входе в раздел «Календарь».
+          </p>
 
-          <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-sber-gray">Календарь по умолчанию</p>
-          <div class="mb-4 grid grid-cols-2 gap-2">
+          <p class="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-sber-gray">Календарь по умолчанию</p>
+          <div class="mb-5 grid grid-cols-2 gap-2.5">
             <button
               v-for="opt in calendarViewOptions"
               :key="opt.id"
               type="button"
-              class="rounded-2xl border px-3 py-3 text-sm font-medium transition-colors"
+              class="flex items-center gap-2 rounded-2xl border px-3 py-3 text-left text-sm font-semibold transition-colors"
               :class="(settingsStore.appSettings.calendarDefaultView || 'day') === opt.id
                 ? 'border-sber-green bg-sber-green-light text-sber-green'
-                : 'border-sber-gray-light text-sber-black'"
+                : 'border-sber-gray-mid bg-white text-sber-black'"
               @click="setCalendarDefaultView(opt.id)"
             >
-              {{ opt.label }}
+              <component
+                :is="opt.icon"
+                class="h-5 w-5 shrink-0"
+                :class="(settingsStore.appSettings.calendarDefaultView || 'day') === opt.id ? 'text-sber-green' : 'text-sber-gray'"
+              />
+              <span class="min-w-0 flex-1 truncate">{{ opt.label }}</span>
+              <Check
+                v-if="(settingsStore.appSettings.calendarDefaultView || 'day') === opt.id"
+                class="h-4 w-4 shrink-0 text-sber-green"
+              />
             </button>
           </div>
 
-          <button class="btn-secondary w-full" type="button" @click="viewModal = false">Закрыть</button>
+          <button class="btn-secondary w-full" type="button" @click="viewModal = false">Готово</button>
         </div>
       </Transition>
     </Teleport>
@@ -634,26 +645,44 @@
       <Transition name="overlay"><div v-if="dateTimeModal" class="overlay" @click="dateTimeModal = false" /></Transition>
       <Transition name="modal">
         <div v-if="dateTimeModal" class="app-modal px-5 py-5" @click.stop>
-          <h3 class="text-lg font-bold mb-1">Дата и время</h3>
-          <p class="mb-4 text-sm text-sber-gray">
-            Часовой пояс используется для напоминаний и группировки «Сегодня» / «Просрочено».
+          <h3 class="mb-1 text-lg font-extrabold tracking-tight text-sber-black">Дата и время</h3>
+          <p class="mb-5 text-sm leading-snug text-sber-gray">
+            Часовой пояс нужен для напоминаний и списков «Сегодня» и «Просрочено».
           </p>
 
-          <div class="mb-3 rounded-2xl border border-sber-gray-light px-4 py-3">
-            <p class="text-xs font-semibold uppercase tracking-wide text-sber-gray">Часовой пояс</p>
-            <p class="mt-1 text-sm font-semibold text-sber-black">{{ timezoneLabel }}</p>
-            <p class="mt-1 text-xs text-sber-gray">Сейчас: {{ deviceNowLabel }}</p>
+          <div class="mb-4 flex gap-3.5 rounded-2xl border border-sber-gray-light bg-sber-gray-light px-4 py-4">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-sber-gray-light bg-white">
+              <Globe class="h-5 w-5 text-sber-green" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-sber-gray">Часовой пояс</p>
+              <p class="mt-1.5 truncate text-[17px] font-bold tracking-tight text-sber-black">{{ timezoneLabel }}</p>
+              <div class="mt-2 flex flex-wrap items-center gap-2">
+                <span class="rounded-lg border border-sber-gray-light bg-white px-2 py-1 text-xs font-semibold text-sber-black">
+                  {{ timezoneOffsetLabel }}
+                </span>
+                <span
+                  v-if="timezoneMatchesDevice"
+                  class="inline-flex items-center gap-1 rounded-lg bg-sber-green-light px-2 py-1 text-xs font-semibold text-sber-green"
+                >
+                  <Check class="h-3 w-3" />
+                  Как на устройстве
+                </span>
+              </div>
+              <p class="mt-2.5 text-xs leading-snug text-sber-gray">Сейчас · {{ deviceNowLabel }}</p>
+            </div>
           </div>
 
           <button
-            class="btn-primary mb-3 w-full"
+            class="btn-primary mb-3 flex w-full items-center justify-center gap-2"
             type="button"
             :disabled="timezoneSyncing"
             @click="syncTimezoneFromDevice"
           >
+            <Smartphone v-if="!timezoneSyncing" class="h-4 w-4" />
             {{ timezoneSyncing ? 'Синхронизация…' : 'Синхронизировать с устройством' }}
           </button>
-          <button class="btn-secondary w-full" type="button" @click="dateTimeModal = false">Закрыть</button>
+          <button class="btn-secondary w-full" type="button" @click="dateTimeModal = false">Готово</button>
         </div>
       </Transition>
     </Teleport>
@@ -847,6 +876,7 @@ import {
   Bell, Vibrate, Volume2, CheckCircle, Camera, Image, Globe,
   HelpCircle, Info, Star, Check, ChevronDown, ChevronRight, User, Lock, FileText,
   Paintbrush, Clock, Download, Upload, Share2, Smartphone, Crown, GripVertical, MessageSquareText,
+  CalendarDays, Calendar, CalendarRange, Columns3,
 } from 'lucide-vue-next'
 import { Moon, Sun } from 'lucide-vue-next'
 import type { CalendarDefaultView } from '~/data/mockData'
@@ -984,11 +1014,11 @@ const selectedLanguageLabel = computed(() =>
   languages.find(l => l.id === selectedLanguage.value)?.label || 'Русский'
 )
 
-const calendarViewOptions: { id: CalendarDefaultView; label: string }[] = [
-  { id: 'day', label: 'День' },
-  { id: 'week', label: 'Неделя' },
-  { id: 'month', label: 'Месяц' },
-  { id: 'year', label: 'Год' },
+const calendarViewOptions: { id: CalendarDefaultView; label: string; icon: typeof CalendarDays }[] = [
+  { id: 'day', label: 'День', icon: CalendarDays },
+  { id: 'week', label: 'Неделя', icon: Columns3 },
+  { id: 'month', label: 'Месяц', icon: Calendar },
+  { id: 'year', label: 'Год', icon: CalendarRange },
 ]
 
 const calendarViewLabel = computed(() => {
@@ -1001,6 +1031,39 @@ const timezoneLabel = computed(() =>
   || (import.meta.client ? Intl.DateTimeFormat().resolvedOptions().timeZone : '')
   || '—'
 )
+
+const deviceTimezoneLabel = computed(() => {
+  if (!import.meta.client) return ''
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+})
+
+const timezoneMatchesDevice = computed(() => {
+  const saved = settingsStore.appSettings.timezone
+  const device = deviceTimezoneLabel.value
+  return Boolean(saved && device && saved === device)
+})
+
+const timezoneOffsetLabel = computed(() => {
+  void deviceNowTick.value
+  if (!import.meta.client) return 'UTC'
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezoneLabel.value !== '—' ? timezoneLabel.value : undefined,
+      timeZoneName: 'shortOffset',
+    }).formatToParts(new Date())
+    const raw = parts.find(p => p.type === 'timeZoneName')?.value || ''
+    // "GMT+5" / "GMT+05:00" → "UTC+5" / "UTC+05:00"
+    return raw.replace(/^GMT/, 'UTC') || 'UTC'
+  }
+  catch {
+    const minutes = -new Date().getTimezoneOffset()
+    const sign = minutes < 0 ? '-' : '+'
+    const abs = Math.abs(minutes)
+    const h = String(Math.floor(abs / 60)).padStart(2, '0')
+    const m = String(abs % 60).padStart(2, '0')
+    return `UTC${sign}${h}:${m}`
+  }
+})
 
 const deviceNowLabel = computed(() => {
   void deviceNowTick.value

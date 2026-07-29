@@ -345,6 +345,7 @@
                 v-for="day in weekViewDays"
                 :key="`w-day-${day.date}`"
                 class="relative min-w-0 flex-1 overflow-hidden border-l border-[#c8cfdb]"
+                :data-week-date="day.date"
                 :style="{ height: `${weekTotalPx}px` }"
               >
                 <div
@@ -376,21 +377,22 @@
                   >
                     <button
                       type="button"
-                      class="absolute left-1/2 top-0 z-40 flex h-5 w-full -translate-x-1/2 cursor-ns-resize items-start justify-center"
+                      class="absolute left-1/2 top-0 z-20 flex h-5 w-full max-w-[3.5rem] -translate-x-1/2 cursor-ns-resize items-start justify-center"
                       aria-label="Изменить начало"
                       @pointerdown.stop.prevent="startTaskResize($event, task, 'start')"
                     >
                       <span class="pointer-events-none h-1 w-6 shrink-0 rounded-full bg-sber-gray/50" />
                     </button>
-                    <div class="flex min-w-0 items-start gap-0.5">
+                    <div class="pointer-events-none relative z-30 flex min-w-0 items-start gap-0.5">
                       <button
                         type="button"
-                        class="mt-px flex h-2.5 w-2.5 shrink-0 items-center justify-center rounded border"
+                        class="pointer-events-auto relative z-40 mt-px flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border"
                         :style="{ borderColor: getPriorityColor(task.priority), backgroundColor: task.completed ? getPriorityColor(task.priority) : 'transparent' }"
-                        @click.stop="toggleTaskComplete(task.id)"
+                        aria-label="Завершить задачу"
+                        @click.stop.prevent="toggleTaskComplete(task.id)"
                         @pointerdown.stop
                       >
-                        <Check v-if="task.completed" class="h-1.5 w-1.5 text-white" />
+                        <Check v-if="task.completed" class="h-2 w-2 text-white" />
                       </button>
                       <div class="min-w-0 flex-1 overflow-hidden">
                         <p class="truncate text-sm font-semibold leading-snug text-sber-black">{{ weekTaskTimeLabel(task) }}</p>
@@ -399,7 +401,7 @@
                     </div>
                     <button
                       type="button"
-                      class="absolute bottom-0 left-1/2 z-40 flex h-5 w-full -translate-x-1/2 cursor-ns-resize items-end justify-center"
+                      class="absolute bottom-0 left-1/2 z-20 flex h-5 w-full max-w-[3.5rem] -translate-x-1/2 cursor-ns-resize items-end justify-center"
                       aria-label="Изменить конец"
                       @pointerdown.stop.prevent="startTaskResize($event, task, 'end')"
                     >
@@ -671,14 +673,22 @@ const dragState = ref<{
   taskId: string
   mode: DragMode
   startY: number
+  startX: number
   initialStart: number
   initialEnd: number
+  sourceDate: string | null
   hadDuration: boolean
   captureEl: HTMLElement | null
   pointerId: number | null
   pxPerMinute: number
 } | null>(null)
-const dragPreview = ref<{ taskId: string; start: number; end: number } | null>(null)
+const dragPreview = ref<{
+  taskId: string
+  start: number
+  end: number
+  /** Week view: target day while dragging across columns. */
+  date?: string | null
+} | null>(null)
 const didDrag = ref(false)
 /**
  * После реального перетаскивания часто приходит лишний click (ghost click на touch).
@@ -798,14 +808,43 @@ function getDateHourTasks(date: string, hour: number) {
 }
 
 function getWeekDayTimelineTasks(date: string) {
-  const base = tasksStore.getTasksForDate(date)
+  const preview = dragPreview.value
+  const realPreviewId = preview ? resolveRealTaskId(preview.taskId) : null
+  const previewOnThisDay = Boolean(
+    preview && realPreviewId && (preview.date || null) === date,
+  )
+  const previewOnOtherDay = Boolean(
+    preview && realPreviewId && preview.date && preview.date !== date,
+  )
+
+  let sourceTasks = tasksStore.getTasksForDate(date)
     .filter(t => !!getTaskScheduleStart(t))
+
+  // Hide the block on its source day while the preview lives on another column.
+  if (previewOnOtherDay) {
+    sourceTasks = sourceTasks.filter(t => resolveRealTaskId(t.id) !== realPreviewId)
+  }
+
+  // Show the dragged block on the target day even if it is not scheduled there yet.
+  if (previewOnThisDay) {
+    const already = sourceTasks.some(t => resolveRealTaskId(t.id) === realPreviewId)
+    if (!already) {
+      const fromStore = tasksStore.tasks.find(t => resolveRealTaskId(t.id) === realPreviewId)
+        || tasksStore.calendarTasks.find(t => resolveRealTaskId(t.id) === realPreviewId)
+      if (fromStore) sourceTasks = [...sourceTasks, fromStore]
+    }
+  }
+
+  const base = sourceTasks
     .map((task) => {
-      const preview = dragPreview.value?.taskId === task.id ? dragPreview.value : null
+      const isPreview = realPreviewId != null
+        && resolveRealTaskId(task.id) === realPreviewId
+        && (!preview?.date || preview.date === date)
+      const activePreview = isPreview ? preview : null
       const scheduleStart = getTaskScheduleStart(task) || '00:00'
-      const startMinutes = preview ? preview.start : parseTimeToMinutes(scheduleStart)
-      const durationMinutes = preview
-        ? (preview.end - preview.start)
+      const startMinutes = activePreview ? activePreview.start : parseTimeToMinutes(scheduleStart)
+      const durationMinutes = activePreview
+        ? (activePreview.end - activePreview.start)
         : getTaskDurationMinutes(task)
       const endMinutes = startMinutes + durationMinutes
 
@@ -936,10 +975,6 @@ function startTaskResize(event: PointerEvent, task: Task & { rawStart: number; r
   initDrag(event, task, edge === 'start' ? 'resize-start' : 'resize-end')
 }
 
-function resolveDragPxPerMinute(_startMinutes: number) {
-  return minuteHeightPx
-}
-
 function initDrag(event: PointerEvent, task: Task & { rawStart: number; rawEnd: number }, mode: DragMode) {
   const captureEl = (event.currentTarget as HTMLElement | null) ?? null
   const pointerId = event.pointerId
@@ -951,23 +986,46 @@ function initDrag(event: PointerEvent, task: Task & { rawStart: number; rawEnd: 
     }
   }
 
+  const sourceDate = calendarStore.viewType === 'week'
+    ? (task.dueDate || calendarStore.currentDate)
+    : calendarStore.currentDate
+
   dragState.value = {
     taskId: task.id,
     mode,
     startY: event.clientY,
+    startX: event.clientX,
     initialStart: task.rawStart,
     initialEnd: task.rawEnd,
+    sourceDate: calendarStore.viewType === 'week' ? sourceDate : null,
     hadDuration: !!task.duration,
     captureEl,
     pointerId,
-    pxPerMinute: resolveDragPxPerMinute(task.rawStart),
+    pxPerMinute: calendarStore.viewType === 'week' ? weekMinuteHeightPx : minuteHeightPx,
   }
   didDrag.value = false
-  dragPreview.value = { taskId: task.id, start: task.rawStart, end: task.rawEnd }
+  dragPreview.value = {
+    taskId: task.id,
+    start: task.rawStart,
+    end: task.rawEnd,
+    date: calendarStore.viewType === 'week' ? sourceDate : null,
+  }
 
   window.addEventListener('pointermove', handleDragMove, { passive: false })
   window.addEventListener('pointerup', handleDragEnd)
   window.addEventListener('pointercancel', handleDragEnd)
+}
+
+function resolveWeekDateUnderPointer(clientX: number, _clientY: number, fallback: string | null) {
+  if (typeof document === 'undefined') return fallback
+  const cols = document.querySelectorAll<HTMLElement>('[data-week-date]')
+  for (const col of cols) {
+    const rect = col.getBoundingClientRect()
+    if (clientX >= rect.left && clientX < rect.right) {
+      return col.dataset.weekDate || fallback
+    }
+  }
+  return fallback
 }
 
 function handleDragMove(event: PointerEvent) {
@@ -975,7 +1033,8 @@ function handleDragMove(event: PointerEvent) {
   event.preventDefault()
 
   const rawDeltaMinutes = (event.clientY - dragState.value.startY) / dragState.value.pxPerMinute
-  if (Math.abs(rawDeltaMinutes) >= 1.5) {
+  const rawDeltaX = event.clientX - dragState.value.startX
+  if (Math.abs(rawDeltaMinutes) >= 1.5 || Math.abs(rawDeltaX) >= 12) {
     didDrag.value = true
   }
 
@@ -995,10 +1054,24 @@ function handleDragMove(event: PointerEvent) {
     nextEnd = snapMinutes(nextEnd)
   }
 
+  let nextDate = dragState.value.sourceDate
+  if (
+    dragState.value.mode === 'move'
+    && calendarStore.viewType === 'week'
+    && dragState.value.sourceDate
+  ) {
+    nextDate = resolveWeekDateUnderPointer(
+      event.clientX,
+      event.clientY,
+      dragState.value.sourceDate,
+    )
+  }
+
   dragPreview.value = {
     taskId: dragState.value.taskId,
     start: nextStart,
     end: nextEnd,
+    date: nextDate,
   }
 }
 
@@ -1034,9 +1107,18 @@ function handleDragEnd() {
   }
 
   const preview = dragPreview.value
+  const dateChanged = Boolean(
+    preview?.date
+    && state.sourceDate
+    && preview.date !== state.sourceDate,
+  )
   const shouldPersist = preview
     && preview.taskId === state.taskId
-    && (preview.start !== state.initialStart || preview.end !== state.initialEnd)
+    && (
+      preview.start !== state.initialStart
+      || preview.end !== state.initialEnd
+      || dateChanged
+    )
 
   if (!shouldPersist) {
     finishDragInteraction()
@@ -1049,6 +1131,9 @@ function handleDragEnd() {
   const updates: Partial<Task> = {
     dueTime: nextStart,
     duration: { start: nextStart, end: nextEnd },
+  }
+  if (dateChanged && preview.date) {
+    updates.dueDate = preview.date
   }
 
   void tasksStore

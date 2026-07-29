@@ -843,6 +843,8 @@ async function submit() {
       }
     } else if (attachmentRemoved.value) {
       updates.attachment = undefined
+      updates.imageUrl = undefined
+      updates.attachments = []
     }
 
     await tasksStore.updateTask(editTaskId.value, updates)

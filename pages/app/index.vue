@@ -1044,6 +1044,8 @@ async function saveDesktopTask() {
     }
   } else if (attachmentRemoved.value) {
     updates.attachment = undefined
+    updates.imageUrl = undefined
+    updates.attachments = []
   }
 
   try {

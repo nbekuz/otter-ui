@@ -82,15 +82,25 @@ export const useTasksStore = defineStore('tasks', () => {
   const noDateTasks = computed(() => groupedFromApi.value.nodate)
   const completedTasks = computed(() => groupedFromApi.value.completed)
 
-  /** List endpoints may omit the image; keep a previously known attachment. */
+  /**
+   * List endpoints may omit the image; keep a previously known attachment.
+   * Do not restore when the cached task was intentionally cleared — otherwise
+   * remove+save looks like a no-op.
+   */
   function preserveImages(incoming: Task[]) {
     const prevById = new Map(tasks.value.map(t => [t.id, t]))
     for (const task of incoming) {
       if (task.imageUrl || task.attachment) continue
       const prev = prevById.get(task.id)
-      if (prev?.imageUrl || prev?.attachment) {
+      if (!prev) continue
+      const prevCleared = !prev.imageUrl
+        && !prev.attachment
+        && !(prev.attachments && prev.attachments.length > 0)
+      if (prevCleared) continue
+      if (prev.imageUrl || prev.attachment) {
         task.imageUrl = prev.imageUrl
         task.attachment = prev.attachment
+        if (prev.attachments?.length) task.attachments = prev.attachments
       }
     }
     return incoming
@@ -458,21 +468,61 @@ export const useTasksStore = defineStore('tasks', () => {
 
   type RefreshOptions = { grouped?: boolean, calendar?: boolean, matrix?: boolean }
 
+  function isClearingAttachment(updates: Partial<Task>, imageFile?: File) {
+    if (imageFile) return false
+    return Object.prototype.hasOwnProperty.call(updates, 'attachment')
+      && !updates.attachment
+  }
+
+  function clearedAttachmentFields(): Pick<Task, 'attachment' | 'imageUrl' | 'attachments'> {
+    return {
+      attachment: undefined,
+      imageUrl: undefined,
+      attachments: [],
+    }
+  }
+
   async function updateTask(
     id: string,
     updates: Partial<Task>,
     refresh: RefreshOptions = {},
   ) {
     const existing = findTaskById(id)
-    const optimistic = mergeTaskFields(existing, updates, id)
+    const imageFile = await resolveAttachmentFile(updates)
+    const clearingAttachment = isClearingAttachment(updates, imageFile)
+
+    const optimisticUpdates = clearingAttachment
+      ? { ...updates, ...clearedAttachmentFields() }
+      : updates
+    const optimistic = mergeTaskFields(existing, optimisticUpdates, id)
     upsertTaskInState(optimistic)
 
     const merged = { ...existing, ...updates, id } as Partial<Task>
-    const imageFile = await resolveAttachmentFile(updates)
-    let updated = imageFile
-      ? await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToFormData(merged, imageFile))
-      : await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToApiPayload(merged))
+
+    // Remove server attachments so list refresh cannot resurrect the old file.
+    if (clearingAttachment) {
+      const ids = new Set<number>()
+      for (const a of existing?.attachments || []) ids.add(a.id)
+      for (const attachmentId of ids) {
+        try {
+          await deleteAttachment(id, attachmentId)
+        }
+        catch {
+          /* continue — still clear legacy image field below */
+        }
+      }
+    }
+
+    let updated: ApiTask
     if (imageFile) {
+      const prevIds = existing?.attachments?.map(a => a.id) || []
+      for (const attachmentId of prevIds) {
+        try {
+          await deleteAttachment(id, attachmentId)
+        }
+        catch { /* ignore */ }
+      }
+      updated = await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToFormData(merged, imageFile))
       try {
         await uploadAttachment(id, imageFile)
         updated = await apiGet<ApiTask>(`tasks/${id}/`)
@@ -481,7 +531,26 @@ export const useTasksStore = defineStore('tasks', () => {
         /* keep patched response */
       }
     }
-    const task = mergeTaskFromApi(existing, updates, apiTaskToUi(updated))
+    else if (clearingAttachment) {
+      updated = await apiPatch<ApiTask>(
+        `tasks/${id}/`,
+        uiTaskToFormData(merged, undefined, { clearImage: true }),
+      )
+      try {
+        updated = await apiGet<ApiTask>(`tasks/${id}/`)
+      }
+      catch {
+        /* keep patched response */
+      }
+    }
+    else {
+      updated = await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToApiPayload(merged))
+    }
+
+    let task = mergeTaskFromApi(existing, optimisticUpdates, apiTaskToUi(updated))
+    if (clearingAttachment) {
+      task = { ...task, ...clearedAttachmentFields() }
+    }
     upsertTaskInState(task)
     await refreshTaskLists(refresh)
     return task
