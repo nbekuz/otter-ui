@@ -1137,7 +1137,11 @@ function handleDragEnd() {
   }
 
   void tasksStore
-    .updateTask(resolveRealTaskId(state.taskId), updates, { grouped: false, matrix: false })
+    .updateTask(resolveRealTaskId(state.taskId), updates, {
+      grouped: false,
+      calendar: false,
+      matrix: false,
+    })
     .finally(finishDragInteraction)
 }
 
@@ -1318,7 +1322,11 @@ function handleWeekCellDrop(event: DragEvent, date: string, hour: number) {
     duration: { start: nextStart, end: nextEnd },
   }
 
-  void tasksStore.updateTask(task.id, updates, { grouped: false, matrix: false })
+  void tasksStore.updateTask(task.id, updates, {
+    grouped: false,
+    calendar: false,
+    matrix: false,
+  })
   draggingWeekTaskId.value = null
 }
 
@@ -1332,7 +1340,11 @@ function handleMonthCellDrop(event: DragEvent, date: string) {
     return
   }
 
-  void tasksStore.updateTask(task.id, { dueDate: date }, { grouped: false, matrix: false })
+  void tasksStore.updateTask(task.id, { dueDate: date }, {
+    grouped: false,
+    calendar: false,
+    matrix: false,
+  })
   draggingWeekTaskId.value = null
 }
 

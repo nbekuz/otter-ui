@@ -178,9 +178,17 @@ export const useTasksStore = defineStore('tasks', () => {
       ...fromApi,
       ...updates,
       id: fromApi.id,
-      duration: fromApi.duration ?? updates.duration ?? existing?.duration,
-      dueTime: fromApi.dueTime ?? updates.dueTime ?? existing?.dueTime,
-      dueDate: fromApi.dueDate ?? updates.dueDate ?? existing?.dueDate,
+      // Prefer the schedule we just wrote so a remapped API timezone cannot
+      // jump the block on the calendar after drag/resize.
+      duration: 'duration' in updates
+        ? updates.duration
+        : (fromApi.duration ?? existing?.duration),
+      dueTime: 'dueTime' in updates
+        ? updates.dueTime
+        : (fromApi.dueTime ?? existing?.dueTime),
+      dueDate: 'dueDate' in updates
+        ? updates.dueDate
+        : (fromApi.dueDate ?? existing?.dueDate),
     }
   }
 

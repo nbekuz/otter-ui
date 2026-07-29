@@ -1,8 +1,22 @@
-/** Дата и время «как в строке API», без сдвига в локальную TZ браузера. */
+/**
+ * API datetime → date/time in the device local timezone.
+ *
+ * Server often returns UTC (`…Z`) even when we sent `+05:00`; reading the
+ * raw digits would shift the calendar after save/resize.
+ */
 export function parseApiWallClock(iso: string): { date: string; time: string } | null {
+  const parsed = new Date(iso)
+  if (!Number.isNaN(parsed.getTime())) {
+    const y = parsed.getFullYear()
+    const mo = String(parsed.getMonth() + 1).padStart(2, '0')
+    const d = String(parsed.getDate()).padStart(2, '0')
+    const hh = String(parsed.getHours()).padStart(2, '0')
+    const mm = String(parsed.getMinutes()).padStart(2, '0')
+    return { date: `${y}-${mo}-${d}`, time: `${hh}:${mm}` }
+  }
   const match = iso.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/)
   if (match) {
-    return { date: match[1], time: `${match[2]}:${match[3]}` }
+    return { date: match[1]!, time: `${match[2]}:${match[3]}` }
   }
   return null
 }
