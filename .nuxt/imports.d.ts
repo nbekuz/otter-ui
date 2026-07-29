@@ -52,7 +52,7 @@ export { PRIORITY_COLORS, priorityColor } from '../utils/priority-colors';
 export { taskOccursOnDate, computeNextOccurrenceDate, isRecurringTask, expandTasksForDate, expandTasksForRange, resolveRealTaskId } from '../utils/recurrence';
 export { BRAND_NAME, SITE_LEGAL_INFO, DESKTOP_APP, PREMIUM_LANDING, PREMIUM_SUBSCRIPTION } from '../utils/site-info';
 export { OTTER_TASKS_EXPORT_VERSION, tasksToExportPayload, parseTasksExport, downloadTasksExportJson, OtterTasksExportPayload, OtterExportedTask } from '../utils/task-export';
-export { apiTaskToUi, uiTaskToApiPayload, dataUrlToFile, uiTaskToFormData, groupKeyToUi, apiMatrixBlockToUi } from '../utils/task-mapper';
+export { preferClientSchedule, apiTaskToUi, uiTaskToApiPayload, dataUrlToFile, uiTaskToFormData, groupKeyToUi, apiMatrixBlockToUi } from '../utils/task-mapper';
 export { parseApiWallClock, parseTimeToMinutes, formatMinutesToTime, addMinutesToTime, defaultDurationEnd, DURATION_END_AFTER_START_MESSAGE, REPEAT_INTERVAL_MAX, REPEAT_INTERVAL_MAX_MESSAGE, validateDurationFields, validateRepeatInterval, getTaskScheduleStart, getTaskDurationMinutes } from '../utils/time';
 export { useAuthStore } from '../stores/auth';
 export { useCalendarStore, CalendarViewType } from '../stores/calendar';

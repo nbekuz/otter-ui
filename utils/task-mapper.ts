@@ -112,13 +112,23 @@ function buildReminderAt(
   if (!dueAt || !notification) return null
   const minutes = Number(notification)
   if (!Number.isFinite(minutes) || minutes < 0) return null
-  const at = dayjs(dueAt).subtract(minutes, 'minute')
-  if (!at.isValid()) return null
-  const offsetMatch = dueAt.match(/([+-]\d{2}:\d{2}|Z)$/i)
-  const offset = offsetMatch
-    ? (offsetMatch[1]!.toUpperCase() === 'Z' ? '+00:00' : offsetMatch[1]!)
-    : formatLocalOffset(at.toDate())
-  return `${at.format('YYYY-MM-DDTHH:mm:ss.SSS')}${offset}`
+  const due = new Date(dueAt)
+  if (Number.isNaN(due.getTime())) return null
+  const at = new Date(due.getTime() - minutes * 60_000)
+  // Always local wall-clock + device offset (never re-tag dayjs local digits as Z).
+  return toApiDateTime(
+    `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, '0')}-${String(at.getDate()).padStart(2, '0')}`,
+    `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`,
+  )
+}
+
+export function preferClientSchedule(fromApi: Task, client: Partial<Task>): Task {
+  return {
+    ...fromApi,
+    dueDate: 'dueDate' in client ? client.dueDate : fromApi.dueDate,
+    dueTime: 'dueTime' in client ? client.dueTime : fromApi.dueTime,
+    duration: 'duration' in client ? client.duration : fromApi.duration,
+  }
 }
 
 function buildStartEnd(
@@ -163,7 +173,14 @@ export function apiTaskToUi(task: ApiTask): Task {
     priority: apiPriorityToUi(task.priority),
     completed: task.is_completed,
     completedAt: task.completed_at
-      ? dayjs(task.completed_at).format('YYYY-MM-DD')
+      ? (() => {
+        const d = new Date(task.completed_at)
+        if (Number.isNaN(d.getTime())) return undefined
+        const y = d.getFullYear()
+        const mo = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        return `${y}-${mo}-${day}`
+      })()
       : undefined,
     notification: task.reminder_offset_minutes != null
       ? String(task.reminder_offset_minutes)

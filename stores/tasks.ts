@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import type { Task } from '~/data/mockData'
 import type { ApiMatrixBlock, ApiTask, ApiTaskGroup } from '~/types/mobile-api'
 import { apiDelete, apiGet, apiPatch, apiPost, getApiErrorMessage } from '~/utils/api'
-import { apiMatrixBlockToUi, apiTaskToUi, dataUrlToFile, groupKeyToUi, uiTaskToApiPayload, uiTaskToFormData } from '~/utils/task-mapper'
+import { apiMatrixBlockToUi, apiTaskToUi, dataUrlToFile, groupKeyToUi, preferClientSchedule, uiTaskToApiPayload, uiTaskToFormData } from '~/utils/task-mapper'
 import { expandTasksForDate, expandTasksForRange, isRecurringTask } from '~/utils/recurrence'
 
 type GroupKey = 'overdue' | 'today' | 'tomorrow' | 'later' | 'nodate' | 'completed'
@@ -456,12 +456,12 @@ export const useTasksStore = defineStore('tasks', () => {
     const created = imageFile
       ? await apiPost<ApiTask>('tasks/', uiTaskToFormData(taskData, imageFile))
       : await apiPost<ApiTask>('tasks/', uiTaskToApiPayload(taskData))
-    let task = apiTaskToUi(created)
+    let task = preferClientSchedule(apiTaskToUi(created), taskData)
     if (imageFile) {
       try {
         await uploadAttachment(task.id, imageFile)
         const refreshed = await apiGet<ApiTask>(`tasks/${task.id}/`)
-        task = apiTaskToUi(refreshed)
+        task = preferClientSchedule(apiTaskToUi(refreshed), taskData)
       }
       catch {
         /* legacy image field may already hold the file */
@@ -469,6 +469,8 @@ export const useTasksStore = defineStore('tasks', () => {
     }
     upsertTaskInState(task)
     await refreshTaskLists()
+    // Re-pin after refresh — calendar/grouped may briefly echo UTC wall digits.
+    upsertTaskInState(preferClientSchedule(task, taskData))
     return task
   }
 
@@ -607,7 +609,11 @@ export const useTasksStore = defineStore('tasks', () => {
 
       const endpoint = existing.completed ? 'uncomplete' : 'complete'
       const updated = await apiPost<ApiTask>(`tasks/${id}/${endpoint}/`)
-      const task = apiTaskToUi(updated)
+      const task = preferClientSchedule(apiTaskToUi(updated), {
+        dueDate: existing.dueDate,
+        dueTime: existing.dueTime,
+        duration: existing.duration,
+      })
       upsertTaskInState(task)
 
       if (willComplete) {

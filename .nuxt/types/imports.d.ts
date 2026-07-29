@@ -165,6 +165,7 @@ declare global {
   const pauseBackgroundAudio: typeof import('../../utils/pomodoro-audio').pauseBackgroundAudio
   const playBackgroundLoop: typeof import('../../utils/pomodoro-audio').playBackgroundLoop
   const playSoundOnce: typeof import('../../utils/pomodoro-audio').playSoundOnce
+  const preferClientSchedule: typeof import('../../utils/task-mapper').preferClientSchedule
   const prefetchComponents: typeof import('../../node_modules/nuxt/dist/app/composables/preload').prefetchComponents
   const preloadComponents: typeof import('../../node_modules/nuxt/dist/app/composables/preload').preloadComponents
   const preloadPayload: typeof import('../../node_modules/nuxt/dist/app/composables/payload').preloadPayload
@@ -710,6 +711,7 @@ declare module 'vue' {
     readonly pauseBackgroundAudio: UnwrapRef<typeof import('../../utils/pomodoro-audio')['pauseBackgroundAudio']>
     readonly playBackgroundLoop: UnwrapRef<typeof import('../../utils/pomodoro-audio')['playBackgroundLoop']>
     readonly playSoundOnce: UnwrapRef<typeof import('../../utils/pomodoro-audio')['playSoundOnce']>
+    readonly preferClientSchedule: UnwrapRef<typeof import('../../utils/task-mapper')['preferClientSchedule']>
     readonly prefetchComponents: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preload')['prefetchComponents']>
     readonly preloadComponents: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preload')['preloadComponents']>
     readonly preloadPayload: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['preloadPayload']>
