@@ -665,7 +665,7 @@
         <div v-if="integrationsModal" class="app-modal px-5 py-5" @click.stop>
           <h3 class="text-lg font-bold mb-1">Интеграции и импорт</h3>
           <p class="mb-4 text-sm text-sber-gray">
-            Экспортируйте задачи в JSON или импортируйте их из файла Otter.
+            Экспортируйте задачи в JSON или импортируйте их из файла Оттер.
           </p>
 
           <button
@@ -690,7 +690,7 @@
             <Upload class="h-5 w-5 text-sber-gray" />
             <span class="min-w-0 flex-1">
               <span class="block text-sm font-medium text-sber-black">Импорт задач</span>
-              <span class="block text-xs text-sber-gray">Загрузить JSON-файл Otter</span>
+              <span class="block text-xs text-sber-gray">Загрузить JSON-файл Оттер</span>
             </span>
           </button>
           <input

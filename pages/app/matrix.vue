@@ -26,7 +26,7 @@
       <div
         v-for="block in blocks"
         :key="block.id"
-        class="flex h-full max-h-full min-h-0 flex-col overflow-hidden rounded-2xl border"
+        class="flex h-full max-h-full min-h-0 flex-col overflow-hidden rounded-2xl border pb-2"
         :style="getBlockContainerStyle(block)"
         @dragenter.prevent
         @dragover.prevent="dragTarget = block.id"
@@ -49,7 +49,7 @@
         </div>
 
         <!-- Tasks in block -->
-        <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-2 py-2">
+        <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-2 pt-2">
           <!-- Drop zone -->
           <div
             class="sticky top-0 z-20 mb-2 flex items-center justify-center rounded-xl border-2 border-dashed px-2 py-[5px] transition-colors"

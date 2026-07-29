@@ -414,34 +414,33 @@
       </div>
 
       <!-- MONTH VIEW -->
-      <div v-else-if="calendarStore.viewType === 'month'" class="min-h-0 flex-1 overflow-y-auto p-2">
+      <div v-else-if="calendarStore.viewType === 'month'" class="min-h-0 flex-1 overflow-y-auto px-1 py-2 sm:p-2">
         <!-- Weekday headers -->
-        <div class="mb-1 grid grid-cols-7 gap-1">
+        <div class="mb-1.5 grid grid-cols-7">
           <div v-for="d in ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']" :key="d"
-               class="py-1 text-center text-[10px] font-semibold text-sber-gray">
+               class="py-1 text-center text-[11px] font-semibold text-sber-gray">
             {{ d }}
           </div>
         </div>
-        <!-- Calendar grid -->
-        <div class="grid grid-cols-7 gap-1">
+        <!-- Calendar grid: taller cells, no card borders -->
+        <div class="grid grid-cols-7 gap-y-0.5">
           <div
             v-for="cell in monthCells"
             :key="cell.date"
-            class="relative min-w-0 aspect-square overflow-hidden rounded-xl border border-[#c8cfdb] p-1 transition-colors"
+            class="relative min-h-[102px] min-w-0 overflow-hidden px-0.5 py-1 transition-colors sm:min-h-[118px]"
             :class="[
               !cell.isCurrentMonth ? 'opacity-35' : '',
-              cell.date === calendarStore.currentDate ? 'bg-sber-green-light/70' :
-              cell.isToday ? 'bg-sber-green-light/40' : 'bg-white/40 hover:bg-sber-gray-light',
+              'hover:bg-sber-gray-light/60',
             ]"
             @dragenter.prevent
             @dragover.prevent
             @drop.prevent.stop="handleMonthCellDrop($event, cell.date)"
             @click="handleMonthCellClick(cell.date, $event)"
           >
-            <div class="flex items-center justify-between">
+            <div class="flex h-[22px] items-start justify-center">
               <span
                 data-month-day
-                class="inline-flex h-5 min-w-[1.25rem] cursor-pointer items-center justify-center rounded-full px-1 text-[10px] font-bold"
+                class="inline-flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-full text-xs font-semibold"
                 :class="cell.isToday ? 'bg-sber-green text-white' : 'text-sber-black'"
                 @click.stop="goToWeekView(cell.date)"
               >
@@ -449,29 +448,30 @@
               </span>
             </div>
 
-            <div class="mt-1 min-w-0 space-y-0.5">
+            <div class="relative mt-0.5 min-h-0 space-y-0.5 overflow-hidden">
               <div
-                v-for="task in getMonthCellTasks(cell.date)"
+                v-for="task in (monthCellTaskSlices[cell.date]?.visible || [])"
                 :key="task.id"
                 data-month-task
-                class="flex w-full min-w-0 max-w-full items-center gap-0.5 overflow-hidden rounded border border-[#c8cfdb] px-1 py-0.5 text-sm font-medium leading-snug text-sber-black"
+                class="w-full min-w-0 max-w-full cursor-pointer truncate rounded-[3px] px-1 py-px text-[10px] font-medium leading-tight text-sber-black"
                 :class="task.completed ? 'opacity-45' : ''"
-                :style="{ backgroundColor: getPriorityColor(task.priority) + '20' }"
+                :style="{ backgroundColor: getPriorityColor(task.priority) + '38' }"
                 draggable="true"
                 @dragstart.stop="startWeekTaskDrag($event, task.id)"
                 @dragend="endWeekTaskDrag"
                 @click.stop="handleTaskCardClick(resolveRealTaskId(task.id))"
               >
-                <button
-                  type="button"
-                  class="flex h-2.5 w-2.5 shrink-0 items-center justify-center rounded border"
-                  :style="{ borderColor: getPriorityColor(task.priority), backgroundColor: task.completed ? getPriorityColor(task.priority) : 'transparent' }"
-                  @click.stop="toggleTaskComplete(task.id)"
-                >
-                  <Check v-if="task.completed" class="h-1.5 w-1.5 text-white" />
-                </button>
-                <span class="min-w-0 flex-1 truncate text-sm font-medium leading-snug">{{ task.title }}</span>
+                {{ task.title }}
               </div>
+              <button
+                v-if="(monthCellTaskSlices[cell.date]?.hidden || 0) > 0"
+                type="button"
+                data-month-day
+                class="absolute bottom-0 right-0 rounded-md bg-sber-gray-light px-1 py-px text-[10px] font-semibold text-sber-gray"
+                @click.stop="goToWeekView(cell.date)"
+              >
+                +{{ monthCellTaskSlices[cell.date]?.hidden }}
+              </button>
             </div>
           </div>
         </div>
@@ -1135,8 +1135,29 @@ function getDateDots(date?: string | null) {
 
 function getMonthCellTasks(date?: string) {
   if (!date) return []
-  return tasksStore.getTasksForDate(date).filter(t => !!t.dueDate).slice(0, 3)
+  return tasksStore.getTasksForDate(date).filter(t => !!t.dueDate)
 }
+
+/** How many pills fit in a month cell (matches Flutter denser month layout). */
+const MONTH_CELL_VISIBLE_MAX = 5
+
+const monthCellTaskSlices = computed(() => {
+  const out: Record<string, { visible: Task[], hidden: number }> = {}
+  for (const cell of monthCells.value) {
+    if (!cell.date) continue
+    const all = getMonthCellTasks(cell.date)
+    if (all.length <= MONTH_CELL_VISIBLE_MAX) {
+      out[cell.date] = { visible: all, hidden: 0 }
+    }
+    else {
+      out[cell.date] = {
+        visible: all.slice(0, MONTH_CELL_VISIBLE_MAX),
+        hidden: all.length - MONTH_CELL_VISIBLE_MAX,
+      }
+    }
+  }
+  return out
+})
 
 // Year months
 const yearMonths = computed(() => {
