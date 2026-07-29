@@ -479,36 +479,34 @@
         </div>
       </div>
 
-      <!-- YEAR VIEW -->
+      <!-- YEAR VIEW — spacing matches Flutter year cards (gap/padding 8, title gap 4) -->
       <div v-else-if="calendarStore.viewType === 'year'" class="min-h-0 flex-1 overflow-y-auto p-2">
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-3 gap-2">
           <div
             v-for="month in yearMonths"
             :key="month.index"
-            class="cursor-pointer rounded-2xl bg-white p-3 active:bg-sber-gray-light"
+            class="cursor-pointer rounded-2xl bg-white p-2 active:bg-sber-gray-light"
             @click="goToMonth(month.index)"
           >
-            <p class="mb-2 text-xs font-bold text-sber-black">{{ month.name }}</p>
+            <p class="mb-1 text-xs font-bold leading-none text-sber-black">{{ month.name }}</p>
             <div class="grid grid-cols-7 gap-px">
               <div
                 v-for="(cell, cellIdx) in month.cells"
                 :key="`${month.index}-${cellIdx}`"
-                class="flex aspect-square flex-col items-center justify-center"
+                class="flex min-h-[21px] flex-col items-center justify-start pt-0"
                 @click.stop="cell.date && goToDayView(cell.date)"
               >
                 <span
                   v-if="cell.day"
-                  class="flex h-4 w-4 items-center justify-center text-[9px]"
+                  class="flex h-4 w-4 shrink-0 items-center justify-center text-[9px] leading-none"
                   :class="cell.isToday
                     ? 'rounded-full bg-sber-green font-semibold text-white'
                     : 'text-sber-gray'"
                 >
                   {{ cell.day }}
                 </span>
-                <div
-                  v-if="cell.date"
-                  class="mt-px flex h-1 items-center justify-center gap-px"
-                >
+                <!-- Single 4px dot slot (max 1), reserved height like Flutter -->
+                <div class="mt-px flex h-1 items-center justify-center gap-px">
                   <span
                     v-for="(dot, di) in getDateDots(cell.date)"
                     :key="di"
@@ -1199,7 +1197,7 @@ const monthCells = computed(() =>
   buildMonthCells(calendarStore.currentDate, todayStr),
 )
 
-/** Priority-colored dots for year mini-calendars (max 3). */
+/** One priority-colored dot per day on year mini-calendars (any task count). */
 const yearDotsByDate = computed(() => {
   if (calendarStore.viewType !== 'year') return new Map<string, string[]>()
   const year = parseInt(calendarStore.currentDate.substring(0, 4), 10)
@@ -1209,10 +1207,8 @@ const yearDotsByDate = computed(() => {
   const map = new Map<string, string[]>()
   for (const t of tasksStore.getTasksForWeek(start, end)) {
     if (!t.dueDate) continue
-    const list = map.get(t.dueDate) || []
-    if (list.length >= 3) continue
-    list.push(getPriorityColor(t.priority))
-    map.set(t.dueDate, list)
+    if (map.has(t.dueDate)) continue
+    map.set(t.dueDate, [getPriorityColor(t.priority)])
   }
   return map
 })
