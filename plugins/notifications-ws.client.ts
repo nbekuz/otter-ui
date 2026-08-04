@@ -12,8 +12,11 @@ const RECONNECT_MAX_MS = 30_000
 const LOG_TAG = '[otter:notifications-ws]'
 
 /**
- * Keeps a notifications WebSocket alive while the user is logged in.
- * Mobile uses FCM + REST instead — this plugin is web-only.
+ * Keeps a notifications WebSocket alive while the user is logged in
+ * AND app notification preference is enabled.
+ *
+ * Disable notifications in Settings → disconnect WSS.
+ * Re-enable → reconnect WSS with a fresh access token.
  *
  * URL: `wss://…/ws/notifications/?token=<access_jwt>`
  */
@@ -32,6 +35,14 @@ export default defineNuxtPlugin(() => {
   let intentionalClose = false
   let connectedToken: string | null = null
 
+  function notificationsEnabled(): boolean {
+    return settingsStore.appSettings.notifications !== false
+  }
+
+  function shouldConnect(): boolean {
+    return Boolean(authStore.isLoggedIn && getAccessToken() && notificationsEnabled())
+  }
+
   function clearPing() {
     if (pingTimer) {
       clearInterval(pingTimer)
@@ -48,7 +59,7 @@ export default defineNuxtPlugin(() => {
 
   function presentTaskReminder(notification: ApiNotificationItem, unreadCount: number) {
     notificationsStore.applyCreated(notification, unreadCount)
-    if (settingsStore.appSettings.notifications === false) return
+    if (!notificationsEnabled()) return
 
     // Compact in-app message only — no browser Notification popup on web.
     showReminder(notification)
@@ -83,6 +94,7 @@ export default defineNuxtPlugin(() => {
   }
 
   function scheduleReconnect() {
+    if (!shouldConnect()) return
     clearReconnect()
     const delay = Math.min(
       RECONNECT_MAX_MS,
@@ -95,7 +107,7 @@ export default defineNuxtPlugin(() => {
     }, delay)
   }
 
-  function disconnect() {
+  function disconnect(reason = 'manual') {
     intentionalClose = true
     clearPing()
     clearReconnect()
@@ -109,12 +121,18 @@ export default defineNuxtPlugin(() => {
       }
       socket = null
     }
+    console.info(LOG_TAG, 'WS disconnected', reason)
   }
 
   function connect() {
+    if (!shouldConnect()) {
+      disconnect('notifications-off-or-logged-out')
+      return
+    }
+
     const token = getAccessToken()
     if (!token) {
-      disconnect()
+      disconnect('no-token')
       return
     }
 
@@ -151,6 +169,7 @@ export default defineNuxtPlugin(() => {
       return
     }
     socket = ws
+    console.info(LOG_TAG, 'WS connecting…')
 
     ws.onopen = () => {
       console.info(LOG_TAG, 'WS ok')
@@ -174,7 +193,7 @@ export default defineNuxtPlugin(() => {
       clearPing()
       if (socket === ws) socket = null
       if (intentionalClose || event.code === 4401) return
-      if (!getAccessToken()) return
+      if (!shouldConnect()) return
       scheduleReconnect()
     }
 
@@ -183,11 +202,15 @@ export default defineNuxtPlugin(() => {
     }
   }
 
+  function syncConnection() {
+    if (shouldConnect()) connect()
+    else disconnect('sync')
+  }
+
   watch(
-    () => authStore.isLoggedIn,
-    (loggedIn) => {
-      if (loggedIn) connect()
-      else disconnect()
+    () => [authStore.isLoggedIn, settingsStore.appSettings.notifications] as const,
+    () => {
+      syncConnection()
     },
     { immediate: true },
   )
@@ -195,13 +218,13 @@ export default defineNuxtPlugin(() => {
   watch(
     () => authStore.tokenRevision,
     () => {
-      if (!authStore.isLoggedIn) return
+      if (!shouldConnect()) return
       const token = getAccessToken()
       if (token && token !== connectedToken) connect()
     },
   )
 
   if (import.meta.hot) {
-    import.meta.hot.dispose(() => disconnect())
+    import.meta.hot.dispose(() => disconnect('hmr'))
   }
 })

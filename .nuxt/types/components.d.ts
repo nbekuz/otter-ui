@@ -36,6 +36,7 @@ interface _GlobalComponents {
   NotificationsBell: typeof import("../../components/notifications/Bell.vue")['default']
   NotificationsPopover: typeof import("../../components/notifications/Popover.vue")['default']
   SettingsRow: typeof import("../../components/settings/Row.vue")['default']
+  ShareAppModal: typeof import("../../components/share/ShareAppModal.vue")['default']
   TasksTaskDetailModal: typeof import("../../components/tasks/TaskDetailModal.vue")['default']
   TasksTaskGroup: typeof import("../../components/tasks/TaskGroup.vue")['default']
   TasksTaskItem: typeof import("../../components/tasks/TaskItem.vue")['default']
@@ -85,6 +86,7 @@ interface _GlobalComponents {
   LazyNotificationsBell: LazyComponent<typeof import("../../components/notifications/Bell.vue")['default']>
   LazyNotificationsPopover: LazyComponent<typeof import("../../components/notifications/Popover.vue")['default']>
   LazySettingsRow: LazyComponent<typeof import("../../components/settings/Row.vue")['default']>
+  LazyShareAppModal: LazyComponent<typeof import("../../components/share/ShareAppModal.vue")['default']>
   LazyTasksTaskDetailModal: LazyComponent<typeof import("../../components/tasks/TaskDetailModal.vue")['default']>
   LazyTasksTaskGroup: LazyComponent<typeof import("../../components/tasks/TaskGroup.vue")['default']>
   LazyTasksTaskItem: LazyComponent<typeof import("../../components/tasks/TaskItem.vue")['default']>

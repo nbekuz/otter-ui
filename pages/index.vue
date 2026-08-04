@@ -79,10 +79,20 @@
               <button
                 class="hidden !w-auto max-w-full items-center justify-center gap-2 rounded-2xl border border-sber-gray-mid bg-white px-4 py-3.5 text-sm font-semibold text-sber-black transition-colors hover:bg-sber-gray-light sm:flex sm:px-5"
                 type="button"
+                :disabled="loadingWindows"
                 @click="onDesktopDownloadClick"
               >
                 <Download class="h-4 w-4 text-sber-green" />
-                {{ DESKTOP_APP.label }}
+                {{ loadingWindows ? 'Загрузка…' : DESKTOP_APP.label }}
+              </button>
+              <button
+                class="flex !w-auto max-w-full items-center justify-center gap-2 rounded-2xl border border-sber-gray-mid bg-white px-4 py-3.5 text-sm font-semibold text-sber-black transition-colors hover:bg-sber-gray-light max-sm:flex sm:hidden"
+                type="button"
+                :disabled="loadingMobile"
+                @click="onRustoreDownloadClick"
+              >
+                <Smartphone class="h-4 w-4 text-sber-green" />
+                {{ loadingMobile ? 'Загрузка…' : DESKTOP_APP.rustoreLabel }}
               </button>
               <div class="flex w-full flex-col items-center gap-2">
                 <p v-if="googleError" class="w-full text-center text-xs text-red-500">{{ googleError }}</p>
@@ -116,21 +126,34 @@
 </template>
 
 <script setup lang="ts">
-import { Download } from 'lucide-vue-next'
+import { Download, Smartphone } from 'lucide-vue-next'
 import logoUrl from '~/assets/img/logo.svg'
 import { BRAND_NAME, DESKTOP_APP } from '~/utils/site-info'
 
 const authStore = useAuthStore()
-const { showToast } = useAppToast()
+const {
+  loadingWindows,
+  loadingMobile,
+  loadWindows,
+  loadMobile,
+  downloadWindowsApp,
+  openRustoreDownload,
+} = useAppDownloads()
 
-function onDesktopDownloadClick() {
-  showToast(DESKTOP_APP.unavailableMessage, 'error', 4500)
+async function onDesktopDownloadClick() {
+  await downloadWindowsApp()
+}
+
+async function onRustoreDownloadClick() {
+  await openRustoreDownload()
 }
 
 const googleLoading = ref(false)
 const googleError = ref('')
 
 onMounted(() => {
+  void loadWindows()
+  void loadMobile()
   const pending = useState<string | null>('googleBackendError', () => null)
   if (pending.value) {
     googleError.value = pending.value

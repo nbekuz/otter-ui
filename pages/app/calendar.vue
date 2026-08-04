@@ -128,7 +128,13 @@
             <p class="text-[10px] font-semibold uppercase tracking-wide text-sber-gray">Без времени</p>
             <span class="text-[10px] font-medium text-sber-gray">{{ dayUntimedTasks.length }}</span>
           </div>
-          <div class="overflow-y-auto px-3 py-1.5" :style="{ height: `${untimedHeightPx}px` }">
+          <div
+            class="overflow-y-auto px-3 py-1.5"
+            :style="{ height: `${untimedHeightPx}px` }"
+            @dragenter.prevent
+            @dragover.prevent
+            @drop.prevent.stop="handleUntimedDayDrop($event, calendarStore.currentDate)"
+          >
             <div class="flex flex-col gap-1.5">
               <div
                 v-for="task in dayUntimedTasks"
@@ -256,10 +262,10 @@
       <!-- WEEK VIEW -->
       <div
         v-else-if="calendarStore.viewType === 'week'"
-        class="relative flex min-h-0 flex-1 flex-col overflow-hidden p-2"
+        class="relative flex min-h-0 flex-1 flex-col overflow-hidden"
       >
-        <!-- Day headers + untimed: pinned -->
-        <div class="z-30 shrink-0 bg-sber-gray-light pb-1">
+        <!-- Day headers + untimed: pinned (same surface as day view) -->
+        <div class="z-30 shrink-0 border-b border-sber-gray-mid bg-transparent px-2 pb-1 pt-2">
           <div class="mb-1 flex gap-1">
             <div class="w-14 flex-shrink-0" />
             <div
@@ -286,8 +292,11 @@
               <div
                 v-for="day in weekViewDays"
                 :key="`untimed-${day.date}`"
-                class="flex min-w-0 flex-1 flex-col gap-0.5 overflow-y-auto border-b border-[#c8cfdb] px-0.5 py-0.5"
+                class="flex min-w-0 flex-1 flex-col gap-0.5 overflow-y-auto border-b border-sber-gray-mid px-0.5 py-0.5"
                 :style="{ height: `${untimedHeightPx}px` }"
+                @dragenter.prevent
+                @dragover.prevent
+                @drop.prevent.stop="handleUntimedDayDrop($event, day.date)"
               >
                 <div
                   v-for="task in getUntimedTasksForDate(day.date)"
@@ -327,15 +336,15 @@
           </template>
         </div>
 
-        <!-- Hours 00:00–23:00 -->
-        <div class="min-h-0 flex-1 overflow-y-auto">
-          <div class="overflow-hidden rounded-2xl border border-[#c8cfdb] bg-white/45">
+        <!-- Hours 00:00–23:00 — same transparent surface as day view (no gray card) -->
+        <div class="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
+          <div class="overflow-hidden">
             <div class="flex">
-              <div class="sticky left-0 z-10 w-14 flex-shrink-0 bg-white/90">
+              <div class="sticky left-0 z-10 w-14 flex-shrink-0 bg-transparent">
                 <div
                   v-for="h in visibleWeekHours"
                   :key="`w-${h}`"
-                  class="border-t border-[#c8cfdb] pr-2 pt-1 text-right text-xs text-sber-gray first:border-t-0"
+                  class="border-t border-sber-gray-mid pr-2 pt-1 text-right text-xs text-sber-gray first:border-t-0"
                   :style="{ height: `${weekHourHeightPx}px` }"
                 >
                   {{ String(h).padStart(2, '0') }}:00
@@ -344,25 +353,25 @@
               <div
                 v-for="day in weekViewDays"
                 :key="`w-day-${day.date}`"
-                class="relative min-w-0 flex-1 overflow-hidden border-l border-[#c8cfdb]"
+                class="relative min-w-0 flex-1 overflow-hidden border-l border-sber-gray-mid"
                 :data-week-date="day.date"
                 :style="{ height: `${weekTotalPx}px` }"
+                @dragenter.prevent
+                @dragover.prevent
+                @drop.prevent.stop="handleWeekDayColumnDrop($event, day.date)"
               >
                 <div
                   v-for="h in visibleWeekHours"
                   :key="h"
-                  class="cursor-pointer border-t border-[#c8cfdb] first:border-t-0"
+                  class="cursor-pointer border-t border-sber-gray-mid first:border-t-0"
                   :style="{ height: `${weekHourHeightPx}px` }"
                   @click="openNewTaskFromWeekCell(day.date, h)"
-                  @dragenter.prevent
-                  @dragover.prevent
-                  @drop.prevent.stop="handleWeekCellDrop($event, day.date, h)"
                 />
                 <div class="pointer-events-none absolute inset-0">
                   <div
                     v-for="task in getWeekDayTimelineTasks(day.date)"
                     :key="`w-task-${task.id}`"
-                    class="pointer-events-auto absolute min-w-0 cursor-grab touch-none select-none overflow-hidden rounded border border-[#c8cfdb] px-1 py-0.5"
+                    class="pointer-events-auto absolute min-w-0 cursor-grab touch-none select-none overflow-hidden rounded-xl px-1 py-0.5"
                     :class="task.completed ? 'opacity-45' : ''"
                     :style="{
                       ...dayTimelineTaskHorizontalStyle(task.layoutCols, task.layoutCol, 2, 2),
@@ -489,6 +498,15 @@
             @click="goToMonth(month.index)"
           >
             <p class="mb-1 text-xs font-bold leading-none text-sber-black">{{ month.name }}</p>
+            <div class="mb-0.5 grid grid-cols-7 gap-px">
+              <div
+                v-for="d in yearWeekdayLabels"
+                :key="`${month.index}-${d}`"
+                class="text-center text-[8px] font-semibold leading-none text-sber-gray"
+              >
+                {{ d }}
+              </div>
+            </div>
             <div class="grid grid-cols-7 gap-px">
               <div
                 v-for="(cell, cellIdx) in month.cells"
@@ -559,6 +577,7 @@ const calendarStore = useCalendarStore()
 const tasksStore = useTasksStore()
 
 const todayStr = dayjs().format('YYYY-MM-DD')
+const yearWeekdayLabels = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'] as const
 const viewMenuOpen = ref(false)
 const viewMenuRef = ref<HTMLElement | null>(null)
 const selectedTaskId = ref<string | null>(null)
@@ -1293,11 +1312,62 @@ function endWeekTaskDrag() {
   draggingWeekTaskId.value = null
 }
 
-function handleWeekCellDrop(event: DragEvent, date: string, hour: number) {
-  const draggedTaskId = draggingWeekTaskId.value || event.dataTransfer?.getData('text/plain') || null
+function findDraggedTask(taskId: string): Task | undefined {
+  const realId = resolveRealTaskId(taskId)
+  return tasksStore.tasks.find(t => t.id === realId)
+    || tasksStore.calendarTasks.find(t => t.id === realId)
+}
+
+function readDraggedTaskId(event: DragEvent): string | null {
+  return draggingWeekTaskId.value
+    || event.dataTransfer?.getData('text/plain')
+    || null
+}
+
+/** Drop onto «Без вр.» / «Без времени»: keep or clear clock, move due date. */
+function handleUntimedDayDrop(event: DragEvent, date: string) {
+  const draggedTaskId = readDraggedTaskId(event)
   if (!draggedTaskId) return
 
-  const task = tasksStore.tasks.find(t => t.id === draggedTaskId)
+  const task = findDraggedTask(draggedTaskId)
+  if (!task) {
+    draggingWeekTaskId.value = null
+    return
+  }
+
+  const updates: Partial<Task> = {
+    dueDate: date,
+    dueTime: undefined,
+    duration: undefined,
+    isAllDay: true,
+  }
+
+  void tasksStore.updateTask(task.id, updates, {
+    grouped: false,
+    calendar: true,
+    matrix: false,
+  })
+  draggingWeekTaskId.value = null
+}
+
+function handleWeekDayColumnDrop(event: DragEvent, date: string) {
+  const column = event.currentTarget as HTMLElement | null
+  if (!column) return
+  const rect = column.getBoundingClientRect()
+  const offsetY = Math.max(0, event.clientY - rect.top)
+  const hourIndex = Math.min(
+    visibleWeekHours.value.length - 1,
+    Math.max(0, Math.floor(offsetY / weekHourHeightPx)),
+  )
+  const hour = visibleWeekHours.value[hourIndex] ?? Math.floor(offsetY / weekHourHeightPx)
+  handleWeekCellDrop(event, date, hour)
+}
+
+function handleWeekCellDrop(event: DragEvent, date: string, hour: number) {
+  const draggedTaskId = readDraggedTaskId(event)
+  if (!draggedTaskId) return
+
+  const task = findDraggedTask(draggedTaskId)
   if (!task) {
     draggingWeekTaskId.value = null
     return
@@ -1310,27 +1380,28 @@ function handleWeekCellDrop(event: DragEvent, date: string, hour: number) {
   const dayEndMinutes = 24 * 60 - 1
   const nextEndMinutes = Math.min(nextStartMinutes + durationMinutes, dayEndMinutes)
   const nextStart = formatMinutesToTime(nextStartMinutes)
-  const nextEnd = formatMinutesToTime(nextEndMinutes)
+  const nextEnd = formatMinutesToTime(Math.max(nextStartMinutes + 5, nextEndMinutes))
 
   const updates: Partial<Task> = {
     dueDate: date,
     dueTime: nextStart,
     duration: { start: nextStart, end: nextEnd },
+    isAllDay: false,
   }
 
   void tasksStore.updateTask(task.id, updates, {
     grouped: false,
-    calendar: false,
+    calendar: true,
     matrix: false,
   })
   draggingWeekTaskId.value = null
 }
 
 function handleMonthCellDrop(event: DragEvent, date: string) {
-  const draggedTaskId = draggingWeekTaskId.value || event.dataTransfer?.getData('text/plain') || null
+  const draggedTaskId = readDraggedTaskId(event)
   if (!draggedTaskId) return
 
-  const task = tasksStore.tasks.find(t => t.id === draggedTaskId)
+  const task = findDraggedTask(draggedTaskId)
   if (!task) {
     draggingWeekTaskId.value = null
     return
@@ -1338,7 +1409,7 @@ function handleMonthCellDrop(event: DragEvent, date: string) {
 
   void tasksStore.updateTask(task.id, { dueDate: date }, {
     grouped: false,
-    calendar: false,
+    calendar: true,
     matrix: false,
   })
   draggingWeekTaskId.value = null

@@ -75,20 +75,11 @@
     <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
       <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Аккаунт</p>
 
-      <SettingsRow label="Имя" :value="profileFullNameDisplay" @click="openNameModal">
-        <template #icon><User class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsRow>
-      <SettingsRow label="Аватар" @click="openAvatarModal">
-        <template #icon><Camera class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsRow>
       <SettingsRow label="Профиль" @click="navigateTo('/app/profile')">
-        <template #icon><Info class="w-5 h-5 text-sber-gray mr-3" /></template>
+        <template #icon><User class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
       <SettingsRow label="Пароль" @click="passwordModal = true">
         <template #icon><Lock class="w-5 h-5 text-sber-gray mr-3" /></template>
-      </SettingsRow>
-      <SettingsRow label="Устройства" @click="runStubAction">
-        <template #icon><Smartphone class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
       <SettingsRow label="Премиум" label-class="text-yellow-600" @click="premiumModal = true">
         <template #icon><Crown class="w-5 h-5 text-yellow-500 mr-3" /></template>
@@ -310,8 +301,7 @@
 
       <SettingsRow
         label="Вид"
-        :value="calendarViewLabel"
-        @click="viewModal = true"
+        @click="showComingSoon"
       >
         <template #icon><Paintbrush class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
@@ -331,36 +321,34 @@
     <div class="mx-4 mt-4 rounded-2xl overflow-hidden" :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a] shadow-none' : 'bg-white shadow-sm'">
       <p class="text-xs font-semibold text-sber-gray px-4 pt-3 pb-1 uppercase tracking-wide">Звуки и уведомления</p>
 
-      <!-- Notifications toggle -->
-      <div class="flex items-center px-4 py-3.5 border-b border-sber-gray-light">
-        <Bell class="w-5 h-5 text-sber-gray mr-3" />
-        <span class="text-sm font-medium text-sber-black flex-1">Уведомления</span>
-        <button class="w-12 h-6 rounded-full transition-colors relative"
-                :class="settingsStore.appSettings.notifications ? 'bg-sber-green' : 'bg-sber-gray-mid'"
-                @click="settingsStore.updateSettings({ notifications: !settingsStore.appSettings.notifications })">
-          <div class="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform"
-               :class="settingsStore.appSettings.notifications ? 'translate-x-7' : 'translate-x-1'" />
-        </button>
-      </div>
-
-      <div class="border-b border-sber-gray-light px-4 py-3">
-        <div class="flex items-start gap-3">
-          <Bell class="mt-0.5 h-5 w-5 shrink-0 text-sber-gray" />
+      <!-- Notifications toggle: settings + FCM device + WSS -->
+      <div class="border-b border-sber-gray-light px-4 py-3.5">
+        <div class="flex items-center">
+          <Bell class="w-5 h-5 text-sber-gray mr-3 shrink-0" />
           <div class="min-w-0 flex-1">
-            <p class="text-sm font-medium text-sber-black">Браузерные push</p>
+            <p class="text-sm font-medium text-sber-black">Уведомления</p>
             <p class="mt-0.5 text-xs text-sber-gray">
-              {{ pushPermissionLabel }}
+              {{ notificationsStatusLabel }}
             </p>
-            <button
-              type="button"
-              class="mt-2 rounded-xl bg-sber-green px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
-              :disabled="pushEnabling"
-              @click="enableBrowserPush"
-            >
-              {{ pushEnabling ? 'Подключение…' : 'Разрешить уведомления' }}
-            </button>
           </div>
+          <button
+            type="button"
+            class="relative h-6 w-12 shrink-0 rounded-full transition-colors disabled:opacity-60"
+            :class="settingsStore.appSettings.notifications ? 'bg-sber-green' : 'bg-sber-gray-mid'"
+            :disabled="notificationsToggling"
+            :aria-pressed="settingsStore.appSettings.notifications"
+            aria-label="Включить или выключить уведомления"
+            @click="toggleNotifications"
+          >
+            <div
+              class="absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform"
+              :class="settingsStore.appSettings.notifications ? 'translate-x-7' : 'translate-x-1'"
+            />
+          </button>
         </div>
+        <p v-if="notificationsToggleHint" class="mt-2 pl-8 text-xs text-sber-gray">
+          {{ notificationsToggleHint }}
+        </p>
       </div>
 
       <!-- Vibration toggle -->
@@ -430,7 +418,7 @@
       <SettingsRow label="Написать нам" @click="contactModal = true">
         <template #icon><MessageSquareText class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
-      <SettingsRow label="О приложении" @click="aboutModal = true">
+      <SettingsRow label="О приложении" @click="openAboutModal">
         <template #icon><Info class="w-5 h-5 text-sber-gray mr-3" /></template>
       </SettingsRow>
     </div>
@@ -600,46 +588,6 @@
       </Transition>
     </Teleport>
 
-    <!-- View (Вид) modal -->
-    <Teleport to="body">
-      <Transition name="overlay"><div v-if="viewModal" class="overlay" @click="viewModal = false" /></Transition>
-      <Transition name="modal">
-        <div v-if="viewModal" class="app-modal px-5 py-5" style="max-height: 85dvh; overflow-y: auto;" @click.stop>
-          <h3 class="mb-1 text-lg font-extrabold tracking-tight text-sber-black">Вид</h3>
-          <p class="mb-5 text-sm leading-snug text-sber-gray">
-            Какой вид календаря открывать при входе в раздел «Календарь».
-          </p>
-
-          <p class="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-sber-gray">Календарь по умолчанию</p>
-          <div class="mb-5 grid grid-cols-2 gap-2.5">
-            <button
-              v-for="opt in calendarViewOptions"
-              :key="opt.id"
-              type="button"
-              class="flex items-center gap-2 rounded-2xl border px-3 py-3 text-left text-sm font-semibold transition-colors"
-              :class="(settingsStore.appSettings.calendarDefaultView || 'day') === opt.id
-                ? 'border-sber-green bg-sber-green-light text-sber-green'
-                : 'border-sber-gray-mid bg-white text-sber-black'"
-              @click="setCalendarDefaultView(opt.id)"
-            >
-              <component
-                :is="opt.icon"
-                class="h-5 w-5 shrink-0"
-                :class="(settingsStore.appSettings.calendarDefaultView || 'day') === opt.id ? 'text-sber-green' : 'text-sber-gray'"
-              />
-              <span class="min-w-0 flex-1 truncate">{{ opt.label }}</span>
-              <Check
-                v-if="(settingsStore.appSettings.calendarDefaultView || 'day') === opt.id"
-                class="h-4 w-4 shrink-0 text-sber-green"
-              />
-            </button>
-          </div>
-
-          <button class="btn-secondary w-full" type="button" @click="viewModal = false">Готово</button>
-        </div>
-      </Transition>
-    </Teleport>
-
     <!-- Date & time modal -->
     <Teleport to="body">
       <Transition name="overlay"><div v-if="dateTimeModal" class="overlay" @click="dateTimeModal = false" /></Transition>
@@ -775,14 +723,33 @@
             <p class="text-sm text-sber-gray">Версия 1.0.0</p>
           </div>
           <div class="space-y-2">
-            <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" @click="openStoreRating('rustore')">
-              <Star class="w-4 h-4 text-sber-gray" />
-              <span class="text-sm">Оценить в RuStore</span>
+            <button
+              class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl disabled:opacity-60"
+              type="button"
+              :disabled="loadingMobile"
+              @click="onAboutRustore"
+            >
+              <Smartphone class="w-4 h-4 text-sber-gray" />
+              <span class="text-sm">{{ loadingMobile ? 'Загрузка…' : DESKTOP_APP.rustoreLabel }}</span>
             </button>
-            <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" @click="openStoreRating('google')">
-              <Star class="w-4 h-4 text-sber-gray" />
-              <span class="text-sm">Оценить в Google Play</span>
+            <button
+              class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl disabled:opacity-60"
+              type="button"
+              :disabled="loadingWindows"
+              @click="onAboutDesktop"
+            >
+              <Download class="w-4 h-4 text-sber-gray" />
+              <span class="text-sm">{{ loadingWindows ? 'Загрузка…' : DESKTOP_APP.label }}</span>
             </button>
+            <a
+              :href="APP_PUBLIC_URL"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl"
+            >
+              <Globe class="w-4 h-4 text-sber-gray" />
+              <span class="text-sm">Сайт ottertime.ru</span>
+            </a>
             <button class="w-full flex items-center gap-3 px-4 py-3 bg-sber-gray-light rounded-2xl" type="button" @click="navigateTo('/app/legal')">
               <FileText class="w-4 h-4 text-sber-gray" />
               <span class="text-sm">Юридические документы</span>
@@ -874,19 +841,17 @@
 <script setup lang="ts">
 import {
   Bell, Vibrate, Volume2, CheckCircle, Camera, Image, Globe,
-  HelpCircle, Info, Star, Check, ChevronDown, ChevronRight, User, Lock, FileText,
+  HelpCircle, Info, Check, ChevronDown, ChevronRight, User, Lock, FileText,
   Paintbrush, Clock, Download, Upload, Share2, Smartphone, Crown, GripVertical, MessageSquareText,
-  CalendarDays, Calendar, CalendarRange, Columns3,
 } from 'lucide-vue-next'
 import { Moon, Sun } from 'lucide-vue-next'
-import type { CalendarDefaultView } from '~/data/mockData'
 import type { ApiSound } from '~/types/mobile-api'
-import { BRAND_NAME } from '~/utils/site-info'
+import { BRAND_NAME, DESKTOP_APP, APP_PUBLIC_URL } from '~/utils/site-info'
 import { getApiErrorMessage } from '~/utils/api'
 import { validateNewPassword } from '~/utils/password-policy'
 import { buildNavOrderMap } from '~/utils/nav-items'
 import { downloadTasksExportJson, parseTasksExport } from '~/utils/task-export'
-import { enableWebPushNotifications } from '~/utils/fcm-devices'
+import { setAppNotificationsEnabled } from '~/utils/notification-preference'
 
 definePageMeta({ layout: 'app' })
 
@@ -894,48 +859,68 @@ const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
 const premiumStore = usePremiumStore()
 const tasksStore = useTasksStore()
-const calendarStore = useCalendarStore()
 const soundsStore = useSoundsStore()
 const { showToast } = useAppToast()
+const {
+  loadingWindows,
+  loadingMobile,
+  loadWindows,
+  loadMobile,
+  downloadWindowsApp,
+  openRustoreDownload,
+} = useAppDownloads()
 
-const pushEnabling = ref(false)
+const notificationsToggling = ref(false)
 const pushPermissionTick = ref(0)
 
-const pushPermissionLabel = computed(() => {
+const notificationsStatusLabel = computed(() => {
   pushPermissionTick.value
+  if (!settingsStore.appSettings.notifications) {
+    return 'Выключены — push и WebSocket отключены'
+  }
   if (!import.meta.client || !('Notification' in window)) {
-    return 'Браузер не поддерживает уведомления'
+    return 'Включены — этот браузер не поддерживает push'
   }
   const p = Notification.permission
-  if (p === 'granted') return 'Разрешено — устройство можно зарегистрировать для push'
-  if (p === 'denied') return 'Заблокировано в браузере. Разрешите уведомления в настройках сайта'
-  return 'Не разрешено — нажмите кнопку ниже'
+  if (p === 'granted') return 'Включены — браузерный push и WebSocket активны'
+  if (p === 'denied') return 'Включены в приложении, но браузер заблокировал push'
+  return 'Включены — разрешите уведомления браузера при запросе'
 })
 
-async function enableBrowserPush() {
-  if (pushEnabling.value) return
-  pushEnabling.value = true
+const notificationsToggleHint = computed(() => {
+  if (notificationsToggling.value) return 'Применение…'
+  if (!settingsStore.appSettings.notifications) {
+    return 'Включите, чтобы снова получать напоминания и подключить WebSocket.'
+  }
+  if (import.meta.client && 'Notification' in window && Notification.permission === 'denied') {
+    return 'Разрешите уведомления в настройках сайта браузера, затем выключите и снова включите переключатель.'
+  }
+  return ''
+})
+
+async function toggleNotifications() {
+  if (notificationsToggling.value) return
+  const next = !settingsStore.appSettings.notifications
+  notificationsToggling.value = true
   try {
-    if (!settingsStore.appSettings.notifications) {
-      await settingsStore.updateSettings({ notifications: true })
-    }
-    const result = await enableWebPushNotifications()
+    const result = await setAppNotificationsEnabled(next)
     pushPermissionTick.value += 1
     if (result.ok) {
-      showToast('Браузерные уведомления включены', 'success')
+      showToast(result.message, 'success')
     }
-    else if (result.reason === 'permission-denied') {
+    else if (result.push?.reason === 'permission-denied') {
       showToast(result.message, 'error')
     }
     else {
-      showToast(result.message || 'Не удалось включить push', 'error')
+      showToast(result.message || 'Не удалось изменить уведомления', 'error')
     }
   }
   catch (err) {
-    showToast(getApiErrorMessage(err, 'Не удалось включить уведомления'), 'error')
+    showToast(getApiErrorMessage(err, 'Не удалось изменить уведомления'), 'error')
   }
   finally {
-    pushEnabling.value = false
+    notificationsToggling.value = false
+    pushPermissionTick.value += 1
   }
 }
 
@@ -945,7 +930,6 @@ const premiumModal = ref(false)
 const soundModal = ref<'notification' | 'completion' | null>(null)
 const soundPickerLoading = ref(false)
 const languageModal = ref(false)
-const viewModal = ref(false)
 const dateTimeModal = ref(false)
 const integrationsModal = ref(false)
 const contactModal = ref(false)
@@ -1013,18 +997,6 @@ const bottomMenuOrder = computed(() =>
 const selectedLanguageLabel = computed(() =>
   languages.find(l => l.id === selectedLanguage.value)?.label || 'Русский'
 )
-
-const calendarViewOptions: { id: CalendarDefaultView; label: string; icon: typeof CalendarDays }[] = [
-  { id: 'day', label: 'День', icon: CalendarDays },
-  { id: 'week', label: 'Неделя', icon: Columns3 },
-  { id: 'month', label: 'Месяц', icon: Calendar },
-  { id: 'year', label: 'Год', icon: CalendarRange },
-]
-
-const calendarViewLabel = computed(() => {
-  const id = settingsStore.appSettings.calendarDefaultView || 'day'
-  return calendarViewOptions.find(o => o.id === id)?.label || 'День'
-})
 
 const timezoneLabel = computed(() =>
   settingsStore.appSettings.timezone
@@ -1193,13 +1165,7 @@ function pickAvatarFromGallery() {
   avatarGalleryInputRef.value?.click()
 }
 
-function shareApp() {
-  if (navigator.share) {
-    navigator.share({ title: `${BRAND_NAME} - Планировщик`, url: window.location.origin })
-  } else {
-    showComingSoon()
-  }
-}
+const { shareApp } = useAppShare()
 
 async function confirmDeleteAccount() {
   deleteAccountError.value = ''
@@ -1216,12 +1182,18 @@ async function confirmDeleteAccount() {
   }
 }
 
-function openStoreRating(store: 'rustore' | 'google') {
-  const urls = {
-    rustore: 'https://www.rustore.ru/',
-    google: 'https://play.google.com/store',
-  }
-  window.open(urls[store], '_blank')
+function openAboutModal() {
+  aboutModal.value = true
+  void loadWindows()
+  void loadMobile()
+}
+
+async function onAboutRustore() {
+  await openRustoreDownload()
+}
+
+async function onAboutDesktop() {
+  await downloadWindowsApp()
 }
 
 function toggleTheme() {
@@ -1349,11 +1321,6 @@ async function runStubAction() {
   catch (err) {
     showToast(getApiErrorMessage(err), 'error')
   }
-}
-
-async function setCalendarDefaultView(view: CalendarDefaultView) {
-  await settingsStore.updateSettings({ calendarDefaultView: view })
-  calendarStore.applyViewDefaultsFromSettings()
 }
 
 async function syncTimezoneFromDevice() {

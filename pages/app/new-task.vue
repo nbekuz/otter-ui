@@ -351,17 +351,17 @@
 
         <div v-if="activeTab === 'matrix'" class="pb-3 pt-2 lg:pb-4 lg:pt-3">
           <p class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-3 lg:text-xs">Блок матрицы</p>
-          <div class="grid grid-cols-2 gap-1.5 lg:gap-2">
+          <div class="grid grid-cols-4 gap-1 lg:gap-1.5">
             <button v-for="block in matrixBlocks" :key="block.id"
                     type="button"
-                    class="flex flex-col gap-0.5 rounded-xl border-2 px-2 py-2 text-left transition-all lg:gap-1 lg:rounded-2xl lg:px-3 lg:py-3"
+                    class="flex min-w-0 flex-col items-center gap-0.5 rounded-xl border-2 px-1 py-1.5 text-center transition-all lg:rounded-2xl lg:px-1.5 lg:py-2"
                     :class="form.matrixBlock === block.id
                       ? 'border-current'
                       : 'border-sber-gray-light'"
                     :style="form.matrixBlock === block.id ? { borderColor: block.color, backgroundColor: block.color + '15' } : {}"
                     @click="form.matrixBlock = block.id">
-              <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: block.color }" />
-              <span class="text-[10px] font-medium leading-tight text-sber-black lg:text-xs">{{ block.title }}</span>
+              <div class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: block.color }" />
+              <span class="line-clamp-2 text-[9px] font-medium leading-tight text-sber-black lg:text-[10px]">{{ block.title }}</span>
             </button>
           </div>
         </div>

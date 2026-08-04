@@ -4,7 +4,8 @@ import type { Task } from '~/data/mockData'
 import type { ApiMatrixBlock, ApiTask, ApiTaskGroup } from '~/types/mobile-api'
 import { apiDelete, apiGet, apiPatch, apiPost, getApiErrorMessage } from '~/utils/api'
 import { apiMatrixBlockToUi, apiTaskToUi, dataUrlToFile, groupKeyToUi, preferClientSchedule, uiTaskToApiPayload, uiTaskToFormData } from '~/utils/task-mapper'
-import { expandTasksForDate, expandTasksForRange, isRecurringTask } from '~/utils/recurrence'
+import { computeNextOccurrenceDate, expandTasksForDate, expandTasksForRange, isRecurringTask } from '~/utils/recurrence'
+import { enrichTaskWithStoredRepeat, persistTaskRepeatWeekdays, resolveTaskWeekdays } from '~/utils/repeat-weekdays'
 
 type GroupKey = 'overdue' | 'today' | 'tomorrow' | 'later' | 'nodate' | 'completed'
 
@@ -86,13 +87,22 @@ export const useTasksStore = defineStore('tasks', () => {
    * List endpoints may omit the image; keep a previously known attachment.
    * Do not restore when the cached task was intentionally cleared — otherwise
    * remove+save looks like a no-op.
+   * Also keep due/schedule when grouped/completed payloads omit due_at — otherwise
+   * «Восстановить» cannot put the task back into Позже/Сегодня/etc.
    */
   function preserveImages(incoming: Task[]) {
     const prevById = new Map(tasks.value.map(t => [t.id, t]))
     for (const task of incoming) {
-      if (task.imageUrl || task.attachment) continue
       const prev = prevById.get(task.id)
       if (!prev) continue
+
+      if (!task.dueDate && prev.dueDate) {
+        task.dueDate = prev.dueDate
+        if (!task.dueTime && prev.dueTime) task.dueTime = prev.dueTime
+        if (!task.duration && prev.duration) task.duration = prev.duration
+      }
+
+      if (task.imageUrl || task.attachment) continue
       const prevCleared = !prev.imageUrl
         && !prev.attachment
         && !(prev.attachments && prev.attachments.length > 0)
@@ -151,6 +161,7 @@ export const useTasksStore = defineStore('tasks', () => {
     updates: Partial<Task>,
     id: string,
   ): Task {
+    const has = (key: keyof Task) => Object.prototype.hasOwnProperty.call(updates, key)
     return {
       ...(existing || {
         id,
@@ -162,9 +173,10 @@ export const useTasksStore = defineStore('tasks', () => {
       }),
       ...updates,
       id,
-      duration: updates.duration ?? existing?.duration,
-      dueTime: updates.dueTime ?? existing?.dueTime,
-      dueDate: updates.dueDate ?? existing?.dueDate,
+      // Allow explicit undefined to clear schedule (e.g. drop onto «Без времени»).
+      duration: has('duration') ? updates.duration : existing?.duration,
+      dueTime: has('dueTime') ? updates.dueTime : existing?.dueTime,
+      dueDate: has('dueDate') ? updates.dueDate : existing?.dueDate,
     } as Task
   }
 
@@ -189,6 +201,15 @@ export const useTasksStore = defineStore('tasks', () => {
       dueDate: 'dueDate' in updates
         ? updates.dueDate
         : (fromApi.dueDate ?? existing?.dueDate),
+      repeat: 'repeat' in updates
+        ? updates.repeat!
+        : (fromApi.repeat ?? existing?.repeat ?? 'none'),
+      repeatDays: 'repeatDays' in updates
+        ? updates.repeatDays
+        : (fromApi.repeatDays ?? existing?.repeatDays),
+      repeatCustom: 'repeatCustom' in updates
+        ? updates.repeatCustom
+        : (fromApi.repeatCustom ?? existing?.repeatCustom),
     }
   }
 
@@ -467,6 +488,18 @@ export const useTasksStore = defineStore('tasks', () => {
         /* legacy image field may already hold the file */
       }
     }
+    persistTaskRepeatWeekdays({
+      ...taskData,
+      id: task.id,
+      seriesId: task.seriesId,
+      parentTaskId: task.parentTaskId,
+    })
+    task = enrichTaskWithStoredRepeat({
+      ...task,
+      repeat: taskData.repeat || task.repeat,
+      repeatDays: taskData.repeatDays || task.repeatDays,
+      repeatCustom: taskData.repeatCustom || task.repeatCustom,
+    })
     upsertTaskInState(task)
     await refreshTaskLists()
     // Re-pin after refresh — calendar/grouped may briefly echo UTC wall digits.
@@ -561,6 +594,13 @@ export const useTasksStore = defineStore('tasks', () => {
     if (clearingAttachment) {
       task = { ...task, ...clearedAttachmentFields() }
     }
+    persistTaskRepeatWeekdays({
+      ...merged,
+      id: task.id,
+      seriesId: task.seriesId,
+      parentTaskId: task.parentTaskId,
+    })
+    task = enrichTaskWithStoredRepeat(task)
     upsertTaskInState(task)
     await refreshTaskLists(refresh)
     return task
@@ -598,33 +638,141 @@ export const useTasksStore = defineStore('tasks', () => {
       if (!existing) return
 
       const willComplete = !existing.completed
+      const enrichedExisting = enrichTaskWithStoredRepeat(existing)
+      const scheduleSnapshot: Partial<Task> = {
+        repeat: enrichedExisting.repeat,
+        repeatDays: enrichedExisting.repeatDays,
+        repeatCustom: enrichedExisting.repeatCustom,
+      }
+      if (enrichedExisting.dueDate) scheduleSnapshot.dueDate = enrichedExisting.dueDate
+      if (enrichedExisting.dueTime) scheduleSnapshot.dueTime = enrichedExisting.dueTime
+      if (enrichedExisting.duration) scheduleSnapshot.duration = enrichedExisting.duration
 
       upsertTaskInState({
-        ...existing,
+        ...enrichedExisting,
         completed: willComplete,
         completedAt: willComplete
           ? dayjs().format('YYYY-MM-DD')
           : undefined,
+        // Stale list_key: 'completed' would send the UI back to Готово after restore.
+        listKey: willComplete ? 'completed' : undefined,
       })
 
       const endpoint = existing.completed ? 'uncomplete' : 'complete'
       const updated = await apiPost<ApiTask>(`tasks/${id}/${endpoint}/`)
-      const task = preferClientSchedule(apiTaskToUi(updated), {
-        dueDate: existing.dueDate,
-        dueTime: existing.dueTime,
-        duration: existing.duration,
-      })
+      let task = preferClientSchedule(apiTaskToUi(updated), scheduleSnapshot)
+      // Trust the action we just performed — grouped refresh can echo stale flags.
+      task = {
+        ...task,
+        completed: willComplete,
+        completedAt: willComplete
+          ? (task.completedAt || dayjs().format('YYYY-MM-DD'))
+          : undefined,
+        listKey: willComplete ? 'completed' : undefined,
+      }
+      if (!task.dueDate && scheduleSnapshot.dueDate) {
+        task = {
+          ...task,
+          dueDate: scheduleSnapshot.dueDate,
+          dueTime: scheduleSnapshot.dueTime ?? task.dueTime,
+          duration: scheduleSnapshot.duration ?? task.duration,
+        }
+      }
+      task = enrichTaskWithStoredRepeat(task)
       upsertTaskInState(task)
 
       if (willComplete) {
         void useSoundsStore().playFeedbackSound('completion')
         // Backend spawn-on-complete: upsert nested next_task only — never POST /tasks/.
+        // Custom weekdays (Пн/Ср/Сб) are not fully supported by API — align next due date.
         if (updated.next_task) {
-          upsertTaskInState(apiTaskToUi(updated.next_task))
+          let nextUi = enrichTaskWithStoredRepeat(apiTaskToUi(updated.next_task))
+          const weekdays = resolveTaskWeekdays(enrichedExisting)
+          if (weekdays.length && isRecurringTask(enrichedExisting)) {
+            persistTaskRepeatWeekdays({
+              id: nextUi.id,
+              seriesId: nextUi.seriesId || enrichedExisting.seriesId,
+              parentTaskId: nextUi.parentTaskId || enrichedExisting.id,
+              repeat: 'custom',
+              repeatDays: weekdays,
+              repeatCustom: {
+                interval: enrichedExisting.repeatCustom?.interval || 1,
+                unit: enrichedExisting.repeatCustom?.unit || 'week',
+                weekdays,
+              },
+            })
+
+            const nextDate = computeNextOccurrenceDate(enrichedExisting)
+            if (nextDate && nextDate !== nextUi.dueDate) {
+              try {
+                const payload = uiTaskToApiPayload({
+                  ...nextUi,
+                  title: nextUi.title,
+                  description: nextUi.description,
+                  dueDate: nextDate,
+                  dueTime: enrichedExisting.dueTime,
+                  duration: enrichedExisting.duration,
+                  priority: enrichedExisting.priority,
+                  notification: enrichedExisting.notification,
+                  repeat: 'custom',
+                  repeatDays: weekdays,
+                  repeatCustom: {
+                    interval: enrichedExisting.repeatCustom?.interval || 1,
+                    unit: 'week',
+                    weekdays,
+                  },
+                  matrixBlock: enrichedExisting.matrixBlock,
+                })
+                const patched = await apiPatch<ApiTask>(`tasks/${nextUi.id}/`, payload)
+                nextUi = enrichTaskWithStoredRepeat(preferClientSchedule(apiTaskToUi(patched), {
+                  dueDate: nextDate,
+                  dueTime: enrichedExisting.dueTime,
+                  duration: enrichedExisting.duration,
+                  repeat: 'custom',
+                  repeatDays: weekdays,
+                  repeatCustom: {
+                    interval: enrichedExisting.repeatCustom?.interval || 1,
+                    unit: 'week',
+                    weekdays,
+                  },
+                }))
+              }
+              catch {
+                nextUi = {
+                  ...nextUi,
+                  dueDate: nextDate,
+                  dueTime: enrichedExisting.dueTime,
+                  duration: enrichedExisting.duration,
+                  repeat: 'custom',
+                  repeatDays: weekdays,
+                  repeatCustom: {
+                    interval: enrichedExisting.repeatCustom?.interval || 1,
+                    unit: 'week',
+                    weekdays,
+                  },
+                }
+              }
+            }
+            else {
+              nextUi = {
+                ...nextUi,
+                repeat: 'custom',
+                repeatDays: weekdays,
+                repeatCustom: {
+                  interval: enrichedExisting.repeatCustom?.interval || 1,
+                  unit: enrichedExisting.repeatCustom?.unit || 'week',
+                  weekdays,
+                },
+              }
+            }
+          }
+          upsertTaskInState(nextUi)
         }
       }
 
       await refreshTaskLists(refresh)
+      // Re-pin after refresh — same pattern as addTask (grouped may drop due_at / lag flags).
+      upsertTaskInState(enrichTaskWithStoredRepeat(preferClientSchedule(task, scheduleSnapshot)))
       return task
     }
     finally {

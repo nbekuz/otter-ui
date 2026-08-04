@@ -36,6 +36,8 @@ export interface ApiTask {
   reminder_delivered_at?: string | null
   repeat_unit: ApiRepeatUnit
   repeat_interval: number
+  /** ISO weekdays 1=Mon … 7=Sun when API supports custom weekly days. */
+  repeat_weekdays?: number[] | null
   repeat_until?: string | null
   series_id?: string | null
   parent_task?: number | null

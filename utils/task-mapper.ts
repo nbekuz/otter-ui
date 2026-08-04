@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
+import { enrichTaskWithStoredRepeat, persistTaskRepeatWeekdays, resolveTaskWeekdays } from '~/utils/repeat-weekdays'
 import { parseApiWallClock, parseTimeToMinutes } from '~/utils/time'
 import type {
   ApiMatrixBlock,
@@ -39,24 +40,33 @@ const REPEAT_TO_API: Record<RepeatType, ApiRepeatUnit> = {
   custom: 'week',
 }
 
-function resolveRepeatApi(task: Partial<Task>): { unit: ApiRepeatUnit; interval: number } {
+function resolveRepeatApi(task: Partial<Task>): {
+  unit: ApiRepeatUnit
+  interval: number
+  weekdays: number[] | null
+} {
   const repeat = task.repeat || 'none'
+  const weekdays = resolveTaskWeekdays(task as Task)
+
   if (repeat === 'custom' && task.repeatCustom) {
     const unit: ApiRepeatUnit = task.repeatCustom.unit === 'month' ? 'month' : 'week'
     return {
       unit,
       interval: Math.max(1, Math.min(31, task.repeatCustom.interval || 1)),
+      weekdays: unit === 'week' && weekdays.length ? weekdays : null,
     }
   }
   if (repeat !== 'none' && task.repeatCustom?.interval) {
     return {
       unit: REPEAT_TO_API[repeat],
       interval: Math.max(1, Math.min(31, task.repeatCustom.interval)),
+      weekdays: repeat === 'weekly' && weekdays.length ? weekdays : null,
     }
   }
   return {
     unit: REPEAT_TO_API[repeat],
     interval: 1,
+    weekdays: (repeat === 'custom' || repeat === 'weekly') && weekdays.length ? weekdays : null,
   }
 }
 
@@ -122,12 +132,23 @@ function buildReminderAt(
   )
 }
 
+/**
+ * Prefer schedule fields we just wrote/had locally.
+ * Skip keys whose client value is `undefined` — otherwise a lost local dueDate
+ * (e.g. completed list omit due_at) would wipe a valid date from the API on restore.
+ */
 export function preferClientSchedule(fromApi: Task, client: Partial<Task>): Task {
+  const has = <K extends keyof Task>(key: K) =>
+    Object.prototype.hasOwnProperty.call(client, key) && client[key] !== undefined
+
   return {
     ...fromApi,
-    dueDate: 'dueDate' in client ? client.dueDate : fromApi.dueDate,
-    dueTime: 'dueTime' in client ? client.dueTime : fromApi.dueTime,
-    duration: 'duration' in client ? client.duration : fromApi.duration,
+    dueDate: has('dueDate') ? client.dueDate : fromApi.dueDate,
+    dueTime: has('dueTime') ? client.dueTime : fromApi.dueTime,
+    duration: has('duration') ? client.duration : fromApi.duration,
+    repeat: has('repeat') && client.repeat ? client.repeat : fromApi.repeat,
+    repeatDays: has('repeatDays') ? client.repeatDays : fromApi.repeatDays,
+    repeatCustom: has('repeatCustom') ? client.repeatCustom : fromApi.repeatCustom,
   }
 }
 
@@ -155,13 +176,17 @@ export function apiTaskToUi(task: ApiTask): Task {
   const endFields = task.end_at ? parseApiWallClock(task.end_at) : null
   const scheduleDay = startFields ?? dueFields
   const repeat = REPEAT_TO_UI[task.repeat_unit] || 'none'
+  const apiWeekdays = Array.isArray((task as ApiTask & { repeat_weekdays?: number[] }).repeat_weekdays)
+    ? (task as ApiTask & { repeat_weekdays?: number[] }).repeat_weekdays!.filter(d => d >= 1 && d <= 7)
+    : []
   const hasCustomInterval = task.repeat_unit !== 'none' && task.repeat_interval > 1
+  const hasCustomWeekdays = task.repeat_unit === 'week' && apiWeekdays.length > 0
   const customUnit: 'week' | 'month' =
     task.repeat_unit === 'month' ? 'month' : 'week'
   const firstAttachment = task.attachments?.[0]
   const imageUrl = task.image_url || task.image || firstAttachment?.file_url || undefined
 
-  return {
+  const mapped: Task = {
     id: String(task.id),
     title: task.title,
     description: task.description || undefined,
@@ -185,9 +210,14 @@ export function apiTaskToUi(task: ApiTask): Task {
     notification: task.reminder_offset_minutes != null
       ? String(task.reminder_offset_minutes)
       : reminderMinutes(task.due_at, task.reminder_at),
-    repeat: hasCustomInterval ? 'custom' : repeat,
-    repeatCustom: hasCustomInterval
-      ? { interval: task.repeat_interval, unit: customUnit }
+    repeat: hasCustomInterval || hasCustomWeekdays ? 'custom' : repeat,
+    repeatDays: apiWeekdays.length ? apiWeekdays : undefined,
+    repeatCustom: hasCustomInterval || hasCustomWeekdays
+      ? {
+          interval: Math.max(1, task.repeat_interval || 1),
+          unit: customUnit,
+          weekdays: apiWeekdays.length ? apiWeekdays : undefined,
+        }
       : undefined,
     imageUrl,
     isAllDay: Boolean(task.is_all_day),
@@ -211,12 +241,14 @@ export function apiTaskToUi(task: ApiTask): Task {
     parentTaskId: task.parent_task != null ? String(task.parent_task) : null,
     createdAt: task.created_at,
   }
+
+  return enrichTaskWithStoredRepeat(mapped)
 }
 
 export function uiTaskToApiPayload(task: Partial<Task>): Record<string, unknown> {
   const due_at = buildDueAt(task.dueDate, task.dueTime)
   const { start_at, end_at } = buildStartEnd(task.dueDate, task.duration)
-  const { unit: repeat_unit, interval: repeat_interval } = resolveRepeatApi(task)
+  const { unit: repeat_unit, interval: repeat_interval, weekdays } = resolveRepeatApi(task)
 
   const payload: Record<string, unknown> = {
     title: task.title,
@@ -228,6 +260,10 @@ export function uiTaskToApiPayload(task: Partial<Task>): Record<string, unknown>
     repeat_interval,
     priority: uiPriorityToApi(task.priority || 'none'),
     matrix_block: MATRIX_TO_API[task.matrixBlock || 'not-urgent-not-important'],
+  }
+
+  if (weekdays?.length) {
+    payload.repeat_weekdays = weekdays
   }
 
   // Backend requires due_at or start_at when reminder_offset_minutes is set.
@@ -246,6 +282,15 @@ export function uiTaskToApiPayload(task: Partial<Task>): Record<string, unknown>
 
   if (task.completed !== undefined) {
     payload.is_completed = task.completed
+  }
+
+  if (task.isAllDay !== undefined) {
+    payload.is_all_day = task.isAllDay
+  }
+
+  // Keep weekdays available for spawn-on-complete even if API drops them.
+  if (task.repeat === 'custom' || weekdays?.length) {
+    persistTaskRepeatWeekdays(task)
   }
 
   return payload
@@ -277,6 +322,10 @@ export function uiTaskToFormData(
 
   for (const [key, value] of Object.entries(payload)) {
     if (value === null || value === undefined) continue
+    if (Array.isArray(value)) {
+      formData.append(key, JSON.stringify(value))
+      continue
+    }
     formData.append(key, String(value))
   }
 

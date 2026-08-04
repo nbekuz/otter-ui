@@ -16,17 +16,6 @@
           <div @click.stop>
             <NotificationsBell variant="icon" :is-dark-theme="isDarkTheme" />
           </div>
-          <NuxtLink
-            to="/app/profile"
-            class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-sber-green shadow-sm"
-            title="Профиль"
-            @click.stop
-          >
-            <span v-if="!authStore.user?.avatar" class="text-sm font-bold text-white">
-              {{ authStore.user?.name?.[0]?.toUpperCase() || 'A' }}
-            </span>
-            <img v-else :src="authStore.user.avatar" class="h-full w-full object-cover" alt="">
-          </NuxtLink>
         </div>
       </div>
 
@@ -57,7 +46,11 @@
         </div>
       </div>
 
-      <div v-if="!showSearch" class="hidden lg:grid lg:grid-cols-7 lg:gap-3">
+      <div
+        v-if="!showSearch"
+        class="hidden lg:grid lg:gap-3"
+        :style="{ gridTemplateColumns: `repeat(${Math.max(desktopGroups.length, 1)}, minmax(0, 1fr))` }"
+      >
         <button
           v-for="group in desktopGroups"
           :key="group.id"
@@ -191,6 +184,28 @@
                     {{ task.title }}
                   </p>
                 </button>
+                <div
+                  v-if="hasDesktopTaskMeta(task)"
+                  class="flex max-w-[55%] shrink-0 flex-wrap items-center justify-end gap-x-1.5 gap-y-0.5 text-[11px] text-sber-gray"
+                >
+                  <span v-if="task.dueDate">{{ formatDesktopTaskDate(task.dueDate) }}</span>
+                  <span v-if="task.dueDate && task.dueTime" class="text-sber-gray-mid">–</span>
+                  <span v-if="task.dueTime">{{ task.dueTime }}</span>
+                  <template v-if="task.duration?.start && task.duration?.end">
+                    <span class="text-sber-gray-mid">–</span>
+                    <span class="font-medium text-sber-blue">{{ task.duration.start }}–{{ task.duration.end }}</span>
+                  </template>
+                  <Bell
+                    v-if="task.notification !== undefined && task.notification !== ''"
+                    class="h-3 w-3 shrink-0"
+                    aria-label="Уведомление"
+                  />
+                  <RefreshCw
+                    v-if="task.repeat && task.repeat !== 'none'"
+                    class="h-3 w-3 shrink-0"
+                    aria-label="Повтор"
+                  />
+                </div>
               </div>
             </template>
             <div
@@ -210,8 +225,8 @@
         />
 
         <!-- Right: task editor -->
-        <section class="min-w-0 flex-1 px-5 py-4">
-          <div v-if="desktopSelectedTask" class="flex h-full flex-col">
+        <section class="min-w-0 flex-1 overflow-y-auto px-5 py-4">
+          <div v-if="desktopSelectedTask" class="flex flex-col">
             <h2 class="mb-4 line-clamp-1 text-xl font-bold text-sber-black">{{ desktopSelectedTask.title }}</h2>
 
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -372,20 +387,20 @@
 
               <div class="md:col-span-2">
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Матрица Эйзенхауэра</label>
-                <div class="grid grid-cols-2 gap-1.5">
+                <div class="grid grid-cols-4 gap-1">
                   <button
                     v-for="block in matrixBlocks"
                     :key="block.id"
                     type="button"
-                    class="flex flex-col gap-0.5 rounded-xl border-2 px-2 py-2 text-left transition-all"
+                    class="flex min-w-0 flex-col items-center gap-0.5 rounded-xl border-2 px-1 py-1.5 text-center transition-all"
                     :class="editorForm.matrixBlock === block.id ? 'border-current' : 'border-sber-gray-light'"
                     :style="editorForm.matrixBlock === block.id
                       ? { borderColor: block.color, backgroundColor: block.color + '15' }
                       : {}"
                     @click="editorForm.matrixBlock = block.id"
                   >
-                    <div class="h-3 w-3 rounded-full" :style="{ backgroundColor: block.color }" />
-                    <span class="text-[10px] font-medium leading-tight text-sber-black">{{ block.title }}</span>
+                    <div class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: block.color }" />
+                    <span class="line-clamp-2 text-[9px] font-medium leading-tight text-sber-black">{{ block.title }}</span>
                   </button>
                 </div>
               </div>
@@ -432,7 +447,7 @@
               </div>
             </div>
 
-            <div class="mt-auto grid grid-cols-3 gap-3 pt-5">
+            <div class="mt-5 grid grid-cols-3 gap-3">
               <button class="btn-primary col-span-1" type="button" @click="saveDesktopTask">
                 Сохранить
               </button>
@@ -492,7 +507,7 @@
 </template>
 
 <script setup lang="ts">
-import { Search, X, AlertCircle, Sun, Sunset, Moon, Star, Clock, CheckCircle2, Calendar, Paperclip, Check } from 'lucide-vue-next'
+import { Search, X, AlertCircle, Sun, Sunset, Moon, Star, Clock, CheckCircle2, Calendar, Paperclip, Check, Bell, RefreshCw } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
@@ -654,7 +669,7 @@ const visibleGroups = computed(() =>
 
 const allTasksList = computed(() => [...tasksStore.tasks])
 
-const desktopGroups = computed(() => ([
+const allDesktopGroups = computed(() => ([
   { id: 'all', title: 'Все задачи', color: '#5856D6', tasks: allTasksList.value },
   { id: 'overdue', title: 'Просрочено', color: '#FF3B30', tasks: tasksStore.overdueTasks },
   { id: 'today', title: 'Сегодня', color: '#FF9500', tasks: tasksStore.todayTasks },
@@ -663,6 +678,13 @@ const desktopGroups = computed(() => ([
   { id: 'nodate', title: 'Без срока', color: '#8E8E93', tasks: tasksStore.noDateTasks },
   { id: 'completed', title: 'Готово', color: '#21A038', tasks: tasksStore.completedTasks },
 ]))
+
+/** Respect settings «Разделы списка задач» — hide disabled chips. */
+const desktopGroups = computed(() =>
+  allDesktopGroups.value.filter(group =>
+    group.id === 'all' || settingsStore.isGroupVisible(group.id),
+  ),
+)
 
 const activeDesktopGroupId = ref('all')
 const activeDesktopGroup = computed(() =>
@@ -864,18 +886,29 @@ function findDesktopGroupIdForTask(taskId: string): string | null {
 }
 
 function resolveTaskGroupId(task: Task): string {
-  if (task.listKey) {
-    return task.listKey === 'no_deadline' ? 'nodate' : task.listKey
+  // Derive from completed + due date. Do not trust stale list_key from the API
+  // (after «Восстановить» it often stays «completed» and hides the task in Позже).
+  let groupId = 'all'
+  if (task.completed) {
+    groupId = 'completed'
   }
-  if (task.completed) return 'completed'
-  const d = task.dueDate ? dayjs(task.dueDate).format('YYYY-MM-DD') : ''
-  if (!d) return 'nodate'
-  const today = dayjs().format('YYYY-MM-DD')
-  const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD')
-  if (dayjs(d).isBefore(today, 'day')) return 'overdue'
-  if (d === today) return 'today'
-  if (d === tomorrow) return 'tomorrow'
-  return 'later'
+  else {
+    const d = task.dueDate ? dayjs(task.dueDate).format('YYYY-MM-DD') : ''
+    if (!d) groupId = 'nodate'
+    else {
+      const today = dayjs().format('YYYY-MM-DD')
+      const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD')
+      if (dayjs(d).isBefore(today, 'day')) groupId = 'overdue'
+      else if (d === today) groupId = 'today'
+      else if (d === tomorrow) groupId = 'tomorrow'
+      else groupId = 'later'
+    }
+  }
+  // Hidden sections → open in «Все задачи»
+  if (groupId !== 'all' && !settingsStore.isGroupVisible(groupId)) {
+    return 'all'
+  }
+  return groupId
 }
 
 async function toggleSearch() {
@@ -1062,10 +1095,35 @@ function toggleDesktopTaskCheck(id: string) {
   tasksStore.completeTask(id)
 }
 
-function toggleDesktopTaskComplete() {
+function hasDesktopTaskMeta(task: Task) {
+  return !!(
+    task.dueDate
+    || task.dueTime
+    || (task.duration?.start && task.duration?.end)
+    || (task.notification !== undefined && task.notification !== '')
+    || (task.repeat && task.repeat !== 'none')
+  )
+}
+
+function formatDesktopTaskDate(dueDate: string) {
+  const d = dayjs(dueDate)
+  return d.isValid() ? d.format('DD.MM.YY') : dueDate
+}
+
+async function toggleDesktopTaskComplete() {
   const task = desktopSelectedTask.value
   if (!task) return
-  tasksStore.completeTask(task.id)
+  const id = task.id
+  const wasCompleted = task.completed
+  await tasksStore.completeTask(id)
+  if (!wasCompleted) return
+  // After restore, jump to the date-based section (Позже / Просрочено / …).
+  const restored = tasksStore.tasks.find(t => t.id === id)
+  if (!restored || restored.completed) return
+  const groupId = findDesktopGroupIdForTask(id) || resolveTaskGroupId(restored)
+  if (groupId && groupId !== activeDesktopGroupId.value) {
+    activeDesktopGroupId.value = groupId
+  }
 }
 
 function confirmDeleteDesktopTask() {

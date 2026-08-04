@@ -144,7 +144,9 @@
                 ? 'border-sber-green/30 bg-sber-green/10'
                 : 'border-sber-green/30 bg-sber-green-light/30'"
             >
-              <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-sber-gray">Настроить повторение</p>
+
+              <div class="mt-3">
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="text-sm text-sber-gray">Каждые</span>
                   <input
@@ -168,7 +170,7 @@
                       : (isDarkTheme
                         ? 'border-[#2a303a] bg-[#20242d] text-sber-black'
                         : 'border-sber-gray-mid bg-white')"
-                    @click="customRepeat.unit = 'week'; repeatIntervalError = ''"
+                    @click="customRepeat.unit = 'week'; repeatIntervalError = ''; repeatWeekdaysError = ''"
                   >
                     Недели
                   </button>
@@ -180,7 +182,7 @@
                       : (isDarkTheme
                         ? 'border-[#2a303a] bg-[#20242d] text-sber-black'
                         : 'border-sber-gray-mid bg-white')"
-                    @click="customRepeat.unit = 'month'; repeatIntervalError = ''"
+                    @click="customRepeat.unit = 'month'; repeatIntervalError = ''; repeatWeekdaysError = ''"
                   >
                     Месяца
                   </button>
@@ -192,25 +194,69 @@
                   {{ repeatIntervalError }}
                 </p>
               </div>
+
+              <div v-if="customRepeat.unit === 'week'" class="mt-3">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-sber-gray">Дни недели</p>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    v-for="day in repeatWeekDayOptions"
+                    :key="day.value"
+                    type="button"
+                    class="rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors"
+                    :class="customRepeat.weekdays.includes(day.value)
+                      ? 'border-sber-green bg-sber-green text-white'
+                      : repeatWeekdaysError
+                        ? 'border-red-400 bg-red-50 text-sber-gray'
+                        : (isDarkTheme
+                          ? 'border-[#2a303a] bg-[#20242d] text-sber-gray'
+                          : 'border-sber-gray-mid bg-white text-sber-gray')"
+                    @click="toggleCustomWeekday(day.value)"
+                  >
+                    {{ day.label }}
+                  </button>
+                </div>
+                <p
+                  v-if="repeatWeekdaysError"
+                  class="mt-1.5 text-xs font-medium text-red-500"
+                >
+                  {{ repeatWeekdaysError }}
+                </p>
+              </div>
+
+              <div v-else class="mt-3">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-sber-gray">День месяца</p>
+                <div class="flex flex-wrap items-center gap-2">
+                  <input
+                    v-model.number="customRepeat.monthDay"
+                    type="number"
+                    min="1"
+                    max="31"
+                    class="w-28 rounded-xl border px-3 py-2 text-sm font-semibold"
+                    :class="isDarkTheme
+                      ? 'border-[#2a303a] bg-[#11151b] text-sber-black'
+                      : 'border-sber-gray-mid bg-white text-sber-black'"
+                  >
+                </div>
+              </div>
             </div>
           </div>
 
           <div>
             <label class="mb-1 block text-xs font-semibold text-sber-gray">Матрица Эйзенхауэра</label>
-            <div class="grid grid-cols-2 gap-1.5">
+            <div class="grid grid-cols-4 gap-1">
               <button
                 v-for="block in matrixBlocks"
                 :key="block.id"
                 type="button"
-                class="flex flex-col gap-0.5 rounded-xl border-2 px-2 py-2 text-left transition-all"
+                class="flex min-w-0 flex-col items-center gap-0.5 rounded-xl border-2 px-1 py-1.5 text-center transition-all"
                 :class="form.matrixBlock === block.id
                   ? 'border-current'
                   : (isDarkTheme ? 'border-[#2a303a]' : 'border-sber-gray-light')"
                 :style="form.matrixBlock === block.id ? { borderColor: block.color, backgroundColor: block.color + '15' } : {}"
                 @click="form.matrixBlock = block.id"
               >
-                <div class="h-3 w-3 rounded-full" :style="{ backgroundColor: block.color }" />
-                <span class="text-[10px] font-medium leading-tight text-sber-black">{{ block.title }}</span>
+                <div class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: block.color }" />
+                <span class="line-clamp-2 text-[9px] font-medium leading-tight text-sber-black">{{ block.title }}</span>
               </button>
             </div>
           </div>
@@ -222,20 +268,18 @@
           <button class="btn-primary !w-auto col-span-1 !py-3 text-sm" type="button" :disabled="saving" @click="saveTask">
             {{ saving ? '…' : 'Сохранить' }}
           </button>
-          <button class="btn-secondary !w-auto col-span-1 !py-3 text-sm" type="button" @click="onCancel">
-            Отмена
-          </button>
           <button
-            v-if="task.completed"
-            class="col-span-1 rounded-2xl px-3 py-3 text-sm font-semibold text-sber-blue"
-            :class="isDarkTheme ? 'bg-sber-blue/20' : 'bg-sber-blue-light'"
+            class="col-span-1 rounded-2xl px-3 py-3 text-sm font-semibold transition-colors"
+            :class="task.completed
+              ? (isDarkTheme ? 'bg-sber-blue/20 text-sber-blue' : 'bg-sber-blue-light text-sber-blue')
+              : (isDarkTheme ? 'bg-sber-green/20 text-sber-green' : 'bg-sber-green-light text-sber-green')"
             type="button"
-            @click="restoreTask"
+            :disabled="completing"
+            @click="toggleComplete"
           >
-            Восстановить
+            {{ completing ? '…' : (task.completed ? 'Восстановить' : 'Выполнено') }}
           </button>
           <button
-            v-else
             class="col-span-1 rounded-2xl px-3 py-3 text-sm font-semibold text-red-500"
             :class="isDarkTheme ? 'bg-red-500/15' : 'bg-red-50'"
             type="button"
@@ -244,6 +288,9 @@
             Удалить
           </button>
         </div>
+        <button class="btn-secondary mt-2 !py-3 text-sm" type="button" @click="onCancel">
+          Отмена
+        </button>
       </div>
     </Transition>
 
@@ -299,15 +346,29 @@ const tasksStore = useTasksStore()
 const settingsStore = useSettingsStore()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
-const task = computed(() =>
-  tasksStore.tasks.find(t => t.id === props.taskId)
-  || tasksStore.calendarTasks.find(t => t.id === props.taskId),
-)
+function findLocalTask(id: string): Task | undefined {
+  const fromLists = tasksStore.tasks.find(t => t.id === id)
+    || tasksStore.calendarTasks.find(t => t.id === id)
+  if (fromLists) return fromLists
+  for (const list of Object.values(tasksStore.matrixTasksByBlock)) {
+    const hit = list.find(t => t.id === id)
+    if (hit) return hit
+  }
+  return undefined
+}
+
+/** Live task from store — used for completed/restore UI, not for form sync. */
+const task = computed(() => findLocalTask(props.taskId))
 const saving = ref(false)
+const completing = ref(false)
 const saveError = ref('')
 const repeatIntervalError = ref('')
+const repeatWeekdaysError = ref('')
 const customNotifyMinutes = ref(10)
 const PRESET_NOTIFY = new Set(['', '0', '1', '5', '15', '30', '60', '1440'])
+/** Prevents attachment hydrate from re-fetching the same task in a loop. */
+const attachmentHydrateDone = new Set<string>()
+let attachmentHydrateInFlight: string | null = null
 
 const attachmentInputRef = ref<HTMLInputElement | null>(null)
 const attachmentName = ref('')
@@ -376,14 +437,24 @@ function applyAttachmentFromTask(t: Task) {
 
 async function hydrateAttachment(taskId: string, t: Task) {
   applyAttachmentFromTask(t)
-  if (attachmentDataUrl.value || attachmentRemoved.value) return
+  if (attachmentDataUrl.value || attachmentRemoved.value) {
+    attachmentHydrateDone.add(taskId)
+    return
+  }
+  if (attachmentHydrateDone.has(taskId) || attachmentHydrateInFlight === taskId) return
+  attachmentHydrateInFlight = taskId
   try {
     const detail = await tasksStore.fetchTask(taskId)
-    if (attachmentDataUrl.value || attachmentRemoved.value) return
+    attachmentHydrateDone.add(taskId)
+    if (attachmentRemoved.value || attachmentDataUrl.value) return
     applyAttachmentFromTask(detail)
   }
   catch {
-    /* keep empty */
+    // Mark done so a 429/network error cannot spin into an infinite fetch loop.
+    attachmentHydrateDone.add(taskId)
+  }
+  finally {
+    if (attachmentHydrateInFlight === taskId) attachmentHydrateInFlight = null
   }
 }
 
@@ -431,7 +502,20 @@ const form = reactive({
 const customRepeat = reactive({
   interval: 1,
   unit: 'week' as 'week' | 'month',
+  weekdays: [1] as number[],
+  monthDay: 1,
 })
+
+/** Named distinctly to avoid clashing with calendar page `weekDays`. */
+const repeatWeekDayOptions = [
+  { label: 'Пн', value: 1 },
+  { label: 'Вт', value: 2 },
+  { label: 'Ср', value: 3 },
+  { label: 'Чт', value: 4 },
+  { label: 'Пт', value: 5 },
+  { label: 'Сб', value: 6 },
+  { label: 'Вс', value: 7 },
+]
 
 const matrixBlocks = [
   { id: 'urgent-important' as const, title: 'Срочно и важно', color: '#FF3B30' },
@@ -477,16 +561,55 @@ function syncFormFromTask(t: Task | undefined) {
   form.matrixBlock = t.matrixBlock || 'not-urgent-not-important'
   customRepeat.interval = t.repeatCustom?.interval || 1
   customRepeat.unit = t.repeatCustom?.unit || 'week'
+  customRepeat.weekdays = t.repeatCustom?.weekdays?.length
+    ? [...t.repeatCustom.weekdays]
+    : t.repeatDays?.length
+      ? [...t.repeatDays]
+      : [1]
+  customRepeat.monthDay = t.repeatCustom?.monthDay
+    || (t.dueDate ? Number(t.dueDate.slice(8, 10)) || 1 : 1)
   applyAttachmentFromTask(t)
   nextTick(() => resumeSync())
 }
 
-watch(task, async (t) => {
-  syncFormFromTask(t)
-  if (t) await hydrateAttachment(t.id, t)
-  await nextTick()
-  captureSnapshot()
-}, { immediate: true })
+function toggleCustomWeekday(day: number) {
+  repeatWeekdaysError.value = ''
+  if (customRepeat.weekdays.includes(day)) {
+    customRepeat.weekdays = customRepeat.weekdays.filter(v => v !== day)
+    if (customRepeat.weekdays.length === 0) customRepeat.weekdays = [1]
+    return
+  }
+  customRepeat.weekdays = [...customRepeat.weekdays, day].sort((a, b) => a - b)
+}
+
+/**
+ * Sync the form only when the opened task id changes.
+ * Watching the task object used to re-run on every store upsert (incl. fetchTask
+ * from hydrateAttachment) — that reset fields while typing and flooded the API → 429.
+ */
+watch(
+  () => props.taskId,
+  async (id) => {
+    saveError.value = ''
+    attachmentHydrateDone.clear()
+    attachmentHydrateInFlight = null
+
+    let t = findLocalTask(id)
+    if (!t) {
+      try {
+        t = await tasksStore.fetchTask(id)
+      }
+      catch {
+        /* stay empty — user can close */
+      }
+    }
+    syncFormFromTask(t)
+    if (t) await hydrateAttachment(id, t)
+    await nextTick()
+    captureSnapshot()
+  },
+  { immediate: true },
+)
 
 const formSnapshot = ref('')
 const unsavedModal = ref(false)
@@ -536,6 +659,7 @@ async function saveTask() {
   if (!task.value) return
   saveError.value = ''
   repeatIntervalError.value = ''
+  repeatWeekdaysError.value = ''
   const durationError = validateDurationFields(form.durationStart, form.durationEnd)
   if (durationError) {
     saveError.value = durationError
@@ -545,6 +669,10 @@ async function saveTask() {
     const intervalError = validateRepeatInterval(customRepeat.interval)
     if (intervalError) {
       repeatIntervalError.value = intervalError
+      return
+    }
+    if (customRepeat.unit === 'week' && customRepeat.weekdays.length === 0) {
+      repeatWeekdaysError.value = 'Выберите хотя бы один день недели'
       return
     }
   }
@@ -574,10 +702,14 @@ async function saveTask() {
       updates.duration = undefined
     }
     if (form.repeat === 'custom') {
+      const weekdays = [...customRepeat.weekdays].sort((a, b) => a - b)
       updates.repeatCustom = {
         interval: customRepeat.interval,
         unit: customRepeat.unit,
+        weekdays: customRepeat.unit === 'week' ? weekdays : undefined,
+        monthDay: customRepeat.unit === 'month' ? customRepeat.monthDay : undefined,
       }
+      updates.repeatDays = customRepeat.unit === 'week' ? weekdays : undefined
     } else {
       updates.repeatCustom = undefined
       updates.repeatDays = undefined
@@ -595,7 +727,8 @@ async function saveTask() {
       updates.attachments = []
     }
 
-    await tasksStore.updateTask(task.value.id, updates)
+    // Skip calendar refresh here — modal callers are tasks/matrix; avoids extra 429 pressure.
+    await tasksStore.updateTask(task.value.id, updates, { calendar: false })
     unsavedModal.value = false
     emit('saved')
     emit('close')
@@ -632,9 +765,23 @@ async function deleteSeries() {
   emit('close')
 }
 
-async function restoreTask() {
-  if (!task.value) return
-  await tasksStore.completeTask(task.value.id)
-  emit('close')
+async function toggleComplete() {
+  if (!task.value || completing.value) return
+  completing.value = true
+  try {
+    await tasksStore.completeTask(task.value.id, {
+      grouped: false,
+      calendar: true,
+      matrix: false,
+    })
+    emit('saved')
+    emit('close')
+  }
+  catch (err: unknown) {
+    saveError.value = getApiErrorMessage(err, 'Не удалось изменить статус задачи')
+  }
+  finally {
+    completing.value = false
+  }
 }
 </script>

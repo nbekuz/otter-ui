@@ -1,5 +1,14 @@
 export const BRAND_NAME = 'Оттер'
 
+/** Canonical public URL for share / recommend (not the current page path). */
+export const APP_PUBLIC_URL = 'https://ottertime.ru'
+
+export const APP_SHARE = {
+  title: `${BRAND_NAME} — Планировщик задач`,
+  text: 'Умный планировщик задач: списки, календарь, Помодоро и матрица Эйзенхауэра. Попробуй Оттер!',
+  url: APP_PUBLIC_URL,
+} as const
+
 export const SITE_LEGAL_INFO = {
   businessName: 'ИП Наринян А.Б.',
   email: 'nab1985nab@gmail.com',
@@ -9,11 +18,17 @@ export const SITE_LEGAL_INFO = {
   ogrnip: '326265100087984',
 } as const
 
-/** Windows desktop build — override with NUXT_PUBLIC_DESKTOP_DOWNLOAD_URL in production. */
+/**
+ * Windows / mobile distribution labels.
+ * Actual URLs come from public Admin APIs:
+ * `GET /api/app/windows`, `GET /api/app/mobile` — do not hardcode download links.
+ */
 export const DESKTOP_APP = {
   label: 'Скачать для Windows',
-  downloadPath: '/downloads/otter-windows-x64.zip',
+  /** Visible only below 640px — opens RuStore URL from `GET /api/app/mobile`. */
+  rustoreLabel: 'Скачать в RuStore',
   unavailableMessage: 'Десктопная версия пока не загружена. Скачивание будет доступно позже.',
+  rustoreUnavailableMessage: 'Приложение пока недоступно в RuStore.',
 } as const
 
 export const PREMIUM_LANDING = {

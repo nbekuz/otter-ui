@@ -208,6 +208,8 @@
         </div>
       </Transition>
     </Teleport>
+
+    <ShareAppModal />
   </div>
 </template>
 
@@ -228,6 +230,7 @@ const authStore = useAuthStore()
 const premiumStore = usePremiumStore()
 const notificationsStore = useNotificationsStore()
 const { showToast } = useAppToast()
+const { shareApp } = useAppShare()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
 const premiumModal = ref(false)
@@ -345,12 +348,6 @@ const sidebarEnabled = computed(() => {
     settings: set.has('settings'),
   }
 })
-
-function shareApp() {
-  if (navigator.share) {
-    void navigator.share({ title: `${BRAND_NAME} - Планировщик`, url: window.location.origin })
-  }
-}
 
 function openNewTask() {
   navigateTo(`/app/new-task?returnTo=${encodeURIComponent(route.fullPath)}`)

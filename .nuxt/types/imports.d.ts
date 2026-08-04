@@ -3,6 +3,8 @@ export {}
 declare global {
   const ACCESS_TOKEN_KEY: typeof import('../../utils/auth-session').ACCESS_TOKEN_KEY
   const APP_NAV_CATALOG: typeof import('../../utils/nav-items').APP_NAV_CATALOG
+  const APP_PUBLIC_URL: typeof import('../../utils/site-info').APP_PUBLIC_URL
+  const APP_SHARE: typeof import('../../utils/site-info').APP_SHARE
   const BOTTOM_NAV_IDS: typeof import('../../utils/nav-items').BOTTOM_NAV_IDS
   const BRAND_NAME: typeof import('../../utils/site-info').BRAND_NAME
   const DESKTOP_APP: typeof import('../../utils/site-info').DESKTOP_APP
@@ -18,6 +20,7 @@ declare global {
   const REFRESH_TOKEN_KEY: typeof import('../../utils/auth-session').REFRESH_TOKEN_KEY
   const REPEAT_INTERVAL_MAX: typeof import('../../utils/time').REPEAT_INTERVAL_MAX
   const REPEAT_INTERVAL_MAX_MESSAGE: typeof import('../../utils/time').REPEAT_INTERVAL_MAX_MESSAGE
+  const SHARE_NETWORKS: typeof import('../../utils/share-app').SHARE_NETWORKS
   const SIDEBAR_NAV_IDS: typeof import('../../utils/nav-items').SIDEBAR_NAV_IDS
   const SITE_LEGAL_INFO: typeof import('../../utils/site-info').SITE_LEGAL_INFO
   const STATIC_LEGAL_DOCUMENTS: typeof import('../../utils/legal-static').STATIC_LEGAL_DOCUMENTS
@@ -38,9 +41,11 @@ declare global {
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
   const buildMonthCells: typeof import('../../utils/calendar-grid').buildMonthCells
   const buildNavOrderMap: typeof import('../../utils/nav-items').buildNavOrderMap
+  const buildShareMessage: typeof import('../../utils/share-app').buildShareMessage
   const buildYearMonthCells: typeof import('../../utils/calendar-grid').buildYearMonthCells
   const buildYearMonths: typeof import('../../utils/calendar-grid').buildYearMonths
   const callOnce: typeof import('../../node_modules/nuxt/dist/app/composables/once').callOnce
+  const canUseNativeShare: typeof import('../../utils/share-app').canUseNativeShare
   const cancelIdleCallback: typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback').cancelIdleCallback
   const clearAuthSession: typeof import('../../utils/auth-session').clearAuthSession
   const clearError: typeof import('../../node_modules/nuxt/dist/app/composables/error').clearError
@@ -55,6 +60,7 @@ declare global {
   const computedWithControl: typeof import('@vueuse/core').computedWithControl
   const controlledComputed: typeof import('@vueuse/core').controlledComputed
   const controlledRef: typeof import('@vueuse/core').controlledRef
+  const copyTextToClipboard: typeof import('../../utils/share-app').copyTextToClipboard
   const createError: typeof import('../../node_modules/nuxt/dist/app/composables/error').createError
   const createEventHook: typeof import('@vueuse/core').createEventHook
   const createGlobalState: typeof import('@vueuse/core').createGlobalState
@@ -87,15 +93,19 @@ declare global {
   const effect: typeof import('vue').effect
   const effectScope: typeof import('vue').effectScope
   const enableWebPushNotifications: typeof import('../../utils/fcm-devices').enableWebPushNotifications
+  const enrichTaskWithStoredRepeat: typeof import('../../utils/repeat-weekdays').enrichTaskWithStoredRepeat
   const expandTasksForDate: typeof import('../../utils/recurrence').expandTasksForDate
   const expandTasksForRange: typeof import('../../utils/recurrence').expandTasksForRange
   const extendRef: typeof import('@vueuse/core').extendRef
+  const fetchMobileStoreLinks: typeof import('../../utils/app-download').fetchMobileStoreLinks
+  const fetchWindowsDownloadInfo: typeof import('../../utils/app-download').fetchWindowsDownloadInfo
   const formatLegalUpdatedAt: typeof import('../../utils/legal-static').formatLegalUpdatedAt
   const formatMinutesToTime: typeof import('../../utils/time').formatMinutesToTime
   const getAccessToken: typeof import('../../utils/auth-session').getAccessToken
   const getApiErrorMessage: typeof import('../../utils/api').getApiErrorMessage
   const getApiFieldError: typeof import('../../utils/api').getApiFieldError
   const getAppManifest: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getAppManifest
+  const getAppSharePayload: typeof import('../../utils/share-app').getAppSharePayload
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getRefreshToken: typeof import('../../utils/auth-session').getRefreshToken
@@ -126,6 +136,7 @@ declare global {
   const isVue2: typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi').isVue2
   const isVue3: typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi').isVue3
   const loadPayload: typeof import('../../node_modules/nuxt/dist/app/composables/payload').loadPayload
+  const loadRepeatWeekdays: typeof import('../../utils/repeat-weekdays').loadRepeatWeekdays
   const makeDestructurable: typeof import('@vueuse/core').makeDestructurable
   const markRaw: typeof import('vue').markRaw
   const migrateLegacyTokens: typeof import('../../utils/auth-session').migrateLegacyTokens
@@ -156,6 +167,7 @@ declare global {
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
+  const openShareUrl: typeof import('../../utils/share-app').openShareUrl
   const orderNavItems: typeof import('../../utils/nav-items').orderNavItems
   const parseApiWallClock: typeof import('../../utils/time').parseApiWallClock
   const parseNotificationsWsMessage: typeof import('../../utils/notifications-ws').parseNotificationsWsMessage
@@ -163,6 +175,7 @@ declare global {
   const parseTimeToMinutes: typeof import('../../utils/time').parseTimeToMinutes
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
   const pauseBackgroundAudio: typeof import('../../utils/pomodoro-audio').pauseBackgroundAudio
+  const persistTaskRepeatWeekdays: typeof import('../../utils/repeat-weekdays').persistTaskRepeatWeekdays
   const playBackgroundLoop: typeof import('../../utils/pomodoro-audio').playBackgroundLoop
   const playSoundOnce: typeof import('../../utils/pomodoro-audio').playSoundOnce
   const preferClientSchedule: typeof import('../../utils/task-mapper').preferClientSchedule
@@ -196,13 +209,17 @@ declare global {
   const requestIdleCallback: typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback').requestIdleCallback
   const resolveActiveNavId: typeof import('../../utils/nav-items').resolveActiveNavId
   const resolveApiBaseUrl: typeof import('../../utils/api').resolveApiBaseUrl
+  const resolveAppDistributionBaseUrl: typeof import('../../utils/app-download').resolveAppDistributionBaseUrl
   const resolveComponent: typeof import('vue').resolveComponent
   const resolveMediaUrl: typeof import('../../utils/media').resolveMediaUrl
   const resolveNotificationsWsUrl: typeof import('../../utils/notifications-ws').resolveNotificationsWsUrl
   const resolveRealTaskId: typeof import('../../utils/recurrence').resolveRealTaskId
   const resolveRef: typeof import('@vueuse/core').resolveRef
+  const resolveTaskWeekdays: typeof import('../../utils/repeat-weekdays').resolveTaskWeekdays
   const resolveUnref: typeof import('@vueuse/core').resolveUnref
   const sanitizeTariffDescription: typeof import('../../utils/premium-tariffs').sanitizeTariffDescription
+  const saveRepeatWeekdays: typeof import('../../utils/repeat-weekdays').saveRepeatWeekdays
+  const setAppNotificationsEnabled: typeof import('../../utils/notification-preference').setAppNotificationsEnabled
   const setAuthTokens: typeof import('../../utils/auth-session').setAuthTokens
   const setInterval: typeof import('../../node_modules/nuxt/dist/app/compat/interval').setInterval
   const setPageLayout: typeof import('../../node_modules/nuxt/dist/app/composables/router').setPageLayout
@@ -245,6 +262,8 @@ declare global {
   const useActiveElement: typeof import('@vueuse/core').useActiveElement
   const useAnimate: typeof import('@vueuse/core').useAnimate
   const useAppConfig: typeof import('../../node_modules/nuxt/dist/app/config').useAppConfig
+  const useAppDownloads: typeof import('../../composables/useAppDownloads').useAppDownloads
+  const useAppShare: typeof import('../../composables/useAppShare').useAppShare
   const useAppToast: typeof import('../../composables/useAppToast').useAppToast
   const useArrayDifference: typeof import('@vueuse/core').useArrayDifference
   const useArrayEvery: typeof import('@vueuse/core').useArrayEvery
@@ -516,6 +535,9 @@ declare global {
   export type { TaskReminderToastState } from '../../composables/useTaskReminderToast'
   import('../../composables/useTaskReminderToast')
   // @ts-ignore
+  export type { WindowsDownloadInfo, MobileStoreLinks } from '../../utils/app-download'
+  import('../../utils/app-download')
+  // @ts-ignore
   export type { AuthTokens } from '../../utils/auth-session'
   import('../../utils/auth-session')
   // @ts-ignore
@@ -531,8 +553,14 @@ declare global {
   export type { AppNavItemId, AppNavItem } from '../../utils/nav-items'
   import('../../utils/nav-items')
   // @ts-ignore
+  export type { NotificationPreferenceResult } from '../../utils/notification-preference'
+  import('../../utils/notification-preference')
+  // @ts-ignore
   export type { NotificationsWsEvent } from '../../utils/notifications-ws'
   import('../../utils/notifications-ws')
+  // @ts-ignore
+  export type { AppSharePayload, ShareNetworkId, ShareNetwork } from '../../utils/share-app'
+  import('../../utils/share-app')
   // @ts-ignore
   export type { OtterTasksExportPayload, OtterExportedTask } from '../../utils/task-export'
   import('../../utils/task-export')
@@ -549,6 +577,8 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     readonly ACCESS_TOKEN_KEY: UnwrapRef<typeof import('../../utils/auth-session')['ACCESS_TOKEN_KEY']>
     readonly APP_NAV_CATALOG: UnwrapRef<typeof import('../../utils/nav-items')['APP_NAV_CATALOG']>
+    readonly APP_PUBLIC_URL: UnwrapRef<typeof import('../../utils/site-info')['APP_PUBLIC_URL']>
+    readonly APP_SHARE: UnwrapRef<typeof import('../../utils/site-info')['APP_SHARE']>
     readonly BOTTOM_NAV_IDS: UnwrapRef<typeof import('../../utils/nav-items')['BOTTOM_NAV_IDS']>
     readonly BRAND_NAME: UnwrapRef<typeof import('../../utils/site-info')['BRAND_NAME']>
     readonly DESKTOP_APP: UnwrapRef<typeof import('../../utils/site-info')['DESKTOP_APP']>
@@ -564,6 +594,7 @@ declare module 'vue' {
     readonly REFRESH_TOKEN_KEY: UnwrapRef<typeof import('../../utils/auth-session')['REFRESH_TOKEN_KEY']>
     readonly REPEAT_INTERVAL_MAX: UnwrapRef<typeof import('../../utils/time')['REPEAT_INTERVAL_MAX']>
     readonly REPEAT_INTERVAL_MAX_MESSAGE: UnwrapRef<typeof import('../../utils/time')['REPEAT_INTERVAL_MAX_MESSAGE']>
+    readonly SHARE_NETWORKS: UnwrapRef<typeof import('../../utils/share-app')['SHARE_NETWORKS']>
     readonly SIDEBAR_NAV_IDS: UnwrapRef<typeof import('../../utils/nav-items')['SIDEBAR_NAV_IDS']>
     readonly SITE_LEGAL_INFO: UnwrapRef<typeof import('../../utils/site-info')['SITE_LEGAL_INFO']>
     readonly STATIC_LEGAL_DOCUMENTS: UnwrapRef<typeof import('../../utils/legal-static')['STATIC_LEGAL_DOCUMENTS']>
@@ -584,9 +615,11 @@ declare module 'vue' {
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly buildMonthCells: UnwrapRef<typeof import('../../utils/calendar-grid')['buildMonthCells']>
     readonly buildNavOrderMap: UnwrapRef<typeof import('../../utils/nav-items')['buildNavOrderMap']>
+    readonly buildShareMessage: UnwrapRef<typeof import('../../utils/share-app')['buildShareMessage']>
     readonly buildYearMonthCells: UnwrapRef<typeof import('../../utils/calendar-grid')['buildYearMonthCells']>
     readonly buildYearMonths: UnwrapRef<typeof import('../../utils/calendar-grid')['buildYearMonths']>
     readonly callOnce: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/once')['callOnce']>
+    readonly canUseNativeShare: UnwrapRef<typeof import('../../utils/share-app')['canUseNativeShare']>
     readonly cancelIdleCallback: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback')['cancelIdleCallback']>
     readonly clearAuthSession: UnwrapRef<typeof import('../../utils/auth-session')['clearAuthSession']>
     readonly clearError: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/error')['clearError']>
@@ -601,6 +634,7 @@ declare module 'vue' {
     readonly computedWithControl: UnwrapRef<typeof import('@vueuse/core')['computedWithControl']>
     readonly controlledComputed: UnwrapRef<typeof import('@vueuse/core')['controlledComputed']>
     readonly controlledRef: UnwrapRef<typeof import('@vueuse/core')['controlledRef']>
+    readonly copyTextToClipboard: UnwrapRef<typeof import('../../utils/share-app')['copyTextToClipboard']>
     readonly createError: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/error')['createError']>
     readonly createEventHook: UnwrapRef<typeof import('@vueuse/core')['createEventHook']>
     readonly createGlobalState: UnwrapRef<typeof import('@vueuse/core')['createGlobalState']>
@@ -633,15 +667,19 @@ declare module 'vue' {
     readonly effect: UnwrapRef<typeof import('vue')['effect']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly enableWebPushNotifications: UnwrapRef<typeof import('../../utils/fcm-devices')['enableWebPushNotifications']>
+    readonly enrichTaskWithStoredRepeat: UnwrapRef<typeof import('../../utils/repeat-weekdays')['enrichTaskWithStoredRepeat']>
     readonly expandTasksForDate: UnwrapRef<typeof import('../../utils/recurrence')['expandTasksForDate']>
     readonly expandTasksForRange: UnwrapRef<typeof import('../../utils/recurrence')['expandTasksForRange']>
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
+    readonly fetchMobileStoreLinks: UnwrapRef<typeof import('../../utils/app-download')['fetchMobileStoreLinks']>
+    readonly fetchWindowsDownloadInfo: UnwrapRef<typeof import('../../utils/app-download')['fetchWindowsDownloadInfo']>
     readonly formatLegalUpdatedAt: UnwrapRef<typeof import('../../utils/legal-static')['formatLegalUpdatedAt']>
     readonly formatMinutesToTime: UnwrapRef<typeof import('../../utils/time')['formatMinutesToTime']>
     readonly getAccessToken: UnwrapRef<typeof import('../../utils/auth-session')['getAccessToken']>
     readonly getApiErrorMessage: UnwrapRef<typeof import('../../utils/api')['getApiErrorMessage']>
     readonly getApiFieldError: UnwrapRef<typeof import('../../utils/api')['getApiFieldError']>
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
+    readonly getAppSharePayload: UnwrapRef<typeof import('../../utils/share-app')['getAppSharePayload']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getRefreshToken: UnwrapRef<typeof import('../../utils/auth-session')['getRefreshToken']>
@@ -672,6 +710,7 @@ declare module 'vue' {
     readonly isVue2: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi')['isVue2']>
     readonly isVue3: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi')['isVue3']>
     readonly loadPayload: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['loadPayload']>
+    readonly loadRepeatWeekdays: UnwrapRef<typeof import('../../utils/repeat-weekdays')['loadRepeatWeekdays']>
     readonly makeDestructurable: UnwrapRef<typeof import('@vueuse/core')['makeDestructurable']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly migrateLegacyTokens: UnwrapRef<typeof import('../../utils/auth-session')['migrateLegacyTokens']>
@@ -702,6 +741,7 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
+    readonly openShareUrl: UnwrapRef<typeof import('../../utils/share-app')['openShareUrl']>
     readonly orderNavItems: UnwrapRef<typeof import('../../utils/nav-items')['orderNavItems']>
     readonly parseApiWallClock: UnwrapRef<typeof import('../../utils/time')['parseApiWallClock']>
     readonly parseNotificationsWsMessage: UnwrapRef<typeof import('../../utils/notifications-ws')['parseNotificationsWsMessage']>
@@ -709,6 +749,7 @@ declare module 'vue' {
     readonly parseTimeToMinutes: UnwrapRef<typeof import('../../utils/time')['parseTimeToMinutes']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
     readonly pauseBackgroundAudio: UnwrapRef<typeof import('../../utils/pomodoro-audio')['pauseBackgroundAudio']>
+    readonly persistTaskRepeatWeekdays: UnwrapRef<typeof import('../../utils/repeat-weekdays')['persistTaskRepeatWeekdays']>
     readonly playBackgroundLoop: UnwrapRef<typeof import('../../utils/pomodoro-audio')['playBackgroundLoop']>
     readonly playSoundOnce: UnwrapRef<typeof import('../../utils/pomodoro-audio')['playSoundOnce']>
     readonly preferClientSchedule: UnwrapRef<typeof import('../../utils/task-mapper')['preferClientSchedule']>
@@ -742,13 +783,17 @@ declare module 'vue' {
     readonly requestIdleCallback: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback')['requestIdleCallback']>
     readonly resolveActiveNavId: UnwrapRef<typeof import('../../utils/nav-items')['resolveActiveNavId']>
     readonly resolveApiBaseUrl: UnwrapRef<typeof import('../../utils/api')['resolveApiBaseUrl']>
+    readonly resolveAppDistributionBaseUrl: UnwrapRef<typeof import('../../utils/app-download')['resolveAppDistributionBaseUrl']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resolveMediaUrl: UnwrapRef<typeof import('../../utils/media')['resolveMediaUrl']>
     readonly resolveNotificationsWsUrl: UnwrapRef<typeof import('../../utils/notifications-ws')['resolveNotificationsWsUrl']>
     readonly resolveRealTaskId: UnwrapRef<typeof import('../../utils/recurrence')['resolveRealTaskId']>
     readonly resolveRef: UnwrapRef<typeof import('@vueuse/core')['resolveRef']>
+    readonly resolveTaskWeekdays: UnwrapRef<typeof import('../../utils/repeat-weekdays')['resolveTaskWeekdays']>
     readonly resolveUnref: UnwrapRef<typeof import('@vueuse/core')['resolveUnref']>
     readonly sanitizeTariffDescription: UnwrapRef<typeof import('../../utils/premium-tariffs')['sanitizeTariffDescription']>
+    readonly saveRepeatWeekdays: UnwrapRef<typeof import('../../utils/repeat-weekdays')['saveRepeatWeekdays']>
+    readonly setAppNotificationsEnabled: UnwrapRef<typeof import('../../utils/notification-preference')['setAppNotificationsEnabled']>
     readonly setAuthTokens: UnwrapRef<typeof import('../../utils/auth-session')['setAuthTokens']>
     readonly setInterval: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/interval')['setInterval']>
     readonly setPageLayout: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['setPageLayout']>
@@ -791,6 +836,8 @@ declare module 'vue' {
     readonly useActiveElement: UnwrapRef<typeof import('@vueuse/core')['useActiveElement']>
     readonly useAnimate: UnwrapRef<typeof import('@vueuse/core')['useAnimate']>
     readonly useAppConfig: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/config')['useAppConfig']>
+    readonly useAppDownloads: UnwrapRef<typeof import('../../composables/useAppDownloads')['useAppDownloads']>
+    readonly useAppShare: UnwrapRef<typeof import('../../composables/useAppShare')['useAppShare']>
     readonly useAppToast: UnwrapRef<typeof import('../../composables/useAppToast')['useAppToast']>
     readonly useArrayDifference: UnwrapRef<typeof import('@vueuse/core')['useArrayDifference']>
     readonly useArrayEvery: UnwrapRef<typeof import('@vueuse/core')['useArrayEvery']>

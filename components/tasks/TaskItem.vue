@@ -33,40 +33,51 @@
       </button>
 
       <!-- Content -->
-      <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium leading-snug line-clamp-2"
-           :class="task.completed ? 'line-through text-sber-gray' : 'text-sber-black'">
+      <div class="min-w-0 flex-1">
+        <p
+          class="line-clamp-2 text-sm font-medium leading-snug"
+          :class="task.completed ? 'text-sber-gray line-through' : 'text-sber-black'"
+        >
           {{ task.title }}
         </p>
 
-        <!-- Meta info -->
-        <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-          <!-- Date/time -->
-          <span v-if="task.dueDate" class="flex items-center gap-1 text-xs text-sber-gray">
-            <Clock class="w-3 h-3" />
-            {{ formatDateTime }}
+        <!-- Meta: date, time, duration, notify, repeat -->
+        <div
+          v-if="hasMeta"
+          class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-sber-gray"
+        >
+          <span v-if="task.dueDate" class="inline-flex items-center gap-1">
+            <Clock class="h-3 w-3 shrink-0" />
+            <span>{{ formatDate }}</span>
+            <span v-if="task.dueTime">{{ task.dueTime }}</span>
           </span>
 
-          <!-- Duration -->
-          <span v-if="task.duration" class="text-xs text-sber-gray font-medium">
+          <span
+            v-if="task.duration?.start && task.duration?.end"
+            class="font-medium text-sber-blue"
+          >
             {{ task.duration.start }}–{{ task.duration.end }}
           </span>
 
-          <!-- Notification bell -->
-          <span v-if="task.notification" class="text-sber-gray">
-            <Bell class="w-3 h-3" />
-          </span>
+          <Bell
+            v-if="hasNotification"
+            class="h-3 w-3 shrink-0 text-sber-gray"
+            aria-label="Уведомление"
+          />
 
-          <!-- Repeat -->
-          <span v-if="task.repeat && task.repeat !== 'none'" class="text-sber-gray">
-            <RefreshCw class="w-3 h-3" />
-          </span>
+          <RefreshCw
+            v-if="hasRepeat"
+            class="h-3 w-3 shrink-0 text-sber-gray"
+            aria-label="Повтор"
+          />
         </div>
       </div>
 
       <!-- Priority dot -->
-      <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1.5"
-           :class="priorityDotClass" />
+      <div
+        class="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full"
+        :class="priorityDotClass"
+      />
     </div>
   </div>
 </template>
@@ -74,7 +85,10 @@
 <script setup lang="ts">
 import { Check, CheckCircle, Clock, Bell, RefreshCw, Trash2 } from 'lucide-vue-next'
 import dayjs from 'dayjs'
+import 'dayjs/locale/ru'
 import type { Task } from '~/data/mockData'
+
+dayjs.locale('ru')
 
 const props = defineProps<{ task: Task }>()
 const emit = defineEmits<{
@@ -101,11 +115,27 @@ const priorityDotClass = computed(() => {
   }
 })
 
-const formatDateTime = computed(() => {
+const hasNotification = computed(() =>
+  props.task.notification !== undefined && props.task.notification !== '',
+)
+
+const hasRepeat = computed(() =>
+  !!(props.task.repeat && props.task.repeat !== 'none'),
+)
+
+const hasMeta = computed(() =>
+  !!(
+    props.task.dueDate
+    || (props.task.duration?.start && props.task.duration?.end)
+    || hasNotification.value
+    || hasRepeat.value
+  ),
+)
+
+const formatDate = computed(() => {
   if (!props.task.dueDate) return ''
   const d = dayjs(props.task.dueDate)
-  const dateStr = d.format('D MMM')
-  return props.task.dueTime ? `${dateStr}, ${props.task.dueTime}` : dateStr
+  return d.isValid() ? d.format('D MMM') : props.task.dueDate
 })
 
 // ─── Swipe logic ──────────────────────────────────────────────────────────────

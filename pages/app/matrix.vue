@@ -50,27 +50,27 @@
 
         <!-- Tasks in block -->
         <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-2 pt-2">
-          <!-- Drop zone -->
-          <div
-            class="sticky top-0 z-20 mb-2 flex items-center justify-center rounded-xl border-2 border-dashed px-2 py-[5px] transition-colors"
+          <!-- Drop zone + add task (entire dashed area is clickable) -->
+          <button
+            type="button"
+            class="sticky top-0 z-20 mb-2 flex w-full items-center justify-center rounded-xl border-2 border-dashed px-2 py-[5px] transition-colors"
             :style="{ borderColor: block.color + '50', backgroundColor: isDarkTheme ? '#171a21' : block.bgColor }"
             :class="dragTarget === block.id ? (isDarkTheme ? 'bg-[#20242d]' : 'bg-white/90') : ''"
+            :aria-label="`Добавить задачу в «${block.title}»`"
+            @click="openNewTaskForBlock(block.id)"
           >
-            <div class="flex items-center gap-1">
-              <button
-                type="button"
-                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-base font-bold leading-none transition-opacity active:opacity-60"
+            <span class="pointer-events-none flex items-center gap-1">
+              <span
+                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-base font-bold leading-none"
                 :style="{ color: block.color }"
-                aria-label="Добавить задачу"
-                @click.stop="openNewTaskForBlock(block.id)"
               >
                 +
-              </button>
+              </span>
               <span class="text-[10px]" :style="{ color: block.color }">
                 {{ dragTarget === block.id ? 'Отпустите здесь' : 'перетащите' }}
               </span>
-            </div>
-          </div>
+            </span>
+          </button>
 
           <div
             v-for="task in getBlockTasks(block.id)"
@@ -187,7 +187,6 @@
       v-if="selectedTaskId"
       :task-id="selectedTaskId"
       @close="selectedTaskId = null"
-      @saved="onTaskDetailSaved"
     />
   </div>
 </template>
@@ -291,13 +290,6 @@ function toggleDateFilter(blockId: string, filter: string) {
   if (idx === -1) filters.push(filter)
   else filters.splice(idx, 1)
   settingsStore.updateMatrixBlock(blockId, { dateFilter: filters })
-}
-
-function onTaskDetailSaved() {
-  void Promise.all([
-    tasksStore.fetchGrouped(),
-    tasksStore.fetchMatrix(),
-  ])
 }
 
 function openNewTaskForBlock(blockId: string) {

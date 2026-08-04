@@ -111,6 +111,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   async function syncPushIfLoggedIn() {
     if (!authStore.isLoggedIn) return
+    if (!settingsStore.appSettings.notifications) return
     try {
       const { getFirebaseApp } = await import('~/lib/firebase')
       const { registerWebFcmDevice } = await import('~/utils/fcm-devices')
@@ -138,7 +139,11 @@ export default defineNuxtPlugin((nuxtApp) => {
   const dueTimer = window.setInterval(() => { void pollServerDueReminders() }, 45_000)
   watch(() => tasksStore.tasks.length, checkDueNotifications)
   watch(() => settingsStore.appSettings.notifications, (enabled) => {
-    if (enabled) void checkDueNotifications()
+    if (enabled) {
+      void syncPushIfLoggedIn()
+      void checkDueNotifications()
+      void pollServerDueReminders()
+    }
   })
   watch(() => authStore.isLoggedIn, (loggedIn) => {
     if (loggedIn) {

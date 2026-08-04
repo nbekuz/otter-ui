@@ -40,9 +40,18 @@
           <button
             class="mt-4 hidden items-center gap-2 text-sm font-semibold text-sber-green hover:underline sm:inline-flex"
             type="button"
+            :disabled="loadingWindows"
             @click="onDesktopDownloadClick"
           >
-            {{ DESKTOP_APP.label }}
+            {{ loadingWindows ? 'Загрузка…' : DESKTOP_APP.label }}
+          </button>
+          <button
+            class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-sber-green hover:underline max-sm:inline-flex sm:hidden"
+            type="button"
+            :disabled="loadingMobile"
+            @click="onRustoreDownloadClick"
+          >
+            {{ loadingMobile ? 'Загрузка…' : DESKTOP_APP.rustoreLabel }}
           </button>
         </div>
       </div>
@@ -60,9 +69,25 @@ import { STATIC_LEGAL_DOCUMENTS } from '~/utils/legal-static'
 
 const currentYear = 2026
 const legalDocuments = STATIC_LEGAL_DOCUMENTS
-const { showToast } = useAppToast()
+const {
+  loadingWindows,
+  loadingMobile,
+  loadWindows,
+  loadMobile,
+  downloadWindowsApp,
+  openRustoreDownload,
+} = useAppDownloads()
 
-function onDesktopDownloadClick() {
-  showToast(DESKTOP_APP.unavailableMessage, 'error', 4500)
+onMounted(() => {
+  void loadWindows()
+  void loadMobile()
+})
+
+async function onDesktopDownloadClick() {
+  await downloadWindowsApp()
+}
+
+async function onRustoreDownloadClick() {
+  await openRustoreDownload()
 }
 </script>
