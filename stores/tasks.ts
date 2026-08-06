@@ -445,7 +445,12 @@ export const useTasksStore = defineStore('tasks', () => {
 
       const assigned = incomplete.filter(t => t.matrixBlock === blockId)
       const byId = new Map<string, Task>()
-      for (const t of [...matched, ...assigned]) byId.set(t.id, t)
+      for (const t of matched) {
+        // Drag = move: don't keep a task here via filters when it is assigned elsewhere.
+        if (t.matrixBlock && t.matrixBlock !== blockId) continue
+        byId.set(t.id, t)
+      }
+      for (const t of assigned) byId.set(t.id, t)
       return Array.from(byId.values())
     }
 

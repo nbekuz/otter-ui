@@ -160,7 +160,7 @@
         class="phone-frame relative flex-1 lg:h-[calc(100dvh-1rem)] lg:rounded-3xl"
         :class="isDarkTheme ? 'bg-[#0f1115] lg:border lg:border-[#2a303a]' : 'bg-white lg:border lg:border-[#e9ebf1] lg:shadow-[0_20px_48px_rgba(15,23,42,0.10)]'"
       >
-        <div class="min-h-dvh lg:h-full lg:min-h-0 lg:overflow-y-auto ">
+        <div class="flex min-h-dvh flex-col lg:h-full lg:min-h-0 lg:overflow-y-auto">
           <slot />
         </div>
 

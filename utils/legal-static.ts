@@ -27,7 +27,7 @@ export const STATIC_LEGAL_DOCUMENTS: StaticLegalDocument[] = [
     slug: 'privacy-policy',
     title: 'Политика конфиденциальности',
     docType: 'privacy',
-    updatedAt: '2026-07-08',
+    updatedAt: '2026-06-17',
     content: privacyRaw,
     docxPath: '/legal/Политика_конфиденциальности_17_06_26.docx',
   },

@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <div class="px-4 py-4">
+    <div class="mx-auto w-full max-w-6xl px-4 py-4 lg:px-8">
       <template v-if="selectedStatic">
         <button
           class="mb-4 text-sm font-semibold text-sber-green"
@@ -28,7 +28,7 @@
           ← Назад к списку
         </button>
         <div
-          class="rounded-2xl p-4"
+          class="rounded-2xl p-4 sm:p-6"
           :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a]' : 'bg-white shadow-sm'"
         >
           <p v-if="staticUpdatedLabel" class="mb-3 text-xs text-sber-gray">
@@ -58,7 +58,9 @@
             <FileText class="h-5 w-5 flex-shrink-0 text-sber-gray" />
             <div class="min-w-0 flex-1">
               <p class="text-sm font-semibold text-sber-black">{{ doc.title }}</p>
-              <p class="mt-0.5 text-xs text-sber-gray">17.06.2026</p>
+              <p v-if="formatLegalUpdatedAt(doc.updatedAt)" class="mt-0.5 text-xs text-sber-gray">
+                {{ formatLegalUpdatedAt(doc.updatedAt) }}
+              </p>
             </div>
             <ChevronRight class="h-4 w-4 flex-shrink-0 text-sber-gray" />
           </button>

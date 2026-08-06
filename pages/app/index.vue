@@ -1,7 +1,14 @@
 <template>
-  <div class="page-container" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'" @click="handlePageClick">
+  <div
+    class="page-container flex min-h-0 flex-col max-lg:min-h-dvh lg:!h-full lg:!min-h-0 lg:!flex-1 lg:!overflow-hidden lg:!pb-0"
+    :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'"
+    @click="handlePageClick"
+  >
     <!-- Header -->
-    <div class="page-header-top sticky top-0 z-20 px-4 pb-3 lg:px-6" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
+    <div
+      class="page-header-top shrink-0 px-4 pb-3 lg:px-6"
+      :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'"
+    >
       <div class="flex items-center justify-between mb-3">
         <div>
           <p class="text-sm font-semibold text-sber-black">{{ greeting }}</p>
@@ -71,7 +78,7 @@
     </div>
 
     <!-- Search results -->
-    <div v-if="showSearch && searchQuery" class="px-4 pb-8 lg:px-6 lg:pb-10">
+    <div v-if="showSearch && searchQuery" class="min-h-0 flex-1 overflow-y-auto px-4 pb-8 lg:px-6 lg:pb-6">
       <p class="text-xs font-semibold text-sber-gray mb-2 uppercase tracking-wide">
         Результаты ({{ searchResults.length }})
       </p>
@@ -91,16 +98,19 @@
     </div>
 
     <!-- Task groups -->
-    <div v-else-if="tasksStore.loading && !tasksStore.initialized" class="px-4 py-16 text-center text-sm text-sber-gray">
+    <div v-else-if="tasksStore.loading && !tasksStore.initialized" class="min-h-0 flex-1 px-4 py-16 text-center text-sm text-sber-gray">
       Загрузка задач...
     </div>
-    <div v-else-if="tasksStore.error && !tasksStore.initialized" class="px-4 py-16 text-center">
+    <div v-else-if="tasksStore.error && !tasksStore.initialized" class="min-h-0 flex-1 px-4 py-16 text-center">
       <p class="text-sm text-red-500">{{ tasksStore.error }}</p>
       <button class="mt-3 text-sm font-semibold text-sber-green" type="button" @click="tasksStore.fetchGrouped()">
         Повторить
       </button>
     </div>
-    <div v-else class="px-4 pb-8 lg:px-6 lg:pb-10">
+    <div
+      v-else
+      class="flex min-h-0 flex-1 flex-col px-4 pb-8 lg:overflow-hidden lg:px-6 lg:pb-4"
+    >
       <div class="grid grid-cols-1 gap-3 lg:hidden">
         <TasksTaskGroup
           v-for="group in visibleGroups"
@@ -117,15 +127,15 @@
 
       <div
         ref="desktopSplitRef"
-        class="hidden lg:flex lg:min-h-[calc(100dvh-9rem)] lg:rounded-3xl lg:border lg:border-sber-gray-mid/60 lg:shadow-card"
+        class="hidden min-h-0 flex-1 overflow-hidden lg:flex lg:rounded-3xl lg:border lg:border-sber-gray-mid/60 lg:shadow-card"
         :class="isDarkTheme ? 'lg:bg-[#171a21]' : 'lg:bg-white'"
       >
         <!-- Left: tasks list -->
         <section
-          class="flex min-h-0 min-w-[360px] flex-col border-r border-sber-gray-light px-4 py-4"
+          class="flex min-h-0 min-w-[360px] flex-col overflow-hidden border-r border-sber-gray-light px-4 py-4"
           :style="{ width: `${leftPaneWidth}%` }"
         >
-          <div class="mb-3 flex items-center justify-between">
+          <div class="mb-3 flex shrink-0 items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: activeDesktopGroup?.color || '#8E8E93' }" />
               <p class="text-sm font-bold text-sber-black">{{ activeDesktopGroup?.title }}</p>
@@ -138,7 +148,7 @@
             </button>
           </div>
 
-          <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain pr-1">
+          <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-y-contain pr-1">
             <template v-if="activeDesktopTasks.length">
               <div
                 v-for="task in activeDesktopTasks"
@@ -225,19 +235,24 @@
         />
 
         <!-- Right: task editor -->
-        <section class="min-w-0 flex-1 overflow-y-auto px-5 py-4">
-          <div v-if="desktopSelectedTask" class="flex flex-col">
-            <h2 class="mb-4 line-clamp-1 text-xl font-bold text-sber-black">{{ desktopSelectedTask.title }}</h2>
+        <section class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-5 py-3">
+          <div v-if="desktopSelectedTask" class="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <h2 class="mb-3 shrink-0 line-clamp-1 text-xl font-bold text-sber-black">{{ desktopSelectedTask.title }}</h2>
 
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-1">
+            <div class="grid grid-cols-1 gap-2.5 md:grid-cols-2">
               <div class="md:col-span-2">
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Название</label>
-                <input v-model="editorForm.title" class="input-field py-3" type="text">
+                <input v-model="editorForm.title" class="input-field py-2.5" type="text">
               </div>
 
               <div class="md:col-span-2">
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Описание</label>
-                <textarea v-model="editorForm.description" class="input-field min-h-[92px] resize-none py-3" />
+                <textarea
+                  v-model="editorForm.description"
+                  rows="2"
+                  class="input-field min-h-[52px] max-h-[88px] resize-y py-2"
+                />
               </div>
 
               <div class="md:col-span-2 grid grid-cols-2 gap-3">
@@ -440,26 +455,27 @@
                       rel="noopener"
                       class="mt-2 block"
                     >
-                      <img :src="attachmentDataUrl" alt="Вложение" class="max-h-40 rounded-lg object-contain">
+                      <img :src="attachmentDataUrl" alt="Вложение" class="max-h-28 rounded-lg object-contain">
                     </a>
                   </div>
                 </div>
               </div>
             </div>
+            </div>
 
-            <div class="mt-5 grid grid-cols-3 gap-3">
-              <button class="btn-primary col-span-1" type="button" @click="saveDesktopTask">
+            <div class="mt-3 grid shrink-0 grid-cols-3 gap-2 border-t border-sber-gray-light/80 pt-3">
+              <button class="btn-primary col-span-1 !py-3 !text-sm" type="button" @click="saveDesktopTask">
                 Сохранить
               </button>
               <button
-                class="col-span-1 rounded-2xl px-4 py-4 text-sm font-semibold transition-colors"
+                class="col-span-1 rounded-2xl px-3 py-3 text-sm font-semibold transition-colors"
                 :class="desktopSelectedTask.completed ? 'bg-sber-blue-light text-sber-blue' : 'bg-sber-green-light text-sber-green'"
                 type="button"
                 @click="toggleDesktopTaskComplete"
               >
                 {{ desktopSelectedTask.completed ? 'Восстановить' : 'Выполнено' }}
               </button>
-              <button class="col-span-1 rounded-2xl bg-red-50 px-4 py-4 text-sm font-semibold text-red-500" type="button" @click="confirmDeleteDesktopTask">
+              <button class="col-span-1 rounded-2xl bg-red-50 px-3 py-3 text-sm font-semibold text-red-500" type="button" @click="confirmDeleteDesktopTask">
                 Удалить
               </button>
             </div>

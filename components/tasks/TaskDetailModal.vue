@@ -6,11 +6,12 @@
     <Transition name="modal">
       <div
         v-if="task"
-        class="app-modal px-4 py-5"
+        class="app-modal flex flex-col overflow-hidden p-0"
         :class="isDarkTheme ? 'border border-[#2a303a]' : ''"
-        style="max-height: 85dvh; overflow-y: auto;"
+        style="max-height: 85dvh;"
         @click.stop
       >
+        <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-3 pt-5">
         <div class="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5"
              :style="{ backgroundColor: priorityColor(form.priority) + '20' }">
           <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: priorityColor(form.priority) }" />
@@ -29,7 +30,11 @@
           </div>
           <div>
             <label class="mb-1 block text-xs font-semibold text-sber-gray">Описание</label>
-            <textarea v-model="form.description" class="input-field min-h-[72px] resize-none py-3" />
+            <textarea
+              v-model="form.description"
+              rows="2"
+              class="input-field min-h-[52px] max-h-[80px] resize-y py-2"
+            />
           </div>
 
           <div>
@@ -263,13 +268,17 @@
 
           <p v-if="saveError" class="text-sm text-red-500">{{ saveError }}</p>
         </div>
+        </div>
 
-        <div class="mt-5 grid grid-cols-3 gap-2">
-          <button class="btn-primary !w-auto col-span-1 !py-3 text-sm" type="button" :disabled="saving" @click="saveTask">
+        <div
+          class="grid shrink-0 grid-cols-4 gap-2 border-t px-4 py-3"
+          :class="isDarkTheme ? 'border-[#2a303a] bg-[#171a21]' : 'border-sber-gray-light bg-white'"
+        >
+          <button class="btn-primary !w-auto col-span-1 !px-2 !py-3 !text-xs sm:!text-sm" type="button" :disabled="saving" @click="saveTask">
             {{ saving ? '…' : 'Сохранить' }}
           </button>
           <button
-            class="col-span-1 rounded-2xl px-3 py-3 text-sm font-semibold transition-colors"
+            class="col-span-1 rounded-2xl px-2 py-3 text-xs font-semibold transition-colors sm:text-sm"
             :class="task.completed
               ? (isDarkTheme ? 'bg-sber-blue/20 text-sber-blue' : 'bg-sber-blue-light text-sber-blue')
               : (isDarkTheme ? 'bg-sber-green/20 text-sber-green' : 'bg-sber-green-light text-sber-green')"
@@ -280,17 +289,21 @@
             {{ completing ? '…' : (task.completed ? 'Восстановить' : 'Выполнено') }}
           </button>
           <button
-            class="col-span-1 rounded-2xl px-3 py-3 text-sm font-semibold text-red-500"
+            class="col-span-1 rounded-2xl px-2 py-3 text-xs font-semibold text-red-500 sm:text-sm"
             :class="isDarkTheme ? 'bg-red-500/15' : 'bg-red-50'"
             type="button"
             @click="requestDelete"
           >
             Удалить
           </button>
+          <button
+            class="btn-secondary col-span-1 !w-auto !px-2 !py-3 !text-xs sm:!text-sm"
+            type="button"
+            @click="onCancel"
+          >
+            Отмена
+          </button>
         </div>
-        <button class="btn-secondary mt-2 !py-3 text-sm" type="button" @click="onCancel">
-          Отмена
-        </button>
       </div>
     </Transition>
 

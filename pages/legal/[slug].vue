@@ -15,12 +15,12 @@
       Документ не найден
     </div>
 
-    <div v-else class="flex flex-1 flex-col px-4 pb-6 sm:px-6">
+    <div v-else class="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-6 sm:px-6 lg:px-8">
       <p v-if="updatedLabel" class="mb-4 text-xs text-sber-gray">
         Обновлено: {{ updatedLabel }}
       </p>
 
-      <div class="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
+      <div class="rounded-2xl bg-white p-4 shadow-sm sm:p-6 lg:p-8">
         <LegalDocumentBody :content="document.content" />
       </div>
 
