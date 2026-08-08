@@ -41,6 +41,7 @@ export { resolveApiBaseUrl, api, getApiFieldError, getApiErrorMessage, apiGet, a
 export { resolveAppDistributionBaseUrl, fetchWindowsDownloadInfo, fetchMobileStoreLinks, WindowsDownloadInfo, MobileStoreLinks } from '../utils/app-download';
 export { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, FIREBASE_ID_TOKEN_STORAGE_KEY, onAuthTokensChanged, migrateLegacyTokens, getAccessToken, getRefreshToken, setAuthTokens, clearAuthSession, readRememberedLogin, writeRememberedLogin, clearRememberedLogin, AuthTokens } from '../utils/auth-session';
 export { buildMonthCells, buildYearMonthCells, buildYearMonths, CalendarMonthCell, CalendarYearDayCell, CalendarYearMonth } from '../utils/calendar-grid';
+export { deliverSupportEmail } from '../utils/contact-email';
 export { validateEmail } from '../utils/email-policy';
 export { registerWebFcmDevice, enableWebPushNotifications, unregisterWebFcmDevice, WebPushRegisterResult } from '../utils/fcm-devices';
 export { STATIC_LEGAL_DOCUMENTS, getStaticLegalDocument, formatLegalUpdatedAt, LegalSlug, StaticLegalDocument } from '../utils/legal-static';

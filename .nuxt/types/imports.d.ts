@@ -88,6 +88,7 @@ declare global {
   const definePayloadReducer: typeof import('../../node_modules/nuxt/dist/app/composables/payload').definePayloadReducer
   const definePayloadReviver: typeof import('../../node_modules/nuxt/dist/app/composables/payload').definePayloadReviver
   const defineStore: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').defineStore
+  const deliverSupportEmail: typeof import('../../utils/contact-email').deliverSupportEmail
   const downloadTasksExportJson: typeof import('../../utils/task-export').downloadTasksExportJson
   const eagerComputed: typeof import('@vueuse/core').eagerComputed
   const effect: typeof import('vue').effect
@@ -662,6 +663,7 @@ declare module 'vue' {
     readonly definePayloadReducer: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['definePayloadReducer']>
     readonly definePayloadReviver: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['definePayloadReviver']>
     readonly defineStore: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['defineStore']>
+    readonly deliverSupportEmail: UnwrapRef<typeof import('../../utils/contact-email')['deliverSupportEmail']>
     readonly downloadTasksExportJson: UnwrapRef<typeof import('../../utils/task-export')['downloadTasksExportJson']>
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effect: UnwrapRef<typeof import('vue')['effect']>

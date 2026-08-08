@@ -14,6 +14,7 @@ import type {
   ApiPremiumFeature,
 } from '~/types/mobile-api'
 import { apiGet, apiPatch, apiPost, getApiErrorMessage } from '~/utils/api'
+import { deliverSupportEmail } from '~/utils/contact-email'
 
 export interface HelpFaqItem {
   id: string
@@ -202,13 +203,35 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function sendHelpMessage(message: string, screenshot?: File) {
-    if (screenshot) {
-      const formData = new FormData()
-      formData.append('message', message)
-      formData.append('screenshot', screenshot)
-      return apiPost('help/', formData)
+    const authStore = useAuthStore()
+    const trimmed = message.trim()
+
+    // Persist ticket in admin (best-effort) + deliver mail to support inbox.
+    const apiPromise = (async () => {
+      if (screenshot) {
+        const formData = new FormData()
+        formData.append('message', trimmed)
+        formData.append('screenshot', screenshot)
+        return apiPost('help/', formData)
+      }
+      return apiPost('help/', { message: trimmed })
+    })()
+
+    const mailPromise = deliverSupportEmail({
+      message: trimmed,
+      fromEmail: authStore.user?.email || undefined,
+      fromName: authStore.user?.name || undefined,
+    })
+
+    const results = await Promise.allSettled([apiPromise, mailPromise])
+    const mailResult = results[1]
+    if (mailResult.status === 'rejected') {
+      // Mail delivery is the user-facing requirement; surface that error.
+      throw mailResult.reason instanceof Error
+        ? mailResult.reason
+        : new Error(getApiErrorMessage(mailResult.reason, 'Не удалось отправить сообщение'))
     }
-    return apiPost('help/', { message })
+    return mailResult.value
   }
 
   async function callStubAction() {

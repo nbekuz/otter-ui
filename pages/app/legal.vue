@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-sber-gray-light'">
+  <div class="page-container" :class="isDarkTheme ? 'bg-[#0f1115]' : 'bg-white'">
     <div
       class="page-header-top px-4 pb-4"
       :class="isDarkTheme ? 'bg-[#171a21] border-b border-[#2a303a] shadow-none' : 'bg-white shadow-sm'"
@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <div class="mx-auto w-full max-w-6xl px-4 py-4 lg:px-8">
+    <div class="mx-auto w-full max-w-6xl bg-white px-4 py-4 lg:px-8" :class="isDarkTheme ? '!bg-transparent' : ''">
       <template v-if="selectedStatic">
         <button
           class="mb-4 text-sm font-semibold text-sber-green"
@@ -28,8 +28,8 @@
           ← Назад к списку
         </button>
         <div
-          class="rounded-2xl p-4 sm:p-6"
-          :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a]' : 'bg-white shadow-sm'"
+          class="p-0 sm:p-2"
+          :class="isDarkTheme ? 'rounded-2xl border border-[#2a303a] bg-[#171a21] p-4 sm:p-6' : 'bg-white'"
         >
           <p v-if="staticUpdatedLabel" class="mb-3 text-xs text-sber-gray">
             Обновлено: {{ staticUpdatedLabel }}
@@ -51,7 +51,7 @@
             v-for="doc in STATIC_LEGAL_DOCUMENTS"
             :key="doc.slug"
             class="flex w-full items-center gap-3 rounded-2xl px-4 py-4 text-left transition-colors active:bg-sber-gray-light"
-            :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a]' : 'bg-white shadow-sm'"
+            :class="isDarkTheme ? 'bg-[#171a21] border border-[#2a303a]' : 'border border-sber-gray-mid/50 bg-white'"
             type="button"
             @click="selectedStatic = doc"
           >

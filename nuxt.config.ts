@@ -52,6 +52,15 @@ export default defineNuxtConfig({
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap' },
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
       ],
+      // Prevent light FOUC on /app when dark theme is stored locally (Windows Edge/Chrome).
+      script: [
+        {
+          key: 'otter-theme-boot',
+          children: `(function(){try{var p=location.pathname||'';if(p.indexOf('/app')!==0)return;var raw=localStorage.getItem('otter.app.settings');if(!raw)return;var s=JSON.parse(raw);if(s&&s.theme==='dark'){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';document.documentElement.style.background='#0f1115';}}catch(e){}})();`,
+          type: 'text/javascript',
+          tagPriority: -20,
+        },
+      ],
     },
   },
   pinia: {

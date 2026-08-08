@@ -1,6 +1,6 @@
 <template>
-  <div class="flex min-h-dvh flex-col bg-white">
-    <div class="page-header-top flex shrink-0 items-center gap-3 px-4 pb-4 sm:px-6">
+  <div class="flex min-h-dvh w-full flex-col bg-white">
+    <div class="page-header-top flex shrink-0 items-center gap-3 px-4 pb-4 sm:px-6 lg:px-8">
       <button
         type="button"
         class="flex h-10 w-10 items-center justify-center rounded-full bg-sber-gray-light"
@@ -15,12 +15,12 @@
       Документ не найден
     </div>
 
-    <div v-else class="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-6 sm:px-6 lg:px-8">
+    <div v-else class="mx-auto flex w-full max-w-6xl flex-1 flex-col bg-white px-4 pb-6 sm:px-6 lg:px-8">
       <p v-if="updatedLabel" class="mb-4 text-xs text-sber-gray">
         Обновлено: {{ updatedLabel }}
       </p>
 
-      <div class="rounded-2xl bg-white p-4 shadow-sm sm:p-6 lg:p-8">
+      <div class="bg-white p-0 sm:p-2 lg:p-4">
         <LegalDocumentBody :content="document.content" />
       </div>
 
@@ -34,7 +34,7 @@
       </a>
     </div>
 
-    <SiteFooter class="mt-auto shrink-0" />
+    <SiteFooter class="mt-auto shrink-0" surface="white" />
   </div>
 </template>
 
@@ -42,6 +42,8 @@
 import { ChevronLeft, Download } from 'lucide-vue-next'
 import { formatLegalUpdatedAt, getStaticLegalDocument } from '~/utils/legal-static'
 import { BRAND_NAME } from '~/utils/site-info'
+
+definePageMeta({ layout: false })
 
 const route = useRoute()
 const router = useRouter()
@@ -59,6 +61,11 @@ function goBack() {
   }
   navigateTo('/login')
 }
+
+useHead({
+  htmlAttrs: { style: 'background:#ffffff' },
+  bodyAttrs: { style: 'background:#ffffff' },
+})
 
 watchEffect(() => {
   if (document.value) {

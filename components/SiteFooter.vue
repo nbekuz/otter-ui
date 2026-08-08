@@ -1,5 +1,10 @@
 <template>
-  <footer class="border-t border-sber-gray-light bg-sber-gray-light/60 px-4 py-8 md:px-8 lg:px-10">
+  <footer
+    class="border-t px-4 py-8 md:px-8 lg:px-10"
+    :class="surface === 'white'
+      ? 'border-sber-gray-mid/40 bg-white'
+      : 'border-sber-gray-light bg-sber-gray-light/60'"
+  >
     <div class="mx-auto max-w-6xl">
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <div>
@@ -66,6 +71,13 @@
 <script setup lang="ts">
 import { BRAND_NAME, DESKTOP_APP, SITE_LEGAL_INFO } from '~/utils/site-info'
 import { STATIC_LEGAL_DOCUMENTS } from '~/utils/legal-static'
+
+withDefaults(defineProps<{
+  /** Legal pages need a full white canvas (no gray side gutters). */
+  surface?: 'default' | 'white'
+}>(), {
+  surface: 'default',
+})
 
 const currentYear = 2026
 const legalDocuments = STATIC_LEGAL_DOCUMENTS

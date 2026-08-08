@@ -215,6 +215,7 @@
 
 .dark {
   color-scheme: dark;
+  scrollbar-color: #3a4250 #0f1115;
 }
 
 .dark body,
@@ -230,6 +231,9 @@
 }
 
 .dark .bg-white,
+.dark .lg\:bg-white,
+.dark .md\:bg-white,
+.dark .sm\:bg-white,
 .dark .card,
 .dark .task-group-header,
 .dark .app-modal,
@@ -288,6 +292,23 @@
   color: #7c8591;
 }
 
+.dark .input-field:focus,
+.dark .focus\:bg-white:focus,
+.dark .focus-within\:bg-white:focus-within {
+  background-color: #171a21 !important;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark textarea:-webkit-autofill,
+.dark select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #11151b inset !important;
+  -webkit-text-fill-color: #f3f4f6 !important;
+  caret-color: #f3f4f6;
+  transition: background-color 99999s ease-in-out 0s;
+}
+
 .dark .btn-secondary,
 .dark .task-group-header,
 .dark .active\:bg-sber-gray-light:active {
@@ -322,4 +343,85 @@
 .dark .border-sber-green.bg-sber-green-light\/40,
 .dark .bg-sber-green-light\/40 {
   background-color: rgba(33, 160, 56, 0.22) !important;
+}
+
+/* Soft tint chips — calendar / new-task / settings / premium */
+.dark .bg-sber-green-light,
+.dark .bg-green-50,
+.dark .bg-green-100 {
+  background-color: rgba(33, 160, 56, 0.18) !important;
+}
+
+.dark .bg-sber-blue-light,
+.dark .bg-blue-50,
+.dark .bg-blue-100 {
+  background-color: rgba(0, 122, 255, 0.18) !important;
+}
+
+.dark .bg-red-50,
+.dark .bg-red-100 {
+  background-color: rgba(255, 59, 48, 0.16) !important;
+}
+
+.dark .bg-orange-50,
+.dark .bg-orange-100 {
+  background-color: rgba(255, 149, 0, 0.16) !important;
+}
+
+.dark .bg-yellow-50,
+.dark .bg-yellow-50\/80,
+.dark .bg-yellow-100 {
+  background-color: rgba(251, 191, 36, 0.14) !important;
+}
+
+.dark .border-yellow-200,
+.dark .border-red-200,
+.dark .border-orange-200,
+.dark .border-green-200,
+.dark .border-blue-200 {
+  border-color: #2a303a !important;
+}
+
+.dark .text-yellow-600,
+.dark .text-yellow-700,
+.dark .text-yellow-800 {
+  color: #fbbf24 !important;
+}
+
+.dark .text-red-500,
+.dark .text-red-600 {
+  color: #ff6b6b !important;
+}
+
+.dark .text-orange-500,
+.dark .text-orange-600 {
+  color: #ffb020 !important;
+}
+
+.dark .priority-high {
+  background-color: rgba(255, 59, 48, 0.16) !important;
+  color: #ff6b6b !important;
+  border-color: rgba(255, 59, 48, 0.35) !important;
+}
+
+.dark .priority-medium {
+  background-color: rgba(255, 149, 0, 0.16) !important;
+  color: #ffb020 !important;
+  border-color: rgba(255, 149, 0, 0.35) !important;
+}
+
+.dark .priority-low {
+  background-color: rgba(52, 199, 89, 0.16) !important;
+  color: #4ade80 !important;
+  border-color: rgba(52, 199, 89, 0.35) !important;
+}
+
+.dark .priority-none {
+  background-color: rgba(142, 142, 147, 0.16) !important;
+  color: #9aa3af !important;
+  border-color: #2a303a !important;
+}
+
+.dark .ring-white {
+  --tw-ring-color: #171a21 !important;
 }

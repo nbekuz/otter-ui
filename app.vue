@@ -31,5 +31,11 @@ useHead({
   htmlAttrs: {
     class: computed(() => (applyDark.value ? 'dark' : '')),
   },
+  meta: [
+    {
+      name: 'theme-color',
+      content: computed(() => (applyDark.value ? '#0f1115' : '#21A038')),
+    },
+  ],
 })
 </script>
