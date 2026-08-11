@@ -2025,7 +2025,7 @@ async function errorHandler(error, event) {
 
 const rootDir = "/Users/nodirbek/Desktop/otter/otter-app";
 
-const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1, maximum-scale=1"},{"name":"description","content":"Оттер - умный планировщик задач"},{"name":"theme-color","content":"#21A038"}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"},{"rel":"icon","type":"image/svg+xml","href":"/favicon.svg"}],"style":[],"script":[],"noscript":[],"title":"Оттер - Планировщик задач"};
+const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1, maximum-scale=1"},{"name":"description","content":"Оттер - умный планировщик задач"},{"name":"theme-color","content":"#21A038"}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"},{"rel":"icon","type":"image/svg+xml","href":"/favicon.svg"}],"style":[],"script":[{"key":"otter-theme-boot","children":"(function(){try{var p=location.pathname||'';if(p.indexOf('/app')!==0)return;var raw=localStorage.getItem('otter.app.settings');if(!raw)return;var s=JSON.parse(raw);if(s&&s.theme==='dark'){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';document.documentElement.style.background='#0f1115';}}catch(e){}})();","type":"text/javascript","tagPriority":-20}],"noscript":[],"title":"Оттер - Планировщик задач"};
 
 const appRootTag = "div";
 
