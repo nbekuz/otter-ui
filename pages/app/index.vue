@@ -132,8 +132,9 @@
       >
         <!-- Left: tasks list -->
         <section
-          class="flex min-h-0 min-w-[360px] flex-col overflow-hidden border-r border-sber-gray-light px-4 py-4"
-          :style="{ width: `${leftPaneWidth}%` }"
+          class="flex min-h-0 min-w-[360px] shrink-0 flex-col overflow-hidden border-r border-sber-gray-light px-4 py-4"
+          :class="isDarkTheme ? 'bg-[#171a21]' : 'bg-white'"
+          :style="{ flex: `0 0 ${leftPaneWidth}%`, width: `${leftPaneWidth}%`, maxWidth: `${leftPaneWidth}%` }"
         >
           <div class="mb-3 flex shrink-0 items-center justify-between">
             <div class="flex items-center gap-2">
@@ -235,7 +236,10 @@
         />
 
         <!-- Right: task editor -->
-        <section class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-5 py-3">
+        <section
+          class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-5 py-3"
+          :class="isDarkTheme ? 'bg-[#171a21]' : 'bg-white'"
+        >
           <div v-if="desktopSelectedTask" class="flex min-h-0 flex-1 flex-col overflow-hidden">
             <h2 class="mb-3 shrink-0 line-clamp-1 text-xl font-bold text-sber-black">{{ desktopSelectedTask.title }}</h2>
 

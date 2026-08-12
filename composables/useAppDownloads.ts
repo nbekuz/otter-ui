@@ -59,7 +59,17 @@ export function useAppDownloads() {
       return false
     }
     if (import.meta.client) {
-      window.open(url, '_blank', 'noopener,noreferrer')
+      // Prefer same-tab <a> click over window.open: cross-origin .exe/.zip
+      // opens a blank tab that instantly closes (COOP / download handler).
+      const a = document.createElement('a')
+      a.href = url
+      a.rel = 'noopener'
+      const name = url.split('/').pop()?.split('?')[0]
+      if (name) a.download = name
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      showToast('Скачивание началось…', 'success', 2500)
     }
     return true
   }
