@@ -126,10 +126,10 @@
         class="mb-4 rounded-2xl border border-yellow-200/80 bg-yellow-50/60 px-4 py-3"
       >
         <p class="text-sm font-semibold text-sber-black">
-          {{ PREMIUM_SUBSCRIPTION.price }} ₽ / {{ PREMIUM_SUBSCRIPTION.period }}
+          Оплата через Robokassa
         </p>
         <p class="mt-1 text-xs leading-relaxed text-sber-gray">
-          Оплата через Robokassa.
+          Тарифы загружаются с сервера.
         </p>
       </div>
 
@@ -285,7 +285,7 @@ const promoUntilLabel = computed(() => {
 
 const payButtonLabel = computed(() => {
   const tariff = selectedTariff.value
-  if (!tariff) return `Оплатить ${PREMIUM_SUBSCRIPTION.price} ₽`
+  if (!tariff) return 'Оплатить'
   return `Оплатить ${formatPrice(tariff)}`
 })
 

@@ -15,7 +15,6 @@ declare global {
   const PASSWORD_MIN_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MIN_LENGTH
   const PREMIUM_LANDING: typeof import('../../utils/site-info').PREMIUM_LANDING
   const PREMIUM_SUBSCRIPTION: typeof import('../../utils/site-info').PREMIUM_SUBSCRIPTION
-  const PREMIUM_TARIFF_DISPLAY: typeof import('../../utils/premium-tariffs').PREMIUM_TARIFF_DISPLAY
   const PRIORITY_COLORS: typeof import('../../utils/priority-colors').PRIORITY_COLORS
   const REFRESH_TOKEN_KEY: typeof import('../../utils/auth-session').REFRESH_TOKEN_KEY
   const REPEAT_INTERVAL_MAX: typeof import('../../utils/time').REPEAT_INTERVAL_MAX
@@ -590,7 +589,6 @@ declare module 'vue' {
     readonly PASSWORD_MIN_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MIN_LENGTH']>
     readonly PREMIUM_LANDING: UnwrapRef<typeof import('../../utils/site-info')['PREMIUM_LANDING']>
     readonly PREMIUM_SUBSCRIPTION: UnwrapRef<typeof import('../../utils/site-info')['PREMIUM_SUBSCRIPTION']>
-    readonly PREMIUM_TARIFF_DISPLAY: UnwrapRef<typeof import('../../utils/premium-tariffs')['PREMIUM_TARIFF_DISPLAY']>
     readonly PRIORITY_COLORS: UnwrapRef<typeof import('../../utils/priority-colors')['PRIORITY_COLORS']>
     readonly REFRESH_TOKEN_KEY: UnwrapRef<typeof import('../../utils/auth-session')['REFRESH_TOKEN_KEY']>
     readonly REPEAT_INTERVAL_MAX: UnwrapRef<typeof import('../../utils/time')['REPEAT_INTERVAL_MAX']>

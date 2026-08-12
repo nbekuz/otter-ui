@@ -52,7 +52,7 @@ export { resolveNotificationsWsUrl, parseNotificationsWsMessage, taskIdFromNotif
 export { intervalsOverlapHalfOpen, assignTimelineOverlapLayout, timelineTaskHorizontalStyle } from '../utils/overlap-layout';
 export { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH, validateNewPassword } from '../utils/password-policy';
 export { stopEffectAudio, stopBackgroundAudio, pauseBackgroundAudio, playBackgroundLoop, playSoundOnce } from '../utils/pomodoro-audio';
-export { PREMIUM_TARIFF_DISPLAY, isPurchaseableTariff, sanitizeTariffDescription, normalizeTariffForDisplay, normalizeTariffsForDisplay } from '../utils/premium-tariffs';
+export { isPurchaseableTariff, sanitizeTariffDescription, normalizeTariffForDisplay, normalizeTariffsForDisplay } from '../utils/premium-tariffs';
 export { PRIORITY_COLORS, priorityColor } from '../utils/priority-colors';
 export { taskOccursOnDate, computeNextOccurrenceDate, isRecurringTask, expandTasksForDate, expandTasksForRange, resolveRealTaskId } from '../utils/recurrence';
 export { saveRepeatWeekdays, loadRepeatWeekdays, persistTaskRepeatWeekdays, enrichTaskWithStoredRepeat, resolveTaskWeekdays } from '../utils/repeat-weekdays';

@@ -1,11 +1,5 @@
 import type { ApiTariff } from '~/types/mobile-api'
 
-/** Display overrides while backend tariffs catch up to product pricing. */
-export const PREMIUM_TARIFF_DISPLAY: Record<string, { price: number; promoDays: number }> = {
-  monthly: { price: 150, promoDays: 30 },
-  yearly: { price: 1500, promoDays: 30 },
-}
-
 const PROMO_SIDE_NOTE = /промо-период\s+настраивается\s+на\s+стороне\s+otter\.?/gi
 
 export function isPurchaseableTariff(tariff: ApiTariff): boolean {
@@ -19,12 +13,10 @@ export function sanitizeTariffDescription(description: string): string {
   return description.replace(PROMO_SIDE_NOTE, '').replace(/\s{2,}/g, ' ').trim()
 }
 
+/** Keep API price/promo as-is; only clean description for UI. */
 export function normalizeTariffForDisplay(tariff: ApiTariff): ApiTariff {
-  const override = PREMIUM_TARIFF_DISPLAY[tariff.code]
   return {
     ...tariff,
-    price: override ? String(override.price) : tariff.price,
-    promo_days: override ? override.promoDays : tariff.promo_days,
     description: sanitizeTariffDescription(tariff.description || ''),
   }
 }
