@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { defaultPomodoroSettings, type PomodoroSettings } from '~/data/mockData'
 import type { ApiPomodoroSession, ApiPomodoroSettings, ApiSound } from '~/types/mobile-api'
-import { apiGet, apiPatch, apiPost } from '~/utils/api'
+import { apiGet, apiPatch, apiPost, getApiErrorMessage } from '~/utils/api'
 import {
   pauseBackgroundAudio,
   playBackgroundLoop,
@@ -9,6 +9,11 @@ import {
   stopBackgroundAudio,
   stopEffectAudio,
 } from '~/utils/pomodoro-audio'
+
+function getApiErrorCode(error: unknown): string | undefined {
+  const data = (error as { response?: { data?: { code?: unknown } } })?.response?.data
+  return typeof data?.code === 'string' ? data.code : undefined
+}
 
 type TimerState = 'idle' | 'running' | 'paused' | 'break'
 
@@ -177,7 +182,12 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
         try {
           await ensureSession()
         }
-        catch {
+        catch (err) {
+          const { showToast } = useAppToast()
+          const message = getApiErrorCode(err) === 'PREMIUM_REQUIRED'
+            ? 'Таймер Помодоро доступен с подключенным Premium'
+            : getApiErrorMessage(err, 'Не удалось запустить таймер')
+          showToast(message, 'error')
           return
         }
         void syncSessionState('running')
