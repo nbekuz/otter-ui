@@ -206,6 +206,7 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
   function stop() {
     state.value = 'idle'
     isBreak.value = false
+    sessionCount.value = 0
     stopBackgroundAudio()
     if (activeSessionId.value) void syncSessionState('stopped')
     clearTicker()
