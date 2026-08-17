@@ -217,9 +217,15 @@ function showToast(type: 'success' | 'error', message: string) {
   toast.message = message
 }
 
-function onRememberToggle() {
-  if (!rememberMe.value)
+function persistRememberedLogin() {
+  if (rememberMe.value)
+    writeRememberedLogin(form.email.trim(), form.password)
+  else
     clearRememberedLogin()
+}
+
+function onRememberToggle() {
+  persistRememberedLogin()
 }
 
 function onTermsToggle(accepted: boolean) {
@@ -257,12 +263,10 @@ async function handleRegister() {
   toast.visible = false
   isSubmitting.value = true
 
+  persistRememberedLogin()
+
   try {
     await authStore.register(form.email.trim(), form.password, '', '', { navigateOnSuccess: false })
-    if (rememberMe.value)
-      writeRememberedLogin(form.email.trim(), form.password)
-    else
-      clearRememberedLogin()
     showToast('success', 'Аккаунт создан! Проверьте почту для подтверждения.')
     setTimeout(() => {
       navigateTo('/profile-fill')

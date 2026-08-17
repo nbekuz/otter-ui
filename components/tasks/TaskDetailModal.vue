@@ -258,7 +258,7 @@
                   ? 'border-current'
                   : (isDarkTheme ? 'border-[#2a303a]' : 'border-sber-gray-light')"
                 :style="form.matrixBlock === block.id ? { borderColor: block.color, backgroundColor: block.color + '15' } : {}"
-                @click="form.matrixBlock = block.id"
+                @click="selectMatrixBlock(block.id)"
               >
                 <div class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: block.color }" />
                 <span class="line-clamp-2 text-[9px] font-medium leading-tight text-sber-black">{{ block.title }}</span>
@@ -357,6 +357,8 @@ const props = defineProps<{ taskId: string }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
 const tasksStore = useTasksStore()
 const settingsStore = useSettingsStore()
+const premiumStore = usePremiumStore()
+const { openPremiumModal } = usePremiumModal()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
 function findLocalTask(id: string): Task | undefined {
@@ -536,6 +538,14 @@ const matrixBlocks = [
   { id: 'urgent-not-important' as const, title: 'Срочно, не важно', color: '#FF9500' },
   { id: 'not-urgent-not-important' as const, title: 'Не срочно, не важно', color: '#8E8E93' },
 ]
+
+function selectMatrixBlock(blockId: NonNullable<Task['matrixBlock']>) {
+  if (!premiumStore.isPremium) {
+    openPremiumModal()
+    return
+  }
+  form.matrixBlock = blockId
+}
 
 const isCustomNotification = computed(() => {
   const n = form.notification

@@ -575,6 +575,7 @@ definePageMeta({ layout: 'app' })
 const route = useRoute()
 const calendarStore = useCalendarStore()
 const tasksStore = useTasksStore()
+const { handlePremiumRequired } = usePremiumRequiredToast()
 
 const todayStr = dayjs().format('YYYY-MM-DD')
 const yearWeekdayLabels = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'] as const
@@ -1171,8 +1172,13 @@ function handleTaskCardClick(taskId: string) {
   selectedTaskId.value = resolveRealTaskId(taskId)
 }
 
-function refreshCalendarTasks() {
-  void tasksStore.fetchCalendar(calendarStore.viewType, calendarStore.currentDate)
+async function refreshCalendarTasks() {
+  try {
+    await tasksStore.fetchCalendar(calendarStore.viewType, calendarStore.currentDate)
+  }
+  catch (err) {
+    handlePremiumRequired('calendar', err)
+  }
 }
 
 function toggleTaskComplete(taskId: string) {
@@ -1417,8 +1423,13 @@ function handleMonthCellDrop(event: DragEvent, date: string) {
 
 watch(
   [() => calendarStore.currentDate, () => calendarStore.viewType],
-  ([date, view]) => {
-    void tasksStore.fetchCalendar(view, date)
+  async ([date, view]) => {
+    try {
+      await tasksStore.fetchCalendar(view, date)
+    }
+    catch (err) {
+      handlePremiumRequired('calendar', err)
+    }
   },
   { immediate: true },
 )

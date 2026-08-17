@@ -476,25 +476,39 @@
         <div v-if="passwordModal" class="app-modal px-5 py-5" @click.stop>
           <h3 class="text-lg font-bold mb-2">Пароль</h3>
           <p class="mb-4 text-xs text-sber-gray">Новый: 8–20 символов, Aa + цифра + спецсимвол (!, @ …).</p>
-          <input
-            v-model="passwordForm.next"
-            class="input-field mb-2"
-            :class="{ 'border-red-400 bg-red-50': passwordErrors.next }"
-            type="password"
-            placeholder="Новый пароль"
-            required
-            @input="passwordErrors.next = ''"
-          />
+          <div class="relative mb-2">
+            <input
+              v-model="passwordForm.next"
+              class="input-field pr-12"
+              :class="{ 'border-red-400 bg-red-50': passwordErrors.next }"
+              :type="showPasswordNext ? 'text' : 'password'"
+              placeholder="Новый пароль"
+              autocomplete="new-password"
+              required
+              @input="passwordErrors.next = ''"
+            />
+            <button class="absolute right-4 top-1/2 -translate-y-1/2" type="button" @click="showPasswordNext = !showPasswordNext">
+              <Eye v-if="!showPasswordNext" class="h-5 w-5 text-sber-gray" />
+              <EyeOff v-else class="h-5 w-5 text-sber-gray" />
+            </button>
+          </div>
           <p v-if="passwordErrors.next" class="mb-3 ml-1 text-xs text-red-500">{{ passwordErrors.next }}</p>
-          <input
-            v-model="passwordForm.confirm"
-            class="input-field mb-2"
-            :class="{ 'border-red-400 bg-red-50': passwordErrors.confirm }"
-            type="password"
-            placeholder="Повторите новый пароль"
-            required
-            @input="passwordErrors.confirm = ''"
-          />
+          <div class="relative mb-2">
+            <input
+              v-model="passwordForm.confirm"
+              class="input-field pr-12"
+              :class="{ 'border-red-400 bg-red-50': passwordErrors.confirm }"
+              :type="showPasswordConfirm ? 'text' : 'password'"
+              placeholder="Повторите новый пароль"
+              autocomplete="new-password"
+              required
+              @input="passwordErrors.confirm = ''"
+            />
+            <button class="absolute right-4 top-1/2 -translate-y-1/2" type="button" @click="showPasswordConfirm = !showPasswordConfirm">
+              <Eye v-if="!showPasswordConfirm" class="h-5 w-5 text-sber-gray" />
+              <EyeOff v-else class="h-5 w-5 text-sber-gray" />
+            </button>
+          </div>
           <p v-if="passwordErrors.confirm" class="mb-3 ml-1 text-xs text-red-500">{{ passwordErrors.confirm }}</p>
           <button class="btn-primary mb-3 w-full" :disabled="passwordSaving" @click="savePassword">
             {{ passwordSaving ? 'Сохранение…' : 'Сохранить' }}
@@ -844,7 +858,7 @@ import {
   HelpCircle, Info, Check, ChevronDown, ChevronRight, User, Lock, FileText,
   Paintbrush, Clock, Download, Upload, Share2, Smartphone, Crown, GripVertical, MessageSquareText,
 } from 'lucide-vue-next'
-import { Moon, Sun } from 'lucide-vue-next'
+import { Moon, Sun, Eye, EyeOff } from 'lucide-vue-next'
 import type { ApiSound } from '~/types/mobile-api'
 import { BRAND_NAME, DESKTOP_APP, APP_PUBLIC_URL } from '~/utils/site-info'
 import { getApiErrorMessage } from '~/utils/api'
@@ -926,6 +940,8 @@ async function toggleNotifications() {
 
 const nameModal = ref(false)
 const passwordModal = ref(false)
+const showPasswordNext = ref(false)
+const showPasswordConfirm = ref(false)
 const premiumModal = ref(false)
 const soundModal = ref<'notification' | 'completion' | null>(null)
 const soundPickerLoading = ref(false)
@@ -1310,6 +1326,8 @@ function closePasswordModal() {
   passwordForm.confirm = ''
   passwordErrors.next = ''
   passwordErrors.confirm = ''
+  showPasswordNext.value = false
+  showPasswordConfirm.value = false
   passwordModal.value = false
 }
 

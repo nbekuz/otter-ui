@@ -167,6 +167,7 @@
         <LayoutBottomNav />
 
         <button
+          v-if="!hideMobileFab"
           class="fixed bottom-24 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-sber-green shadow-lg transition-transform active:scale-95 lg:hidden"
           @click="openNewTask"
         >
@@ -177,7 +178,7 @@
 
     <Teleport to="body">
       <Transition name="overlay">
-        <div v-if="premiumModal" class="overlay" @click="premiumModal = false" />
+        <div v-if="premiumModal" class="overlay" @click="closePremiumModal" />
       </Transition>
       <Transition name="modal">
         <div v-if="premiumModal" class="app-modal px-5 py-6" @click.stop>
@@ -204,7 +205,7 @@
             @refresh="onPremiumRefresh"
             @cancel="cancelPremiumSubscription"
           />
-          <button class="btn-secondary mt-2 w-full" type="button" @click="premiumModal = false">Закрыть</button>
+          <button class="btn-secondary mt-2 w-full" type="button" @click="closePremiumModal">Закрыть</button>
         </div>
       </Transition>
     </Teleport>
@@ -233,7 +234,9 @@ const { showToast } = useAppToast()
 const { shareApp } = useAppShare()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
-const premiumModal = ref(false)
+const hideMobileFab = computed(() => route.path.startsWith('/app/new-task'))
+
+const { isOpen: premiumModal, openPremiumModal, closePremiumModal } = usePremiumModal()
 const premiumRefreshLoading = ref(false)
 
 const premiumExpiresLabel = computed(() => {
@@ -242,14 +245,6 @@ const premiumExpiresLabel = computed(() => {
   const date = new Date(expiresAt)
   if (Number.isNaN(date.getTime())) return ''
   return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
-})
-
-function openPremiumModal() {
-  premiumModal.value = true
-}
-
-watch(premiumModal, (open) => {
-  if (open) void premiumStore.loadAll()
 })
 
 async function onPremiumTrial(payload: { tariff: string; recurringConsent: boolean }) {

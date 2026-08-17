@@ -245,7 +245,10 @@ export function apiTaskToUi(task: ApiTask): Task {
   return enrichTaskWithStoredRepeat(mapped)
 }
 
-export function uiTaskToApiPayload(task: Partial<Task>): Record<string, unknown> {
+export function uiTaskToApiPayload(
+  task: Partial<Task>,
+  options?: { includeMatrixBlock?: boolean },
+): Record<string, unknown> {
   const due_at = buildDueAt(task.dueDate, task.dueTime)
   const { start_at, end_at } = buildStartEnd(task.dueDate, task.duration)
   const { unit: repeat_unit, interval: repeat_interval, weekdays } = resolveRepeatApi(task)
@@ -259,7 +262,10 @@ export function uiTaskToApiPayload(task: Partial<Task>): Record<string, unknown>
     repeat_unit,
     repeat_interval,
     priority: uiPriorityToApi(task.priority || 'none'),
-    matrix_block: MATRIX_TO_API[task.matrixBlock || 'not-urgent-not-important'],
+  }
+
+  if (options?.includeMatrixBlock !== false) {
+    payload.matrix_block = MATRIX_TO_API[task.matrixBlock || 'not-urgent-not-important']
   }
 
   if (weekdays?.length) {
@@ -315,10 +321,12 @@ export async function dataUrlToFile(
 export function uiTaskToFormData(
   task: Partial<Task>,
   imageFile?: File,
-  options?: { clearImage?: boolean },
+  options?: { clearImage?: boolean, includeMatrixBlock?: boolean },
 ): FormData {
   const formData = new FormData()
-  const payload = uiTaskToApiPayload(task)
+  const payload = uiTaskToApiPayload(task, {
+    includeMatrixBlock: options?.includeMatrixBlock,
+  })
 
   for (const [key, value] of Object.entries(payload)) {
     if (value === null || value === undefined) continue

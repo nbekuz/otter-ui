@@ -477,11 +477,16 @@ export const useTasksStore = defineStore('tasks', () => {
     await apiDelete(`tasks/${taskId}/attachments/${attachmentId}/`)
   }
 
+  function includeMatrixInApiPayload() {
+    return usePremiumStore().isPremium
+  }
+
   async function addTask(taskData: Partial<Task>) {
+    const matrixOpts = { includeMatrixBlock: includeMatrixInApiPayload() }
     const imageFile = await resolveAttachmentFile(taskData)
     const created = imageFile
-      ? await apiPost<ApiTask>('tasks/', uiTaskToFormData(taskData, imageFile))
-      : await apiPost<ApiTask>('tasks/', uiTaskToApiPayload(taskData))
+      ? await apiPost<ApiTask>('tasks/', uiTaskToFormData(taskData, imageFile, matrixOpts))
+      : await apiPost<ApiTask>('tasks/', uiTaskToApiPayload(taskData, matrixOpts))
     let task = preferClientSchedule(apiTaskToUi(created), taskData)
     if (imageFile) {
       try {
@@ -546,6 +551,7 @@ export const useTasksStore = defineStore('tasks', () => {
     upsertTaskInState(optimistic)
 
     const merged = { ...existing, ...updates, id } as Partial<Task>
+    const matrixOpts = { includeMatrixBlock: includeMatrixInApiPayload() }
 
     // Remove server attachments so list refresh cannot resurrect the old file.
     if (clearingAttachment) {
@@ -570,7 +576,7 @@ export const useTasksStore = defineStore('tasks', () => {
         }
         catch { /* ignore */ }
       }
-      updated = await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToFormData(merged, imageFile))
+      updated = await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToFormData(merged, imageFile, matrixOpts))
       try {
         await uploadAttachment(id, imageFile)
         updated = await apiGet<ApiTask>(`tasks/${id}/`)
@@ -582,7 +588,7 @@ export const useTasksStore = defineStore('tasks', () => {
     else if (clearingAttachment) {
       updated = await apiPatch<ApiTask>(
         `tasks/${id}/`,
-        uiTaskToFormData(merged, undefined, { clearImage: true }),
+        uiTaskToFormData(merged, undefined, { clearImage: true, ...matrixOpts }),
       )
       try {
         updated = await apiGet<ApiTask>(`tasks/${id}/`)
@@ -592,7 +598,7 @@ export const useTasksStore = defineStore('tasks', () => {
       }
     }
     else {
-      updated = await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToApiPayload(merged))
+      updated = await apiPatch<ApiTask>(`tasks/${id}/`, uiTaskToApiPayload(merged, matrixOpts))
     }
 
     let task = mergeTaskFromApi(existing, optimisticUpdates, apiTaskToUi(updated))
@@ -727,7 +733,7 @@ export const useTasksStore = defineStore('tasks', () => {
                     weekdays,
                   },
                   matrixBlock: enrichedExisting.matrixBlock,
-                })
+                }, { includeMatrixBlock: includeMatrixInApiPayload() })
                 const patched = await apiPatch<ApiTask>(`tasks/${nextUi.id}/`, payload)
                 nextUi = enrichTaskWithStoredRepeat(preferClientSchedule(apiTaskToUi(patched), {
                   dueDate: nextDate,

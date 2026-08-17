@@ -200,6 +200,7 @@ definePageMeta({ layout: 'app' })
 const route = useRoute()
 const tasksStore = useTasksStore()
 const settingsStore = useSettingsStore()
+const { handlePremiumRequired } = usePremiumRequiredToast()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
 const settingsOpen = ref(false)
@@ -210,10 +211,15 @@ let draggedTaskId: string | null = null
 const blocks = computed(() => Object.values(settingsStore.matrixBlocks))
 
 onMounted(() => {
-  void Promise.all([
-    tasksStore.fetchGrouped(),
-    tasksStore.fetchMatrix(),
-  ])
+  void tasksStore.fetchGrouped()
+  void (async () => {
+    try {
+      await tasksStore.fetchMatrix()
+    }
+    catch (err) {
+      handlePremiumRequired('matrix', err)
+    }
+  })()
 })
 
 function getBlockTasks(blockId: string) {

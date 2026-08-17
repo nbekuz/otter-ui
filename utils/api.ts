@@ -123,6 +123,11 @@ export function getApiFieldError(error: unknown, field: string): string | undefi
   return undefined
 }
 
+export function getApiErrorCode(error: unknown): string | undefined {
+  const data = (error as { response?: { data?: { code?: unknown } } })?.response?.data
+  return typeof data?.code === 'string' ? data.code : undefined
+}
+
 export function getApiErrorMessage(error: unknown, fallback = 'Ошибка запроса'): string {
   const err = error as { response?: { data?: Record<string, unknown> }; message?: string }
   const data = err?.response?.data

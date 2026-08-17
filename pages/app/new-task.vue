@@ -68,7 +68,7 @@
             <button
               type="button"
               class="inline-flex max-w-full items-center gap-1.5 truncate rounded-lg border border-sber-green/40 bg-sber-green-light px-2 py-1 text-[11px] font-semibold leading-tight text-sber-green transition-colors hover:bg-sber-green/20 lg:gap-2 lg:rounded-xl lg:px-3 lg:py-2 lg:text-sm"
-              @click="attachmentInputRef?.click()"
+              @click="triggerAttachmentPicker"
             >
               <Paperclip class="h-3.5 w-3.5 shrink-0 lg:h-4 lg:w-4" />
               <span class="truncate lg:hidden">Файл / фото</span>
@@ -359,7 +359,7 @@
                       ? 'border-current'
                       : 'border-sber-gray-light'"
                     :style="form.matrixBlock === block.id ? { borderColor: block.color, backgroundColor: block.color + '15' } : {}"
-                    @click="form.matrixBlock = block.id">
+                    @click="selectMatrixBlock(block.id)">
               <div class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: block.color }" />
               <span class="line-clamp-2 text-[9px] font-medium leading-tight text-sber-black lg:text-[10px]">{{ block.title }}</span>
             </button>
@@ -368,6 +368,9 @@
         </div>
 
         <div class="shrink-0 border-t border-sber-gray-light bg-white px-3 pb-2 pt-2 lg:px-4 lg:pb-4 lg:pt-3">
+          <p v-if="submitError" class="mb-2 text-xs font-medium text-red-500 lg:mb-3 lg:text-sm">
+            {{ submitError }}
+          </p>
           <template v-if="isEditMode && editingTask">
             <!-- Мобильная панель: меньше по высоте, дата/время остаются в зоне прокрутки -->
             <div class="max-lg:space-y-2 lg:hidden">
@@ -400,8 +403,9 @@
                   ref="mobileSubmitRef"
                   class="btn-primary min-w-0 flex-[1.15] !w-auto !py-2.5 !text-xs"
                   type="submit"
+                  :disabled="submitting"
                 >
-                  Сохранить
+                  {{ submitting ? 'Сохранение...' : 'Сохранить' }}
                 </button>
               </div>
             </div>
@@ -430,8 +434,8 @@
                 <button class="btn-secondary !w-auto flex-1" type="button" @click="goBackToSource">
                   Отмена
                 </button>
-                <button ref="desktopSubmitRef" class="btn-primary !w-auto flex-1" type="submit">
-                  Сохранить
+                <button ref="desktopSubmitRef" class="btn-primary !w-auto flex-1" type="submit" :disabled="submitting">
+                  {{ submitting ? 'Сохранение...' : 'Сохранить' }}
                 </button>
               </div>
             </div>
@@ -446,16 +450,21 @@
               >
                 Отмена
               </button>
-              <button ref="mobileSubmitRef" class="btn-primary min-w-0 flex-[1.35] !w-auto !py-2.5 !text-sm" type="submit">
-                Добавить задачу
+              <button
+                ref="mobileSubmitRef"
+                class="btn-primary min-w-0 flex-[1.35] !w-auto !py-2.5 !text-sm"
+                type="submit"
+                :disabled="submitting"
+              >
+                {{ submitting ? 'Сохранение...' : 'Добавить задачу' }}
               </button>
             </div>
             <div class="hidden lg:flex lg:gap-3">
               <button class="btn-secondary !w-auto flex-1" type="button" @click="goBackToSource">
                 Отмена
               </button>
-              <button ref="desktopSubmitRef" class="btn-primary !w-auto flex-1" type="submit">
-                Добавить задачу
+              <button ref="desktopSubmitRef" class="btn-primary !w-auto flex-1" type="submit" :disabled="submitting">
+                {{ submitting ? 'Сохранение...' : 'Добавить задачу' }}
               </button>
             </div>
           </template>
@@ -498,12 +507,16 @@ import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { matrixBlockDefaults } from '~/data/mockData'
 import { defaultDurationEnd, validateDurationFields, validateRepeatInterval } from '~/utils/time'
 import { resolveMediaUrl } from '~/utils/media'
-import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
+import { getApiErrorCode, getApiErrorMessage, getApiFieldError } from '~/utils/api'
 
 definePageMeta({ layout: 'app' })
 
 const route = useRoute()
 const tasksStore = useTasksStore()
+const premiumStore = usePremiumStore()
+const { showToast } = useAppToast()
+const { PREMIUM_REQUIRED_MESSAGES } = usePremiumRequiredToast()
+const { openPremiumModal } = usePremiumModal()
 
 const deleteModal = ref(false)
 const pendingLeavePath = ref<string | null>(null)
@@ -892,6 +905,13 @@ async function submit() {
       errors.duration = endAtError
       return
     }
+    if (getApiErrorCode(err) === 'PREMIUM_REQUIRED') {
+      submitError.value = attachmentDataUrl.value
+        ? PREMIUM_REQUIRED_MESSAGES.taskAttachments
+        : 'Эта функция доступна только с Premium'
+      showToast(submitError.value, 'error')
+      return
+    }
     submitError.value = getApiErrorMessage(err, 'Не удалось сохранить задачу')
   }
   finally {
@@ -959,11 +979,36 @@ function clearAttachment() {
   attachmentRemoved.value = true
 }
 
+function ensureAttachmentPremium() {
+  if (premiumStore.isPremium) return true
+  submitError.value = PREMIUM_REQUIRED_MESSAGES.taskAttachments
+  showToast(submitError.value, 'error')
+  return false
+}
+
+function selectMatrixBlock(blockId: NonNullable<Task['matrixBlock']>) {
+  if (!premiumStore.isPremium) {
+    openPremiumModal()
+    return
+  }
+  form.matrixBlock = blockId
+}
+
+function triggerAttachmentPicker() {
+  if (!ensureAttachmentPremium()) return
+  attachmentInputRef.value?.click()
+}
+
 function handleAttachmentChange(event: Event) {
+  if (!ensureAttachmentPremium()) {
+    resetAttachmentFields()
+    return
+  }
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
 
+  submitError.value = ''
   attachmentRemoved.value = false
   attachmentName.value = file.name
   attachmentMimeType.value = file.type || 'application/octet-stream'

@@ -82,6 +82,15 @@
     </template>
 
     <template v-else>
+      <div
+        v-if="canStartTrial && promoDays > 0"
+        class="mb-4 rounded-2xl border border-sber-green/35 bg-sber-green-light px-4 py-3"
+      >
+        <p class="text-center text-sm font-semibold text-sber-green">
+          Попробуйте {{ promoDays }} дней бесплатно — один раз для каждого аккаунта
+        </p>
+      </div>
+
       <div v-if="features.length" class="mb-4 max-h-40 space-y-3 overflow-y-auto">
         <div
           v-for="feat in features"
@@ -110,8 +119,8 @@
             <div>
               <p class="text-sm font-semibold text-sber-black">{{ tariff.title }}</p>
               <p class="mt-0.5 text-xs text-sber-gray">{{ tariff.description }}</p>
-              <p v-if="tariff.promo_days > 0" class="mt-1 text-xs font-medium text-sber-green">
-                {{ tariff.promo_days }} дней бесплатно
+              <p v-if="tariffPromoDays(tariff) > 0" class="mt-1 text-xs font-medium text-sber-green">
+                {{ tariffPromoDays(tariff) }} дней бесплатно
               </p>
             </div>
             <p class="shrink-0 text-sm font-bold text-sber-black">
@@ -148,13 +157,13 @@
       <p v-if="consentError" class="mb-3 ml-1 text-xs text-red-500">{{ consentError }}</p>
 
       <button
-        v-if="selectedTariff?.promo_days"
+        v-if="canStartTrial && promoDays > 0"
         class="mb-2 w-full rounded-2xl border border-sber-green bg-sber-green-light py-3.5 text-sm font-semibold text-sber-green disabled:opacity-60"
         type="button"
         :disabled="actionLoading"
         @click="handleTrial"
       >
-        {{ actionLoading ? 'Активация…' : `Попробовать бесплатно (${selectedTariff.promo_days} дн.)` }}
+        {{ actionLoading ? 'Активация…' : `Попробовать ${promoDays} дней бесплатно` }}
       </button>
 
       <button
@@ -210,6 +219,7 @@
 import { Check } from 'lucide-vue-next'
 import type { ApiPremiumFeature, ApiSubscription, ApiTariff } from '~/types/mobile-api'
 import { PREMIUM_SUBSCRIPTION } from '~/utils/site-info'
+import { canStartPremiumTrial, effectivePromoDays } from '~/utils/premium-trial'
 
 const props = defineProps<{
   features: ApiPremiumFeature[]
@@ -240,6 +250,16 @@ const cancelModal = ref(false)
 const selectedTariff = computed(() =>
   props.tariffs.find(t => t.code === props.selectedTariffCode) || props.tariffs[0] || null,
 )
+
+const canStartTrial = computed(() => canStartPremiumTrial(props.subscription))
+
+const promoDays = computed(() =>
+  effectivePromoDays(selectedTariff.value, props.subscription),
+)
+
+function tariffPromoDays(tariff: ApiTariff) {
+  return effectivePromoDays(tariff, props.subscription)
+}
 
 const needsRecurringConsent = computed(() =>
   !!selectedTariff.value?.is_recurring,

@@ -27,6 +27,35 @@ export const BOTTOM_NAV_IDS: AppNavItemId[] = [
   'settings',
 ]
 
+function isLegacyBottomNavWithoutPremium(items: string[]) {
+  return items.length === 2
+    && items.includes('tasks')
+    && items.includes('settings')
+    && !items.includes('calendar')
+}
+
+/** Expands legacy server defaults (`tasks` + `settings` only) to full menu. */
+export function resolveBottomNavItems(items: string[] | undefined): string[] {
+  if (!items?.length) return [...BOTTOM_NAV_IDS]
+  const normalized = normalizeBottomNavItems([...items])
+  if (isLegacyBottomNavWithoutPremium(normalized)) {
+    return normalizeBottomNavItems([...BOTTOM_NAV_IDS])
+  }
+  return normalized
+}
+
+export function normalizeBottomNavItems(items: string[]) {
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const id of items) {
+    if (!id || id === 'profile' || seen.has(id)) continue
+    seen.add(id)
+    result.push(id)
+  }
+  if (!seen.has('settings')) result.push('settings')
+  return result
+}
+
 /**
  * Resolve active nav id from route path only.
  * More specific paths are checked before shorter prefixes.

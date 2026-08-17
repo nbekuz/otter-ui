@@ -194,9 +194,11 @@
             <div class="relative mb-2">
               <Lock class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-sber-gray" />
               <input
+                ref="forgotCodeInputRef"
                 v-model="forgotCode"
                 type="text"
                 inputmode="numeric"
+                pattern="[0-9]*"
                 maxlength="6"
                 placeholder="000000"
                 autocomplete="one-time-code"
@@ -312,9 +314,15 @@ function flushPendingPasswordToast() {
   showPageToast(msg)
 }
 
-function onRememberToggle() {
-  if (!rememberMe.value)
+function persistRememberedLogin() {
+  if (rememberMe.value)
+    writeRememberedLogin(form.email.trim(), form.password)
+  else
     clearRememberedLogin()
+}
+
+function onRememberToggle() {
+  persistRememberedLogin()
 }
 
 onMounted(() => {
@@ -350,6 +358,15 @@ const forgotPwError = ref('')
 const forgotLoading = ref(false)
 const showForgotNewPw = ref(false)
 const showForgotConfirmPw = ref(false)
+const forgotCodeInputRef = ref<HTMLInputElement | null>(null)
+
+function focusForgotCodeInput() {
+  nextTick(() => forgotCodeInputRef.value?.focus())
+}
+
+watch(forgotStep, (step) => {
+  if (step === 'code') focusForgotCodeInput()
+})
 
 const forgotSubmitLabel = computed(() => {
   if (forgotLoading.value) return 'Подождите...'
@@ -391,12 +408,11 @@ function normalizeErrorDetail(detail: unknown, fallback: string): string {
 
 async function handleLogin() {
   if (!validate()) return
+  const email = form.email.trim()
+  const password = form.password
+  persistRememberedLogin()
   try {
-    await authStore.login(form.email.trim(), form.password)
-    if (rememberMe.value)
-      writeRememberedLogin(form.email.trim(), form.password)
-    else
-      clearRememberedLogin()
+    await authStore.login(email, password)
   }
   catch (err: any) {
     const msg = normalizeErrorDetail(
@@ -453,6 +469,7 @@ async function onForgotSubmit() {
     try {
       await authStore.forgotPassword(forgotEmail.value.trim())
       forgotStep.value = 'code'
+      focusForgotCodeInput()
     }
     catch (err: any) {
       forgotError.value = normalizeErrorDetail(err?.response?.data?.detail, 'Не удалось отправить код')
@@ -477,6 +494,7 @@ async function onForgotSubmit() {
     }
     catch (err: any) {
       forgotError.value = normalizeErrorDetail(err?.response?.data?.detail, 'Неверный код или срок истёк')
+      focusForgotCodeInput()
     }
     finally {
       forgotLoading.value = false

@@ -15,26 +15,13 @@ import type {
 } from '~/types/mobile-api'
 import { apiGet, apiPatch, apiPost, getApiErrorMessage } from '~/utils/api'
 import { deliverSupportEmail } from '~/utils/contact-email'
+import { normalizeBottomNavItems, resolveBottomNavItems } from '~/utils/nav-items'
 
 export interface HelpFaqItem {
   id: string
   question: string
   answer: string
   open: boolean
-}
-
-function normalizeBottomNavItems(items: string[]) {
-  const seen = new Set<string>()
-  const result: string[] = []
-  for (const id of items) {
-    // Profile lives in the sidebar card only — never in bottom/side nav tabs.
-    if (!id || id === 'profile' || seen.has(id)) continue
-    seen.add(id)
-    result.push(id)
-  }
-  // Settings stays always enabled, but may sit at any position in the order.
-  if (!seen.has('settings')) result.push('settings')
-  return result
 }
 
 function apiToAppSettings(data: ApiAppSettings): AppSettings {
@@ -54,9 +41,7 @@ function apiToAppSettings(data: ApiAppSettings): AppSettings {
     vibration: data.vibration_enabled,
     notificationSound: data.notification_sound,
     completionSound: data.completion_sound,
-    bottomNavItems: data.bottom_tabs?.length
-      ? normalizeBottomNavItems([...data.bottom_tabs])
-      : [...defaultAppSettings.bottomNavItems],
+    bottomNavItems: resolveBottomNavItems(data.bottom_tabs),
     timezone: data.timezone || undefined,
     calendarDefaultView: defaultAppSettings.calendarDefaultView,
     calendarCollapseEarlyHours: defaultAppSettings.calendarCollapseEarlyHours,
@@ -70,6 +55,9 @@ function preserveLocalSettings(prev: AppSettings, next: AppSettings): AppSetting
     ...next,
     theme: prev.theme || next.theme,
     notifications: prev.notifications,
+    bottomNavItems: prev.bottomNavItems?.length
+      ? normalizeBottomNavItems([...prev.bottomNavItems])
+      : next.bottomNavItems,
     calendarDefaultView: prev.calendarDefaultView ?? next.calendarDefaultView
       ?? defaultAppSettings.calendarDefaultView,
     calendarCollapseEarlyHours: prev.calendarCollapseEarlyHours

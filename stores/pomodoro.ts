@@ -10,11 +10,6 @@ import {
   stopEffectAudio,
 } from '~/utils/pomodoro-audio'
 
-function getApiErrorCode(error: unknown): string | undefined {
-  const data = (error as { response?: { data?: { code?: unknown } } })?.response?.data
-  return typeof data?.code === 'string' ? data.code : undefined
-}
-
 type TimerState = 'idle' | 'running' | 'paused' | 'break'
 
 function apiToPomodoroSettings(data: ApiPomodoroSettings): PomodoroSettings {
@@ -183,11 +178,11 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
           await ensureSession()
         }
         catch (err) {
-          const { showToast } = useAppToast()
-          const message = getApiErrorCode(err) === 'PREMIUM_REQUIRED'
-            ? 'Таймер Помодоро доступен с подключенным Premium'
-            : getApiErrorMessage(err, 'Не удалось запустить таймер')
-          showToast(message, 'error')
+          const { handlePremiumRequired } = usePremiumRequiredToast()
+          if (!handlePremiumRequired('pomodoro', err, { once: false })) {
+            const { showToast } = useAppToast()
+            showToast(getApiErrorMessage(err, 'Не удалось запустить таймер'), 'error')
+          }
           return
         }
         void syncSessionState('running')
