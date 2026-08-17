@@ -12,7 +12,7 @@
     >
       <Check v-if="modelValue" class="h-4 w-4 text-white" stroke-width="3" />
     </button>
-    <div :id="labelId" class="min-w-0 flex-1">
+    <div :id="labelId" class="min-w-0 flex-1 cursor-pointer" @click="onLabelClick">
       <slot />
     </div>
   </div>
@@ -44,5 +44,12 @@ const alignClass = computed(() =>
 
 function toggle() {
   emit('update:modelValue', !props.modelValue)
+}
+
+function onLabelClick(event: MouseEvent) {
+  const target = event.target as HTMLElement | null
+  if (target?.closest('a, button, input, textarea'))
+    return
+  toggle()
 }
 </script>

@@ -48,7 +48,7 @@
             Введите данные вашей учётной записи для входа в {{ BRAND_NAME }}
           </p>
 
-          <form class="space-y-4" @submit.prevent="handleLogin">
+          <form class="space-y-4" novalidate @submit.prevent="handleLogin">
             <div>
               <label class="mb-2 block text-sm font-medium text-sber-gray">Email</label>
               <div class="relative">

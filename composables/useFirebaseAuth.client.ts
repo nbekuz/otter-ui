@@ -63,7 +63,12 @@ export function useFirebaseAuth() {
     const credential = await signInWithPopup(auth, provider)
     const token = await credential.user.getIdToken()
 
-    localStorage.setItem(FIREBASE_ID_TOKEN_STORAGE_KEY, token)
+    try {
+      localStorage.setItem(FIREBASE_ID_TOKEN_STORAGE_KEY, token)
+    }
+    catch {
+      /* Yandex Protect / blocked storage */
+    }
     console.log('[otter:google] popup OK', { tokenLength: token.length })
 
     return token
