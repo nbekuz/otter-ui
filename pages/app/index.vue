@@ -297,6 +297,9 @@
 
               <div>
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Уведомление</label>
+                <p v-if="!editorHasClock" class="mb-2 text-xs text-sber-gray">
+                  Без времени срока напоминание не отправляется.
+                </p>
                 <UiAppSelect v-model="editorForm.notification" :options="notificationSelectOptions" />
                 <div v-if="editorForm.notification === 'custom'" class="mt-2 flex items-center gap-2">
                   <input
@@ -532,6 +535,11 @@ import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
 import { defaultDurationEnd, validateDurationFields, validateRepeatInterval } from '~/utils/time'
+import {
+  clampNotificationToClock,
+  hasTaskClockTime,
+  notificationForApi,
+} from '~/utils/task-reminder'
 import { priorityColor } from '~/utils/priority-colors'
 import { resolveMediaUrl } from '~/utils/media'
 
@@ -779,6 +787,16 @@ const {
   adoptLoadedDuration: adoptEditorLoadedDuration,
 } = useTaskTimeSync(editorForm)
 
+const editorHasClock = computed(() => hasTaskClockTime(editorForm))
+
+watch(
+  () => [editorForm.dueTime, editorForm.durationStart, editorForm.notification] as const,
+  () => {
+    const next = clampNotificationToClock(editorForm.notification, editorHasClock.value)
+    if (next !== editorForm.notification) editorForm.notification = next
+  },
+)
+
 const editorSnapshot = ref('')
 const unsavedModal = ref(false)
 const deleteModal = ref(false)
@@ -963,10 +981,10 @@ function syncEditorForm(task: Task | null) {
   editorForm.priority = task?.priority || 'none'
   const notify = task?.notification || ''
   if (notify && !PRESET_NOTIFY.has(notify)) {
-    editorForm.notification = 'custom'
+    editorForm.notification = clampNotificationToClock('custom', hasTaskClockTime(editorForm))
     customNotifyMinutes.value = Number(notify) || 10
   } else {
-    editorForm.notification = notify
+    editorForm.notification = clampNotificationToClock(notify, hasTaskClockTime(editorForm))
   }
   editorForm.repeat = task?.repeat || 'none'
   editorForm.matrixBlock = task?.matrixBlock || 'not-urgent-not-important'
@@ -1035,13 +1053,15 @@ async function saveDesktopTask() {
     return
   }
 
+  const hasClock = hasTaskClockTime(editorForm)
   const updates: Partial<Task> = {
     title: editorForm.title.trim() || task.title,
     description: editorForm.description.trim() || undefined,
     dueDate: editorForm.dueDate || undefined,
     dueTime: editorForm.dueTime || undefined,
     priority: editorForm.priority,
-    notification: editorForm.notification || undefined,
+    notification: notificationForApi(editorForm.notification, hasClock, customNotifyMinutes.value),
+    isAllDay: Boolean(editorForm.dueDate && !hasClock),
     repeat: editorForm.repeat,
     matrixBlock: editorForm.matrixBlock,
   }
@@ -1075,12 +1095,6 @@ async function saveDesktopTask() {
   } else {
     updates.repeatCustom = undefined
     updates.repeatDays = undefined
-  }
-
-  if (editorForm.notification === 'custom') {
-    updates.notification = String(Math.max(0, customNotifyMinutes.value || 0))
-  } else {
-    updates.notification = editorForm.notification || undefined
   }
 
   if (editorForm.durationStart && editorForm.durationEnd) {

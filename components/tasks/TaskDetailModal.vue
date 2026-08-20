@@ -125,6 +125,9 @@
 
           <div>
             <label class="mb-1 block text-xs font-semibold text-sber-gray">Уведомление</label>
+            <p v-if="!formHasClock" class="mb-2 text-xs text-sber-gray">
+              Без времени срока напоминание не отправляется.
+            </p>
             <UiAppSelect v-model="form.notification" :options="notificationSelectOptions" />
             <div v-if="form.notification === 'custom' || isCustomNotification" class="mt-2 flex items-center gap-2">
               <input
@@ -350,6 +353,11 @@ import { Paperclip, X } from 'lucide-vue-next'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { priorityColor } from '~/utils/priority-colors'
 import { defaultDurationEnd, validateDurationFields, validateRepeatInterval } from '~/utils/time'
+import {
+  clampNotificationToClock,
+  hasTaskClockTime,
+  notificationForApi,
+} from '~/utils/task-reminder'
 import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
 import { resolveMediaUrl } from '~/utils/media'
 
@@ -554,6 +562,16 @@ const isCustomNotification = computed(() => {
 
 const { pauseSync, resumeSync, markEndEdited, resetEndEdited, adoptLoadedDuration } = useTaskTimeSync(form)
 
+const formHasClock = computed(() => hasTaskClockTime(form))
+
+watch(
+  () => [form.dueTime, form.durationStart, form.notification] as const,
+  () => {
+    const next = clampNotificationToClock(form.notification, formHasClock.value)
+    if (next !== form.notification) form.notification = next
+  },
+)
+
 function onDurationEndInput(val: string) {
   if (!val?.trim()) resetEndEdited()
   else markEndEdited()
@@ -575,10 +593,10 @@ function syncFormFromTask(t: Task | undefined) {
   form.priority = t.priority || 'none'
   const notify = t.notification ?? ''
   if (notify && !PRESET_NOTIFY.has(notify)) {
-    form.notification = 'custom'
+    form.notification = clampNotificationToClock('custom', hasTaskClockTime(form))
     customNotifyMinutes.value = Number(notify) || 10
   } else {
-    form.notification = notify
+    form.notification = clampNotificationToClock(notify, hasTaskClockTime(form))
   }
   form.repeat = t.repeat || 'none'
   form.matrixBlock = t.matrixBlock || 'not-urgent-not-important'
@@ -702,12 +720,8 @@ async function saveTask() {
 
   saving.value = true
   try {
-    let notification: string | undefined
-    if (form.notification === 'custom') {
-      notification = String(Math.max(0, customNotifyMinutes.value || 0))
-    } else if (form.notification) {
-      notification = form.notification
-    }
+    const hasClock = hasTaskClockTime(form)
+    const notification = notificationForApi(form.notification, hasClock, customNotifyMinutes.value)
 
     const updates: Partial<Task> = {
       title: form.title.trim() || task.value.title,
@@ -716,6 +730,7 @@ async function saveTask() {
       dueTime: form.dueTime || undefined,
       priority: form.priority,
       notification,
+      isAllDay: Boolean(form.dueDate && !hasClock),
       repeat: form.repeat,
       matrixBlock: form.matrixBlock,
     }

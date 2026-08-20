@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import { BRAND_NAME } from '~/utils/site-info'
 import { apiGet, apiPost } from '~/utils/api'
 import { getAccessToken } from '~/utils/auth-session'
+import { hasTaskClockTime } from '~/utils/task-reminder'
 
 const firedKeys = new Set<string>()
 const ackedDueIds = new Set<string>()
@@ -10,9 +11,11 @@ function taskReminderKey(taskId: string, dueAt: string) {
   return `${taskId}:${dueAt}`
 }
 
-function getNotifyAt(task: { dueDate?: string; dueTime?: string; notification?: string }) {
+function getNotifyAt(task: { dueDate?: string; dueTime?: string; duration?: { start?: string }; notification?: string }) {
   if (!task.dueDate || task.notification === undefined || task.notification === '') return null
-  const time = task.dueTime || '00:00'
+  if (!hasTaskClockTime(task)) return null
+  const time = task.dueTime || task.duration?.start
+  if (!time) return null
   const dueAt = dayjs(`${task.dueDate}T${time}`)
   if (!dueAt.isValid()) return null
   const minutes = Number(task.notification)

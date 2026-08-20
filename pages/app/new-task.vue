@@ -218,6 +218,9 @@
 
         <div v-if="activeTab === 'notify'" class="pb-3 pt-2 lg:pb-4 lg:pt-3">
           <p class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-3 lg:text-xs">Уведомление</p>
+          <p v-if="!formHasClock" class="mb-2 text-xs text-sber-gray">
+            Без времени срока напоминание не отправляется. Выберите «чч:мм», чтобы включить уведомление.
+          </p>
           <div class="flex flex-col gap-1.5 lg:gap-2">
             <button v-for="n in notifyOptions" :key="n.value"
                     type="button"
@@ -506,6 +509,11 @@ import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { matrixBlockDefaults } from '~/data/mockData'
 import { defaultDurationEnd, validateDurationFields, validateRepeatInterval } from '~/utils/time'
+import {
+  clampNotificationToClock,
+  hasTaskClockTime,
+  notificationForApi,
+} from '~/utils/task-reminder'
 import { resolveMediaUrl } from '~/utils/media'
 import { getApiErrorCode, getApiErrorMessage, getApiFieldError } from '~/utils/api'
 
@@ -567,7 +575,7 @@ const form = reactive({
   durationStart: '',
   durationEnd: '',
   priority: 'none' as Priority,
-  notification: '0', // «В момент срока» — default for new tasks (matches product)
+  notification: '', // «Без уведомления» — do not send reminder_offset_minutes by default
   repeat: 'none' as RepeatType,
   matrixBlock: 'not-urgent-not-important',
 })
@@ -639,6 +647,7 @@ const priorities: Array<{ value: Priority; label: string; color: string }> = [
 ]
 
 const notifyOptions = [
+  { label: 'Без уведомления', value: '' },
   { label: 'В момент срока', value: '0' },
   { label: 'За 1 минуту', value: '1' },
   { label: 'За 5 минут', value: '5' },
@@ -647,7 +656,6 @@ const notifyOptions = [
   { label: 'За 1 час', value: '60' },
   { label: 'За 1 день', value: '1440' },
   { label: 'Своё время…', value: 'custom' },
-  { label: 'Без уведомления', value: '' },
 ]
 
 const repeatOptions: Array<{ label: string; value: RepeatType }> = [
@@ -677,6 +685,16 @@ const customRepeat = reactive({
 })
 
 const { pauseSync, resumeSync, markEndEdited, resetEndEdited, adoptLoadedDuration } = useTaskTimeSync(form)
+
+const formHasClock = computed(() => hasTaskClockTime(form))
+
+watch(
+  () => [form.dueTime, form.durationStart, form.notification] as const,
+  () => {
+    const next = clampNotificationToClock(form.notification, formHasClock.value)
+    if (next !== form.notification) form.notification = next
+  },
+)
 
 const matrixBlocks = [
   { id: 'urgent-important', title: 'Срочно и важно', color: '#FF3B30' },
@@ -819,18 +837,21 @@ async function submit() {
   const duration = form.durationStart && form.durationEnd
     ? { start: form.durationStart, end: form.durationEnd }
     : undefined
+  const dueDate = form.dueDate || (form.repeat !== 'none' ? dayjs().format('YYYY-MM-DD') : undefined)
+  const hasClock = hasTaskClockTime({ dueTime: form.dueTime, durationStart: form.durationStart })
+  const notification = notificationForApi(form.notification, hasClock, customNotifyMinutes.value)
+  const isAllDay = Boolean(dueDate && !hasClock)
 
   if (isEditMode.value && editTaskId.value) {
     const updates: Partial<Task> = {
       title: form.title.trim(),
       description,
-      dueDate: form.dueDate || (form.repeat !== 'none' ? dayjs().format('YYYY-MM-DD') : undefined),
+      dueDate,
       dueTime: form.dueTime || undefined,
       duration,
       priority: form.priority,
-      notification: form.notification === 'custom'
-        ? String(Math.max(0, customNotifyMinutes.value || 0))
-        : (form.notification || undefined),
+      notification,
+      isAllDay,
       repeat: form.repeat,
       matrixBlock: form.matrixBlock as Task['matrixBlock'],
     }
@@ -868,13 +889,12 @@ async function submit() {
   await tasksStore.addTask({
     title: form.title.trim(),
     description,
-    dueDate: form.dueDate || (form.repeat !== 'none' ? dayjs().format('YYYY-MM-DD') : undefined),
+    dueDate,
     dueTime: form.dueTime || undefined,
     duration,
     priority: form.priority,
-    notification: form.notification === 'custom'
-      ? String(Math.max(0, customNotifyMinutes.value || 0))
-      : (form.notification || undefined),
+    notification,
+    isAllDay,
     repeat: form.repeat,
     repeatDays: form.repeat === 'custom' && customRepeat.unit === 'week'
       ? [...customRepeat.weekdays]
@@ -1158,10 +1178,10 @@ function hydrateFromTask(task: Task) {
   form.priority = task.priority || 'none'
   const notify = task.notification || ''
   if (notify && !PRESET_NOTIFY.has(notify)) {
-    form.notification = 'custom'
+    form.notification = clampNotificationToClock('custom', hasTaskClockTime(form))
     customNotifyMinutes.value = Number(notify) || 10
   } else {
-    form.notification = notify || ''
+    form.notification = clampNotificationToClock(notify || '', hasTaskClockTime(form))
   }
   form.repeat = task.repeat || 'none'
   form.matrixBlock = task.matrixBlock || 'not-urgent-not-important'

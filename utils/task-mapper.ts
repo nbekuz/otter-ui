@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
 import { enrichTaskWithStoredRepeat, persistTaskRepeatWeekdays, resolveTaskWeekdays } from '~/utils/repeat-weekdays'
+import { hasTaskClockTime, parseReminderOffset } from '~/utils/task-reminder'
 import { parseApiWallClock, parseTimeToMinutes } from '~/utils/time'
 import type {
   ApiMatrixBlock,
@@ -113,23 +114,6 @@ function toApiDateTime(dueDate: string, time: string): string {
 function buildDueAt(dueDate?: string, dueTime?: string): string | null {
   if (!dueDate) return null
   return toApiDateTime(dueDate, dueTime || '00:00')
-}
-
-function buildReminderAt(
-  dueAt: string | null,
-  notification?: string,
-): string | null {
-  if (!dueAt || !notification) return null
-  const minutes = Number(notification)
-  if (!Number.isFinite(minutes) || minutes < 0) return null
-  const due = new Date(dueAt)
-  if (Number.isNaN(due.getTime())) return null
-  const at = new Date(due.getTime() - minutes * 60_000)
-  // Always local wall-clock + device offset (never re-tag dayjs local digits as Z).
-  return toApiDateTime(
-    `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, '0')}-${String(at.getDate()).padStart(2, '0')}`,
-    `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`,
-  )
 }
 
 /**
@@ -272,26 +256,26 @@ export function uiTaskToApiPayload(
     payload.repeat_weekdays = weekdays
   }
 
-  // Backend requires due_at or start_at when reminder_offset_minutes is set.
+  const timed = hasTaskClockTime(task)
+  if (task.dueDate) {
+    payload.is_all_day = !timed
+  } else if (task.isAllDay !== undefined) {
+    payload.is_all_day = task.isAllDay
+  }
+
+  // Reminder only when the user enabled it AND there is a real clock time.
+  // Date-only + offset 0 against 00:00 used to fire an immediate push.
   const hasSchedule = Boolean(due_at || start_at)
-  if (!hasSchedule || task.notification === undefined || task.notification === '') {
+  const offset = parseReminderOffset(task.notification)
+  if (!hasSchedule || !timed || offset == null) {
     payload.reminder_at = null
     payload.reminder_offset_minutes = null
   } else {
-    const offset = Number(task.notification)
-    if (Number.isFinite(offset) && offset >= 0) {
-      payload.reminder_offset_minutes = offset
-    } else {
-      payload.reminder_at = buildReminderAt(due_at || start_at, task.notification)
-    }
+    payload.reminder_offset_minutes = offset
   }
 
   if (task.completed !== undefined) {
     payload.is_completed = task.completed
-  }
-
-  if (task.isAllDay !== undefined) {
-    payload.is_all_day = task.isAllDay
   }
 
   // Keep weekdays available for spawn-on-complete even if API drops them.

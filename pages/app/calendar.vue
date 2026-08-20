@@ -160,7 +160,10 @@
                 >
                   <Check v-if="task.completed" class="h-2 w-2 text-white" />
                 </button>
-                <span class="min-w-0 flex-1 truncate">{{ task.title }}</span>
+                <span
+                  class="min-w-0 flex-1 truncate"
+                  :class="task.completed ? 'line-through text-sber-gray' : ''"
+                >{{ task.title }}</span>
               </div>
             </div>
           </div>
@@ -242,7 +245,10 @@
                     <p class="truncate text-sm font-semibold leading-snug" :style="{ color: getPriorityColor(task.priority) }">
                       {{ task.labelTime }}
                     </p>
-                    <p class="truncate text-sm font-medium leading-snug text-sber-black">{{ task.title }}</p>
+                    <p
+                      class="truncate text-sm font-medium leading-snug"
+                      :class="task.completed ? 'line-through text-sber-gray' : 'text-sber-black'"
+                    >{{ task.title }}</p>
                   </div>
                 </div>
                 <button
@@ -322,7 +328,10 @@
                   >
                     <Check v-if="task.completed" class="h-1.5 w-1.5 text-white" />
                   </button>
-                  <span class="min-w-0 flex-1 truncate">{{ task.title }}</span>
+                  <span
+                    class="min-w-0 flex-1 truncate"
+                    :class="task.completed ? 'line-through text-sber-gray' : ''"
+                  >{{ task.title }}</span>
                 </div>
               </div>
             </div>
@@ -405,7 +414,10 @@
                       </button>
                       <div class="min-w-0 flex-1 overflow-hidden">
                         <p class="truncate text-sm font-semibold leading-snug text-sber-black">{{ weekTaskTimeLabel(task) }}</p>
-                        <p class="truncate text-sm font-medium leading-snug text-sber-black">{{ task.title }}</p>
+                        <p
+                          class="truncate text-sm font-medium leading-snug"
+                          :class="task.completed ? 'line-through text-sber-gray' : 'text-sber-black'"
+                        >{{ task.title }}</p>
                       </div>
                     </div>
                     <button
