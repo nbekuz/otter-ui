@@ -195,6 +195,7 @@ export interface ApiTariff {
   promo_days: number
   is_recurring: boolean
   sort_order: number
+  rustore_product_id?: string | null
 }
 
 export type ApiSubscriptionStatus =
@@ -214,6 +215,11 @@ export interface ApiSubscription {
   cancelled_at: string | null
   is_premium: boolean
   updated_at: string
+  /** `robokassa` | `rustore` | empty when none */
+  provider?: string | null
+  promo_used?: boolean
+  /** Whether the user can still tap «Попробовать бесплатно». */
+  trial_available?: boolean
 }
 
 export interface ApiPremiumCheckoutConsent {

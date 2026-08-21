@@ -12,13 +12,36 @@ export function usePremiumNavGuard() {
   const premiumStore = usePremiumStore()
   const { openPremiumModal } = usePremiumModal()
 
-  function guardPremiumNav(event: Event, navigate: () => void, to: string) {
-    if (!isPremiumNavPath(to) || premiumStore.isPremium) {
-      navigate()
+  async function guardPremiumNav(
+    event: Event,
+    navigate: (e?: MouseEvent) => void,
+    to: string,
+  ) {
+    if (!isPremiumNavPath(to)) {
+      navigate(event as MouseEvent)
+      return
+    }
+
+    if (premiumStore.isPremium) {
+      navigate(event as MouseEvent)
       return
     }
 
     event.preventDefault()
+    if (!premiumStore.subscription) {
+      try {
+        await premiumStore.fetchSubscription()
+      }
+      catch {
+        // Network error: still block until we know Premium is active.
+      }
+    }
+
+    if (premiumStore.isPremium) {
+      await navigateTo(to)
+      return
+    }
+
     openPremiumModal()
   }
 

@@ -12,6 +12,7 @@ withDefaults(defineProps<{
 
 const to = '/app/pomodoro'
 const label = 'Помодоро'
+const { guardPremiumNav } = usePremiumNavGuard()
 </script>
 
 <template>
@@ -33,7 +34,7 @@ const label = 'Помодоро'
       :href="href"
       class="relative flex min-w-[52px] flex-col items-center gap-1 rounded-xl px-2 py-1 transition-colors active:bg-sber-gray-light"
       :class="active ? 'text-sber-green' : 'text-sber-gray'"
-      @click="navigate"
+      @click="(e) => { void guardPremiumNav(e, navigate, to) }"
     >
       <span class="inline-flex h-6 w-6 items-center justify-center overflow-hidden">
         <Timer class="h-full w-full" :stroke-width="active ? 2.25 : 2" />
@@ -56,7 +57,7 @@ const label = 'Помодоро'
         : isDarkTheme
           ? 'text-slate-300 hover:bg-[#20242d] hover:text-white'
           : 'text-sber-gray hover:bg-sber-gray-light hover:text-sber-black'"
-      @click="navigate"
+      @click="(e) => { void guardPremiumNav(e, navigate, to) }"
     >
       <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden">
         <Timer class="h-full w-full" :stroke-width="active ? 2.25 : 2" />

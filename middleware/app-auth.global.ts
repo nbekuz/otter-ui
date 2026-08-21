@@ -1,3 +1,5 @@
+import { isPremiumNavPath } from '~/composables/usePremiumNavGuard'
+
 export default defineNuxtRouteMiddleware(async (to) => {
   if (import.meta.server) return
 
@@ -26,5 +28,21 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (to.path === '/profile-fill' && !authStore.requiresProfileFill) {
     return navigateTo('/app')
+  }
+
+  if (isPremiumNavPath(to.path)) {
+    const premiumStore = usePremiumStore()
+    if (!premiumStore.subscription) {
+      try {
+        await premiumStore.fetchSubscription()
+      }
+      catch {
+        // Fall through: allow the page and let 403 open the paywall.
+      }
+    }
+    if (premiumStore.subscription && !premiumStore.isPremium) {
+      usePremiumModal().openPremiumModal()
+      return navigateTo('/app')
+    }
   }
 })

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
 import type { Task } from '~/data/mockData'
 import type { ApiMatrixBlock, ApiTask, ApiTaskGroup } from '~/types/mobile-api'
-import { apiDelete, apiGet, apiPatch, apiPost, getApiErrorMessage } from '~/utils/api'
+import { apiDelete, apiGet, apiPatch, apiPost, getApiErrorCode, getApiErrorMessage } from '~/utils/api'
 import { apiMatrixBlockToUi, apiTaskToUi, dataUrlToFile, groupKeyToUi, preferClientSchedule, uiTaskToApiPayload, uiTaskToFormData } from '~/utils/task-mapper'
 import { computeNextOccurrenceDate, expandTasksForDate, expandTasksForRange, isRecurringTask } from '~/utils/recurrence'
 import { enrichTaskWithStoredRepeat, persistTaskRepeatWeekdays, resolveTaskWeekdays } from '~/utils/repeat-weekdays'
@@ -69,6 +69,8 @@ export const useTasksStore = defineStore('tasks', () => {
   const matrixTasksByBlock = ref<Record<string, Task[]>>({})
   const calendarTasks = ref<Task[]>([])
   const calendarCacheKey = ref('')
+  const calendarPremiumBlocked = ref(false)
+  const matrixPremiumBlocked = ref(false)
   const loading = ref(false)
   const error = ref('')
   const initialized = ref(false)
@@ -318,29 +320,40 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   async function fetchMatrix() {
-    const blocks = await apiGet<Array<{
-      block: ApiMatrixBlock
-      tasks: ApiTask[]
-    }>>('matrix/')
+    try {
+      const blocks = await apiGet<Array<{
+        block: ApiMatrixBlock
+        tasks: ApiTask[]
+      }>>('matrix/')
 
-    const prevById = new Map<string, Task>()
-    for (const list of Object.values(matrixTasksByBlock.value)) {
-      for (const task of list) prevById.set(task.id, task)
-    }
+      const prevById = new Map<string, Task>()
+      for (const list of Object.values(matrixTasksByBlock.value)) {
+        for (const task of list) prevById.set(task.id, task)
+      }
 
-    const next: Record<string, Task[]> = {}
-    for (const block of blocks) {
-      next[apiMatrixBlockToUi(block.block)] = block.tasks.map((apiTask) => {
-        const task = apiTaskToUi(apiTask)
-        const prev = prevById.get(task.id)
-        return prev && taskScheduleKey(prev) === taskScheduleKey(task) ? prev : task
-      })
+      const next: Record<string, Task[]> = {}
+      for (const block of blocks) {
+        next[apiMatrixBlockToUi(block.block)] = block.tasks.map((apiTask) => {
+          const task = apiTaskToUi(apiTask)
+          const prev = prevById.get(task.id)
+          return prev && taskScheduleKey(prev) === taskScheduleKey(task) ? prev : task
+        })
+      }
+      matrixPremiumBlocked.value = false
+      matrixTasksByBlock.value = next
+      return next
     }
-    matrixTasksByBlock.value = next
-    return next
+    catch (err) {
+      if (getApiErrorCode(err) === 'PREMIUM_REQUIRED') {
+        matrixPremiumBlocked.value = true
+        matrixTasksByBlock.value = {}
+      }
+      throw err
+    }
   }
 
   async function fetchCalendar(view: 'day' | 'week' | 'month' | 'year', date: string) {
+    try {
     const response = await apiGet<{
       tasks?: ApiTask[]
       all_day_tasks?: ApiTask[]
@@ -362,6 +375,7 @@ export const useTasksStore = defineStore('tasks', () => {
       return true
     })
     calendarCacheKey.value = `${view}:${date}`
+    calendarPremiumBlocked.value = false
 
     if (calendarTasks.value.length === 0) {
       calendarTasks.value = incoming
@@ -377,6 +391,14 @@ export const useTasksStore = defineStore('tasks', () => {
       return task
     })
     return calendarTasks.value
+    }
+    catch (err) {
+      if (getApiErrorCode(err) === 'PREMIUM_REQUIRED') {
+        calendarPremiumBlocked.value = true
+        calendarTasks.value = []
+      }
+      throw err
+    }
   }
 
   function parseCalendarCacheKey() {
@@ -393,6 +415,7 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   function getTasksForDate(date: string) {
+    if (calendarPremiumBlocked.value) return []
     const pool = new Map<string, Task>()
     for (const t of tasks.value) pool.set(t.id, t)
     for (const t of calendarTasks.value) {
@@ -402,6 +425,7 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   function getTasksForWeek(startDate: string, endDate: string) {
+    if (calendarPremiumBlocked.value) return []
     const pool = new Map<string, Task>()
     for (const t of tasks.value) pool.set(t.id, t)
     for (const t of calendarTasks.value) {
@@ -411,6 +435,7 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   function getTasksForMatrix(blockId: string) {
+    if (matrixPremiumBlocked.value) return []
     const settingsStore = useSettingsStore()
     const block = settingsStore.matrixBlocks[blockId as keyof typeof settingsStore.matrixBlocks]
     const dateFilters = block?.dateFilter || []
@@ -830,6 +855,8 @@ export const useTasksStore = defineStore('tasks', () => {
     matrixTasksByBlock.value = {}
     calendarTasks.value = []
     calendarCacheKey.value = ''
+    calendarPremiumBlocked.value = false
+    matrixPremiumBlocked.value = false
     initialized.value = false
     error.value = ''
   }
@@ -840,6 +867,8 @@ export const useTasksStore = defineStore('tasks', () => {
     matrixTasksByBlock,
     calendarTasks,
     calendarCacheKey,
+    calendarPremiumBlocked,
+    matrixPremiumBlocked,
     loading,
     error,
     initialized,

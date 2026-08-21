@@ -237,30 +237,37 @@
         <div v-if="premiumModal" class="overlay" @click="premiumModal = false" />
       </Transition>
       <Transition name="modal">
-        <div v-if="premiumModal" class="app-modal px-5 py-6" @click.stop>
-          <div class="text-center mb-4">
-            <div class="mb-3 text-4xl">⭐</div>
-            <h3 class="text-xl font-bold text-sber-black">{{ BRAND_NAME }} Premium</h3>
+        <div
+          v-if="premiumModal"
+          class="app-modal app-modal-premium flex flex-col overflow-hidden px-5 py-6 lg:px-6 lg:py-8"
+          @click.stop
+        >
+          <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div class="mb-6 text-center">
+              <div class="mb-3 text-4xl">⭐</div>
+              <h3 class="text-xl font-bold text-sber-black">{{ BRAND_NAME }} Premium</h3>
+              <p class="mt-1 text-sm text-sber-gray">Больше функций в приложении</p>
+            </div>
+            <PremiumSubscriptionPanel
+              :features="premiumStore.features"
+              :features-loading="premiumStore.featuresLoading"
+              :tariffs="premiumStore.tariffs"
+              :tariffs-loading="premiumStore.tariffsLoading"
+              :selected-tariff-code="premiumStore.selectedTariffCode"
+              :subscription="premiumStore.subscription"
+              :subscription-loading="premiumStore.subscriptionLoading"
+              :is-premium="premiumStore.isPremium"
+              :expires-label="premiumExpiresLabel"
+              :action-loading="premiumStore.actionLoading"
+              :refresh-loading="premiumRefreshLoading"
+              @select-tariff="premiumStore.selectTariff"
+              @trial="onPremiumTrial"
+              @checkout="onPremiumCheckout"
+              @refresh="onPremiumRefresh"
+              @cancel="cancelPremiumSubscription"
+            />
           </div>
-          <PremiumSubscriptionPanel
-            :features="premiumStore.features"
-            :features-loading="premiumStore.featuresLoading"
-            :tariffs="premiumStore.tariffs"
-            :tariffs-loading="premiumStore.tariffsLoading"
-            :selected-tariff-code="premiumStore.selectedTariffCode"
-            :subscription="premiumStore.subscription"
-            :subscription-loading="premiumStore.subscriptionLoading"
-            :is-premium="premiumStore.isPremium"
-            :expires-label="premiumExpiresLabel"
-            :action-loading="premiumStore.actionLoading"
-            :refresh-loading="premiumRefreshLoading"
-            @select-tariff="premiumStore.selectTariff"
-            @trial="onPremiumTrial"
-            @checkout="onPremiumCheckout"
-            @refresh="onPremiumRefresh"
-            @cancel="cancelPremiumSubscription"
-          />
-          <button class="btn-secondary mt-3 w-full" type="button" @click="premiumModal = false">Закрыть</button>
+          <button class="btn-secondary mt-4 w-full shrink-0" type="button" @click="premiumModal = false">Закрыть</button>
         </div>
       </Transition>
     </Teleport>

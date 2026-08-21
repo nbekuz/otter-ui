@@ -1,4 +1,5 @@
 import { getApiErrorCode } from '~/utils/api'
+import { isPremiumNavPath } from '~/composables/usePremiumNavGuard'
 
 export type PremiumFeature = 'pomodoro' | 'calendar' | 'matrix' | 'taskAttachments'
 
@@ -10,18 +11,16 @@ export const PREMIUM_REQUIRED_MESSAGES: Record<PremiumFeature, string> = {
 }
 
 /**
- * Открывает окно Premium при PREMIUM_REQUIRED (calendar/matrix/pomodoro).
- * Для calendar/matrix — один раз за сессию (чтобы не спамить при смене даты/вида).
- * Для pomodoro — каждый клик Play.
+ * Opens the Premium modal on PREMIUM_REQUIRED and leaves gated sections.
+ * Every click / 403 shows the modal again (not once per session).
  */
 export function usePremiumRequiredToast() {
-  const shown = useState<Partial<Record<PremiumFeature, boolean>>>('premium-required-modal-shown', () => ({}))
   const { openPremiumModal } = usePremiumModal()
 
   function handlePremiumRequired(
     feature: PremiumFeature,
     error: unknown,
-    options: { once?: boolean } = {},
+    _options: { once?: boolean } = {},
   ): boolean {
     if (getApiErrorCode(error) !== 'PREMIUM_REQUIRED')
       return false
@@ -29,12 +28,15 @@ export function usePremiumRequiredToast() {
     if (feature === 'taskAttachments')
       return false
 
-    const once = options.once ?? feature !== 'pomodoro'
-    if (once && shown.value[feature])
-      return true
-
-    shown.value = { ...shown.value, [feature]: true }
     openPremiumModal()
+
+    if (import.meta.client) {
+      const route = useRoute()
+      if (isPremiumNavPath(route.path)) {
+        void navigateTo('/app')
+      }
+    }
+
     return true
   }
 

@@ -50,9 +50,9 @@
           </div>
         </div>
 
-        <div class="mx-auto flex w-full min-h-0 flex-1 flex-col justify-center rounded-[32px] bg-white px-6 py-6 shadow-card lg:px-10 lg:py-8">
+        <div class="mx-auto flex w-full min-h-0 flex-1 flex-col justify-center rounded-[32px] bg-white px-6 py-6 shadow-card lg:px-10 lg:py-14">
           <!-- Session count -->
-          <div class="mb-4 flex justify-center gap-2 lg:mb-6">
+          <div class="mb-4 flex justify-center gap-2 lg:mb-8">
             <div v-for="i in pomodoroStore.settings.sessionsUntilLong" :key="i"
                  class="h-2 w-8 rounded-full transition-colors"
                  :class="i <= pomodoroStore.sessionCount % pomodoroStore.settings.sessionsUntilLong || (pomodoroStore.sessionCount > 0 && pomodoroStore.sessionCount % pomodoroStore.settings.sessionsUntilLong === 0)
@@ -82,7 +82,7 @@
             </div>
 
             <!-- Controls -->
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-6 lg:mt-2 lg:pb-2">
               <!-- Stop -->
               <button
                 class="flex h-12 w-12 items-center justify-center rounded-full border border-sber-gray-light bg-sber-gray-light transition-colors active:bg-sber-gray-mid disabled:opacity-50"

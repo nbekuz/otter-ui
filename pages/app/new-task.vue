@@ -1,6 +1,6 @@
 <template>
   <div
-    class="page-container flex flex-col bg-sber-gray-light max-lg:fixed max-lg:inset-x-0 max-lg:top-0 max-lg:z-[25] max-lg:mx-auto max-lg:h-[100dvh] max-lg:max-h-[100dvh] max-lg:w-full max-lg:max-w-[430px] max-lg:!min-h-0 max-lg:overflow-hidden max-lg:!pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:static lg:!h-auto lg:!max-h-none lg:!overflow-visible"
+    class="page-container flex min-h-0 flex-col overflow-hidden bg-sber-gray-light max-lg:fixed max-lg:inset-x-0 max-lg:top-0 max-lg:z-[25] max-lg:mx-auto max-lg:h-[100dvh] max-lg:max-h-[100dvh] max-lg:w-full max-lg:max-w-[430px] max-lg:!min-h-0 max-lg:!pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:h-full lg:max-h-full lg:!min-h-0 lg:!overflow-hidden lg:!pb-0"
   >
     <div class="page-header-top shrink-0 bg-white px-4 pb-4 shadow-sm lg:px-6">
       <div class="flex items-center gap-3">
@@ -19,9 +19,9 @@
       </div>
     </div>
 
-    <div class="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col px-3 py-1 lg:px-4 lg:py-4">
+    <div class="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col px-3 py-1 lg:px-4 lg:py-3">
       <form
-        class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white shadow-card lg:min-h-0 lg:overflow-visible lg:rounded-3xl"
+        class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white shadow-card lg:rounded-3xl"
         @submit.prevent="submit"
       >
         <div class="shrink-0 px-3 pb-1.5 pt-2 lg:px-5 lg:pb-4 lg:pt-5">
@@ -134,7 +134,7 @@
           </button>
         </div>
 
-        <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-3 lg:flex-none lg:overflow-visible lg:px-4">
+        <div class="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-3 lg:px-4">
         <div v-if="activeTab === 'date'" class="pb-1 pt-1.5 lg:pb-4 lg:pt-3">
           <p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-3 lg:text-xs">Дата выполнения</p>
           <div class="mb-1.5 flex flex-wrap gap-1 lg:mb-4 lg:gap-2">
@@ -216,24 +216,21 @@
           </div>
         </div>
 
-        <div v-if="activeTab === 'notify'" class="pb-3 pt-2 lg:pb-4 lg:pt-3">
+        <div v-if="activeTab === 'notify'" class="pb-3 pt-2 lg:pb-3 lg:pt-3">
           <p class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-sber-gray lg:mb-3 lg:text-xs">Уведомление</p>
-          <p v-if="!formHasClock" class="mb-2 text-xs text-sber-gray">
-            Без времени срока напоминание не отправляется. Выберите «чч:мм», чтобы включить уведомление.
-          </p>
-          <div class="flex flex-col gap-1.5 lg:gap-2">
+          <div class="flex flex-col gap-1.5">
             <button v-for="n in notifyOptions" :key="n.value"
                     type="button"
-                    class="flex items-center gap-2 rounded-xl border px-3 py-2 transition-all lg:gap-3 lg:rounded-2xl lg:px-4 lg:py-3"
+                    class="flex items-center gap-2 rounded-xl border px-3 py-2 transition-all lg:gap-3 lg:rounded-2xl lg:px-4 lg:py-2"
                     :class="form.notification === n.value
                       ? 'border-sber-green bg-sber-green-light'
                       : 'border-sber-gray-light bg-white'"
-                    @click="form.notification = n.value">
+                    @click="selectNotification(n.value)">
               <Bell class="w-4 h-4" :class="form.notification === n.value ? 'text-sber-green' : 'text-sber-gray'" />
               <span class="text-xs lg:text-sm" :class="form.notification === n.value ? 'font-medium text-sber-green' : 'text-sber-black'">{{ n.label }}</span>
               <Check v-if="form.notification === n.value" class="ml-auto h-4 w-4 text-sber-green" />
             </button>
-            <div v-if="form.notification === 'custom'" class="mt-2 flex items-center gap-2 px-1">
+            <div v-if="form.notification === 'custom'" class="mt-1 flex items-center gap-2 px-1 pb-1">
               <input
                 v-model.number="customNotifyMinutes"
                 type="number"
@@ -370,7 +367,7 @@
         </div>
         </div>
 
-        <div class="shrink-0 border-t border-sber-gray-light bg-white px-3 pb-2 pt-2 lg:px-4 lg:pb-4 lg:pt-3">
+        <div class="shrink-0 border-t border-sber-gray-light bg-white px-3 pb-2 pt-2 lg:px-4 lg:pb-3 lg:pt-2">
           <p v-if="submitError" class="mb-2 text-xs font-medium text-red-500 lg:mb-3 lg:text-sm">
             {{ submitError }}
           </p>
@@ -434,10 +431,10 @@
                 </button>
               </div>
               <div class="flex gap-3">
-                <button class="btn-secondary !w-auto flex-1" type="button" @click="goBackToSource">
+                <button class="btn-secondary !w-auto flex-1 !py-3 !text-sm" type="button" @click="goBackToSource">
                   Отмена
                 </button>
-                <button ref="desktopSubmitRef" class="btn-primary !w-auto flex-1" type="submit" :disabled="submitting">
+                <button ref="desktopSubmitRef" class="btn-primary !w-auto flex-1 !py-3 !text-sm" type="submit" :disabled="submitting">
                   {{ submitting ? 'Сохранение...' : 'Сохранить' }}
                 </button>
               </div>
@@ -463,10 +460,10 @@
               </button>
             </div>
             <div class="hidden lg:flex lg:gap-3">
-              <button class="btn-secondary !w-auto flex-1" type="button" @click="goBackToSource">
+              <button class="btn-secondary !w-auto flex-1 !py-3 !text-sm" type="button" @click="goBackToSource">
                 Отмена
               </button>
-              <button ref="desktopSubmitRef" class="btn-primary !w-auto flex-1" type="submit" :disabled="submitting">
+              <button ref="desktopSubmitRef" class="btn-primary !w-auto flex-1 !py-3 !text-sm" type="submit" :disabled="submitting">
                 {{ submitting ? 'Сохранение...' : 'Добавить задачу' }}
               </button>
             </div>
@@ -511,8 +508,11 @@ import { matrixBlockDefaults } from '~/data/mockData'
 import { defaultDurationEnd, validateDurationFields, validateRepeatInterval } from '~/utils/time'
 import {
   clampNotificationToClock,
+  canEnableTaskNotification,
   hasTaskClockTime,
   notificationForApi,
+  NOTIFY_NEEDS_CLOCK_MESSAGE,
+  syncNotificationWithClock,
 } from '~/utils/task-reminder'
 import { resolveMediaUrl } from '~/utils/media'
 import { getApiErrorCode, getApiErrorMessage, getApiFieldError } from '~/utils/api'
@@ -688,10 +688,25 @@ const { pauseSync, resumeSync, markEndEdited, resetEndEdited, adoptLoadedDuratio
 
 const formHasClock = computed(() => hasTaskClockTime(form))
 
+function selectNotification(value: string) {
+  if (!canEnableTaskNotification(formHasClock.value, value)) {
+    showToast(NOTIFY_NEEDS_CLOCK_MESSAGE, 'error')
+    return
+  }
+  form.notification = value
+}
+
 watch(
-  () => [form.dueTime, form.durationStart, form.notification] as const,
-  () => {
-    const next = clampNotificationToClock(form.notification, formHasClock.value)
+  () => [form.dueTime, form.durationStart] as const,
+  (now, prev) => {
+    const hasClock = hasTaskClockTime({ dueTime: now[0], durationStart: now[1] })
+    const previousHasClock = !!(prev && hasTaskClockTime({
+      dueTime: prev[0],
+      durationStart: prev[1],
+    }))
+    const next = isEditMode.value
+      ? clampNotificationToClock(form.notification, hasClock)
+      : syncNotificationWithClock(form.notification, hasClock, previousHasClock)
     if (next !== form.notification) form.notification = next
   },
 )

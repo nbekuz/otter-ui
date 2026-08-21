@@ -3,12 +3,19 @@ import { PREMIUM_SUBSCRIPTION } from '~/utils/site-info'
 
 export const PREMIUM_TRIAL_DAYS = PREMIUM_SUBSCRIPTION.trialDays
 
-/** Free trial is available only once — while subscription status is still `none`. */
+/**
+ * Free trial is available only once. Prefer backend `trial_available`;
+ * fall back to status/`promo_used` for older payloads.
+ */
 export function canStartPremiumTrial(
   subscription: ApiSubscription | null | undefined,
 ): boolean {
   if (!subscription) return true
   if (subscription.is_premium) return false
+  if (typeof subscription.trial_available === 'boolean') {
+    return subscription.trial_available
+  }
+  if (subscription.promo_used) return false
   return subscription.status === 'none'
 }
 

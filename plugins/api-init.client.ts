@@ -20,9 +20,14 @@ export default defineNuxtPlugin(() => {
       tasksStore.fetchGrouped().catch(() => undefined),
       settingsStore.fetchFromApi().catch(() => undefined),
       usePremiumStore().fetchSubscription().catch(() => undefined),
-      pomodoroStore.fetchSettings().catch(() => undefined),
-      pomodoroStore.fetchSessions().catch(() => undefined),
     ])
+
+    if (usePremiumStore().isPremium) {
+      await Promise.all([
+        pomodoroStore.fetchSettings().catch(() => undefined),
+        pomodoroStore.fetchSessions().catch(() => undefined),
+      ])
+    }
   }
 
   watch(

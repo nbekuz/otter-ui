@@ -83,6 +83,10 @@
     max-width: 32rem;
   }
 
+  .app-modal-premium {
+    max-height: 80vh;
+  }
+
   /* Overlay */
   .overlay {
     @apply fixed inset-0 bg-black/40 z-40;

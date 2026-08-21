@@ -125,10 +125,11 @@
 
           <div>
             <label class="mb-1 block text-xs font-semibold text-sber-gray">Уведомление</label>
-            <p v-if="!formHasClock" class="mb-2 text-xs text-sber-gray">
-              Без времени срока напоминание не отправляется.
-            </p>
-            <UiAppSelect v-model="form.notification" :options="notificationSelectOptions" />
+            <UiAppSelect
+              :model-value="form.notification"
+              :options="notificationSelectOptions"
+              @update:model-value="onNotificationChange"
+            />
             <div v-if="form.notification === 'custom' || isCustomNotification" class="mt-2 flex items-center gap-2">
               <input
                 v-model.number="customNotifyMinutes"
@@ -355,8 +356,10 @@ import { priorityColor } from '~/utils/priority-colors'
 import { defaultDurationEnd, validateDurationFields, validateRepeatInterval } from '~/utils/time'
 import {
   clampNotificationToClock,
+  canEnableTaskNotification,
   hasTaskClockTime,
   notificationForApi,
+  NOTIFY_NEEDS_CLOCK_MESSAGE,
 } from '~/utils/task-reminder'
 import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
 import { resolveMediaUrl } from '~/utils/media'
@@ -367,6 +370,7 @@ const tasksStore = useTasksStore()
 const settingsStore = useSettingsStore()
 const premiumStore = usePremiumStore()
 const { openPremiumModal } = usePremiumModal()
+const { showToast } = useAppToast()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
 function findLocalTask(id: string): Task | undefined {
@@ -563,6 +567,15 @@ const isCustomNotification = computed(() => {
 const { pauseSync, resumeSync, markEndEdited, resetEndEdited, adoptLoadedDuration } = useTaskTimeSync(form)
 
 const formHasClock = computed(() => hasTaskClockTime(form))
+
+function onNotificationChange(value: string) {
+  if (!canEnableTaskNotification(formHasClock.value, value)) {
+    showToast(NOTIFY_NEEDS_CLOCK_MESSAGE, 'error')
+    form.notification = ''
+    return
+  }
+  form.notification = value
+}
 
 watch(
   () => [form.dueTime, form.durationStart, form.notification] as const,

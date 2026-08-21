@@ -297,10 +297,11 @@
 
               <div>
                 <label class="mb-1 block text-xs font-semibold text-sber-gray">Уведомление</label>
-                <p v-if="!editorHasClock" class="mb-2 text-xs text-sber-gray">
-                  Без времени срока напоминание не отправляется.
-                </p>
-                <UiAppSelect v-model="editorForm.notification" :options="notificationSelectOptions" />
+                <UiAppSelect
+                  :model-value="editorForm.notification"
+                  :options="notificationSelectOptions"
+                  @update:model-value="onEditorNotificationChange"
+                />
                 <div v-if="editorForm.notification === 'custom'" class="mt-2 flex items-center gap-2">
                   <input
                     v-model.number="customNotifyMinutes"
@@ -537,8 +538,10 @@ import { getApiErrorMessage, getApiFieldError } from '~/utils/api'
 import { defaultDurationEnd, validateDurationFields, validateRepeatInterval } from '~/utils/time'
 import {
   clampNotificationToClock,
+  canEnableTaskNotification,
   hasTaskClockTime,
   notificationForApi,
+  NOTIFY_NEEDS_CLOCK_MESSAGE,
 } from '~/utils/task-reminder'
 import { priorityColor } from '~/utils/priority-colors'
 import { resolveMediaUrl } from '~/utils/media'
@@ -549,6 +552,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 const tasksStore = useTasksStore()
 const settingsStore = useSettingsStore()
+const { showToast } = useAppToast()
 const isDarkTheme = computed(() => settingsStore.appSettings.theme === 'dark')
 
 const prioritySelectOptions = [
@@ -788,6 +792,15 @@ const {
 } = useTaskTimeSync(editorForm)
 
 const editorHasClock = computed(() => hasTaskClockTime(editorForm))
+
+function onEditorNotificationChange(value: string) {
+  if (!canEnableTaskNotification(editorHasClock.value, value)) {
+    showToast(NOTIFY_NEEDS_CLOCK_MESSAGE, 'error')
+    editorForm.notification = ''
+    return
+  }
+  editorForm.notification = value
+}
 
 watch(
   () => [editorForm.dueTime, editorForm.durationStart, editorForm.notification] as const,

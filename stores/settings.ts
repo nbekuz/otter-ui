@@ -13,7 +13,7 @@ import type {
   ApiMatrixSetting,
   ApiPremiumFeature,
 } from '~/types/mobile-api'
-import { apiGet, apiPatch, apiPost, getApiErrorMessage } from '~/utils/api'
+import { apiGet, apiPatch, apiPost, getApiErrorCode, getApiErrorMessage } from '~/utils/api'
 import { deliverSupportEmail } from '~/utils/contact-email'
 import { normalizeBottomNavItems, resolveBottomNavItems } from '~/utils/nav-items'
 
@@ -256,10 +256,7 @@ export const useSettingsStore = defineStore('settings', () => {
     loading.value = true
     error.value = ''
     try {
-      const [settings, matrixSettings] = await Promise.all([
-        apiGet<ApiAppSettings>('settings/'),
-        apiGet<ApiMatrixSetting[]>('matrix/settings/'),
-      ])
+      const settings = await apiGet<ApiAppSettings>('settings/')
       appSettings.value = preserveLocalSettings(
         appSettings.value,
         {
@@ -267,11 +264,20 @@ export const useSettingsStore = defineStore('settings', () => {
           ...apiToAppSettings(settings),
         },
       )
-      matrixBlocks.value = apiMatrixToBlocks(matrixSettings)
       isPremium.value = settings.is_premium
       premiumActivatedAt.value = settings.premium_until
         || settings.premium_activated_at
       syncPremiumToAuth(settings)
+
+      try {
+        const matrixSettings = await apiGet<ApiMatrixSetting[]>('matrix/settings/')
+        matrixBlocks.value = apiMatrixToBlocks(matrixSettings)
+      }
+      catch (err) {
+        if (getApiErrorCode(err) !== 'PREMIUM_REQUIRED') {
+          // Non-fatal: keep last-known / default matrix blocks.
+        }
+      }
 
       // Keep reminders / today / overdue aligned with the browser timezone.
       if (import.meta.client) {
