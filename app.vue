@@ -7,7 +7,6 @@
     </NuxtLayout>
   </div>
 </template>
-
 <script setup lang="ts">
 import 'dayjs/locale/ru'
 import dayjs from 'dayjs'
