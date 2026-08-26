@@ -10,11 +10,16 @@ declare global {
   const DESKTOP_APP: typeof import('../../utils/site-info').DESKTOP_APP
   const DURATION_END_AFTER_START_MESSAGE: typeof import('../../utils/time').DURATION_END_AFTER_START_MESSAGE
   const FIREBASE_ID_TOKEN_STORAGE_KEY: typeof import('../../utils/auth-session').FIREBASE_ID_TOKEN_STORAGE_KEY
+  const NOTIFY_AT_DUE: typeof import('../../utils/task-reminder').NOTIFY_AT_DUE
+  const NOTIFY_NEEDS_CLOCK_MESSAGE: typeof import('../../utils/task-reminder').NOTIFY_NEEDS_CLOCK_MESSAGE
+  const NOTIFY_NONE: typeof import('../../utils/task-reminder').NOTIFY_NONE
   const OTTER_TASKS_EXPORT_VERSION: typeof import('../../utils/task-export').OTTER_TASKS_EXPORT_VERSION
   const PASSWORD_MAX_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MAX_LENGTH
   const PASSWORD_MIN_LENGTH: typeof import('../../utils/password-policy').PASSWORD_MIN_LENGTH
   const PREMIUM_LANDING: typeof import('../../utils/site-info').PREMIUM_LANDING
+  const PREMIUM_REQUIRED_MESSAGES: typeof import('../../composables/usePremiumRequiredToast').PREMIUM_REQUIRED_MESSAGES
   const PREMIUM_SUBSCRIPTION: typeof import('../../utils/site-info').PREMIUM_SUBSCRIPTION
+  const PREMIUM_TRIAL_DAYS: typeof import('../../utils/premium-trial').PREMIUM_TRIAL_DAYS
   const PRIORITY_COLORS: typeof import('../../utils/priority-colors').PRIORITY_COLORS
   const REFRESH_TOKEN_KEY: typeof import('../../utils/auth-session').REFRESH_TOKEN_KEY
   const REPEAT_INTERVAL_MAX: typeof import('../../utils/time').REPEAT_INTERVAL_MAX
@@ -44,8 +49,11 @@ declare global {
   const buildYearMonthCells: typeof import('../../utils/calendar-grid').buildYearMonthCells
   const buildYearMonths: typeof import('../../utils/calendar-grid').buildYearMonths
   const callOnce: typeof import('../../node_modules/nuxt/dist/app/composables/once').callOnce
+  const canEnableTaskNotification: typeof import('../../utils/task-reminder').canEnableTaskNotification
+  const canStartPremiumTrial: typeof import('../../utils/premium-trial').canStartPremiumTrial
   const canUseNativeShare: typeof import('../../utils/share-app').canUseNativeShare
   const cancelIdleCallback: typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback').cancelIdleCallback
+  const clampNotificationToClock: typeof import('../../utils/task-reminder').clampNotificationToClock
   const clearAuthSession: typeof import('../../utils/auth-session').clearAuthSession
   const clearError: typeof import('../../node_modules/nuxt/dist/app/composables/error').clearError
   const clearNuxtData: typeof import('../../node_modules/nuxt/dist/app/composables/asyncData').clearNuxtData
@@ -92,6 +100,7 @@ declare global {
   const eagerComputed: typeof import('@vueuse/core').eagerComputed
   const effect: typeof import('vue').effect
   const effectScope: typeof import('vue').effectScope
+  const effectivePromoDays: typeof import('../../utils/premium-trial').effectivePromoDays
   const enableWebPushNotifications: typeof import('../../utils/fcm-devices').enableWebPushNotifications
   const enrichTaskWithStoredRepeat: typeof import('../../utils/repeat-weekdays').enrichTaskWithStoredRepeat
   const expandTasksForDate: typeof import('../../utils/recurrence').expandTasksForDate
@@ -102,6 +111,7 @@ declare global {
   const formatLegalUpdatedAt: typeof import('../../utils/legal-static').formatLegalUpdatedAt
   const formatMinutesToTime: typeof import('../../utils/time').formatMinutesToTime
   const getAccessToken: typeof import('../../utils/auth-session').getAccessToken
+  const getApiErrorCode: typeof import('../../utils/api').getApiErrorCode
   const getApiErrorMessage: typeof import('../../utils/api').getApiErrorMessage
   const getApiFieldError: typeof import('../../utils/api').getApiFieldError
   const getAppManifest: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getAppManifest
@@ -116,6 +126,7 @@ declare global {
   const groupKeyToUi: typeof import('../../utils/task-mapper').groupKeyToUi
   const h: typeof import('vue').h
   const hasInjectionContext: typeof import('vue').hasInjectionContext
+  const hasTaskClockTime: typeof import('../../utils/task-reminder').hasTaskClockTime
   const ignorableWatch: typeof import('@vueuse/core').ignorableWatch
   const inject: typeof import('vue').inject
   const injectHead: typeof import('../../node_modules/nuxt/dist/app/composables/head').injectHead
@@ -125,6 +136,7 @@ declare global {
   const isDefined: typeof import('@vueuse/core').isDefined
   const isNavItemActive: typeof import('../../utils/nav-items').isNavItemActive
   const isNuxtError: typeof import('../../node_modules/nuxt/dist/app/composables/error').isNuxtError
+  const isPremiumNavPath: typeof import('../../composables/usePremiumNavGuard').isPremiumNavPath
   const isPrerendered: typeof import('../../node_modules/nuxt/dist/app/composables/payload').isPrerendered
   const isProxy: typeof import('vue').isProxy
   const isPurchaseableTariff: typeof import('../../utils/premium-tariffs').isPurchaseableTariff
@@ -142,8 +154,10 @@ declare global {
   const migrateLegacyTokens: typeof import('../../utils/auth-session').migrateLegacyTokens
   const navigateTo: typeof import('../../node_modules/nuxt/dist/app/composables/router').navigateTo
   const nextTick: typeof import('vue').nextTick
+  const normalizeBottomNavItems: typeof import('../../utils/nav-items').normalizeBottomNavItems
   const normalizeTariffForDisplay: typeof import('../../utils/premium-tariffs').normalizeTariffForDisplay
   const normalizeTariffsForDisplay: typeof import('../../utils/premium-tariffs').normalizeTariffsForDisplay
+  const notificationForApi: typeof import('../../utils/task-reminder').notificationForApi
   const onActivated: typeof import('vue').onActivated
   const onAuthTokensChanged: typeof import('../../utils/auth-session').onAuthTokensChanged
   const onBeforeMount: typeof import('vue').onBeforeMount
@@ -167,10 +181,12 @@ declare global {
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
+  const openRobokassaCheckout: typeof import('../../utils/robokassa-checkout').openRobokassaCheckout
   const openShareUrl: typeof import('../../utils/share-app').openShareUrl
   const orderNavItems: typeof import('../../utils/nav-items').orderNavItems
   const parseApiWallClock: typeof import('../../utils/time').parseApiWallClock
   const parseNotificationsWsMessage: typeof import('../../utils/notifications-ws').parseNotificationsWsMessage
+  const parseReminderOffset: typeof import('../../utils/task-reminder').parseReminderOffset
   const parseTasksExport: typeof import('../../utils/task-export').parseTasksExport
   const parseTimeToMinutes: typeof import('../../utils/time').parseTimeToMinutes
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
@@ -210,6 +226,7 @@ declare global {
   const resolveActiveNavId: typeof import('../../utils/nav-items').resolveActiveNavId
   const resolveApiBaseUrl: typeof import('../../utils/api').resolveApiBaseUrl
   const resolveAppDistributionBaseUrl: typeof import('../../utils/app-download').resolveAppDistributionBaseUrl
+  const resolveBottomNavItems: typeof import('../../utils/nav-items').resolveBottomNavItems
   const resolveComponent: typeof import('vue').resolveComponent
   const resolveMediaUrl: typeof import('../../utils/media').resolveMediaUrl
   const resolveNotificationsWsUrl: typeof import('../../utils/notifications-ws').resolveNotificationsWsUrl
@@ -231,6 +248,7 @@ declare global {
   const stopBackgroundAudio: typeof import('../../utils/pomodoro-audio').stopBackgroundAudio
   const stopEffectAudio: typeof import('../../utils/pomodoro-audio').stopEffectAudio
   const storeToRefs: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').storeToRefs
+  const syncNotificationWithClock: typeof import('../../utils/task-reminder').syncNotificationWithClock
   const syncRef: typeof import('@vueuse/core').syncRef
   const syncRefs: typeof import('@vueuse/core').syncRefs
   const taskIdFromNotification: typeof import('../../utils/notifications-ws').taskIdFromNotification
@@ -389,6 +407,10 @@ declare global {
   const usePreferredDark: typeof import('@vueuse/core').usePreferredDark
   const usePreferredLanguages: typeof import('@vueuse/core').usePreferredLanguages
   const usePreferredReducedMotion: typeof import('@vueuse/core').usePreferredReducedMotion
+  const usePremiumModal: typeof import('../../composables/usePremiumModal').usePremiumModal
+  const usePremiumMutationGuard: typeof import('../../composables/usePremiumMutationGuard').usePremiumMutationGuard
+  const usePremiumNavGuard: typeof import('../../composables/usePremiumNavGuard').usePremiumNavGuard
+  const usePremiumRequiredToast: typeof import('../../composables/usePremiumRequiredToast').usePremiumRequiredToast
   const usePremiumStore: typeof import('../../stores/premium').usePremiumStore
   const usePreviewMode: typeof import('../../node_modules/nuxt/dist/app/composables/preview').usePreviewMode
   const usePrevious: typeof import('@vueuse/core').usePrevious
@@ -532,6 +554,9 @@ declare global {
   export type { AppToastType } from '../../composables/useAppToast'
   import('../../composables/useAppToast')
   // @ts-ignore
+  export type { PremiumFeature } from '../../composables/usePremiumRequiredToast'
+  import('../../composables/usePremiumRequiredToast')
+  // @ts-ignore
   export type { TaskReminderToastState } from '../../composables/useTaskReminderToast'
   import('../../composables/useTaskReminderToast')
   // @ts-ignore
@@ -584,11 +609,16 @@ declare module 'vue' {
     readonly DESKTOP_APP: UnwrapRef<typeof import('../../utils/site-info')['DESKTOP_APP']>
     readonly DURATION_END_AFTER_START_MESSAGE: UnwrapRef<typeof import('../../utils/time')['DURATION_END_AFTER_START_MESSAGE']>
     readonly FIREBASE_ID_TOKEN_STORAGE_KEY: UnwrapRef<typeof import('../../utils/auth-session')['FIREBASE_ID_TOKEN_STORAGE_KEY']>
+    readonly NOTIFY_AT_DUE: UnwrapRef<typeof import('../../utils/task-reminder')['NOTIFY_AT_DUE']>
+    readonly NOTIFY_NEEDS_CLOCK_MESSAGE: UnwrapRef<typeof import('../../utils/task-reminder')['NOTIFY_NEEDS_CLOCK_MESSAGE']>
+    readonly NOTIFY_NONE: UnwrapRef<typeof import('../../utils/task-reminder')['NOTIFY_NONE']>
     readonly OTTER_TASKS_EXPORT_VERSION: UnwrapRef<typeof import('../../utils/task-export')['OTTER_TASKS_EXPORT_VERSION']>
     readonly PASSWORD_MAX_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MAX_LENGTH']>
     readonly PASSWORD_MIN_LENGTH: UnwrapRef<typeof import('../../utils/password-policy')['PASSWORD_MIN_LENGTH']>
     readonly PREMIUM_LANDING: UnwrapRef<typeof import('../../utils/site-info')['PREMIUM_LANDING']>
+    readonly PREMIUM_REQUIRED_MESSAGES: UnwrapRef<typeof import('../../composables/usePremiumRequiredToast')['PREMIUM_REQUIRED_MESSAGES']>
     readonly PREMIUM_SUBSCRIPTION: UnwrapRef<typeof import('../../utils/site-info')['PREMIUM_SUBSCRIPTION']>
+    readonly PREMIUM_TRIAL_DAYS: UnwrapRef<typeof import('../../utils/premium-trial')['PREMIUM_TRIAL_DAYS']>
     readonly PRIORITY_COLORS: UnwrapRef<typeof import('../../utils/priority-colors')['PRIORITY_COLORS']>
     readonly REFRESH_TOKEN_KEY: UnwrapRef<typeof import('../../utils/auth-session')['REFRESH_TOKEN_KEY']>
     readonly REPEAT_INTERVAL_MAX: UnwrapRef<typeof import('../../utils/time')['REPEAT_INTERVAL_MAX']>
@@ -618,8 +648,11 @@ declare module 'vue' {
     readonly buildYearMonthCells: UnwrapRef<typeof import('../../utils/calendar-grid')['buildYearMonthCells']>
     readonly buildYearMonths: UnwrapRef<typeof import('../../utils/calendar-grid')['buildYearMonths']>
     readonly callOnce: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/once')['callOnce']>
+    readonly canEnableTaskNotification: UnwrapRef<typeof import('../../utils/task-reminder')['canEnableTaskNotification']>
+    readonly canStartPremiumTrial: UnwrapRef<typeof import('../../utils/premium-trial')['canStartPremiumTrial']>
     readonly canUseNativeShare: UnwrapRef<typeof import('../../utils/share-app')['canUseNativeShare']>
     readonly cancelIdleCallback: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback')['cancelIdleCallback']>
+    readonly clampNotificationToClock: UnwrapRef<typeof import('../../utils/task-reminder')['clampNotificationToClock']>
     readonly clearAuthSession: UnwrapRef<typeof import('../../utils/auth-session')['clearAuthSession']>
     readonly clearError: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/error')['clearError']>
     readonly clearNuxtData: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/asyncData')['clearNuxtData']>
@@ -666,6 +699,7 @@ declare module 'vue' {
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effect: UnwrapRef<typeof import('vue')['effect']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
+    readonly effectivePromoDays: UnwrapRef<typeof import('../../utils/premium-trial')['effectivePromoDays']>
     readonly enableWebPushNotifications: UnwrapRef<typeof import('../../utils/fcm-devices')['enableWebPushNotifications']>
     readonly enrichTaskWithStoredRepeat: UnwrapRef<typeof import('../../utils/repeat-weekdays')['enrichTaskWithStoredRepeat']>
     readonly expandTasksForDate: UnwrapRef<typeof import('../../utils/recurrence')['expandTasksForDate']>
@@ -676,6 +710,7 @@ declare module 'vue' {
     readonly formatLegalUpdatedAt: UnwrapRef<typeof import('../../utils/legal-static')['formatLegalUpdatedAt']>
     readonly formatMinutesToTime: UnwrapRef<typeof import('../../utils/time')['formatMinutesToTime']>
     readonly getAccessToken: UnwrapRef<typeof import('../../utils/auth-session')['getAccessToken']>
+    readonly getApiErrorCode: UnwrapRef<typeof import('../../utils/api')['getApiErrorCode']>
     readonly getApiErrorMessage: UnwrapRef<typeof import('../../utils/api')['getApiErrorMessage']>
     readonly getApiFieldError: UnwrapRef<typeof import('../../utils/api')['getApiFieldError']>
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
@@ -690,6 +725,7 @@ declare module 'vue' {
     readonly groupKeyToUi: UnwrapRef<typeof import('../../utils/task-mapper')['groupKeyToUi']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly hasInjectionContext: UnwrapRef<typeof import('vue')['hasInjectionContext']>
+    readonly hasTaskClockTime: UnwrapRef<typeof import('../../utils/task-reminder')['hasTaskClockTime']>
     readonly ignorableWatch: UnwrapRef<typeof import('@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectHead: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/head')['injectHead']>
@@ -699,6 +735,7 @@ declare module 'vue' {
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isNavItemActive: UnwrapRef<typeof import('../../utils/nav-items')['isNavItemActive']>
     readonly isNuxtError: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/error')['isNuxtError']>
+    readonly isPremiumNavPath: UnwrapRef<typeof import('../../composables/usePremiumNavGuard')['isPremiumNavPath']>
     readonly isPrerendered: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['isPrerendered']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isPurchaseableTariff: UnwrapRef<typeof import('../../utils/premium-tariffs')['isPurchaseableTariff']>
@@ -716,8 +753,10 @@ declare module 'vue' {
     readonly migrateLegacyTokens: UnwrapRef<typeof import('../../utils/auth-session')['migrateLegacyTokens']>
     readonly navigateTo: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['navigateTo']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
+    readonly normalizeBottomNavItems: UnwrapRef<typeof import('../../utils/nav-items')['normalizeBottomNavItems']>
     readonly normalizeTariffForDisplay: UnwrapRef<typeof import('../../utils/premium-tariffs')['normalizeTariffForDisplay']>
     readonly normalizeTariffsForDisplay: UnwrapRef<typeof import('../../utils/premium-tariffs')['normalizeTariffsForDisplay']>
+    readonly notificationForApi: UnwrapRef<typeof import('../../utils/task-reminder')['notificationForApi']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onAuthTokensChanged: UnwrapRef<typeof import('../../utils/auth-session')['onAuthTokensChanged']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
@@ -741,10 +780,12 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
+    readonly openRobokassaCheckout: UnwrapRef<typeof import('../../utils/robokassa-checkout')['openRobokassaCheckout']>
     readonly openShareUrl: UnwrapRef<typeof import('../../utils/share-app')['openShareUrl']>
     readonly orderNavItems: UnwrapRef<typeof import('../../utils/nav-items')['orderNavItems']>
     readonly parseApiWallClock: UnwrapRef<typeof import('../../utils/time')['parseApiWallClock']>
     readonly parseNotificationsWsMessage: UnwrapRef<typeof import('../../utils/notifications-ws')['parseNotificationsWsMessage']>
+    readonly parseReminderOffset: UnwrapRef<typeof import('../../utils/task-reminder')['parseReminderOffset']>
     readonly parseTasksExport: UnwrapRef<typeof import('../../utils/task-export')['parseTasksExport']>
     readonly parseTimeToMinutes: UnwrapRef<typeof import('../../utils/time')['parseTimeToMinutes']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
@@ -784,6 +825,7 @@ declare module 'vue' {
     readonly resolveActiveNavId: UnwrapRef<typeof import('../../utils/nav-items')['resolveActiveNavId']>
     readonly resolveApiBaseUrl: UnwrapRef<typeof import('../../utils/api')['resolveApiBaseUrl']>
     readonly resolveAppDistributionBaseUrl: UnwrapRef<typeof import('../../utils/app-download')['resolveAppDistributionBaseUrl']>
+    readonly resolveBottomNavItems: UnwrapRef<typeof import('../../utils/nav-items')['resolveBottomNavItems']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resolveMediaUrl: UnwrapRef<typeof import('../../utils/media')['resolveMediaUrl']>
     readonly resolveNotificationsWsUrl: UnwrapRef<typeof import('../../utils/notifications-ws')['resolveNotificationsWsUrl']>
@@ -805,6 +847,7 @@ declare module 'vue' {
     readonly stopBackgroundAudio: UnwrapRef<typeof import('../../utils/pomodoro-audio')['stopBackgroundAudio']>
     readonly stopEffectAudio: UnwrapRef<typeof import('../../utils/pomodoro-audio')['stopEffectAudio']>
     readonly storeToRefs: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['storeToRefs']>
+    readonly syncNotificationWithClock: UnwrapRef<typeof import('../../utils/task-reminder')['syncNotificationWithClock']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
     readonly taskIdFromNotification: UnwrapRef<typeof import('../../utils/notifications-ws')['taskIdFromNotification']>
@@ -963,6 +1006,10 @@ declare module 'vue' {
     readonly usePreferredDark: UnwrapRef<typeof import('@vueuse/core')['usePreferredDark']>
     readonly usePreferredLanguages: UnwrapRef<typeof import('@vueuse/core')['usePreferredLanguages']>
     readonly usePreferredReducedMotion: UnwrapRef<typeof import('@vueuse/core')['usePreferredReducedMotion']>
+    readonly usePremiumModal: UnwrapRef<typeof import('../../composables/usePremiumModal')['usePremiumModal']>
+    readonly usePremiumMutationGuard: UnwrapRef<typeof import('../../composables/usePremiumMutationGuard')['usePremiumMutationGuard']>
+    readonly usePremiumNavGuard: UnwrapRef<typeof import('../../composables/usePremiumNavGuard')['usePremiumNavGuard']>
+    readonly usePremiumRequiredToast: UnwrapRef<typeof import('../../composables/usePremiumRequiredToast')['usePremiumRequiredToast']>
     readonly usePremiumStore: UnwrapRef<typeof import('../../stores/premium')['usePremiumStore']>
     readonly usePreviewMode: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preview')['usePreviewMode']>
     readonly usePrevious: UnwrapRef<typeof import('@vueuse/core')['usePrevious']>

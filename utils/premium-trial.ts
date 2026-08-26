@@ -24,6 +24,7 @@ export function effectivePromoDays(
   subscription?: ApiSubscription | null,
 ): number {
   if (!canStartPremiumTrial(subscription)) return 0
+  if (PREMIUM_TRIAL_DAYS <= 0) return 0
   const fromApi = tariff?.promo_days ?? 0
   return fromApi > 0 ? fromApi : PREMIUM_TRIAL_DAYS
 }

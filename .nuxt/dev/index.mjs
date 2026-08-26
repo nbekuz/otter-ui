@@ -1,43 +1,43 @@
 import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import { tmpdir } from 'node:os';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/h3/dist/index.mjs';
 import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { escapeHtml } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/@vue/shared/dist/shared.cjs.js';
-import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/vue-bundle-renderer/dist/runtime.mjs';
-import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/ufo/dist/index.mjs';
-import { renderToString } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/vue/server-renderer/index.mjs';
-import destr, { destr as destr$1 } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/destr/dist/index.mjs';
-import { createHooks } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/hookable/dist/index.mjs';
-import { createFetch, Headers as Headers$1 } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/ofetch/dist/node.mjs';
-import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/node-mock-http/dist/index.mjs';
-import { createStorage, prefixStorage } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/unstorage/dist/index.mjs';
-import unstorage_47drivers_47fs from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/unstorage/drivers/fs.mjs';
-import { digest } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/ohash/dist/index.mjs';
-import { klona } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/klona/dist/index.mjs';
-import defu, { defuFn } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/defu/dist/defu.mjs';
-import { snakeCase } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/scule/dist/index.mjs';
-import { getContext } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/unctx/dist/index.mjs';
-import { toRouteMatcher, createRouter } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/radix3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/h3/dist/index.mjs';
+import { escapeHtml } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/@vue/shared/dist/shared.cjs.js';
+import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/vue-bundle-renderer/dist/runtime.mjs';
+import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/ufo/dist/index.mjs';
+import { renderToString } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/vue/server-renderer/index.mjs';
+import { klona } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/klona/dist/index.mjs';
+import defu, { defuFn } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/defu/dist/defu.mjs';
+import destr, { destr as destr$1 } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/destr/dist/index.mjs';
+import { snakeCase } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/scule/dist/index.mjs';
+import { createHead as createHead$1, propsToString, renderSSRHead } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/unhead/dist/server.mjs';
+import { stringify, uneval } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/devalue/index.js';
+import { isVNode, isRef, toValue } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/vue/index.mjs';
+import { DeprecationsPlugin, PromisesPlugin, TemplateParamsPlugin, AliasSortingPlugin } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/unhead/dist/plugins.mjs';
+import { createHooks } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/hookable/dist/index.mjs';
+import { createFetch, Headers as Headers$1 } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/ofetch/dist/node.mjs';
+import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/node-mock-http/dist/index.mjs';
+import { createStorage, prefixStorage } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/unstorage/dist/index.mjs';
+import unstorage_47drivers_47fs from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/unstorage/drivers/fs.mjs';
+import { digest } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/ohash/dist/index.mjs';
+import { toRouteMatcher, createRouter } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/radix3/dist/index.mjs';
 import { readFile } from 'node:fs/promises';
-import consola, { consola as consola$1 } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/consola/dist/index.mjs';
-import { ErrorParser } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/youch-core/build/index.js';
-import { Youch } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/youch/build/index.js';
-import { SourceMapConsumer } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/source-map/source-map.js';
+import consola, { consola as consola$1 } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/consola/dist/index.mjs';
+import { ErrorParser } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/youch-core/build/index.js';
+import { Youch } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/youch/build/index.js';
+import { SourceMapConsumer } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/source-map/source-map.js';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { stringify, uneval } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/devalue/index.js';
-import { captureRawStackTrace, parseRawStackTrace } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/errx/dist/index.js';
-import { isVNode, isRef, toValue } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/vue/index.mjs';
-import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
+import { getContext } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/unctx/dist/index.mjs';
+import { captureRawStackTrace, parseRawStackTrace } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/errx/dist/index.js';
+import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
 import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname as dirname$1, resolve as resolve$1 } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/pathe/dist/index.mjs';
-import { createHead as createHead$1, propsToString, renderSSRHead } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/unhead/dist/server.mjs';
-import { DeprecationsPlugin, PromisesPlugin, TemplateParamsPlugin, AliasSortingPlugin } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/unhead/dist/plugins.mjs';
-import { walkResolver } from 'file:///Users/nodirbek/Desktop/otter/otter-app/node_modules/unhead/dist/utils.mjs';
+import { dirname as dirname$1, resolve as resolve$1 } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/pathe/dist/index.mjs';
+import { walkResolver } from 'file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/node_modules/unhead/dist/utils.mjs';
 
-const serverAssets = [{"baseName":"server","dir":"/Users/nodirbek/Desktop/otter/otter-app/server/assets"}];
+const serverAssets = [{"baseName":"server","dir":"D:/Projects/Mobile Backend APPS/OtterBackendFrontend/otter-ui/server/assets"}];
 
 const assets$1 = createStorage();
 
@@ -49,11 +49,11 @@ const storage = createStorage({});
 
 storage.mount('/assets', assets$1);
 
-storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/Users/nodirbek/Desktop/otter/otter-app","watchOptions":{"ignored":[null]}}));
-storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/Users/nodirbek/Desktop/otter/otter-app/server","watchOptions":{"ignored":[null]}}));
-storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/Users/nodirbek/Desktop/otter/otter-app/.nuxt"}));
-storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/Users/nodirbek/Desktop/otter/otter-app/.nuxt/cache"}));
-storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"/Users/nodirbek/Desktop/otter/otter-app/.data/kv"}));
+storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"D:/Projects/Mobile Backend APPS/OtterBackendFrontend/otter-ui","watchOptions":{"ignored":[null]}}));
+storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"D:/Projects/Mobile Backend APPS/OtterBackendFrontend/otter-ui/server","watchOptions":{"ignored":[null]}}));
+storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"D:/Projects/Mobile Backend APPS/OtterBackendFrontend/otter-ui/.nuxt"}));
+storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"D:/Projects/Mobile Backend APPS/OtterBackendFrontend/otter-ui/.nuxt/cache"}));
+storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"D:/Projects/Mobile Backend APPS/OtterBackendFrontend/otter-ui/.data/kv"}));
 
 function useStorage(base = "") {
   return base ? prefixStorage(storage, base) : storage;
@@ -644,7 +644,7 @@ const _inlineRuntimeConfig = {
     }
   },
   "public": {
-    "apiBaseUrl": "https://admin.ottertime.ru/api/v1/",
+    "apiBaseUrl": "http://127.0.0.1:8005/api/v1/",
     "desktopDownloadUrl": "",
     "firebase": {
       "apiKey": "AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4",
@@ -700,11 +700,6 @@ new Proxy(/* @__PURE__ */ Object.create(null), {
     }
     return void 0;
   }
-});
-
-getContext("nitro-app", {
-  asyncContext: false,
-  AsyncLocalStorage: void 0
 });
 
 const config = useRuntimeConfig();
@@ -2023,7 +2018,7 @@ async function errorHandler(error, event) {
   // H3 will handle fallback
 }
 
-const rootDir = "/Users/nodirbek/Desktop/otter/otter-app";
+const rootDir = "D:/Projects/Mobile Backend APPS/OtterBackendFrontend/otter-ui";
 
 const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1, maximum-scale=1"},{"name":"description","content":"Оттер - умный планировщик задач"},{"name":"theme-color","content":"#21A038"}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"},{"rel":"icon","type":"image/svg+xml","href":"/favicon.svg"}],"style":[],"script":[{"key":"otter-theme-boot","children":"(function(){try{var p=location.pathname||'';if(p.indexOf('/app')!==0)return;var raw=localStorage.getItem('otter.app.settings');if(!raw)return;var s=JSON.parse(raw);if(s&&s.theme==='dark'){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';document.documentElement.style.background='#0f1115';}}catch(e){}})();","type":"text/javascript","tagPriority":-20}],"noscript":[],"title":"Оттер - Планировщик задач"};
 
@@ -2048,7 +2043,7 @@ const asyncContext = getContext("nuxt-dev", {
 	asyncContext: true,
 	AsyncLocalStorage
 });
-const _xSIwBepVbxmNnULg_6ZVVJDHQFVczpvsdV74JfASwNU = (nitroApp) => {
+const _1Lr1l5PPMEsBPRVJi0D4kxqnr07ZlXxKKf5H005PZI = (nitroApp) => {
 	const handler = nitroApp.h3App.handler;
 	nitroApp.h3App.handler = (event) => {
 		return asyncContext.callAsync({
@@ -2122,7 +2117,7 @@ function onConsoleLog(callback) {
 }
 
 const plugins = [
-  _xSIwBepVbxmNnULg_6ZVVJDHQFVczpvsdV74JfASwNU,
+  _1Lr1l5PPMEsBPRVJi0D4kxqnr07ZlXxKKf5H005PZI,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
@@ -2151,7 +2146,7 @@ function getAsset (id) {
 
 const METHODS = /* @__PURE__ */ new Set(["HEAD", "GET"]);
 const EncodingMap = { gzip: ".gz", br: ".br" };
-const _HgzTwC = eventHandler((event) => {
+const _0ei5Lf = eventHandler((event) => {
   if (event.method && !METHODS.has(event.method)) {
     return;
   }
@@ -2293,9 +2288,9 @@ function publicAssetsURL(...path) {
 const APP_ROOT_OPEN_TAG = `<${appRootTag}${propsToString(appRootAttrs)}>`;
 const APP_ROOT_CLOSE_TAG = `</${appRootTag}>`;
 // @ts-expect-error file will be produced after app build
-const getServerEntry = () => import('file:///Users/nodirbek/Desktop/otter/otter-app/.nuxt//dist/server/server.mjs').then((r) => r.default || r);
+const getServerEntry = () => import('file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/.nuxt//dist/server/server.mjs').then((r) => r.default || r);
 // @ts-expect-error file will be produced after app build
-const getClientManifest = () => import('file:///Users/nodirbek/Desktop/otter/otter-app/.nuxt//dist/server/client.manifest.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
+const getClientManifest = () => import('file://D:/Projects/Mobile%20Backend%20APPS/OtterBackendFrontend/otter-ui/.nuxt//dist/server/client.manifest.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
 // -- SSR Renderer --
 const getSSRRenderer = lazyCachedFunction(async () => {
 	// Load server bundle
@@ -2586,13 +2581,13 @@ async function getIslandContext(event) {
 	};
 }
 
-const _lazy_WJnSp6 = () => Promise.resolve().then(function () { return renderer; });
+const _lazy_wWGQj6 = () => Promise.resolve().then(function () { return renderer; });
 
 const handlers = [
-  { route: '', handler: _HgzTwC, lazy: false, middleware: true, method: undefined },
-  { route: '/__nuxt_error', handler: _lazy_WJnSp6, lazy: true, middleware: false, method: undefined },
+  { route: '', handler: _0ei5Lf, lazy: false, middleware: true, method: undefined },
+  { route: '/__nuxt_error', handler: _lazy_wWGQj6, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: handler$1, lazy: false, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_WJnSp6, lazy: true, middleware: false, method: undefined }
+  { route: '/**', handler: _lazy_wWGQj6, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {

@@ -412,7 +412,7 @@ async function handleLogin() {
   const password = form.password
   persistRememberedLogin()
   try {
-    await authStore.login(email, password)
+    await authStore.login(email.toLowerCase(), password)
   }
   catch (err: any) {
     const msg = normalizeErrorDetail(

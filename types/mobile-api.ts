@@ -242,6 +242,8 @@ export interface ApiPremiumPayment {
 
 export interface ApiPremiumCheckoutResponse {
   checkout_url: string
+  payment_url?: string
+  checkout_params?: Record<string, string>
   provider: string
   payment?: ApiPremiumPayment
 }

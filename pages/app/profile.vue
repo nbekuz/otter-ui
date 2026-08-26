@@ -544,10 +544,14 @@ async function onPremiumTrial(payload: { tariff: string; recurringConsent: boole
 
 async function onPremiumCheckout(payload: { tariff: string; recurringConsent: boolean }) {
   try {
-    const { checkout_url } = await premiumStore.checkout(payload.tariff, {
+    const { checkout_url, payment_url, checkout_params } = await premiumStore.checkout(payload.tariff, {
       recurringConsent: payload.recurringConsent,
     })
-    window.open(checkout_url, '_blank', 'noopener,noreferrer')
+    openRobokassaCheckout({
+      checkoutUrl: checkout_url,
+      paymentUrl: payment_url,
+      params: checkout_params,
+    })
     showToast('Откройте вкладку оплаты Robokassa. После оплаты нажмите «обновить статус».', 'success', 6000)
   }
   catch (err) {

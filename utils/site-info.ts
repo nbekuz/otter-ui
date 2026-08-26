@@ -36,7 +36,8 @@ export const PREMIUM_LANDING = {
   price: 150,
   period: 'месяц',
   yearlyPrice: 1500,
-  trialDays: 30,
+  // TODO: restore 30 after local Robokassa checkout testing
+  trialDays: 0,
   features: ['Календарь', 'Помодоро', 'Матрица Эйзенхауэра'],
 } as const
 
