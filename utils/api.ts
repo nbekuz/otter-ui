@@ -6,8 +6,7 @@ import {
   setAuthTokens,
 } from '~/utils/auth-session'
 
-// const DEFAULT_API_BASE_URL = 'https://admin.ottertime.ru/api/v1/'
-const DEFAULT_API_BASE_URL = 'http://127.0.0.1:8005/api/v1/'
+const DEFAULT_API_BASE_URL = 'https://admin.ottertime.ru/api/v1/'
 
 export function resolveApiBaseUrl(): string {
   if (import.meta.client) {
