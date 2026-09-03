@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
-import { enrichTaskWithStoredRepeat, persistTaskRepeatWeekdays, resolveTaskWeekdays } from '~/utils/repeat-weekdays'
+import { resolveTaskWeekdays } from '~/utils/repeat-weekdays'
 import { hasTaskClockTime, parseReminderOffset } from '~/utils/task-reminder'
 import { parseApiWallClock, parseTimeToMinutes } from '~/utils/time'
 import type {
@@ -160,17 +160,18 @@ export function apiTaskToUi(task: ApiTask): Task {
   const endFields = task.end_at ? parseApiWallClock(task.end_at) : null
   const scheduleDay = startFields ?? dueFields
   const repeat = REPEAT_TO_UI[task.repeat_unit] || 'none'
-  const apiWeekdays = Array.isArray((task as ApiTask & { repeat_weekdays?: number[] }).repeat_weekdays)
-    ? (task as ApiTask & { repeat_weekdays?: number[] }).repeat_weekdays!.filter(d => d >= 1 && d <= 7)
+  const apiWeekdays = Array.isArray(task.repeat_weekdays)
+    ? task.repeat_weekdays.filter(d => d >= 1 && d <= 7)
     : []
   const hasCustomInterval = task.repeat_unit !== 'none' && task.repeat_interval > 1
+  // Backend contract: week + non-empty weekdays → «Настроить повторение».
   const hasCustomWeekdays = task.repeat_unit === 'week' && apiWeekdays.length > 0
   const customUnit: 'week' | 'month' =
     task.repeat_unit === 'month' ? 'month' : 'week'
   const firstAttachment = task.attachments?.[0]
   const imageUrl = task.image_url || task.image || firstAttachment?.file_url || undefined
 
-  const mapped: Task = {
+  return {
     id: String(task.id),
     title: task.title,
     description: task.description || undefined,
@@ -225,8 +226,6 @@ export function apiTaskToUi(task: ApiTask): Task {
     parentTaskId: task.parent_task != null ? String(task.parent_task) : null,
     createdAt: task.created_at,
   }
-
-  return enrichTaskWithStoredRepeat(mapped)
 }
 
 export function uiTaskToApiPayload(
@@ -252,9 +251,10 @@ export function uiTaskToApiPayload(
     payload.matrix_block = MATRIX_TO_API[task.matrixBlock || 'not-urgent-not-important']
   }
 
-  if (weekdays?.length) {
-    payload.repeat_weekdays = weekdays
-  }
+  // Always send: non-empty for custom days; `[]` clears / means plain weekly.
+  payload.repeat_weekdays = repeat_unit === 'week' && weekdays?.length
+    ? weekdays
+    : []
 
   const timed = hasTaskClockTime(task)
   if (task.dueDate) {
@@ -276,11 +276,6 @@ export function uiTaskToApiPayload(
 
   if (task.completed !== undefined) {
     payload.is_completed = task.completed
-  }
-
-  // Keep weekdays available for spawn-on-complete even if API drops them.
-  if (task.repeat === 'custom' || weekdays?.length) {
-    persistTaskRepeatWeekdays(task)
   }
 
   return payload

@@ -5,7 +5,7 @@ import type { ApiMatrixBlock, ApiTask, ApiTaskGroup } from '~/types/mobile-api'
 import { apiDelete, apiGet, apiPatch, apiPost, getApiErrorCode, getApiErrorMessage } from '~/utils/api'
 import { apiMatrixBlockToUi, apiTaskToUi, dataUrlToFile, groupKeyToUi, preferClientSchedule, uiTaskToApiPayload, uiTaskToFormData } from '~/utils/task-mapper'
 import { computeNextOccurrenceDate, expandTasksForDate, expandTasksForRange, isRecurringTask } from '~/utils/recurrence'
-import { enrichTaskWithStoredRepeat, persistTaskRepeatWeekdays, resolveTaskWeekdays } from '~/utils/repeat-weekdays'
+import { resolveTaskWeekdays } from '~/utils/repeat-weekdays'
 
 type GroupKey = 'overdue' | 'today' | 'tomorrow' | 'later' | 'nodate' | 'completed'
 
@@ -141,8 +141,15 @@ export const useTasksStore = defineStore('tasks', () => {
     const realId = id.includes('__') && /^\d{4}-\d{2}-\d{2}$/.test(id.split('__').pop() || '')
       ? id.slice(0, id.lastIndexOf('__'))
       : id
-    return tasks.value.find(t => t.id === realId)
-      ?? calendarTasks.value.find(t => t.id === realId)
+    const fromGrouped = tasks.value.find(t => t.id === realId)
+    const fromCalendar = calendarTasks.value.find(t => t.id === realId)
+    if (!fromGrouped) return fromCalendar
+    if (!fromCalendar) return fromGrouped
+    // Calendar drag updates calendarTasks first — prefer fresher schedule on complete.
+    if (taskScheduleKey(fromGrouped) !== taskScheduleKey(fromCalendar)) {
+      return fromCalendar
+    }
+    return fromGrouped
   }
 
   function taskScheduleKey(task: Task) {
@@ -254,6 +261,9 @@ export const useTasksStore = defineStore('tasks', () => {
     const calIdx = calendarTasks.value.findIndex(t => t.id === updated.id)
     if (calIdx !== -1) {
       calendarTasks.value[calIdx] = updated
+    }
+    else if (calendarCacheKey.value && !updated.completed && updated.dueDate) {
+      calendarTasks.value = [...calendarTasks.value, updated]
     }
 
     applyTaskToMatrixState(updated)
@@ -523,18 +533,12 @@ export const useTasksStore = defineStore('tasks', () => {
         /* legacy image field may already hold the file */
       }
     }
-    persistTaskRepeatWeekdays({
-      ...taskData,
-      id: task.id,
-      seriesId: task.seriesId,
-      parentTaskId: task.parentTaskId,
-    })
-    task = enrichTaskWithStoredRepeat({
+    task = {
       ...task,
       repeat: taskData.repeat || task.repeat,
       repeatDays: taskData.repeatDays || task.repeatDays,
       repeatCustom: taskData.repeatCustom || task.repeatCustom,
-    })
+    }
     upsertTaskInState(task)
     await refreshTaskLists()
     // Re-pin after refresh — calendar/grouped may briefly echo UTC wall digits.
@@ -558,6 +562,145 @@ export const useTasksStore = defineStore('tasks', () => {
       imageUrl: undefined,
       attachments: [],
     }
+  }
+
+  function recurringRepeatFields(source: Task) {
+    const weekdays = resolveTaskWeekdays(source)
+    if (!weekdays.length) {
+      return {
+        repeat: source.repeat,
+        repeatDays: source.repeatDays,
+        repeatCustom: source.repeatCustom,
+      }
+    }
+    return {
+      repeat: 'custom' as const,
+      repeatDays: weekdays,
+      repeatCustom: {
+        interval: source.repeatCustom?.interval || 1,
+        unit: source.repeatCustom?.unit || 'week',
+        weekdays,
+      },
+    }
+  }
+
+  async function finalizeNextRecurringTask(
+    nextApi: ApiTask,
+    enrichedExisting: Task,
+  ): Promise<Task> {
+    let nextUi = apiTaskToUi(nextApi)
+    const nextDate = computeNextOccurrenceDate(enrichedExisting)
+    const targetDueDate = nextDate ?? nextUi.dueDate
+    const targetDueTime = enrichedExisting.dueTime ?? nextUi.dueTime
+    const targetDuration = enrichedExisting.duration ?? nextUi.duration
+    const repeatFields = recurringRepeatFields(enrichedExisting)
+
+    const scheduleChanged = Boolean(
+      targetDueDate
+      && (
+        targetDueDate !== nextUi.dueDate
+        || targetDueTime !== nextUi.dueTime
+        || JSON.stringify(targetDuration) !== JSON.stringify(nextUi.duration)
+      ),
+    )
+
+    if (scheduleChanged && targetDueDate) {
+      try {
+        const payload = uiTaskToApiPayload({
+          ...nextUi,
+          title: nextUi.title,
+          description: nextUi.description,
+          dueDate: targetDueDate,
+          dueTime: targetDueTime,
+          duration: targetDuration,
+          priority: enrichedExisting.priority,
+          notification: enrichedExisting.notification,
+          matrixBlock: enrichedExisting.matrixBlock,
+          ...repeatFields,
+        }, { includeMatrixBlock: includeMatrixInApiPayload() })
+        const patched = await apiPatch<ApiTask>(`tasks/${nextUi.id}/`, payload)
+        nextUi = preferClientSchedule(apiTaskToUi(patched), {
+          dueDate: targetDueDate,
+          dueTime: targetDueTime,
+          duration: targetDuration,
+          ...repeatFields,
+        })
+      }
+      catch {
+        nextUi = {
+          ...nextUi,
+          dueDate: targetDueDate,
+          dueTime: targetDueTime,
+          duration: targetDuration,
+          ...repeatFields,
+        }
+      }
+    }
+    else {
+      nextUi = {
+        ...nextUi,
+        dueTime: targetDueTime,
+        duration: targetDuration,
+        ...repeatFields,
+      }
+    }
+
+    return nextUi
+  }
+
+  async function spawnNextRecurringTask(enrichedExisting: Task): Promise<Task | null> {
+    const nextDate = computeNextOccurrenceDate(enrichedExisting)
+    if (!nextDate) return null
+
+    const repeatFields = recurringRepeatFields(enrichedExisting)
+    const payloadData: Partial<Task> = {
+      title: enrichedExisting.title,
+      description: enrichedExisting.description,
+      dueDate: nextDate,
+      dueTime: enrichedExisting.dueTime,
+      duration: enrichedExisting.duration,
+      priority: enrichedExisting.priority,
+      notification: enrichedExisting.notification,
+      matrixBlock: enrichedExisting.matrixBlock,
+      ...repeatFields,
+    }
+
+    const matrixOpts = { includeMatrixBlock: includeMatrixInApiPayload() }
+    const apiPayload = uiTaskToApiPayload(payloadData, matrixOpts)
+    const parentId = Number(enrichedExisting.id)
+    if (!Number.isNaN(parentId)) {
+      apiPayload.parent_task = parentId
+    }
+    if (enrichedExisting.seriesId) {
+      apiPayload.series_id = enrichedExisting.seriesId
+    }
+
+    try {
+      const created = await apiPost<ApiTask>('tasks/', apiPayload)
+      return preferClientSchedule(apiTaskToUi(created), {
+        dueDate: nextDate,
+        dueTime: enrichedExisting.dueTime,
+        duration: enrichedExisting.duration,
+        ...repeatFields,
+      })
+    }
+    catch {
+      return null
+    }
+  }
+
+  async function upsertNextRecurringOccurrence(
+    enrichedExisting: Task,
+    nextApi: ApiTask | null | undefined,
+  ) {
+    if (nextApi) {
+      const nextUi = await finalizeNextRecurringTask(nextApi, enrichedExisting)
+      upsertTaskInState(nextUi)
+      return
+    }
+
+    const spawned = await spawnNextRecurringTask(enrichedExisting)
+    if (spawned) upsertTaskInState(spawned)
   }
 
   async function updateTask(
@@ -630,13 +773,6 @@ export const useTasksStore = defineStore('tasks', () => {
     if (clearingAttachment) {
       task = { ...task, ...clearedAttachmentFields() }
     }
-    persistTaskRepeatWeekdays({
-      ...merged,
-      id: task.id,
-      seriesId: task.seriesId,
-      parentTaskId: task.parentTaskId,
-    })
-    task = enrichTaskWithStoredRepeat(task)
     upsertTaskInState(task)
     await refreshTaskLists(refresh)
     return task
@@ -674,18 +810,17 @@ export const useTasksStore = defineStore('tasks', () => {
       if (!existing) return
 
       const willComplete = !existing.completed
-      const enrichedExisting = enrichTaskWithStoredRepeat(existing)
       const scheduleSnapshot: Partial<Task> = {
-        repeat: enrichedExisting.repeat,
-        repeatDays: enrichedExisting.repeatDays,
-        repeatCustom: enrichedExisting.repeatCustom,
+        repeat: existing.repeat,
+        repeatDays: existing.repeatDays,
+        repeatCustom: existing.repeatCustom,
       }
-      if (enrichedExisting.dueDate) scheduleSnapshot.dueDate = enrichedExisting.dueDate
-      if (enrichedExisting.dueTime) scheduleSnapshot.dueTime = enrichedExisting.dueTime
-      if (enrichedExisting.duration) scheduleSnapshot.duration = enrichedExisting.duration
+      if (existing.dueDate) scheduleSnapshot.dueDate = existing.dueDate
+      if (existing.dueTime) scheduleSnapshot.dueTime = existing.dueTime
+      if (existing.duration) scheduleSnapshot.duration = existing.duration
 
       upsertTaskInState({
-        ...enrichedExisting,
+        ...existing,
         completed: willComplete,
         completedAt: willComplete
           ? dayjs().format('YYYY-MM-DD')
@@ -714,101 +849,27 @@ export const useTasksStore = defineStore('tasks', () => {
           duration: scheduleSnapshot.duration ?? task.duration,
         }
       }
-      task = enrichTaskWithStoredRepeat(task)
+      task = {
+        ...task,
+        repeat: scheduleSnapshot.repeat ?? task.repeat,
+        repeatDays: scheduleSnapshot.repeatDays ?? task.repeatDays,
+        repeatCustom: scheduleSnapshot.repeatCustom ?? task.repeatCustom,
+      }
       upsertTaskInState(task)
 
       if (willComplete) {
         void useSoundsStore().playFeedbackSound('completion')
-        // Backend spawn-on-complete: upsert nested next_task only — never POST /tasks/.
-        // Custom weekdays (Пн/Ср/Сб) are not fully supported by API — align next due date.
-        if (updated.next_task) {
-          let nextUi = enrichTaskWithStoredRepeat(apiTaskToUi(updated.next_task))
-          const weekdays = resolveTaskWeekdays(enrichedExisting)
-          if (weekdays.length && isRecurringTask(enrichedExisting)) {
-            persistTaskRepeatWeekdays({
-              id: nextUi.id,
-              seriesId: nextUi.seriesId || enrichedExisting.seriesId,
-              parentTaskId: nextUi.parentTaskId || enrichedExisting.id,
-              repeat: 'custom',
-              repeatDays: weekdays,
-              repeatCustom: {
-                interval: enrichedExisting.repeatCustom?.interval || 1,
-                unit: enrichedExisting.repeatCustom?.unit || 'week',
-                weekdays,
-              },
-            })
-
-            const nextDate = computeNextOccurrenceDate(enrichedExisting)
-            if (nextDate && nextDate !== nextUi.dueDate) {
-              try {
-                const payload = uiTaskToApiPayload({
-                  ...nextUi,
-                  title: nextUi.title,
-                  description: nextUi.description,
-                  dueDate: nextDate,
-                  dueTime: enrichedExisting.dueTime,
-                  duration: enrichedExisting.duration,
-                  priority: enrichedExisting.priority,
-                  notification: enrichedExisting.notification,
-                  repeat: 'custom',
-                  repeatDays: weekdays,
-                  repeatCustom: {
-                    interval: enrichedExisting.repeatCustom?.interval || 1,
-                    unit: 'week',
-                    weekdays,
-                  },
-                  matrixBlock: enrichedExisting.matrixBlock,
-                }, { includeMatrixBlock: includeMatrixInApiPayload() })
-                const patched = await apiPatch<ApiTask>(`tasks/${nextUi.id}/`, payload)
-                nextUi = enrichTaskWithStoredRepeat(preferClientSchedule(apiTaskToUi(patched), {
-                  dueDate: nextDate,
-                  dueTime: enrichedExisting.dueTime,
-                  duration: enrichedExisting.duration,
-                  repeat: 'custom',
-                  repeatDays: weekdays,
-                  repeatCustom: {
-                    interval: enrichedExisting.repeatCustom?.interval || 1,
-                    unit: 'week',
-                    weekdays,
-                  },
-                }))
-              }
-              catch {
-                nextUi = {
-                  ...nextUi,
-                  dueDate: nextDate,
-                  dueTime: enrichedExisting.dueTime,
-                  duration: enrichedExisting.duration,
-                  repeat: 'custom',
-                  repeatDays: weekdays,
-                  repeatCustom: {
-                    interval: enrichedExisting.repeatCustom?.interval || 1,
-                    unit: 'week',
-                    weekdays,
-                  },
-                }
-              }
-            }
-            else {
-              nextUi = {
-                ...nextUi,
-                repeat: 'custom',
-                repeatDays: weekdays,
-                repeatCustom: {
-                  interval: enrichedExisting.repeatCustom?.interval || 1,
-                  unit: enrichedExisting.repeatCustom?.unit || 'week',
-                  weekdays,
-                },
-              }
-            }
-          }
-          upsertTaskInState(nextUi)
+        if (isRecurringTask(existing)) {
+          await upsertNextRecurringOccurrence(existing, updated.next_task)
         }
       }
 
       await refreshTaskLists(refresh)
+      if (willComplete && isRecurringTask(existing) && calendarCacheKey.value) {
+        await refreshCalendarIfCached()
+      }
       // Re-pin after refresh — same pattern as addTask (grouped may drop due_at / lag flags).
-      upsertTaskInState(enrichTaskWithStoredRepeat(preferClientSchedule(task, scheduleSnapshot)))
+      upsertTaskInState(preferClientSchedule(task, scheduleSnapshot))
       return task
     }
     finally {
