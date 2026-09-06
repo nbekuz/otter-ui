@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import type { Priority, RepeatType, Task } from '~/data/mockData'
-import { resolveTaskWeekdays } from '~/utils/repeat-weekdays'
+import { normalizeRepeatWeekdays, resolveTaskWeekdays } from '~/utils/repeat-weekdays'
 import { hasTaskClockTime, parseReminderOffset } from '~/utils/task-reminder'
 import { parseApiWallClock, parseTimeToMinutes } from '~/utils/time'
 import type {
@@ -160,9 +160,7 @@ export function apiTaskToUi(task: ApiTask): Task {
   const endFields = task.end_at ? parseApiWallClock(task.end_at) : null
   const scheduleDay = startFields ?? dueFields
   const repeat = REPEAT_TO_UI[task.repeat_unit] || 'none'
-  const apiWeekdays = Array.isArray(task.repeat_weekdays)
-    ? task.repeat_weekdays.filter(d => d >= 1 && d <= 7)
-    : []
+  const apiWeekdays = normalizeRepeatWeekdays(task.repeat_weekdays)
   const hasCustomInterval = task.repeat_unit !== 'none' && task.repeat_interval > 1
   // Backend contract: week + non-empty weekdays → «Настроить повторение».
   const hasCustomWeekdays = task.repeat_unit === 'week' && apiWeekdays.length > 0
@@ -253,7 +251,7 @@ export function uiTaskToApiPayload(
 
   // Always send: non-empty for custom days; `[]` clears / means plain weekly.
   payload.repeat_weekdays = repeat_unit === 'week' && weekdays?.length
-    ? weekdays
+    ? normalizeRepeatWeekdays(weekdays)
     : []
 
   const timed = hasTaskClockTime(task)

@@ -589,22 +589,23 @@ export const useTasksStore = defineStore('tasks', () => {
     enrichedExisting: Task,
   ): Promise<Task> {
     let nextUi = apiTaskToUi(nextApi)
-    const nextDate = computeNextOccurrenceDate(enrichedExisting)
-    const targetDueDate = nextDate ?? nextUi.dueDate
+    const repeatFields = recurringRepeatFields(enrichedExisting)
     const targetDueTime = enrichedExisting.dueTime ?? nextUi.dueTime
     const targetDuration = enrichedExisting.duration ?? nextUi.duration
-    const repeatFields = recurringRepeatFields(enrichedExisting)
+    // Backend computes weekday-aware next due_at — trust it when present.
+    // Client compute is only a fallback when the API omitted due_at.
+    const targetDueDate = nextUi.dueDate ?? computeNextOccurrenceDate(enrichedExisting)
 
-    const scheduleChanged = Boolean(
-      targetDueDate
-      && (
-        targetDueDate !== nextUi.dueDate
-        || targetDueTime !== nextUi.dueTime
-        || JSON.stringify(targetDuration) !== JSON.stringify(nextUi.duration)
-      ),
-    )
+    const scheduleIncomplete = Boolean(targetDueDate && !nextApi.due_at)
+    const timeChanged = targetDueTime !== nextUi.dueTime
+      || JSON.stringify(targetDuration) !== JSON.stringify(nextUi.duration)
+    const weekdaysChanged = JSON.stringify(resolveTaskWeekdays(nextUi))
+      !== JSON.stringify(resolveTaskWeekdays({
+        ...nextUi,
+        ...repeatFields,
+      }))
 
-    if (scheduleChanged && targetDueDate) {
+    if ((scheduleIncomplete || timeChanged || weekdaysChanged) && targetDueDate) {
       try {
         const payload = uiTaskToApiPayload({
           ...nextUi,
@@ -639,6 +640,7 @@ export const useTasksStore = defineStore('tasks', () => {
     else {
       nextUi = {
         ...nextUi,
+        dueDate: targetDueDate ?? nextUi.dueDate,
         dueTime: targetDueTime,
         duration: targetDuration,
         ...repeatFields,
