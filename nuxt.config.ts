@@ -72,21 +72,21 @@ export default defineNuxtConfig({
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://admin.ottertime.ru/api/v1/',
       desktopDownloadUrl: process.env.NUXT_PUBLIC_DESKTOP_DOWNLOAD_URL || '',
       firebase: {
-        apiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4',
+        apiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyDQ_2x_veKhySiORFRc_6HpjcDaPlx6KBE',
         /**
          * `*.firebaseapp.com` — Firebase `__/auth/iframe` shu hostda xizmat qiladi (Vercelda yo‘q).
          * Ilova URL hali ham `*.vercel.app` bo‘lishi mumkin; Console → Authorized domains ga ikkalasini qo‘shing.
          */
-        authDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'otter-6bdac.firebaseapp.com',
-        projectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || 'otter-6bdac',
+        authDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'otter-78857.firebaseapp.com',
+        projectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || 'otter-78857',
         // Konsolda `*.appspot.com` ko‘rsatsa: NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET orqali yozing
-        storageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'otter-6bdac.firebasestorage.app',
-        messagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '911773858551',
-        appId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || '1:911773858551:web:dd939daa464da5af74f1f2',
-        measurementId: process.env.NUXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-D48K735BKD',
+        storageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'otter-78857.firebasestorage.app',
+        messagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '523879790697',
+        appId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || '1:523879790697:web:113c764eaab668bebacaf8',
+        measurementId: process.env.NUXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-BENPFYCBZM',
         /** Web Push VAPID (Firebase Console → Project settings → Cloud Messaging) */
         vapidKey: process.env.NUXT_PUBLIC_FIREBASE_VAPID_KEY
-          || 'BBUplNc_uDIgZqfd7xE07f1lsniR9-CNoEwUVxx78dNQkp5UunpNpbBnN1AyY7D9oC35hhPwRZU0zt-tw-jxbvw',
+          || 'BAHePtJVxrAKcyFIIaMvXUuGUWPo_gBBp7CzNqRBC4CT6bg0V2_DIbAY7oYr1i0lhGKGWgk68J9xYa5pGjt-zc4',
       },
     },
   },

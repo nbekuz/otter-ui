@@ -3,12 +3,13 @@ importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js')
 
 firebase.initializeApp({
-  apiKey: 'AIzaSyCwg8YuF1oNhGbhqTwo08wQTjjtYEe9_S4',
-  authDomain: 'otter-6bdac.firebaseapp.com',
-  projectId: 'otter-6bdac',
-  storageBucket: 'otter-6bdac.firebasestorage.app',
-  messagingSenderId: '911773858551',
-  appId: '1:911773858551:web:dd939daa464da5af74f1f2',
+  apiKey: 'AIzaSyDQ_2x_veKhySiORFRc_6HpjcDaPlx6KBE',
+  authDomain: 'otter-78857.firebaseapp.com',
+  projectId: 'otter-78857',
+  storageBucket: 'otter-78857.firebasestorage.app',
+  messagingSenderId: '523879790697',
+  appId: '1:523879790697:web:113c764eaab668bebacaf8',
+  measurementId: 'G-BENPFYCBZM',
 })
 
 const messaging = firebase.messaging()
